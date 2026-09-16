@@ -150,6 +150,8 @@
           "type": "slide",
           "settings": {
             "collection": "new-in",
+            "image": "shopify://shop_images/WhatsApp_Image_2026-07-31_at_6.10.09_PM.webp",
+            "mobile_image": "shopify://shop_images/WhatsApp_Image_2026-07-31_at_6.17.40_PM.jpg",
             "subheading": "Fresh Drop",
             "heading": "NEW IN ARRIVALS",
             "button_label": "SHOP NOW",
@@ -239,38 +241,49 @@
     "testimonials": {
       "type": "stagmenfashion-home-testimonials",
       "blocks": {
+        "testimonial_HVBwMC": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "“A sophisticated fragrance with a lasting impression. The quality and attention to detail make Balad a wonderful choice.”",
+            "name": "Aisha H.",
+            "initials": "AH",
+            "role": "Verified Customer"
+          }
+        },
         "review_1": {
           "type": "testimonial",
           "settings": {
             "rating": 5,
-            "quote": "\"Absolutely love the fit and quality. The fabric feels premium, heavy, and sits perfectly. This has quickly become my go-to daily uniform.\"",
-            "name": "Jane C.",
-            "initials": "JC",
-            "role": "Verified Buyer"
+            "quote": "“A fragrance that feels luxurious, lasts beautifully, and makes every moment a little more special. Truly impressed.”",
+            "name": "Arjun R.",
+            "initials": "AR",
+            "role": "Verified Customer"
           }
         },
         "review_2": {
           "type": "testimonial",
           "settings": {
             "rating": 5,
-            "quote": "\"A perfect balance of contemporary streetwear cuts and premium tailoring. Stag Men Fashion brings a level of curation that is hard to find in fashion today.\"",
-            "name": "Darlene R.",
-            "initials": "DR",
-            "role": "Brand Stylist"
+            "quote": "“The scent is elegant, long-lasting, and perfect for everyday wear. Balad has become my go-to perfume brand.”",
+            "name": "Sara N.",
+            "initials": "SN",
+            "role": "Verified Customer"
           }
         },
         "review_3": {
           "type": "testimonial",
           "settings": {
             "rating": 5,
-            "quote": "\"Excellent eye for silhouette and detailing. The heavy cotton washes beautifully and holds its structure. Very impressed with the overall quality.\"",
-            "name": "Thomas G.",
-            "initials": "TG",
-            "role": "Creative Director"
+            "quote": "“Beautiful packaging, refined fragrances, and excellent quality. Every purchase feels like a premium experience.”",
+            "name": "Faisal M.",
+            "initials": "FM",
+            "role": "Verified Customer"
           }
         }
       },
       "block_order": [
+        "testimonial_HVBwMC",
         "review_1",
         "review_2",
         "review_3"
