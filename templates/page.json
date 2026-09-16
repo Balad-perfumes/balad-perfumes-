@@ -12,11 +12,11 @@
     "about_story": {
       "type": "about-story",
       "settings": {
-        "section_label": "The Stag Men Fashion Story",
-        "heading": "Why Blend In, When You Can Pop?",
-        "content_heading": "Why settle for ordinary streetwear?",
-        "text": "<p>Stag Men Fashion started with a simple question: why settle for basic fast fashion? We looked around and saw racks filled with ordinary tees and bland cuts that lost shape after one wash.</p><p>So we created Stag Men Fashion, a homegrown fashion label crafted specially for modern men and streetwear enthusiasts with one simple belief: every fit should express your individuality and bring effortless confidence. We design and craft in-house with heavyweight fabrics, signature silhouettes, and bold palettes.</p>",
-        "image": "shopify://shop_images/WhatsApp_Image_2026-06-13_at_3.56.51_AM.jpg",
+        "section_label": "THE BALAD PERFUMES STORY",
+        "heading": "THE BALAD PERFUMES STORY",
+        "content_heading": "Why settle for an ordinary scent?",
+        "text": "<p>Balad Perfumes was created with a simple belief: fragrance is more than a finishing touch. It is a reflection of your personality, your mood, and the moments you choose to remember.<br/>We bring together distinctive fragrances crafted for those who appreciate quality, character, and lasting impressions. From everyday essentials to special occasions, every scent is an invitation to express your individuality.<br/>At Balad Perfumes, we believe the right fragrance can become part of your identity. Every bottle is an opportunity to discover something new, create a lasting impression, and carry a little confidence wherever you go.<br/>From fresh, uplifting notes to rich and captivating blends, our collection offers a fragrance for every mood and moment. Discover your favorite, make it your own, and let your scent tell your story.<br/><br/></p>",
+        "image": "shopify://shop_images/WhatsApp_Image_2026-08-03_at_11.55.24_AM.jpg",
         "reverse_layout": false,
         "color_scheme": "scheme-1",
         "enable_animations": true
@@ -24,31 +24,25 @@
     },
     "about_stats": {
       "type": "about-stats",
-      "settings": {
-        "eyebrow": "Our Impact",
-        "heading": "Numbers that speak for our passion",
-        "color_scheme": "scheme-1",
-        "enable_animations": true
-      },
       "blocks": {
         "stat_1": {
           "type": "stat",
           "settings": {
-            "number": "50k+",
-            "label": "Men Styled Worldwide"
+            "number": "5K+",
+            "label": "Happy Customers"
           }
         },
         "stat_2": {
           "type": "stat",
           "settings": {
-            "number": "100%",
-            "label": "In-House Tailored"
+            "number": "50+",
+            "label": "Signature Fragrances"
           }
         },
         "stat_3": {
           "type": "stat",
           "settings": {
-            "number": "250+",
+            "number": "100%",
             "label": "Signature Drops"
           }
         },
@@ -56,7 +50,7 @@
           "type": "stat",
           "settings": {
             "number": "4.9/5",
-            "label": "Average Fit Rating"
+            "label": "Customer Rating"
           }
         }
       },
@@ -65,7 +59,13 @@
         "stat_2",
         "stat_3",
         "stat_4"
-      ]
+      ],
+      "settings": {
+        "eyebrow": "Our Impact",
+        "heading": "Numbers that speak for our passion",
+        "color_scheme": "scheme-1",
+        "enable_animations": true
+      }
     },
     "about_values": {
       "type": "about-values",
@@ -74,36 +74,32 @@
           "type": "value",
           "settings": {
             "icon": "star",
-            "image": "",
-            "title": "100% In-House Crafted",
-            "text": "Every silhouette is conceived, patterned, and sampled in our dedicated studio with obsessive attention to fit and drape."
+            "title": "Distinctive Fragrances",
+            "text": "Explore captivating scents crafted to express your personality and leave a lasting impression."
           }
         },
         "value_2": {
           "type": "value",
           "settings": {
             "icon": "leaf",
-            "image": "",
-            "title": "Heavyweight Cottons",
-            "text": "We select premium 100% combed cottons, rich French terry, and breathable natural fibers built to hold structure."
+            "title": "Premium Quality",
+            "text": "We focus on carefully selected fragrance compositions that bring character, depth, and elegance to every bottle."
           }
         },
         "value_3": {
           "type": "value",
           "settings": {
             "icon": "heart",
-            "image": "",
-            "title": "Statement Silhouettes",
-            "text": "We don’t follow fast trends. We design contemporary oversized fits, co-ords, and daily streetwear that turn heads."
+            "title": "Scents for Every Occasion",
+            "text": "From everyday freshness to special moments, discover fragrances that complement your mood and style."
           }
         },
         "value_4": {
           "type": "value",
           "settings": {
             "icon": "truck",
-            "image": "",
-            "title": "Doorstep Delivery & Exchanges",
-            "text": "Swiftly dispatched across India with premium packaging, Cash on Delivery, and hassle-free 7-day exchanges."
+            "title": "Easy Shopping Experience",
+            "text": "Enjoy convenient ordering, reliable delivery, and friendly support whenever you need assistance."
           }
         }
       },
@@ -115,8 +111,54 @@
       ],
       "settings": {
         "eyebrow": "Why Choose Us",
-        "heading": "Crafted for Character, Built for Confidence.",
-        "text": "<p>We combine premium fabrics, contemporary cuts, and joyful colorways to make every outfit feel uniquely yours.</p>",
+        "heading": "Crafted for Character, Made to Be Remembered.",
+        "text": "<p>We bring together distinctive fragrances, premium quality, and thoughtful service to make every scent feel uniquely yours.</p>",
+        "color_scheme": "scheme-1",
+        "enable_animations": true
+      }
+    },
+    "about_faq": {
+      "type": "about-faq",
+      "blocks": {
+        "faq_1": {
+          "type": "faq",
+          "settings": {
+            "question": "What makes Balad Perfumes special?",
+            "answer": "<p>We bring together distinctive fragrances, premium quality, and thoughtful service to help you find a scent that feels uniquely yours.</p>"
+          }
+        },
+        "faq_2": {
+          "type": "faq",
+          "settings": {
+            "question": "How can I choose the right fragrance?",
+            "answer": "<p>Explore our fragrance descriptions or contact our team for recommendations based on your preferences, mood, and occasion.</p>"
+          }
+        },
+        "faq_3": {
+          "type": "faq",
+          "settings": {
+            "question": "Do you offer delivery across India?",
+            "answer": "<p>Yes, we offer delivery across India. Delivery times may vary by location, and tracking details are shared once your order is dispatched.</p>"
+          }
+        },
+        "faq_4": {
+          "type": "faq",
+          "settings": {
+            "question": "What is your return and exchange policy?",
+            "answer": "<p>Please review our return policy for eligibility, timelines, and exchange details before placing your order.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "faq_1",
+        "faq_2",
+        "faq_3",
+        "faq_4"
+      ],
+      "settings": {
+        "eyebrow": "Common Questions",
+        "heading": "Everything You Need to Know",
+        "text": "<p>Quick answers to frequently asked questions about our fragrances, orders, and shopping experience.</p>",
         "color_scheme": "scheme-1",
         "enable_animations": true
       }
@@ -171,57 +213,16 @@
         "review_3",
         "review_4"
       ],
+      "disabled": true,
       "settings": {
         "color_scheme": "scheme-1",
         "eyebrow": "Community Voices",
         "heading": "Loved by 50,000+ Men Worldwide",
-        "subheading": "Real feedback from men who rock our signature menswear and everyday fits."
-      }
-    },
-    "about_faq": {
-      "type": "about-faq",
-      "blocks": {
-        "faq_1": {
-          "type": "faq",
-          "settings": {
-            "question": "Are all collections designed and crafted in-house?",
-            "answer": "<p>Yes! Every design is patterned, sampled, and tailored in-house with rigorous quality inspections at each stitch.</p>"
-          }
-        },
-        "faq_2": {
-          "type": "faq",
-          "settings": {
-            "question": "What fabrics and materials do you use?",
-            "answer": "<p>We prioritize sustainable, high-grade combed cottons, heavyweight French terry, and durable pre-shrunk fabrics built for everyday comfort.</p>"
-          }
-        },
-        "faq_3": {
-          "type": "faq",
-          "settings": {
-            "question": "Do you offer doorstep delivery and COD across India?",
-            "answer": "<p>Yes, we ship across India with express doorstep delivery, Cash on Delivery, and full real-time tracking from our studio to your doorstep.</p>"
-          }
-        },
-        "faq_4": {
-          "type": "faq",
-          "settings": {
-            "question": "How do your sizes fit for men?",
-            "answer": "<p>Our pieces feature contemporary relaxed and oversized fits. You can consult each product's detailed size chart or reach out to our team for custom fit advice.</p>"
-          }
-        }
-      },
-      "block_order": [
-        "faq_1",
-        "faq_2",
-        "faq_3",
-        "faq_4"
-      ],
-      "settings": {
-        "eyebrow": "Common Questions",
-        "heading": "Everything You Need to Know",
-        "text": "<p>Quick answers to frequently asked questions about our fits, fabrics, sizing, and shipping.</p>",
-        "color_scheme": "scheme-1",
-        "enable_animations": true
+        "subheading": "Real feedback from men who rock our signature menswear and everyday fits.",
+        "background": "#f7f7f8",
+        "content_source": "static",
+        "judgeme_widget_type": "featured_carousel",
+        "judgeme_product": ""
       }
     }
   },
