@@ -185,9 +185,8 @@
     "17895486123c3c89da": {
       "type": "_blocks",
       "custom_css": [
-        "margin-top: 50px !important;",
-        "margin-bottom: 30px !important;",
-        ".shopify-block { margin-top: 40px !important; }"
+        "margin-top: 16px !important;",
+        "margin-bottom: 16px !important;"
       ],
       "blocks": {
         "instareel_ig_reels_instagram_reels_feed_mAaTPW": {
@@ -203,8 +202,8 @@
             "subheading_font_size": 16,
             "subheading_color": "#000000",
             "customize_spacing": true,
-            "padding_top": 36,
-            "padding_bottom": 24,
+            "padding_top": 12,
+            "padding_bottom": 12,
             "padding_horizontal": 0
           }
         }
@@ -236,8 +235,8 @@
         "overlay_color": "#00000026",
         "overlay_style": "solid",
         "gradient_direction": "to top",
-        "padding-block-start": 48,
-        "padding-block-end": 36,
+        "padding-block-start": 16,
+        "padding-block-end": 16,
         "remove_horizontal_padding": false
       }
     },
