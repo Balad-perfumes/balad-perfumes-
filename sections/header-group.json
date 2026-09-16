@@ -14,10 +14,10 @@
     "pf_header": {
       "type": "header",
       "settings": {
-        "brand_name": "Stag Men Fashion",
+        "brand_name": "Balad",
         "menu": "main-menu",
         "show_story_badge": true,
-        "custom_story_avatar": "shopify://shop_images/story-icon_8.png",
+        "custom_story_avatar": "shopify://shop_images/logo_2.svg",
         "show_location": true,
         "location_link": "/pages/our-stores",
         "show_search": true,

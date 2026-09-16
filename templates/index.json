@@ -15,8 +15,8 @@
         "slide_1": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/banner.png",
-            "mobile_image": "shopify://shop_images/ChatGPT_Image_Sep_9_2026_02_53_32_PM.png",
+            "image": "shopify://shop_images/WhatsApp_Image_2026-07-31_at_5.43.18_PM.jpg",
+            "mobile_image": "shopify://shop_images/WhatsApp_Image_2026-07-31_at_5.51.07_PM.jpg",
             "eyebrow": "",
             "heading": "",
             "subheading": "",
@@ -53,6 +53,24 @@
         "custom_text": ""
       }
     },
+    "shop_by_category": {
+      "type": "stagmenfashion-category-scroll",
+      "disabled": true,
+      "settings": {
+        "heading": "Shop by Category",
+        "subheading": "Browse our curated collections",
+        "discover_more_label": "Discover More",
+        "discover_more_link": "shopify://collections",
+        "collection_list": [],
+        "show_product_count": true,
+        "hide_empty_collections": false,
+        "card_radius": 5,
+        "background": "#ffffff",
+        "text_color": "#111111",
+        "muted_text_color": "#6b7280",
+        "color_scheme": "scheme-1"
+      }
+    },
     "category_scroll": {
       "type": "stagmenfashion-latest-items",
       "settings": {
@@ -75,24 +93,236 @@
         "discover_more_label": "Discover More",
         "discover_more_link": "shopify://collections/all",
         "background": "#f0f1f4",
+        "section_background": "rgba(0,0,0,0)",
+        "shell_radius": 12,
         "color_scheme": "scheme-1"
       }
     },
-    "shop_by_category": {
-      "type": "stagmenfashion-category-scroll",
+    "banner_slider": {
+      "type": "stagmenfashion-banner-slider",
+      "blocks": {
+        "slide_1": {
+          "type": "slide",
+          "settings": {
+            "collection": "co-ords",
+            "subheading": "New Season",
+            "heading": "CO-ORDS & SETS",
+            "button_label": "SHOP NOW",
+            "button_link": "shopify://collections/co-ords",
+            "button_style": "underline",
+            "content_position": "bottom-center",
+            "text_alignment": "center"
+          }
+        },
+        "slide_2": {
+          "type": "slide",
+          "settings": {
+            "collection": "trending",
+            "subheading": "Streetwear Cuts",
+            "heading": "TRENDING ESSENTIALS",
+            "button_label": "SHOP NOW",
+            "button_link": "shopify://collections/trending",
+            "button_style": "underline",
+            "content_position": "bottom-center",
+            "text_alignment": "center"
+          }
+        },
+        "slide_3": {
+          "type": "slide",
+          "settings": {
+            "collection": "new-in",
+            "subheading": "Fresh Drop",
+            "heading": "NEW IN ARRIVALS",
+            "button_label": "SHOP NOW",
+            "button_link": "shopify://collections/new-in",
+            "button_style": "underline",
+            "content_position": "bottom-center",
+            "text_alignment": "center"
+          }
+        }
+      },
+      "block_order": [
+        "slide_1",
+        "slide_2",
+        "slide_3"
+      ],
       "settings": {
-        "heading": "Shop by Category",
-        "subheading": "Browse our curated collections",
-        "discover_more_label": "Discover More",
-        "discover_more_link": "shopify://collections",
-        "collection_list": [],
-        "show_product_count": true,
-        "hide_empty_collections": false,
-        "card_radius": 5,
-        "background": "#ffffff",
-        "text_color": "#111111",
-        "muted_text_color": "#6b7280",
+        "layout_mode": "full_bleed",
+        "border_radius": 0,
+        "desktop_height": "650px",
+        "mobile_height": "450px",
+        "autoplay_speed": 5,
+        "show_pagination": true,
+        "show_arrows": false,
+        "heading_size": "compact",
+        "color_scheme": "scheme-1",
+        "overlay_color": "#000000",
+        "overlay_opacity": 20,
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "trending_now": {
+      "type": "stagmenfashion-trending-now",
+      "settings": {
+        "heading": "Trending Now",
+        "subheading": "Most popular picks added to the collection",
+        "collection": "trending",
+        "products_to_show": 12,
+        "discover_more_label": "Discover more",
+        "discover_more_link": "shopify://collections/trending",
+        "background": "#f7f7f8",
         "color_scheme": "scheme-1"
+      }
+    },
+    "our_stores": {
+      "type": "stagmenfashion-our-stores",
+      "blocks": {
+        "store_1": {
+          "type": "store",
+          "settings": {
+            "store_name": "Calicut",
+            "directions_label": "Get Direction",
+            "directions_url": "",
+            "address": "1st floor,\n4th Gate, Taisha Arcade,\nPT Usha Rd, vellayil,\nkozhikode, kerala 673032",
+            "phone": "+91 7736444674"
+          }
+        },
+        "store_3": {
+          "type": "store",
+          "settings": {
+            "store_name": "Kondotty",
+            "directions_label": "Get Direction",
+            "directions_url": "",
+            "address": "5X25+3QH, Kondotty Bypass Rd, Kondotty, Kerala 673638",
+            "phone": "+91 7736444674"
+          }
+        },
+        "store_2": {
+          "type": "store",
+          "settings": {
+            "store_name": "Kannur",
+            "directions_label": "Get Direction",
+            "directions_url": "",
+            "address": "V9FF+GGC, Thavakkara, Kannur, Kerala 670012",
+            "phone": "+91 7736444674"
+          }
+        }
+      },
+      "block_order": [
+        "store_1",
+        "store_3",
+        "store_2"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "header_alignment": "left",
+        "heading": "Our Stores",
+        "subheading": "Visit our retail locations across India.",
+        "discover_more_label": "Discover More",
+        "discover_more_link": "/pages/our-stores",
+        "padding_top": 16,
+        "padding_bottom": 16,
+        "background": "#ffffff"
+      }
+    },
+    "testimonials": {
+      "type": "stagmenfashion-home-testimonials",
+      "blocks": {
+        "review_1": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "\"Absolutely love the fit and quality. The fabric feels premium, heavy, and sits perfectly. This has quickly become my go-to daily uniform.\"",
+            "name": "Jane C.",
+            "initials": "JC",
+            "role": "Verified Buyer"
+          }
+        },
+        "review_2": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "\"A perfect balance of contemporary streetwear cuts and premium tailoring. Stag Men Fashion brings a level of curation that is hard to find in fashion today.\"",
+            "name": "Darlene R.",
+            "initials": "DR",
+            "role": "Brand Stylist"
+          }
+        },
+        "review_3": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "\"Excellent eye for silhouette and detailing. The heavy cotton washes beautifully and holds its structure. Very impressed with the overall quality.\"",
+            "name": "Thomas G.",
+            "initials": "TG",
+            "role": "Creative Director"
+          }
+        }
+      },
+      "block_order": [
+        "review_1",
+        "review_2",
+        "review_3"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "eyebrow": "Community Voices",
+        "heading": "Why They Wear Us",
+        "subheading": "Real feedback on our premium fits, heavyweight cottons, and daily styles.",
+        "background": "#f7f7f8",
+        "content_source": "static",
+        "judgeme_widget_type": "featured_carousel",
+        "judgeme_product": ""
+      }
+    },
+    "benefits": {
+      "type": "stagmenfashion-home-benefits",
+      "blocks": {
+        "benefit_1": {
+          "type": "benefit",
+          "settings": {
+            "icon": "returns",
+            "heading": "Long-Lasting Fragrance",
+            "text": "Enjoy captivating scents that stay with you throughout the day."
+          }
+        },
+        "benefit_2": {
+          "type": "benefit",
+          "settings": {
+            "icon": "shipping",
+            "heading": "Premium Quality",
+            "text": "Carefully crafted fragrances made to leave a lasting impression."
+          }
+        },
+        "benefit_3": {
+          "type": "benefit",
+          "settings": {
+            "icon": "support",
+            "heading": "Made to Last",
+            "text": "Premium heavyweight cottons designed to hold structure through washes."
+          }
+        },
+        "benefit_4": {
+          "type": "benefit",
+          "settings": {
+            "icon": "discount",
+            "heading": "Cash on delivery",
+            "text": "Order now and pay at your door. Hassle-free shopping."
+          }
+        }
+      },
+      "block_order": [
+        "benefit_1",
+        "benefit_2",
+        "benefit_3",
+        "benefit_4"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "notice_label": "Bulk order note",
+        "notice_text": "For Bulk Orders — WhatsApp us at +123455 or email bulkorders@stagmenfashion.com",
+        "background": "#ffffff"
       }
     },
     "real_life_images": {
@@ -180,89 +410,6 @@
         "card_radius": 4
       }
     },
-    "trending_now": {
-      "type": "stagmenfashion-trending-now",
-      "settings": {
-        "heading": "Trending Now",
-        "subheading": "Most popular picks added to the collection",
-        "collection": "trending",
-        "products_to_show": 12,
-        "discover_more_label": "Discover more",
-        "discover_more_link": "shopify://collections/trending",
-        "background": "#f7f7f8",
-        "color_scheme": "scheme-1"
-      }
-    },
-    "banner_slider": {
-      "type": "stagmenfashion-banner-slider",
-      "blocks": {
-        "slide_1": {
-          "type": "slide",
-          "settings": {
-            "collection": "co-ords",
-            "image": "shopify://shop_images/banner.png",
-            "mobile_image": "shopify://shop_images/ChatGPT_Image_Sep_9_2026_02_53_32_PM.png",
-            "subheading": "New Season",
-            "heading": "CO-ORDS & SETS",
-            "button_label": "SHOP NOW",
-            "button_link": "shopify://collections/co-ords",
-            "button_style": "underline",
-            "content_position": "bottom-center",
-            "text_alignment": "center"
-          }
-        },
-        "slide_2": {
-          "type": "slide",
-          "settings": {
-            "collection": "trending",
-            "image": "shopify://shop_images/banner.png",
-            "mobile_image": "shopify://shop_images/ChatGPT_Image_Sep_9_2026_02_53_32_PM.png",
-            "subheading": "Streetwear Cuts",
-            "heading": "TRENDING ESSENTIALS",
-            "button_label": "SHOP NOW",
-            "button_link": "shopify://collections/trending",
-            "button_style": "underline",
-            "content_position": "bottom-center",
-            "text_alignment": "center"
-          }
-        },
-        "slide_3": {
-          "type": "slide",
-          "settings": {
-            "collection": "new-in",
-            "image": "shopify://shop_images/banner.png",
-            "mobile_image": "shopify://shop_images/ChatGPT_Image_Sep_9_2026_02_53_32_PM.png",
-            "subheading": "Fresh Drop",
-            "heading": "NEW IN ARRIVALS",
-            "button_label": "SHOP NOW",
-            "button_link": "shopify://collections/new-in",
-            "button_style": "underline",
-            "content_position": "bottom-center",
-            "text_alignment": "center"
-          }
-        }
-      },
-      "block_order": [
-        "slide_1",
-        "slide_2",
-        "slide_3"
-      ],
-      "settings": {
-        "layout_mode": "full_bleed",
-        "border_radius": 0,
-        "desktop_height": "650px",
-        "mobile_height": "450px",
-        "heading_size": "compact",
-        "autoplay_speed": 5,
-        "show_pagination": true,
-        "show_arrows": false,
-        "color_scheme": "scheme-1",
-        "overlay_color": "#000000",
-        "overlay_opacity": 20,
-        "padding_top": 0,
-        "padding_bottom": 0
-      }
-    },
     "promo_cards": {
       "type": "stagmenfashion-promo-cards",
       "blocks": {
@@ -311,55 +458,6 @@
         "height_mobile": 280
       }
     },
-    "benefits": {
-      "type": "stagmenfashion-home-benefits",
-      "blocks": {
-        "benefit_1": {
-          "type": "benefit",
-          "settings": {
-            "icon": "returns",
-            "heading": "Conscious sourcing",
-            "text": "Made with organic cotton and ethically sourced fibers."
-          }
-        },
-        "benefit_2": {
-          "type": "benefit",
-          "settings": {
-            "icon": "shipping",
-            "heading": "Fast Shipping",
-            "text": "Quick, carbon-neutral delivery straight to your door."
-          }
-        },
-        "benefit_3": {
-          "type": "benefit",
-          "settings": {
-            "icon": "support",
-            "heading": "Made to Last",
-            "text": "Premium heavyweight cottons designed to hold structure through washes."
-          }
-        },
-        "benefit_4": {
-          "type": "benefit",
-          "settings": {
-            "icon": "discount",
-            "heading": "Cash on delivery",
-            "text": "Order now and pay at your door. Hassle-free shopping."
-          }
-        }
-      },
-      "block_order": [
-        "benefit_1",
-        "benefit_2",
-        "benefit_3",
-        "benefit_4"
-      ],
-      "settings": {
-        "color_scheme": "scheme-1",
-        "notice_label": "Bulk order note",
-        "notice_text": "For Bulk Orders — WhatsApp us at +123455 or email bulkorders@stagmenfashion.com",
-        "background": "#ffffff"
-      }
-    },
     "spotlight": {
       "type": "stagmenfashion-spotlight",
       "disabled": true,
@@ -376,106 +474,6 @@
         "subtext": "<p>Explore our latest minimal drops, engineered cuts, and styling options.</p>",
         "see_all_text": "See All",
         "color_scheme": "scheme-1"
-      }
-    },
-    "testimonials": {
-      "type": "stagmenfashion-home-testimonials",
-      "blocks": {
-        "review_1": {
-          "type": "testimonial",
-          "settings": {
-            "rating": 5,
-            "quote": "\"Absolutely love the fit and quality. The fabric feels premium, heavy, and sits perfectly. This has quickly become my go-to daily uniform.\"",
-            "name": "Jane C.",
-            "initials": "JC",
-            "role": "Verified Buyer"
-          }
-        },
-        "review_2": {
-          "type": "testimonial",
-          "settings": {
-            "rating": 5,
-            "quote": "\"A perfect balance of contemporary streetwear cuts and premium tailoring. Stag Men Fashion brings a level of curation that is hard to find in fashion today.\"",
-            "name": "Darlene R.",
-            "initials": "DR",
-            "role": "Brand Stylist"
-          }
-        },
-        "review_3": {
-          "type": "testimonial",
-          "settings": {
-            "rating": 5,
-            "quote": "\"Excellent eye for silhouette and detailing. The heavy cotton washes beautifully and holds its structure. Very impressed with the overall quality.\"",
-            "name": "Thomas G.",
-            "initials": "TG",
-            "role": "Creative Director"
-          }
-        }
-      },
-      "block_order": [
-        "review_1",
-        "review_2",
-        "review_3"
-      ],
-      "settings": {
-        "color_scheme": "scheme-1",
-        "eyebrow": "Community Voices",
-        "heading": "Why They Wear Us",
-        "subheading": "Real feedback on our premium fits, heavyweight cottons, and daily styles.",
-        "background": "#f7f7f8"
-      }
-    },
-    "our_stores": {
-      "type": "stagmenfashion-our-stores",
-      "blocks": {
-        "store_1": {
-          "type": "store",
-          "settings": {
-            "image": "shopify://shop_images/stag-2.webp",
-            "store_name": "Calicut",
-            "directions_label": "Get Direction",
-            "directions_url": "",
-            "address": "1st floor,\n4th Gate, Taisha Arcade,\nPT Usha Rd, vellayil,\nkozhikode, kerala 673032",
-            "phone": "+91 7736444674"
-          }
-        },
-        "store_3": {
-          "type": "store",
-          "settings": {
-            "image": "shopify://shop_images/stag-kdy.webp",
-            "store_name": "Kondotty",
-            "directions_label": "Get Direction",
-            "directions_url": "",
-            "address": "5X25+3QH, Kondotty Bypass Rd, Kondotty, Kerala 673638",
-            "phone": "+91 7736444674"
-          }
-        },
-        "store_2": {
-          "type": "store",
-          "settings": {
-            "store_name": "Kannur",
-            "directions_label": "Get Direction",
-            "directions_url": "",
-            "address": "V9FF+GGC, Thavakkara, Kannur, Kerala 670012",
-            "phone": "+91 7736444674"
-          }
-        }
-      },
-      "block_order": [
-        "store_1",
-        "store_3",
-        "store_2"
-      ],
-      "settings": {
-        "color_scheme": "scheme-1",
-        "header_alignment": "left",
-        "heading": "Our Stores",
-        "subheading": "Visit our retail locations across India.",
-        "discover_more_label": "Discover More",
-        "discover_more_link": "/pages/our-stores",
-        "background": "#ffffff",
-        "padding_top": 16,
-        "padding_bottom": 16
       }
     },
     "section_zDXCaG": {
