@@ -1,0 +1,2100 @@
+{% liquid
+  assign coll_handle = section.settings.collection
+  if coll_handle != blank
+    assign active_collection = collections[coll_handle]
+  endif
+  if active_collection == blank or active_collection.products.size == 0
+    assign active_collection = collections['trending']
+  endif
+  if active_collection == blank or active_collection.products.size == 0
+    assign active_collection = collections['all']
+  endif
+
+  assign limit_count = section.settings.products_to_show | default: 12
+  assign sorted_products = active_collection.products | sort: 'created_at' | reverse
+  if sorted_products.size == 0
+    assign sorted_products = active_collection.products
+  endif
+%}
+
+<section
+  class="stagmenfashion-trending color-{{ section.settings.color_scheme }}"
+  data-section-id="{{ section.id }}"
+  style="--trending-bg: {{ section.settings.background | default: '#f7f7f8' }};"
+>
+  <div class="stagmenfashion-trending__shell">
+    <div class="stagmenfashion-trending__head">
+      <div class="stagmenfashion-trending__heading-wrap">
+        {% if section.settings.heading != blank %}
+          <h2 class="stagmenfashion-trending__heading">{{ section.settings.heading }}</h2>
+        {% endif %}
+        {% if section.settings.subheading != blank %}
+          <p class="stagmenfashion-trending__subheading">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </div>
+
+      {% if section.settings.discover_more_label != blank %}
+        {% assign more_link = section.settings.discover_more_link | default: active_collection.url %}
+        <a href="{{ more_link }}" class="stagmenfashion-trending__discover-more">
+          {{ section.settings.discover_more_label }}
+        </a>
+      {% endif %}
+    </div>
+
+    <div class="stagmenfashion-trending-grid">
+      {% for product in sorted_products limit: limit_count %}
+        {% liquid
+          assign images = product.images
+          assign image_count = images.size
+          assign first_image = product.featured_image | default: images.first
+          assign sizes_list = ''
+          for opt in product.options_with_values
+            assign opt_name_down = opt.name | downcase
+            if opt_name_down contains 'size' or opt.name == 'Size'
+              assign sizes_list = opt.values | join: ','
+            endif
+          endfor
+          if sizes_list == ''
+            assign sizes_check = '|'
+            for v in product.variants
+              assign sz = v.option1 | strip
+              unless sz == blank or sz == 'Default Title'
+                assign check_sz = '|' | append: sz | append: '|'
+                unless sizes_check contains check_sz
+                  assign sizes_check = sizes_check | append: check_sz
+                  if sizes_list != ''
+                    assign sizes_list = sizes_list | append: ','
+                  endif
+                  assign sizes_list = sizes_list | append: sz
+                endunless
+              endunless
+            endfor
+          endif
+        %}
+        <div class="stagmenfashion-trending-grid__card" data-product-card>
+          <a href="{{ product.url }}" class="stagmenfashion-trending-grid__media" data-carousel>
+            {% if image_count > 0 %}
+              {% for image in images limit: 6 %}
+                <img
+                  class="stagmenfashion-trending-grid__image{% if forloop.first %} is-active{% endif %}"
+                  src="{{ image | image_url: width: 500 }}"
+                  srcset="{{ image | image_url: width: 300 }} 300w, {{ image | image_url: width: 500 }} 500w"
+                  sizes="(max-width: 749px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                  alt="{{ image.alt | default: product.title | escape }}"
+                  width="500"
+                  height="625"
+                  loading="lazy"
+                  decoding="async"
+                  data-carousel-slide
+                >
+              {% endfor %}
+            {% else %}
+              {{ 'product-1' | placeholder_svg_tag: 'stagmenfashion-trending-grid__placeholder' }}
+            {% endif %}
+
+            <!-- Heart / Wishlist button -->
+            <button
+              type="button"
+              class="stagmenfashion-trending-grid__heart"
+              data-wishlist-heart
+              data-product-id="{{ product.id }}"
+              data-product-title="{{ product.title | escape }}"
+              data-product-price="{{ product.price | money_without_currency | remove: ',' }}"
+              data-product-compare-price="{{ product.compare_at_price | money_without_currency | remove: ',' }}"
+              data-product-url="{{ product.url }}"
+              data-product-image="{{ first_image | image_url: width: 400 }}"
+              data-product-sizes="{{ sizes_list | split: ',' | join: ',' }}"
+              data-product-available="{{ product.available }}"
+              aria-label="Add {{ product.title | escape }} to wishlist"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+              </svg>
+            </button>
+
+            {% if image_count > 1 %}
+              <div class="stagmenfashion-trending-grid__dots" data-carousel-dots>
+                {% for image in images limit: 6 %}
+                  <span class="stagmenfashion-trending-grid__dot{% if forloop.first %} is-active{% endif %}" data-carousel-dot data-index="{{ forloop.index0 }}"></span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </a>
+
+          <div class="stagmenfashion-trending-grid__info">
+            <div class="stagmenfashion-trending-grid__details">
+              <a href="{{ product.url }}" class="stagmenfashion-trending-grid__title-link">
+                <h3 class="stagmenfashion-trending-grid__title">{{ product.title }}</h3>
+              </a>
+              <span class="stagmenfashion-trending-grid__price">RS. {{ product.price | money_without_currency | remove: ',' }}</span>
+            </div>
+            <button
+              type="button"
+              class="stagmenfashion-trending-grid__plus-btn"
+              data-quick-add
+              data-qa-title="{{ product.title | escape }}"
+              data-qa-price="{{ product.price | money_without_currency | remove: ',' }}"
+              data-qa-url="{{ product.url }}"
+              data-qa-id="{{ product.id }}"
+              data-qa-image="{{ first_image | image_url: width: 400 }}"
+              data-qa-sizes="{{ sizes_list | split: ',' | join: ',' }}"
+              data-qa-first-variant="{{ product.selected_or_first_available_variant.id }}"
+              data-qa-variants="{% for v in product.variants %}{% unless v.option1 == 'Default Title' %}{{ v.option1 }}:{{ v.id }},{% endunless %}{% endfor %}"
+              data-qa-available="{{ product.available }}"
+              data-qa-variant-availability="{% for v in product.variants %}{% unless v.option1 == 'Default Title' %}{{ v.option1 }}:{{ v.available }},{% endunless %}{% endfor %}"
+              aria-label="Quick add {{ product.title | escape }}"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      {% endfor %}
+
+      {% if sorted_products.size == 0 %}
+        {% for i in (1..limit_count) %}
+          <div class="stagmenfashion-trending-grid__card stagmenfashion-trending-grid__card--placeholder">
+            <div class="stagmenfashion-trending-grid__media">
+              {{ 'product-1' | placeholder_svg_tag: 'stagmenfashion-trending-grid__placeholder' }}
+            </div>
+            <div class="stagmenfashion-trending-grid__info">
+              <div class="stagmenfashion-trending-grid__details">
+                <h3 class="stagmenfashion-trending-grid__title">Trending Item {{ i }}</h3>
+                <span class="stagmenfashion-trending-grid__price">RS. 0</span>
+              </div>
+              <span class="stagmenfashion-trending-grid__plus-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </span>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Wishlist Modal -->
+  <div class="stagmenfashion-wishlist-modal" data-wishlist-modal style="display:none;" hidden>
+    <div class="stagmenfashion-wishlist-modal__backdrop" data-wishlist-close></div>
+    <div class="stagmenfashion-wishlist-modal__card">
+      <button type="button" class="stagmenfashion-wishlist-modal__close" data-wishlist-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="stagmenfashion-wishlist-modal__header">
+        <div class="stagmenfashion-wishlist-modal__product-img" data-wishlist-img></div>
+        <div class="stagmenfashion-wishlist-modal__product-info">
+          <h3 class="stagmenfashion-wishlist-modal__title" data-wishlist-title></h3>
+          <div class="stagmenfashion-wishlist-modal__price-wrap">
+            <span class="stagmenfashion-wishlist-modal__price" data-wishlist-price></span>
+            <span class="stagmenfashion-wishlist-modal__compare-price" data-wishlist-compare-price></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stagmenfashion-wishlist-modal__sizes">
+        <div class="stagmenfashion-wishlist-modal__sizes-top">
+          <span class="stagmenfashion-wishlist-modal__label" data-wishlist-size-label>Size</span>
+          <button type="button" class="stagmenfashion-wishlist-modal__size-guide" data-wishlist-size-guide>Size Guide</button>
+        </div>
+        <div class="stagmenfashion-wishlist-modal__size-grid" data-wishlist-sizes></div>
+      </div>
+
+      <button type="button" class="stagmenfashion-wishlist-modal__add-btn" data-wishlist-add>
+        Add To List
+      </button>
+    </div>
+  </div>
+
+  <!-- Quick Add Modal -->
+  <div class="stagmenfashion-qa-modal" data-qa-modal style="display:none;" hidden>
+    <div class="stagmenfashion-qa-modal__backdrop" data-qa-close></div>
+    <div class="stagmenfashion-qa-modal__card">
+      <button type="button" class="stagmenfashion-qa-modal__close" data-qa-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="stagmenfashion-qa-modal__header">
+        <div class="stagmenfashion-qa-modal__product-img" data-qa-img></div>
+        <div class="stagmenfashion-qa-modal__product-info">
+          <h3 class="stagmenfashion-qa-modal__title" data-qa-title></h3>
+          <span class="stagmenfashion-qa-modal__price" data-qa-price></span>
+        </div>
+      </div>
+
+      <div class="stagmenfashion-qa-modal__sizes">
+        <div class="stagmenfashion-qa-modal__sizes-top">
+          <span class="stagmenfashion-qa-modal__label">Size</span>
+          <button type="button" class="stagmenfashion-qa-modal__size-guide" data-qa-size-guide>Size Guide</button>
+        </div>
+        <div class="stagmenfashion-qa-modal__size-grid" data-qa-sizes></div>
+      </div>
+
+      <div class="stagmenfashion-qa-modal__actions" data-qa-actions>
+        <button type="button" class="stagmenfashion-qa-modal__btn stagmenfashion-qa-modal__btn--bag" data-qa-add-bag>Add To Bag</button>
+        <button type="button" class="stagmenfashion-qa-modal__btn stagmenfashion-qa-modal__btn--buy" data-qa-buy-now>Buy Now</button>
+      </div>
+      <div class="stagmenfashion-qa-modal__sold-out" data-qa-sold-out style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+        </svg>
+        <span>Sold Out</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Add Size Guide Modal -->
+  <div class="stagmenfashion-size-guide-modal" data-qa-size-guide-modal aria-hidden="true" style="display:none;" hidden>
+    <div class="stagmenfashion-size-guide-modal__backdrop" data-qa-size-guide-close></div>
+    <div class="stagmenfashion-size-guide-modal__card" role="dialog" aria-labelledby="stagmenfashion-trend-size-guide-title">
+      <div class="stagmenfashion-size-guide-modal__header">
+        <h3 id="stagmenfashion-trend-size-guide-title" class="stagmenfashion-size-guide-modal__title">Size guide</h3>
+        <div class="stagmenfashion-size-guide__unit-toggle" data-qa-unit-toggle role="radiogroup" aria-label="Unit of measurement">
+          <button type="button" class="stagmenfashion-unit-btn" data-unit="in" aria-label="Show measurements in Inches" role="radio" aria-checked="false">
+            IN
+          </button>
+          <button type="button" class="stagmenfashion-unit-btn is-active" data-unit="cm" aria-label="Show measurements in Centimeters" role="radio" aria-checked="true">
+            CM
+          </button>
+        </div>
+        <button type="button" class="stagmenfashion-size-guide-modal__close" data-qa-size-guide-close aria-label="Close size guide">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="stagmenfashion-size-guide-modal__body">
+        <div class="stagmenfashion-size-table-wrapper">
+          <table class="stagmenfashion-size-table" data-qa-size-table data-active-unit="cm">
+            <thead>
+              <tr>
+                <th>Size</th>
+                <th>Chest</th>
+                <th>Shoulder</th>
+                <th>Length</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>XXXS</td>
+                <td data-val-cm="88.90" data-val-in="35.00">88.90</td>
+                <td data-val-cm="41.91" data-val-in="16.50">41.91</td>
+                <td data-val-cm="63.50" data-val-in="25.00">63.50</td>
+              </tr>
+              <tr>
+                <td>XXS</td>
+                <td data-val-cm="93.98" data-val-in="37.00">93.98</td>
+                <td data-val-cm="43.18" data-val-in="17.00">43.18</td>
+                <td data-val-cm="66.04" data-val-in="26.00">66.04</td>
+              </tr>
+              <tr>
+                <td>XS</td>
+                <td data-val-cm="99.06" data-val-in="39.00">99.06</td>
+                <td data-val-cm="44.45" data-val-in="17.50">44.45</td>
+                <td data-val-cm="69.85" data-val-in="27.50">69.85</td>
+              </tr>
+              <tr>
+                <td>S</td>
+                <td data-val-cm="106.68" data-val-in="42.00">106.68</td>
+                <td data-val-cm="46.99" data-val-in="18.50">46.99</td>
+                <td data-val-cm="71.12" data-val-in="28.00">71.12</td>
+              </tr>
+              <tr>
+                <td>M</td>
+                <td data-val-cm="111.76" data-val-in="44.00">111.76</td>
+                <td data-val-cm="48.26" data-val-in="19.00">48.26</td>
+                <td data-val-cm="73.66" data-val-in="29.00">73.66</td>
+              </tr>
+              <tr>
+                <td>L</td>
+                <td data-val-cm="116.84" data-val-in="46.00">116.84</td>
+                <td data-val-cm="48.26" data-val-in="19.00">48.26</td>
+                <td data-val-cm="74.93" data-val-in="29.50">74.93</td>
+              </tr>
+              <tr>
+                <td>XL</td>
+                <td data-val-cm="119.38" data-val-in="47.00">119.38</td>
+                <td data-val-cm="49.53" data-val-in="19.50">49.53</td>
+                <td data-val-cm="78.74" data-val-in="31.00">78.74</td>
+              </tr>
+              <tr>
+                <td>XXL</td>
+                <td data-val-cm="129.54" data-val-in="51.00">129.54</td>
+                <td data-val-cm="53.34" data-val-in="21.00">53.34</td>
+                <td data-val-cm="78.74" data-val-in="31.00">78.74</td>
+              </tr>
+              <tr>
+                <td>XXXL</td>
+                <td data-val-cm="134.62" data-val-in="53.00">134.62</td>
+                <td data-val-cm="57.15" data-val-in="22.50">57.15</td>
+                <td data-val-cm="82.55" data-val-in="32.50">82.55</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const STORAGE_KEY = 'wishlist';
+    let selectedSize = null;
+    let currentProductId = '';
+
+    const getWishlist = () => {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch(e) { return []; }
+    };
+
+    const saveWishlist = (list) => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      } catch(e) {
+        console.warn('Wishlist save failed:', e);
+      }
+    };
+
+    const extractHandle = (url) => {
+      if (!url) return '';
+      const parts = url.split('/');
+      return parts[parts.length - 1] || parts[parts.length - 2] || '';
+    };
+
+    const updateHeartStates = (scope) => {
+      const wishlist = getWishlist();
+      scope.querySelectorAll('[data-wishlist-heart]').forEach((btn) => {
+        const handle = extractHandle(btn.dataset.productUrl);
+        const isInList = wishlist.some((item) => item.handle === handle);
+        btn.classList.toggle('is-saved', isInList);
+        const svg = btn.querySelector('svg');
+        if (isInList) {
+          svg.setAttribute('fill', 'currentColor');
+        } else {
+          svg.setAttribute('fill', 'none');
+        }
+      });
+    };
+
+    const openModal = (btn) => {
+      const section = btn.closest('.stagmenfashion-trending') || document;
+      const modal = section.querySelector('[data-wishlist-modal]') || document.querySelector('[data-wishlist-modal]');
+      if (!modal) return;
+
+      const titleEl = modal.querySelector('[data-wishlist-title]');
+      const priceEl = modal.querySelector('[data-wishlist-price]');
+      const comparePriceEl = modal.querySelector('[data-wishlist-compare-price]');
+      const imgEl = modal.querySelector('[data-wishlist-img]');
+      const sizesEl = modal.querySelector('[data-wishlist-sizes]');
+      const sizeLabel = modal.querySelector('[data-wishlist-size-label]');
+      const addBtn = modal.querySelector('[data-wishlist-add]');
+
+      const title = btn.dataset.productTitle || '';
+      const price = btn.dataset.productPrice || '0';
+      const comparePrice = btn.dataset.productComparePrice || '';
+      const productId = String(btn.dataset.productId || '').trim();
+      const productUrl = btn.dataset.productUrl || '#';
+      const productImage = btn.dataset.productImage || '';
+      const sizesRaw = btn.dataset.productSizes || '';
+      const sizes = sizesRaw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+      currentProductId = productId;
+      titleEl.textContent = title;
+      priceEl.textContent = 'INR ' + price;
+
+      if (comparePrice && comparePrice !== price && comparePrice !== '0' && comparePrice !== '') {
+        comparePriceEl.textContent = 'INR ' + comparePrice;
+        comparePriceEl.style.display = 'inline';
+      } else {
+        comparePriceEl.textContent = '';
+        comparePriceEl.style.display = 'none';
+      }
+
+      if (productImage) {
+        imgEl.innerHTML = '<img src="' + productImage + '" alt="' + title.replace(/"/g, '&quot;') + '" />';
+        imgEl.style.display = 'flex';
+      } else {
+        imgEl.innerHTML = '';
+        imgEl.style.display = 'none';
+      }
+
+      selectedSize = null;
+
+      if (sizes.length > 0) {
+        sizeLabel.textContent = 'Size';
+        sizesEl.parentElement.style.display = 'block';
+        sizesEl.innerHTML = sizes.map((size, i) => {
+          const isSelected = i === 0 ? ' is-selected' : '';
+          if (i === 0) selectedSize = size;
+          return '<button type="button" class="stagmenfashion-wishlist-modal__size' + isSelected + '" data-size-btn data-size="' + size + '">' + size + '</button>';
+        }).join('');
+
+        sizesEl.querySelectorAll('[data-size-btn]').forEach((sizeBtn) => {
+          sizeBtn.addEventListener('click', () => {
+            sizesEl.querySelectorAll('[data-size-btn]').forEach(b => b.classList.remove('is-selected'));
+            sizeBtn.classList.add('is-selected');
+            selectedSize = sizeBtn.dataset.size;
+          });
+        });
+      } else {
+        sizeLabel.textContent = 'Default';
+        sizesEl.parentElement.style.display = 'block';
+        selectedSize = 'Default';
+        sizesEl.innerHTML = '<button type="button" class="stagmenfashion-wishlist-modal__size is-selected" data-size-btn data-size="Default">Default</button>';
+      }
+
+      addBtn.dataset.productId = productId;
+      addBtn.dataset.productTitle = title;
+      addBtn.dataset.productPrice = price;
+      addBtn.dataset.productUrl = productUrl;
+      addBtn.dataset.productImage = productImage;
+
+      modal.style.display = 'flex';
+      modal.removeAttribute('hidden');
+      requestAnimationFrame(() => {
+        modal.classList.add('is-open');
+      });
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeModal = () => {
+      const modal = document.querySelector('[data-wishlist-modal]');
+      if (!modal) return;
+      modal.classList.remove('is-open');
+      setTimeout(() => {
+        if (!modal.classList.contains('is-open')) {
+          modal.style.display = 'none';
+          modal.setAttribute('hidden', '');
+        }
+      }, 220);
+      document.body.style.overflow = '';
+    };
+
+    const removeFromWishlist = (handle) => {
+      let wishlist = getWishlist();
+      wishlist = wishlist.filter((item) => item.handle !== handle);
+      saveWishlist(wishlist);
+      document.dispatchEvent(new CustomEvent('wishlist:update'));
+    };
+
+    const addToWishlist = (handle, id, title, price, image, size) => {
+      const wishlist = getWishlist();
+      const exists = wishlist.some((item) => item.handle === handle);
+      if (!exists) {
+        wishlist.push({ handle, id, title, price, image, size: size || '' });
+        saveWishlist(wishlist);
+        document.dispatchEvent(new CustomEvent('wishlist:update'));
+      }
+    };
+
+    const toggleWishlist = (btn) => {
+      const handle = extractHandle(btn.dataset.productUrl);
+      const wishlist = getWishlist();
+      const isInList = wishlist.some((item) => item.handle === handle);
+
+      if (isInList) {
+        removeFromWishlist(handle);
+        updateHeartStates(document);
+        return;
+      }
+
+      openModal(btn);
+    };
+
+    const initSection = (scope = document) => {
+      scope.querySelectorAll('[data-wishlist-heart]').forEach((btn) => {
+        if (btn.dataset.ready === 'true') return;
+        btn.dataset.ready = 'true';
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleWishlist(btn);
+        });
+      });
+
+      updateHeartStates(scope);
+    };
+
+    const initModal = () => {
+      document.querySelectorAll('[data-wishlist-close]').forEach((el) => {
+        el.addEventListener('click', closeModal);
+      });
+
+      document.querySelectorAll('[data-wishlist-add]').forEach((addBtn) => {
+        if (addBtn.dataset.ready === 'true') return;
+        addBtn.dataset.ready = 'true';
+        addBtn.addEventListener('click', () => {
+          const productId = currentProductId;
+          const title = addBtn.dataset.productTitle || '';
+          const price = addBtn.dataset.productPrice || '0';
+          const url = addBtn.dataset.productUrl || '#';
+          const image = addBtn.dataset.productImage || '';
+          const handle = extractHandle(url);
+
+          if (!handle) return;
+
+          addToWishlist(handle, productId, title, price, image, selectedSize || '');
+          closeModal();
+          updateHeartStates(document);
+        });
+      });
+    };
+
+    /* ── Quick Add Modal ──────────────────────────────────────────── */
+    let qaSelectedSize = null;
+    let qaProductUrl = '';
+
+    const resolveVariantId = (modal) => {
+      const variantsData = modal?.dataset.qaVariants || '';
+      const firstVariant = modal?.dataset.qaFirstVariant || '';
+      let variantId = '';
+
+      if (variantsData && qaSelectedSize) {
+        const pairs = variantsData.split(',').filter(Boolean);
+        for (const pair of pairs) {
+          const [name, id] = pair.split(':');
+          if (name && id && name.trim() === qaSelectedSize.trim()) {
+            variantId = id.trim();
+            break;
+          }
+        }
+      }
+
+      if (!variantId && firstVariant) {
+        variantId = firstVariant;
+      }
+
+      return variantId;
+    };
+
+    const getQAModal = () => {
+      const openModal = document.querySelector('[data-qa-modal].is-open');
+      if (openModal) return openModal;
+      return document.querySelector('[data-qa-modal]');
+    };
+
+    const openQAModal = (btn) => {
+      const section = btn.closest('.stagmenfashion-trending') || document;
+      const modal = section.querySelector('[data-qa-modal]') || document.querySelector('[data-qa-modal]');
+      if (!modal) return;
+
+      const titleEl = modal.querySelector('[data-qa-title]');
+      const priceEl = modal.querySelector('[data-qa-price]');
+      const imgEl = modal.querySelector('[data-qa-img]');
+      const sizesEl = modal.querySelector('[data-qa-sizes]');
+
+      const title = btn.dataset.qaTitle || '';
+      const price = btn.dataset.qaPrice || '0';
+      const url = btn.dataset.qaUrl || '#';
+      const image = btn.dataset.qaImage || '';
+      const firstVariant = btn.dataset.qaFirstVariant || '';
+      const sizesRaw = btn.dataset.qaSizes || '';
+      const variantsRaw = btn.dataset.qaVariants || '';
+      const productAvailable = btn.dataset.qaAvailable === 'true';
+      const variantAvailRaw = btn.dataset.qaVariantAvailability || '';
+      const sizes = sizesRaw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+      const variantAvailMap = {};
+      if (variantAvailRaw) {
+        variantAvailRaw.split(',').filter(Boolean).forEach(pair => {
+          const [name, avail] = pair.split(':');
+          if (name) variantAvailMap[name.trim()] = avail && avail.trim() === 'true';
+        });
+      }
+
+      qaProductUrl = url;
+      qaSelectedSize = null;
+
+      modal.dataset.qaVariants = variantsRaw;
+      modal.dataset.qaFirstVariant = firstVariant;
+      modal.dataset.qaProductAvailable = productAvailable;
+
+      titleEl.textContent = title;
+      priceEl.textContent = 'RS. ' + price;
+
+      if (image) {
+        imgEl.innerHTML = '<img src="' + image + '" alt="' + title.replace(/"/g, '&quot;') + '" />';
+        imgEl.style.display = 'flex';
+      } else {
+        imgEl.innerHTML = '';
+        imgEl.style.display = 'none';
+      }
+
+      const actionsEl = modal.querySelector('[data-qa-actions]');
+      const soldOutEl = modal.querySelector('[data-qa-sold-out]');
+
+      const setQASoldOut = (isSoldOut) => {
+        if (actionsEl) actionsEl.style.display = isSoldOut ? 'none' : '';
+        if (soldOutEl) soldOutEl.style.display = isSoldOut ? 'flex' : 'none';
+      };
+      modal._setQASoldOut = setQASoldOut;
+      modal._variantAvailMap = variantAvailMap;
+
+      if (!productAvailable) {
+        setQASoldOut(true);
+      } else {
+        setQASoldOut(false);
+      }
+
+      if (sizes.length > 0) {
+        let firstAvailIdx = sizes.findIndex(s => variantAvailMap[s] !== false);
+        if (firstAvailIdx === -1) firstAvailIdx = 0;
+
+        sizesEl.innerHTML = sizes.map((size, i) => {
+          const isSelected = i === firstAvailIdx ? ' is-selected' : '';
+          const isUnavailable = variantAvailMap[size] === false ? ' is-unavailable' : '';
+          if (i === firstAvailIdx) qaSelectedSize = size;
+          return '<button type="button" class="stagmenfashion-qa-modal__size' + isSelected + isUnavailable + '" data-qa-size-btn data-size="' + size + '">' + size + '</button>';
+        }).join('');
+
+        if (productAvailable && variantAvailMap[qaSelectedSize] === false) {
+          setQASoldOut(true);
+        }
+      } else {
+        sizesEl.innerHTML = '<button type="button" class="stagmenfashion-qa-modal__size is-selected" data-qa-size-btn data-size="Default">Default</button>';
+        qaSelectedSize = 'Default';
+      }
+
+      modal.style.display = 'flex';
+      modal.removeAttribute('hidden');
+      requestAnimationFrame(() => {
+        modal.classList.add('is-open');
+      });
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeQAModal = () => {
+      document.querySelectorAll('[data-qa-modal]').forEach(m => {
+        m.classList.remove('is-open');
+        setTimeout(() => {
+          if (!m.classList.contains('is-open')) {
+            m.style.display = 'none';
+            m.setAttribute('hidden', '');
+          }
+        }, 220);
+      });
+      document.body.style.overflow = '';
+    };
+
+    const cartAddUrl = window.Shopify?.routes?.root ? window.Shopify.routes.root + 'cart/add.js' : '/cart/add.js';
+
+    const initQAModal = (scope = document) => {
+      scope.querySelectorAll('[data-quick-add]').forEach((btn) => {
+        if (btn.dataset.ready === 'true') return;
+        btn.dataset.ready = 'true';
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openQAModal(btn);
+        });
+      });
+
+      scope.querySelectorAll('[data-qa-sizes]').forEach((grid) => {
+        if (grid.dataset.ready === 'true') return;
+        grid.dataset.ready = 'true';
+        grid.addEventListener('click', (e) => {
+          const sizeBtn = e.target.closest('[data-qa-size-btn]');
+          if (!sizeBtn) return;
+          grid.querySelectorAll('[data-qa-size-btn]').forEach(b => b.classList.remove('is-selected'));
+          sizeBtn.classList.add('is-selected');
+          qaSelectedSize = sizeBtn.dataset.size;
+
+          const modal = sizeBtn.closest('[data-qa-modal]');
+          if (modal && modal._setQASoldOut && modal._variantAvailMap) {
+            const isVariantSoldOut = modal._variantAvailMap[qaSelectedSize] === false;
+            modal._setQASoldOut(isVariantSoldOut);
+          }
+        });
+      });
+
+      scope.querySelectorAll('[data-qa-close]').forEach((el) => {
+        if (el.dataset.ready === 'true') return;
+        el.dataset.ready = 'true';
+        el.addEventListener('click', closeQAModal);
+      });
+
+      if (!document._qaTrendingSizeGuideReady) {
+        document._qaTrendingSizeGuideReady = true;
+
+        const openSizeGuideModal = () => {
+          const sgModal = document.querySelector('[data-qa-size-guide-modal]');
+          if (sgModal) {
+            sgModal.style.display = 'flex';
+            sgModal.removeAttribute('hidden');
+            requestAnimationFrame(() => {
+              sgModal.classList.add('is-open');
+              sgModal.setAttribute('aria-hidden', 'false');
+            });
+            document.body.style.overflow = 'hidden';
+          }
+        };
+
+        const closeSizeGuideModal = () => {
+          const sgModal = document.querySelector('[data-qa-size-guide-modal]');
+          if (sgModal) {
+            sgModal.classList.remove('is-open');
+            sgModal.setAttribute('aria-hidden', 'true');
+            setTimeout(() => {
+              if (!sgModal.classList.contains('is-open')) {
+                sgModal.style.display = 'none';
+                sgModal.setAttribute('hidden', '');
+              }
+            }, 220);
+            const qaModal = document.querySelector('[data-qa-modal].is-open');
+            if (!qaModal) {
+              document.body.style.overflow = '';
+            }
+          }
+        };
+
+        document.addEventListener('click', (e) => {
+          const unitBtn = e.target.closest('.stagmenfashion-unit-btn');
+          if (unitBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const unit = unitBtn.dataset.unit;
+            const modal = unitBtn.closest('[data-qa-size-guide-modal]');
+            if (!unit || !modal) return;
+            const allUnitBtns = modal.querySelectorAll('.stagmenfashion-unit-btn');
+            const table = modal.querySelector('[data-qa-size-table]');
+            allUnitBtns.forEach((b) => {
+              const active = b === unitBtn;
+              b.classList.toggle('is-active', active);
+              b.setAttribute('aria-checked', active ? 'true' : 'false');
+            });
+            if (table) {
+              table.dataset.activeUnit = unit;
+              const cells = table.querySelectorAll('td[data-val-cm]');
+              cells.forEach((cell) => {
+                cell.textContent = unit === 'in' ? cell.dataset.valIn : cell.dataset.valCm;
+              });
+            }
+            return;
+          }
+
+          const sizeGuideBtn = e.target.closest('[data-qa-size-guide], [data-wishlist-size-guide]');
+          if (sizeGuideBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            openSizeGuideModal();
+            return;
+          }
+
+          const sizeGuideCloseBtn = e.target.closest('[data-qa-size-guide-close]');
+          if (sizeGuideCloseBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeSizeGuideModal();
+            return;
+          }
+
+          // Add To Bag
+          const addBagBtn = e.target.closest('[data-qa-add-bag]');
+          if (addBagBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const modal = getQAModal();
+            const variantId = resolveVariantId(modal);
+            if (!variantId) return;
+
+            addBagBtn.textContent = 'Adding...';
+            addBagBtn.disabled = true;
+
+            fetch(cartAddUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/javascript',
+                'X-Requested-With': 'XMLHttpRequest'
+              },
+              body: JSON.stringify({ items: [{ id: Number(variantId), quantity: 1 }] })
+            })
+            .then(res => {
+              if (!res.ok) return res.json().then(data => { throw new Error(data.description || 'Add to cart failed'); });
+              return res.json();
+            })
+            .then((cart) => {
+              addBagBtn.textContent = 'Added!';
+              document.dispatchEvent(new CustomEvent('cart:update', {
+                bubbles: true,
+                detail: { data: cart, resource: cart, metadata: { itemCount: cart.item_count } }
+              }));
+              setTimeout(() => {
+                addBagBtn.textContent = 'Add To Bag';
+                addBagBtn.disabled = false;
+                closeQAModal();
+              }, 1200);
+            })
+            .catch((err) => {
+              console.error('Add to bag failed:', err);
+              addBagBtn.textContent = 'Add To Bag';
+              addBagBtn.disabled = false;
+            });
+            return;
+          }
+
+          // Buy Now
+          const buyBtn = e.target.closest('[data-qa-buy-now]');
+          if (buyBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const modal = getQAModal();
+            const variantId = resolveVariantId(modal);
+            if (!variantId) return;
+
+            buyBtn.textContent = 'Redirecting...';
+            buyBtn.disabled = true;
+
+            const rootUrl = window.Shopify?.routes?.root || '/';
+            const cleanRoot = rootUrl.endsWith('/') ? rootUrl : rootUrl + '/';
+            window.location.href = `${cleanRoot}cart/${variantId}:1`;
+            return;
+          }
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            const sgModal = document.querySelector('[data-qa-size-guide-modal]');
+            if (sgModal && sgModal.classList.contains('is-open')) {
+              closeSizeGuideModal();
+            } else {
+              closeQAModal();
+            }
+          }
+        });
+      }
+    };
+
+    const initCarousels = (scope = document) => {
+      scope.querySelectorAll('[data-carousel]').forEach((carousel) => {
+        if (carousel.dataset.ready === 'true') return;
+        carousel.dataset.ready = 'true';
+
+        const slides = carousel.querySelectorAll('[data-carousel-slide]');
+        const dots = carousel.querySelectorAll('[data-carousel-dot]');
+
+        if (slides.length <= 1) return;
+
+        let currentIndex = 0;
+
+        const goTo = (index) => {
+          if (index < 0) index = slides.length - 1;
+          if (index >= slides.length) index = 0;
+          slides[currentIndex].classList.remove('is-active');
+          dots[currentIndex]?.classList.remove('is-active');
+          currentIndex = index;
+          slides[currentIndex].classList.add('is-active');
+          dots[currentIndex]?.classList.add('is-active');
+        };
+
+        // Desktop Hover: Show next image on hover, restore first image on leave
+        const cardEl = carousel.closest('[data-product-card]') || carousel;
+        cardEl.addEventListener('mouseenter', () => {
+          if (slides.length > 1) {
+            goTo(1);
+          }
+        });
+
+        cardEl.addEventListener('mouseleave', () => {
+          if (slides.length > 1) {
+            goTo(0);
+          }
+        });
+
+        dots.forEach((dot) => {
+          dot.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            goTo(parseInt(dot.dataset.index, 10));
+          });
+        });
+
+        // Touch & Pointer Swipe Support
+        carousel.addEventListener('dragstart', (e) => e.preventDefault());
+
+        let startX = 0;
+        let startY = 0;
+        let diffX = 0;
+        let diffY = 0;
+        let isPointerActive = false;
+        let wasSwiped = false;
+        let swipeCooldown = null;
+        let lastSwipeTime = 0;
+
+        const triggerSwipe = (direction) => {
+          const now = Date.now();
+          if (now - lastSwipeTime < 250) return;
+          lastSwipeTime = now;
+          wasSwiped = true;
+          if (swipeCooldown) clearTimeout(swipeCooldown);
+          swipeCooldown = setTimeout(() => {
+            wasSwiped = false;
+          }, 350);
+
+          if (direction === 'next') {
+            goTo(currentIndex + 1);
+          } else {
+            goTo(currentIndex - 1);
+          }
+        };
+
+        const onPointerDown = (e) => {
+          if (e.target.closest('button')) return;
+          if (e.pointerType === 'mouse' && e.button !== 0) return;
+          startX = e.clientX;
+          startY = e.clientY;
+          diffX = 0;
+          diffY = 0;
+          isPointerActive = true;
+          try {
+            carousel.setPointerCapture(e.pointerId);
+          } catch (_) {}
+        };
+
+        const onPointerMove = (e) => {
+          if (!isPointerActive) return;
+          diffX = e.clientX - startX;
+          diffY = e.clientY - startY;
+        };
+
+        const onPointerUp = (e) => {
+          if (!isPointerActive) return;
+          isPointerActive = false;
+          try {
+            carousel.releasePointerCapture(e.pointerId);
+          } catch (_) {}
+
+          if (e.clientX !== undefined) {
+            diffX = e.clientX - startX;
+            diffY = e.clientY - startY;
+          }
+
+          const threshold = 20;
+          if (Math.abs(diffX) >= threshold && Math.abs(diffX) > Math.abs(diffY)) {
+            triggerSwipe(diffX < 0 ? 'next' : 'prev');
+          }
+        };
+
+        const onPointerCancel = (e) => {
+          isPointerActive = false;
+          try {
+            carousel.releasePointerCapture(e.pointerId);
+          } catch (_) {}
+        };
+
+        carousel.addEventListener('pointerdown', onPointerDown);
+        carousel.addEventListener('pointermove', onPointerMove);
+        carousel.addEventListener('pointerup', onPointerUp);
+        carousel.addEventListener('pointercancel', onPointerCancel);
+
+        // Touch events fallback for older mobile browsers / WebViews
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        carousel.addEventListener('touchstart', (e) => {
+          if (e.target.closest('button')) return;
+          if (e.touches && e.touches[0]) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            touchEndX = touchStartX;
+            touchEndY = touchStartY;
+          }
+        }, { passive: true });
+
+        carousel.addEventListener('touchmove', (e) => {
+          if (e.touches && e.touches[0]) {
+            touchEndX = e.touches[0].clientX;
+            touchEndY = e.touches[0].clientY;
+          }
+        }, { passive: true });
+
+        carousel.addEventListener('touchend', (e) => {
+          if (e.changedTouches && e.changedTouches[0]) {
+            touchEndX = e.changedTouches[0].clientX;
+            touchEndY = e.changedTouches[0].clientY;
+          }
+          const tDiffX = touchEndX - touchStartX;
+          const tDiffY = touchEndY - touchStartY;
+          const threshold = 20;
+
+          if (Math.abs(tDiffX) >= threshold && Math.abs(tDiffX) > Math.abs(tDiffY)) {
+            triggerSwipe(tDiffX < 0 ? 'next' : 'prev');
+          }
+        }, { passive: true });
+
+        // Prevent link navigation if a swipe was performed
+        carousel.addEventListener('click', (e) => {
+          if (e.target.closest('button')) return;
+          if (wasSwiped) {
+            e.preventDefault();
+            e.stopPropagation();
+            wasSwiped = false;
+          }
+        });
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCarousels();
+      initSection();
+      initModal();
+      initQAModal();
+    });
+
+    document.addEventListener('shopify:section:load', (event) => {
+      initCarousels(event.target);
+      initSection(event.target);
+      initQAModal(event.target);
+    });
+  })();
+</script>
+
+<style>
+  .stagmenfashion-trending {
+    background: var(--trending-bg, #f7f7f8);
+    color: #111111;
+    width: 100%;
+    padding-top: clamp(14px, 2vw, 22px);
+    padding-bottom: clamp(14px, 2vw, 22px);
+    --trending-heading-size: 18px;
+    --trending-discover-more-size: 13px;
+    --trending-grid-card-title-size: 13px;
+    --trending-grid-card-price-size: 11px;
+  }
+
+  .stagmenfashion-trending__shell {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 36px clamp(10px, 3.5vw, 12px);
+  }
+
+  /* ── Header ── */
+  .stagmenfashion-trending__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgb(17 17 17 / 0.1);
+  }
+
+  .stagmenfashion-trending__heading-wrap {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .stagmenfashion-trending__heading {
+    margin: 0;
+    color: #000000;
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
+    font-size: var(--trending-heading-size);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+  }
+
+  .stagmenfashion-trending__subheading {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--pf-real-life-muted, #6b7280);
+    line-height: 1.4;
+    font-weight: 400;
+  }
+
+  .stagmenfashion-trending__discover-more {
+    display: inline-flex;
+    align-items: center;
+    background: transparent;
+    color: #111111;
+    font-size: var(--trending-discover-more-size);
+    font-weight: 600;
+    padding: 0;
+    border: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.25s ease;
+    flex-shrink: 0;
+  }
+
+  .stagmenfashion-trending__discover-more:hover {
+    color: var(--color-primary, #000000);
+  }
+
+  /* ── 3-Row Product Grid ───────────────────────────────────────── */
+  .stagmenfashion-trending-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+  }
+
+  .stagmenfashion-trending-grid__card {
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    border-radius: 0;
+    overflow: hidden;
+    border: none;
+    box-shadow: none;
+  }
+
+  /* ── Media / Carousel ────────────────────────────────────────── */
+  .stagmenfashion-trending-grid__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    border-radius: 5px;
+    background: #111111;
+    text-decoration: none;
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    cursor: pointer;
+  }
+
+  .stagmenfashion-trending-grid__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-drag: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .stagmenfashion-trending-grid__image.is-active {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .stagmenfashion-trending-grid__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #fafafa;
+  }
+
+  /* ── Clean Minimal Bookmark Button ───────────────────────────── */
+  .stagmenfashion-trending-grid__heart {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 5;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #111111;
+    opacity: 0.8;
+    cursor: pointer;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.95)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.12));
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, color 0.2s ease;
+  }
+
+  .stagmenfashion-trending-grid__heart:hover {
+    opacity: 1;
+    transform: scale(1.15);
+    color: #0800CF;
+  }
+
+  .stagmenfashion-trending-grid__heart svg {
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+    display: block;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    fill: none;
+    transition: fill 0.2s ease, stroke 0.2s ease;
+  }
+
+  .stagmenfashion-trending-grid__heart.is-saved,
+  .stagmenfashion-trending-grid__heart.is-active,
+  .stagmenfashion-trending-grid__heart[aria-pressed="true"] {
+    opacity: 1;
+    color: #111111;
+  }
+
+  .stagmenfashion-trending-grid__heart.is-saved svg,
+  .stagmenfashion-trending-grid__heart.is-active svg,
+  .stagmenfashion-trending-grid__heart[aria-pressed="true"] svg,
+  .stagmenfashion-trending-grid__heart.is-saved svg path,
+  .stagmenfashion-trending-grid__heart.is-active svg path,
+  .stagmenfashion-trending-grid__heart[aria-pressed="true"] svg path {
+    fill: #111111 !important;
+    stroke: #111111 !important;
+  }
+
+  /* ── Dot Indicators ──────────────────────────────────────────── */
+  .stagmenfashion-trending-grid__dots {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 6px;
+    background: rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-radius: 999px;
+  }
+
+  .stagmenfashion-trending-grid__dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .stagmenfashion-trending-grid__dot:hover {
+    background: rgba(255, 255, 255, 0.85);
+  }
+
+  .stagmenfashion-trending-grid__dot.is-active {
+    background: #ffffff;
+    width: 10px;
+    border-radius: 999px;
+  }
+
+  /* ── Card Info ───────────────────────────────────────────────── */
+  .stagmenfashion-trending-grid__info {
+    padding: 8px 0 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .stagmenfashion-trending-grid__details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .stagmenfashion-trending-grid__title-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+    position: relative;
+    line-height: 1;
+  }
+
+  .stagmenfashion-trending-grid__title {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: var(--trending-grid-card-title-size);
+    font-weight: 600;
+    color: var(--color-foreground, #111111);
+    letter-spacing: -0.01em;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    position: relative;
+  }
+
+  .stagmenfashion-trending-grid__title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1.5px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left bottom;
+    transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .stagmenfashion-trending-grid__title-link:hover .stagmenfashion-trending-grid__title::after {
+    transform: scaleX(1);
+  }
+
+  .stagmenfashion-trending-grid__price {
+    font-size: var(--trending-grid-card-price-size);
+    font-weight: 600;
+    color: rgb(var(--color-foreground-rgb, 17 17 17) / 0.7);
+    letter-spacing: 0.01em;
+  }
+
+  .stagmenfashion-trending-grid__plus-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #111111;
+    opacity: 0.55;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    text-decoration: none;
+  }
+
+  .stagmenfashion-trending-grid__plus-btn:hover { opacity: 1; transform: scale(1.15); }
+  .stagmenfashion-trending-grid__plus-btn svg { width: 18px; height: 18px; }
+
+  /* ── Tablet ─────────────────────────────────────────────────── */
+  @media screen and (max-width: 1200px) {
+    .stagmenfashion-trending-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+  }
+
+  @media screen and (max-width: 989px) {
+    .stagmenfashion-trending-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+  }
+
+  /* ── Mobile ─────────────────────────────────────────────────── */
+  @media screen and (max-width: 749px) {
+    .stagmenfashion-trending {
+      --trending-heading-size: 14px;
+      --trending-grid-card-title-size: 12px;
+      --trending-grid-card-price-size: 11px;
+      --trending-discover-more-size: 10px;
+      padding: 0;
+    }
+
+    .stagmenfashion-trending__shell {
+      padding: 10px 10px 10px;
+    }
+
+    .stagmenfashion-trending__head {
+      margin-bottom: 10px;
+      padding-bottom: 12px;
+    }
+
+    .stagmenfashion-trending__heading {
+      font-size: var(--trending-heading-size);
+    }
+
+    .stagmenfashion-trending__subheading {
+      font-size: 12px;
+    }
+
+    .stagmenfashion-trending__discover-more {
+      font-size: var(--trending-discover-more-size);
+    }
+
+    .stagmenfashion-trending-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stagmenfashion-trending-grid__heart {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      min-height: 32px;
+      top: 4px;
+      right: 4px;
+      padding: 0;
+    }
+
+    .stagmenfashion-trending-grid__heart svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  /* ── Wishlist Modal ── */
+  .stagmenfashion-wishlist-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stagmenfashion-wishlist-modal.is-open { display: flex; }
+
+  .stagmenfashion-wishlist-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    cursor: pointer;
+  }
+
+  .stagmenfashion-wishlist-modal__card {
+    position: relative;
+    z-index: 1;
+    width: 90%;
+    max-width: 380px;
+    background: #ffffff;
+    border-radius: 5px;
+    padding: 20px 20px 18px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+    animation: modalSlideUp 0.25s ease-out;
+  }
+
+  @keyframes modalSlideUp {
+    from { opacity: 0; transform: translateY(16px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .stagmenfashion-wishlist-modal__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #666666;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .stagmenfashion-wishlist-modal__close:hover { background: rgb(0 0 0 / 0.06); color: #111111; }
+  .stagmenfashion-wishlist-modal__close svg { width: 16px; height: 16px; }
+
+  .stagmenfashion-wishlist-modal__header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .stagmenfashion-wishlist-modal__product-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f5f5f5;
+  }
+
+  .stagmenfashion-wishlist-modal__product-img img { width: 100%; height: 100%; object-fit: cover; }
+  .stagmenfashion-wishlist-modal__product-info { flex: 1; min-width: 0; }
+
+  .stagmenfashion-wishlist-modal__title {
+    margin: 0 0 2px 0;
+    font-family: var(--font-heading--family);
+    font-size: 14px;
+    font-weight: 700;
+    color: #111111;
+    line-height: 1.3;
+  }
+
+  .stagmenfashion-wishlist-modal__price-wrap { display: flex; align-items: center; gap: 8px; }
+  .stagmenfashion-wishlist-modal__price { font-size: 13px; font-weight: 500; color: #666666; }
+  .stagmenfashion-wishlist-modal__compare-price { font-size: 12px; font-weight: 400; color: #999999; text-decoration: line-through; }
+
+  .stagmenfashion-wishlist-modal__sizes { margin-bottom: 16px; }
+
+  .stagmenfashion-wishlist-modal__sizes-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .stagmenfashion-wishlist-modal__label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #111111;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0;
+  }
+
+  .stagmenfashion-wishlist-modal__size-guide {
+    padding: 0 0 1px 0;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid #111111;
+    background: transparent;
+    color: #111111;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    text-decoration: none;
+    line-height: 1.2;
+  }
+
+  .stagmenfashion-wishlist-modal__size-guide:hover {
+    opacity: 0.65;
+  }
+
+  .stagmenfashion-wishlist-modal__size-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .stagmenfashion-wishlist-modal__size {
+    padding: 6px 14px;
+    border-radius: 5px;
+    border: 1px solid rgb(0 0 0 / 0.15);
+    background: #ffffff;
+    color: #111111;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .stagmenfashion-wishlist-modal__size:hover { border-color: #0800CF; }
+  .stagmenfashion-wishlist-modal__size.is-selected { background: #0800CF; color: #ffffff; border-color: #0800CF; }
+
+  .stagmenfashion-wishlist-modal__add-btn {
+    width: 100%;
+    padding: 10px 16px;
+    border-radius: 5px;
+    border: none;
+    background: #0800CF;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+
+  .stagmenfashion-wishlist-modal__add-btn:hover { background: #0600a3; }
+  .stagmenfashion-wishlist-modal__add-btn:active { transform: scale(0.98); }
+
+  /* ── Quick Add Modal ── */
+  .stagmenfashion-qa-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stagmenfashion-qa-modal.is-open { display: flex; }
+
+  .stagmenfashion-qa-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    cursor: pointer;
+  }
+
+  .stagmenfashion-qa-modal__card {
+    position: relative;
+    z-index: 1;
+    width: 90%;
+    max-width: 380px;
+    background: #ffffff;
+    border-radius: 5px;
+    padding: 20px 20px 18px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+    animation: qaSlideUp 0.25s ease-out;
+  }
+
+  @keyframes qaSlideUp {
+    from { opacity: 0; transform: translateY(16px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .stagmenfashion-qa-modal__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #666666;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .stagmenfashion-qa-modal__close:hover { background: rgb(0 0 0 / 0.06); color: #111111; }
+  .stagmenfashion-qa-modal__close svg { width: 16px; height: 16px; }
+
+  .stagmenfashion-qa-modal__header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .stagmenfashion-qa-modal__product-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f5f5f5;
+  }
+
+  .stagmenfashion-qa-modal__product-img img { width: 100%; height: 100%; object-fit: cover; }
+  .stagmenfashion-qa-modal__product-info { flex: 1; min-width: 0; }
+
+  .stagmenfashion-qa-modal__title {
+    margin: 0 0 2px 0;
+    font-family: var(--font-heading--family);
+    font-size: 14px;
+    font-weight: 700;
+    color: #111111;
+    line-height: 1.3;
+  }
+
+  .stagmenfashion-qa-modal__price { font-size: 13px; font-weight: 500; color: #666666; }
+
+  .stagmenfashion-qa-modal__sizes { margin-bottom: 16px; }
+
+  .stagmenfashion-qa-modal__sizes-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .stagmenfashion-qa-modal__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #111111;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .stagmenfashion-qa-modal__size-guide {
+    padding: 0 0 1px 0;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid #111111;
+    background: transparent;
+    color: #111111;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    text-decoration: none;
+    line-height: 1.2;
+  }
+
+  .stagmenfashion-qa-modal__size-guide:hover {
+    opacity: 0.65;
+  }
+
+  .stagmenfashion-qa-modal__size-guide:active {
+    opacity: 0.45;
+  }
+
+  .stagmenfashion-qa-modal__size-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .stagmenfashion-qa-modal__size {
+    padding: 6px 14px;
+    border-radius: 5px;
+    border: 1px solid rgb(0 0 0 / 0.15);
+    background: #ffffff;
+    color: #111111;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .stagmenfashion-qa-modal__size:hover { border-color: #0800CF; }
+  .stagmenfashion-qa-modal__size.is-selected { background: #0800CF; color: #ffffff; border-color: #0800CF; }
+  .stagmenfashion-qa-modal__size.is-unavailable { opacity: 0.35; text-decoration: line-through; cursor: not-allowed; }
+
+  .stagmenfashion-qa-modal__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .stagmenfashion-qa-modal__btn {
+    padding: 10px 16px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+  }
+
+  .stagmenfashion-qa-modal__btn--bag { border: 1.5px solid #0800CF; background: #ffffff; color: #0800CF; }
+  .stagmenfashion-qa-modal__btn--bag:hover { background: #0800CF; color: #ffffff; }
+  .stagmenfashion-qa-modal__btn--buy { border: 1.5px solid #0800CF; background: #0800CF; color: #ffffff; }
+  .stagmenfashion-qa-modal__btn--buy:hover { background: #0600a3; border-color: #0600a3; }
+  .stagmenfashion-qa-modal__btn:active { transform: scale(0.98); }
+
+  .stagmenfashion-qa-modal__sold-out {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 5px;
+    background: #f5f5f5;
+    border: 1.5px solid #e0e0e0;
+    color: #999;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .stagmenfashion-qa-modal__sold-out svg { width: 15px; height: 15px; stroke: #999; }
+
+  /* ── Size Guide Modal ────────────────────────────────────────── */
+  .stagmenfashion-size-guide-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.22s ease, visibility 0.22s ease;
+  }
+
+  .stagmenfashion-size-guide-modal.is-open {
+    display: flex !important;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .stagmenfashion-size-guide-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .stagmenfashion-size-guide-modal__card {
+    position: relative;
+    z-index: 1;
+    background: #ffffff;
+    border-radius: 5px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    padding: 24px;
+    transform: translateY(12px) scale(0.98);
+    transition: transform 0.22s ease;
+  }
+
+  .stagmenfashion-size-guide-modal.is-open .stagmenfashion-size-guide-modal__card {
+    transform: translateY(0) scale(1);
+  }
+
+  .stagmenfashion-size-guide-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eeeeee;
+  }
+
+  .stagmenfashion-size-guide-modal__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111111;
+    margin: 0;
+    font-family: var(--font-heading--family), sans-serif;
+  }
+
+  .stagmenfashion-size-guide__unit-toggle {
+    display: inline-flex;
+    align-items: center;
+    background: #f1f3f5;
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+    margin-left: auto;
+    margin-right: 8px;
+  }
+
+  .stagmenfashion-unit-btn {
+    appearance: none;
+    border: none;
+    background: transparent;
+    padding: 5px 14px;
+    border-radius: 16px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    line-height: 1;
+  }
+
+  .stagmenfashion-unit-btn:hover {
+    color: #111111;
+  }
+
+  .stagmenfashion-unit-btn.is-active {
+    background: #ffffff;
+    color: #111111;
+    font-weight: 700;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+
+  .stagmenfashion-size-guide-modal__close {
+    appearance: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #666666;
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.18s ease;
+  }
+
+  .stagmenfashion-size-guide-modal__close:hover {
+    color: #000000;
+  }
+
+  .stagmenfashion-size-guide-modal__close svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .stagmenfashion-size-guide-subtitle {
+    font-size: 12px;
+    color: #666666;
+    margin: 0 0 14px;
+  }
+
+  .stagmenfashion-size-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+  }
+
+  .stagmenfashion-size-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+
+  .stagmenfashion-size-table th,
+  .stagmenfashion-size-table td {
+    padding: 9px 12px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .stagmenfashion-size-table th {
+    background: #f7f7f7;
+    font-weight: 600;
+    color: #333333;
+  }
+
+  .stagmenfashion-size-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .stagmenfashion-size-note {
+    font-size: 11px;
+    color: #888888;
+    margin: 12px 0 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .stagmenfashion-wishlist-modal__card {
+      padding: 16px 16px 14px;
+      border-radius: 5px;
+    }
+
+    .stagmenfashion-wishlist-modal__product-img {
+      width: 48px;
+      height: 48px;
+      border-radius: 4px;
+    }
+
+    .stagmenfashion-wishlist-modal__title { font-size: 13px; }
+    .stagmenfashion-wishlist-modal__price { font-size: 12px; }
+    .stagmenfashion-wishlist-modal__compare-price { font-size: 11px; }
+
+    .stagmenfashion-wishlist-modal__size {
+      padding: 5px 12px;
+      font-size: 11px;
+      border-radius: 4px;
+    }
+
+    .stagmenfashion-wishlist-modal__add-btn {
+      padding: 9px 12px;
+      font-size: 10px;
+      border-radius: 4px;
+    }
+
+    .stagmenfashion-qa-modal__card {
+      padding: 16px 16px 14px;
+      border-radius: 5px;
+    }
+
+    .stagmenfashion-qa-modal__product-img {
+      width: 48px;
+      height: 48px;
+      border-radius: 4px;
+    }
+
+    .stagmenfashion-qa-modal__title { font-size: 13px; }
+    .stagmenfashion-qa-modal__price { font-size: 12px; }
+
+    .stagmenfashion-qa-modal__size {
+      padding: 5px 12px;
+      font-size: 11px;
+      border-radius: 4px;
+    }
+
+    .stagmenfashion-qa-modal__btn {
+      padding: 9px 12px;
+      font-size: 10px;
+      border-radius: 4px;
+    }
+
+    .stagmenfashion-qa-modal__sold-out {
+      padding: 9px 12px;
+      font-size: 10px;
+      border-radius: 4px;
+    }
+
+    .stagmenfashion-size-guide-modal__card {
+      padding: 18px 16px;
+      border-radius: 5px;
+    }
+    .stagmenfashion-size-table th,
+    .stagmenfashion-size-table td {
+      padding: 7px 8px;
+      font-size: 11.5px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Trending Now",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Trending Now"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Most popular picks added to the collection"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection",
+      "info": "Select collection to display. Defaults to 'trending' collection."
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Products to show",
+      "min": 4,
+      "max": 24,
+      "step": 4,
+      "default": 12,
+      "info": "12 products display as 3 rows of 4 columns on desktop."
+    },
+    {
+      "type": "text",
+      "id": "discover_more_label",
+      "label": "Discover More Label",
+      "default": "Discover more"
+    },
+    {
+      "type": "url",
+      "id": "discover_more_link",
+      "label": "Discover More Link"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#f7f7f8"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trending Now"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,579 @@
+<section
+  class="pf-contact-form color-{{ section.settings.color_scheme }}"
+  style="--form-pt: {{ section.settings.padding_top | default: 20 }}px; --form-pb: {{ section.settings.padding_bottom | default: 28 }}px;"
+>
+  <div class="pf-contact-shell">
+    <div class="pf-contact-form__wrapper">
+      
+      <!-- Left Editorial Column -->
+      <div class="pf-contact-form__sidebar">
+        {% if section.settings.eyebrow != blank %}
+          <span class="pf-contact-form__eyebrow">{{ section.settings.eyebrow }}</span>
+        {% endif %}
+        
+        <h2 class="pf-contact-form__title">
+          {{ section.settings.heading | default: 'Send us a message' }}
+        </h2>
+
+        {% if section.settings.subheading != blank %}
+          <p class="pf-contact-form__intro">{{ section.settings.subheading }}</p>
+        {% endif %}
+
+        <div class="pf-contact-form__features">
+          {% if section.settings.feature_1_title != blank %}
+            <div class="pf-contact-form__feature-item">
+              <div class="pf-contact-form__feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div>
+                <h4 class="pf-contact-form__feature-title">{{ section.settings.feature_1_title }}</h4>
+                {% if section.settings.feature_1_desc != blank %}
+                  <p class="pf-contact-form__feature-desc">{{ section.settings.feature_1_desc }}</p>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if section.settings.feature_2_title != blank %}
+            <div class="pf-contact-form__feature-item">
+              <div class="pf-contact-form__feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div>
+                <h4 class="pf-contact-form__feature-title">{{ section.settings.feature_2_title }}</h4>
+                {% if section.settings.feature_2_desc != blank %}
+                  <p class="pf-contact-form__feature-desc">{{ section.settings.feature_2_desc }}</p>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if section.settings.feature_3_title != blank %}
+            <div class="pf-contact-form__feature-item">
+              <div class="pf-contact-form__feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div>
+                <h4 class="pf-contact-form__feature-title">{{ section.settings.feature_3_title }}</h4>
+                {% if section.settings.feature_3_desc != blank %}
+                  <p class="pf-contact-form__feature-desc">{{ section.settings.feature_3_desc }}</p>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        {% if section.settings.direct_contact_note != blank %}
+          <div class="pf-contact-form__note-box">
+            <p>{{ section.settings.direct_contact_note }}</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Right Form Panel -->
+      <div class="pf-contact-form__main">
+        <div class="pf-contact-form__card">
+          {% form 'contact', class: 'pf-contact-form__form', novalidate: 'novalidate' %}
+            
+            {% if form.posted_successfully? %}
+              <div class="pf-form-alert pf-form-alert--success" role="status" tabindex="-1" autofocus>
+                <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <span>{{ section.settings.success_message | default: "Thank you for reaching out! We'll get back to you shortly." }}</span>
+              </div>
+            {% endif %}
+
+            {% if form.errors %}
+              <div class="pf-form-alert pf-form-alert--error" role="alert" tabindex="-1" autofocus>
+                <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <div>{{ form.errors | default_errors }}</div>
+              </div>
+            {% endif %}
+
+            <!-- Subject / Topic Chips -->
+            <div class="pf-contact-form__topics">
+              <label class="pf-form-label">Quick Topic</label>
+              <div class="pf-topic-chips" role="radiogroup" aria-label="Inquiry Topic">
+                <button type="button" class="pf-chip is-active" data-topic="General Inquiry">General</button>
+                <button type="button" class="pf-chip" data-topic="Order & Delivery Support">Order Support</button>
+                <button type="button" class="pf-chip" data-topic="Size & Fit Guidance">Size & Fit</button>
+                <button type="button" class="pf-chip" data-topic="Stylist & Creator Collabs">Collabs</button>
+              </div>
+            </div>
+
+            <!-- Fields Grid -->
+            <div class="pf-form-grid">
+              <div class="pf-form-group">
+                <label for="ContactFormName" class="pf-form-label">Your Name <span class="pf-req">*</span></label>
+                <input
+                  id="ContactFormName"
+                  type="text"
+                  name="contact[name]"
+                  class="pf-input"
+                  placeholder="e.g. Alex Morgan"
+                  value="{{ form.name | default: customer.name }}"
+                  required
+                  aria-required="true"
+                >
+              </div>
+
+              <div class="pf-form-group">
+                <label for="ContactFormEmail" class="pf-form-label">Email Address <span class="pf-req">*</span></label>
+                <input
+                  id="ContactFormEmail"
+                  type="email"
+                  name="contact[email]"
+                  class="pf-input"
+                  placeholder="e.g. alex@example.com"
+                  value="{{ form.email | default: customer.email }}"
+                  required
+                  aria-required="true"
+                  spellcheck="false"
+                  autocomplete="email"
+                >
+              </div>
+
+              <div class="pf-form-group">
+                <label for="ContactFormPhone" class="pf-form-label">Phone Number (Optional)</label>
+                <input
+                  id="ContactFormPhone"
+                  type="tel"
+                  name="contact[phone]"
+                  class="pf-input"
+                  placeholder="+91 00000 00000"
+                  value="{{ form.phone }}"
+                  autocomplete="tel"
+                >
+              </div>
+
+              <div class="pf-form-group">
+                <label for="ContactFormSubject" class="pf-form-label">Subject</label>
+                <input
+                  id="ContactFormSubject"
+                  type="text"
+                  name="contact[subject]"
+                  class="pf-input"
+                  placeholder="e.g. Sizing or Order Inquiry"
+                  value="{{ form.subject | default: 'General Inquiry' }}"
+                >
+              </div>
+
+              <div class="pf-form-group pf-form-group--full">
+                <label for="ContactFormMessage" class="pf-form-label">How can we help? <span class="pf-req">*</span></label>
+                <textarea
+                  id="ContactFormMessage"
+                  name="contact[body]"
+                  rows="5"
+                  class="pf-input pf-textarea"
+                  placeholder="Please describe your query in detail..."
+                  required
+                  aria-required="true"
+                >{{ form.body }}</textarea>
+              </div>
+            </div>
+
+            <!-- Form Action Footer -->
+            <div class="pf-contact-form__footer">
+              <button type="submit" class="pf-submit-btn">
+                <span>{{ section.settings.button_label | default: 'Send Message' }}</span>
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M2.5 8h11M9.5 3.5l4.5 4.5-4.5 4.5"/>
+                </svg>
+              </button>
+              <p class="pf-form-privacy">
+                {{ section.settings.privacy_text | default: 'We respect your privacy and will never share your details.' }}
+              </p>
+            </div>
+
+          {% endform %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .pf-contact-shell {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 36px;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 749px) {
+    .pf-contact-shell {
+      padding: 0 10px;
+    }
+  }
+
+  .pf-contact-form {
+    padding-top: var(--form-pt, 48px);
+    padding-bottom: var(--form-pb, 72px);
+  }
+
+  .pf-contact-form__wrapper {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 48px;
+    align-items: start;
+  }
+
+  .pf-contact-form__sidebar {
+    position: sticky;
+    top: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .pf-contact-form__eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: currentColor;
+    opacity: 0.6;
+  }
+
+  .pf-contact-form__title {
+    margin: 0;
+    font-family: var(--font-heading--family), sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--color-foreground-heading, #111111);
+  }
+
+  .pf-contact-form__intro {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: currentColor;
+    opacity: 0.75;
+    max-width: 44ch;
+  }
+
+  .pf-contact-form__features {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 12px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .pf-contact-form__feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .pf-contact-form__feature-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--color-foreground-heading, #111111);
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    margin-top: 2px;
+  }
+
+  .pf-contact-form__feature-title {
+    margin: 0 0 2px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-foreground-heading, #111111);
+  }
+
+  .pf-contact-form__feature-desc {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: currentColor;
+    opacity: 0.7;
+  }
+
+  .pf-contact-form__note-box {
+    margin-top: 8px;
+    padding: 14px 18px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    font-size: 13px;
+    line-height: 1.55;
+    color: currentColor;
+    opacity: 0.8;
+  }
+
+  .pf-contact-form__note-box p {
+    margin: 0;
+  }
+
+  .pf-contact-form__card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    padding: clamp(24px, 4vw, 40px);
+    box-shadow: 0 10px 36px -8px rgba(0, 0, 0, 0.04);
+  }
+
+  .pf-form-alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-radius: 6px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .pf-form-alert--success {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+
+  .pf-form-alert--error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+
+  .pf-contact-form__topics {
+    margin-bottom: 24px;
+  }
+
+  .pf-topic-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .pf-chip {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 5px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: currentColor;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    -webkit-appearance: none;
+  }
+
+  .pf-chip:hover {
+    border-color: #0800CF;
+    color: #0800CF;
+    background: rgba(8, 0, 207, 0.04);
+  }
+
+  .pf-chip.is-active {
+    background: #0800CF;
+    border-color: #0800CF;
+    color: #ffffff;
+  }
+
+  .pf-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .pf-form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pf-form-group--full {
+    grid-column: 1 / -1;
+  }
+
+  .pf-form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-foreground-heading, #111111);
+    margin-bottom: 8px;
+  }
+
+  .pf-req {
+    color: #e11d48;
+    margin-left: 2px;
+  }
+
+  .pf-input {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1px solid rgba(0, 0, 0, 0.14);
+    border-radius: 5px;
+    background: #ffffff;
+    color: var(--color-foreground-heading, #111111);
+    font-size: 14px;
+    line-height: 1.4;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+  }
+
+  .pf-input::placeholder {
+    color: rgba(0, 0, 0, 0.35);
+  }
+
+  .pf-input:focus {
+    outline: none;
+    border-color: #0800CF;
+    box-shadow: 0 0 0 3px rgba(8, 0, 207, 0.12);
+  }
+
+  .pf-textarea {
+    resize: vertical;
+    min-height: 140px;
+  }
+
+  .pf-contact-form__footer {
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .pf-submit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    border-radius: 5px;
+    background: var(--color-primary-button-background, #0800CF);
+    color: var(--color-primary-button-text, #ffffff);
+    border: 0;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+
+  .pf-submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px -4px rgba(8, 0, 207, 0.25);
+    background: var(--color-primary-hover, #0600a3);
+  }
+
+  .pf-submit-btn:active {
+    transform: translateY(0);
+  }
+
+  .pf-form-privacy {
+    margin: 0;
+    font-size: 12px;
+    color: currentColor;
+    opacity: 0.6;
+    max-width: 32ch;
+  }
+
+  @media screen and (max-width: 989px) {
+    .pf-contact-form__wrapper {
+      grid-template-columns: 1fr;
+      gap: 36px;
+    }
+
+    .pf-contact-form__sidebar {
+      position: static;
+    }
+  }
+
+  @media screen and (max-width: 640px) {
+    .pf-form-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .pf-contact-form__card {
+      padding: 20px;
+      border-radius: 6px;
+    }
+
+    .pf-contact-form__footer {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+    }
+
+    .pf-submit-btn {
+      justify-content: center;
+      width: 100%;
+    }
+
+    .pf-form-privacy {
+      max-width: 100%;
+    }
+  }
+</style>
+
+{% javascript %}
+  (() => {
+    document.querySelectorAll('.pf-contact-form').forEach((section) => {
+      if (section.dataset.init === 'true') return;
+      section.dataset.init = 'true';
+
+      const chips = section.querySelectorAll('.pf-chip');
+      const subjectInput = section.querySelector('#ContactFormSubject');
+
+      chips.forEach((chip) => {
+        chip.addEventListener('click', () => {
+          chips.forEach((c) => c.classList.remove('is-active'));
+          chip.classList.add('is-active');
+          if (subjectInput) {
+            subjectInput.value = chip.dataset.topic || chip.textContent.trim();
+          }
+        });
+      });
+    });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Contact form",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Inquiries & Styling" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Let's craft your next fit together" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Fill in the details below and our concierge team will respond within one business day." },
+    { "type": "header", "content": "Highlights / Value Propositions" },
+    { "type": "text", "id": "feature_1_title", "label": "Highlight 1 Title", "default": "Styling & Sizing Guidance" },
+    { "type": "text", "id": "feature_1_desc", "label": "Highlight 1 Description", "default": "Personal styling advice, fit recommendations, and drop alerts tailored to you." },
+    { "type": "text", "id": "feature_2_title", "label": "Highlight 2 Title", "default": "Pan-India Express Delivery" },
+    { "type": "text", "id": "feature_2_desc", "label": "Highlight 2 Description", "default": "Secure, tracked shipping straight to your door with Cash on Delivery and easy 7-day exchanges." },
+    { "type": "text", "id": "feature_3_title", "label": "Highlight 3 Title", "default": "Creator & Stylist Collabs" },
+    { "type": "text", "id": "feature_3_desc", "label": "Highlight 3 Description", "default": "Exclusive gifting, stylist loans, and partnership opportunities for creators." },
+    { "type": "textarea", "id": "direct_contact_note", "label": "Direct contact note", "default": "Prefer chatting directly? You can also email us at hello@stagmenfashion.com or call +91 98765 43210." },
+    { "type": "header", "content": "Form Settings" },
+    { "type": "text", "id": "button_label", "label": "Submit button label", "default": "Send Message" },
+    { "type": "text", "id": "success_message", "label": "Success message", "default": "Thank you for reaching out! We've received your note and will be in touch shortly." },
+    { "type": "text", "id": "privacy_text", "label": "Privacy assurance note", "default": "We respect your privacy and will never share your details with third parties." },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 120, "step": 2, "unit": "px", "label": "Top padding", "default": 20 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 120, "step": 2, "unit": "px", "label": "Bottom padding", "default": 28 }
+  ],
+  "presets": [{ "name": "Contact form" }]
+}
+{% endschema %}

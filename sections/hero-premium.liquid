@@ -1,0 +1,95 @@
+{% schema %}
+{
+"name": "Hero Premium",
+"settings": [
+{
+"type": "text",
+"id": "heading",
+"label": "Heading",
+"default": "Upgrade Your Style Today"
+},
+{
+"type": "text",
+"id": "subheading",
+"label": "Subheading",
+"default": "Premium quality products at best prices"
+},
+{
+"type": "url",
+"id": "button_link",
+"label": "Button Link"
+},
+{
+"type": "text",
+"id": "button_text",
+"label": "Button Text",
+"default": "Shop Now"
+},
+{
+"type": "image_picker",
+"id": "bg_image",
+"label": "Background Image"
+}
+],
+"presets": [
+{
+"name": "Hero Premium"
+}
+]
+}
+{% endschema %}
+
+<section class="hero-premium" style="background-image:url({{ section.settings.bg_image | image_url }});">
+  <div class="hero-overlay">
+    <h1>{{ section.settings.heading }}</h1>
+    <p>{{ section.settings.subheading }}</p>
+    <a href="{{ section.settings.button_link }}" class="hero-btn">
+      {{ section.settings.button_text }}
+    </a>
+  </div>
+</section>
+
+<style>
+.hero-premium {
+  height: 90vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-overlay {
+  background: rgba(0,0,0,0.5);
+  padding: 40px;
+  text-align: center;
+  border-radius: 6px;
+}
+
+.hero-overlay h1 {
+  color: #fff;
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.hero-overlay p {
+  color: #ddd;
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.hero-btn {
+  background: #ff6a00;
+  color: #fff;
+  padding: 12px 30px;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+@media(max-width:768px){
+  .hero-overlay h1 {
+    font-size: 28px;
+  }
+}
+</style>

@@ -1,0 +1,43 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "type": "footer",
+  "name": "Footer",
+  "sections": {
+    "pf_footer_cta_card": {
+      "type": "footer-cta-card",
+      "disabled": true,
+      "settings": {
+        "color_scheme": "scheme-1",
+        "heading": "Join the Club.",
+        "image": "shopify://shop_images/WhatsApp_Image_2026-06-12_at_11.58.53_AM.jpg",
+        "card_title": "The Fitting Room",
+        "text": "<p>Most brands just sell clothes. We craft confidence. Get exclusive early access to upcoming drops, limited edition capsules, and behind-the-scenes fittings.</p>",
+        "button_label": "Explore the Drops",
+        "button_link": ""
+      }
+    },
+    "pf_footer": {
+      "type": "footer",
+      "settings": {
+        "logo": "",
+        "brand_name": "Stag Men Fashion",
+        "brand_text": "Stag Men Fashion is where bold streetwear meets effortless daily fashion for men.",
+        "menu_title_1": "Boring stuff",
+        "menu_1": "main-menu",
+        "color_scheme": "scheme-1"
+      }
+    }
+  },
+  "order": [
+    "pf_footer_cta_card",
+    "pf_footer"
+  ]
+}

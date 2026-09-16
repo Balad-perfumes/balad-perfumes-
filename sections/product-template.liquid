@@ -1,0 +1,3774 @@
+{% liquid
+  assign selected_product = product
+  assign current_variant = selected_product.selected_or_first_available_variant
+  assign form_id = 'StagProductForm-' | append: section.id
+
+  # Dynamic Rating Fetch from Judge.me / Shopify Metafields
+  assign review_rating = blank
+
+  if selected_product.metafields.reviews.rating.value != blank
+    assign review_rating = selected_product.metafields.reviews.rating.value.rating | round: 1
+  endif
+
+  if review_rating == blank
+    assign jm_badge = selected_product.metafields.judgeme.badge
+    if jm_badge != blank and jm_badge contains "data-average-rating='"
+      assign review_rating = jm_badge | split: "data-average-rating='" | last | split: "'" | first | round: 1
+    endif
+  endif
+
+  if review_rating == blank
+    assign review_rating = selected_product.metafields.judgeme.rating
+  endif
+
+  if review_rating == blank or review_rating == '0' or review_rating == '0.0' or review_rating == '0.00'
+    assign review_rating = '5.0'
+  endif
+%}
+
+  {% comment %} Product Metafield Image Fetching {% endcomment %}
+  {% assign metafield_image = selected_product.metafields.custom.sticky_product_image.value | default: selected_product.metafields.custom.sticky_product_image %}
+  {% if metafield_image == blank %}
+    {% assign metafield_image = selected_product.metafields.custom.sticky_image.value | default: selected_product.metafields.custom.sticky_image %}
+  {% endif %}
+  {% if metafield_image == blank %}
+    {% assign metafield_image = selected_product.metafields.custom.product_image.value | default: selected_product.metafields.custom.product_image %}
+  {% endif %}
+  {% if metafield_image == blank %}
+    {% assign metafield_image = selected_product.metafields.custom.image.value | default: selected_product.metafields.custom.image %}
+  {% endif %}
+  {% if metafield_image == blank %}
+    {% assign metafield_image = selected_product.metafields.custom.main_image.value | default: selected_product.metafields.custom.main_image %}
+  {% endif %}
+  {% if metafield_image == blank %}
+    {% assign metafield_image = selected_product.metafields.custom.cover_image.value | default: selected_product.metafields.custom.cover_image %}
+  {% endif %}
+  {% if metafield_image == blank %}
+    {% assign metafield_image = selected_product.metafields.custom.featured_image.value | default: selected_product.metafields.custom.featured_image %}
+  {% endif %}
+  {% if metafield_image == blank %}
+    {% assign metafield_image = selected_product.metafields.custom.model_image.value | default: selected_product.metafields.custom.model_image %}
+  {% endif %}
+  {% if metafield_image == blank %}
+    {% assign metafield_image = selected_product.featured_media | default: selected_product.media.first %}
+  {% endif %}
+
+  {% assign default_product_description = selected_product.metafields.custom.default_description | default: section.settings.default_description | default: section.settings.technical_information | default: '<p>Premium 100% Combed Heavyweight Cotton. Relaxed oversized drape with reinforced ribbed collar, drop shoulders, and anti-pilling finish. Designed for everyday comfort, enduring style, and all-day versatility.</p>' %}
+  {% assign product_care_content = selected_product.metafields.custom.product_care | default: section.settings.product_care %}
+  {% assign delivery_returns_content = selected_product.metafields.custom.delivery_returns | default: section.settings.delivery_returns | default: section.settings.shipping_information %}
+
+{% assign size_option = blank %}
+{% assign color_option = blank %}
+{% unless selected_product.has_only_default_variant %}
+  {% for product_option in selected_product.options_with_values %}
+    {% assign option_name_downcase = product_option.name | downcase %}
+    {% if option_name_downcase contains 'size' %}
+      {% assign size_option = product_option %}
+    {% elsif option_name_downcase contains 'color' or option_name_downcase contains 'colour' %}
+      {% assign color_option = product_option %}
+    {% endif %}
+  {% endfor %}
+{% endunless %}
+
+{% liquid
+  assign related_source = blank
+  if selected_product.collections.size > 0 and selected_product.collections.first != blank
+    assign related_source = selected_product.collections.first.products
+  else
+    assign related_source = collections.all.products
+  endif
+
+  assign related_products = related_source | reject: 'id', selected_product.id
+
+  if related_products == blank or related_products.size < 3
+    assign related_products = collections.all.products | reject: 'id', selected_product.id
+  endif
+%}
+
+<section class="pf-product-template color-{{ section.settings.color_scheme }} product-{{ selected_product.handle }}" data-pf-product data-money-format="{{ shop.money_format | escape }}">
+  <div class="pf-product-template__shell">
+    <div class="pf-product-template__media" data-pf-media>
+      <div class="pf-product-template__gallery{% if selected_product.media.size == 1 and metafield_image == blank %} is-single-media{% endif %}" data-pf-gallery>
+        <div class="pf-gallery-layout{% if selected_product.media.size == 1 and metafield_image == blank %} is-single-media{% endif %}" data-pf-slides>
+          <!-- Primary / Sticky Metafield Image -->
+          <div class="pf-gallery__primary">
+            <article
+              class="pf-product-template__slide pf-gallery-card pf-gallery-card--primary is-active"
+              data-pf-slide
+              data-slide-index="0"
+              aria-hidden="false"
+            >
+              {% if metafield_image != blank %}
+                {{
+                  metafield_image
+                  | image_url: width: 1800
+                  | image_tag:
+                    class: 'pf-product-template__image pf-product-template__image--metafield',
+                    widths: '640, 960, 1200, 1600, 1800',
+                    loading: 'eager',
+                    fetchpriority: 'high',
+                    alt: metafield_image.alt | default: selected_product.title
+                }}
+              {% elsif selected_product.media.size > 0 %}
+                {% assign first_media = selected_product.media.first %}
+                {% if first_media.media_type == 'image' %}
+                  {{
+                    first_media
+                    | image_url: width: 1800
+                    | image_tag:
+                      class: 'pf-product-template__image',
+                      widths: '640, 960, 1200, 1600, 1800',
+                      loading: 'eager',
+                      fetchpriority: 'high',
+                      alt: first_media.alt | default: selected_product.title
+                  }}
+                {% elsif first_media.media_type == 'video' or first_media.media_type == 'external_video' %}
+                  {% render 'video',
+                    video: first_media,
+                    video_class: 'pf-product-template__video',
+                    video_loop: true,
+                    disable_controls: true,
+                    loading: 'lazy'
+                  %}
+                {% else %}
+                  {{ first_media | media_tag }}
+                {% endif %}
+              {% endif %}
+            </article>
+          </div>
+
+          <!-- Secondary / Product Images (Vertically Scrolling on Desktop) -->
+          {% if selected_product.media.size > 0 %}
+            <div class="pf-gallery__secondary" data-pf-gallery-secondary>
+              {% for media in selected_product.media %}
+                <article
+                  class="pf-product-template__slide pf-gallery-card pf-gallery-card--secondary{% if forloop.first %} is-active{% endif %}"
+                  data-pf-slide
+                  data-slide-index="{{ forloop.index }}"
+                  data-media-id="{{ media.id }}"
+                  aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}"
+                >
+                  {% if media.media_type == 'image' %}
+                    {% assign loading = 'lazy' %}
+                    {% assign fetchpriority = 'auto' %}
+                    {% if forloop.first %}
+                      {% assign loading = 'eager' %}
+                      {% assign fetchpriority = 'high' %}
+                    {% endif %}
+                    {{
+                      media
+                      | image_url: width: 1800
+                      | image_tag:
+                        class: 'pf-product-template__image',
+                        widths: '640, 960, 1200, 1600, 1800',
+                        loading: loading,
+                        fetchpriority: fetchpriority,
+                        alt: media.alt | default: selected_product.title
+                    }}
+                  {% elsif media.media_type == 'video' or media.media_type == 'external_video' %}
+                    {% render 'video',
+                      video: media,
+                      video_class: 'pf-product-template__video',
+                      video_loop: true,
+                      disable_controls: true,
+                      loading: 'lazy'
+                    %}
+                  {% else %}
+                    {{ media | media_tag }}
+                  {% endif %}
+                </article>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        {% comment %} Overall Mobile Dots {% endcomment %}
+        {% assign total_mobile_dots = selected_product.media.size | plus: 1 %}
+        {% if total_mobile_dots > 1 %}
+          <div class="pf-product-template__dots" data-pf-dots aria-label="Product image pagination">
+            <button
+              type="button"
+              class="pf-product-template__dot is-active"
+              data-pf-dot
+              data-slide-index="0"
+              aria-label="Go to main image"
+            ></button>
+            {% for media in selected_product.media %}
+              <button
+                type="button"
+                class="pf-product-template__dot"
+                data-pf-dot
+                data-slide-index="{{ forloop.index }}"
+                aria-label="Go to image {{ forloop.index }}"
+              ></button>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="pf-product-template__content">
+      <!-- Minimal Structured Product Card -->
+      <div class="pf-product-card">
+        <div class="pf-buybox__header">
+          <h1 class="pf-buybox__title">{{ selected_product.title }}</h1>
+          <button
+            type="button"
+            class="pf-buybox__wishlist"
+            data-pf-wishlist
+            aria-label="Add to wishlist"
+            aria-pressed="false"
+            data-product-handle="{{ selected_product.handle }}"
+            data-product-id="{{ selected_product.id }}"
+            data-product-title="{{ selected_product.title | escape }}"
+            data-product-image="{{ selected_product.featured_media.preview_image | image_url: width: 360 }}"
+            data-product-price="{{ selected_product.price | money | strip_html | escape }}"
+          >
+            <svg class="pf-bookmark-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="pf-buybox__price-row">
+          <div class="pf-buybox__price" data-pf-price>
+            {% render 'price', product_resource: selected_product, show_sale_price_first: true %}
+          </div>
+          {% if size_option != blank and size_option.values.size > 0 %}
+            <button type="button" class="pf-buybox__size-guide-btn" data-pf-size-guide-open aria-haspopup="dialog">
+              Size Guide
+            </button>
+          {% endif %}
+        </div>
+
+        {% if color_option != blank and color_option.values.size > 1 %}
+          <div class="pf-buybox__colors">
+            <span class="pf-buybox__option-label">Color: <strong data-pf-selected-color>{{ color_option.selected_value | default: color_option.values.first.name }}</strong></span>
+            <div class="pf-buybox__color-list" data-pf-swatches>
+              {% for product_option_value in color_option.values %}
+                {% assign option_variant = product_option_value.variant %}
+                {% assign option_media = option_variant.featured_media | default: selected_product.featured_media %}
+                <button
+                  type="button"
+                  class="pf-color-swatch-item{% if product_option_value.selected or forloop.first %} is-active{% endif %}"
+                  data-pf-swatch
+                  data-variant-id="{{ option_variant.id | default: current_variant.id }}"
+                  data-media-id="{{ option_media.id | default: '' }}"
+                  data-color-name="{{ product_option_value.name }}"
+                  aria-label="{{ product_option_value.name }}"
+                  aria-pressed="{% if product_option_value.selected or forloop.first %}true{% else %}false{% endif %}"
+                >
+                  <span class="pf-color-swatch">
+                    {% if product_option_value.swatch != blank or option_media != blank %}
+                      {% render 'swatch',
+                        swatch: product_option_value.swatch,
+                        variant_image: option_media,
+                        label: product_option_value.name
+                      %}
+                    {% else %}
+                      <span class="pf-color-swatch-fallback">{{ product_option_value.name | slice: 0, 1 }}</span>
+                    {% endif %}
+                  </span>
+                </button>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- Size Pills -->
+        {% if size_option != blank and size_option.values.size > 0 %}
+          <div class="pf-buybox__sizes" data-pf-size-selector>
+            {% assign size_pos = size_option.position %}
+            {% assign selected_color_val = color_option.selected_value | default: color_option.values.first.name | default: color_option.values.first %}
+            {% for val in size_option.values %}
+              {% liquid
+                assign val_name = val.name | default: val
+                assign size_variant = blank
+
+                for v in selected_product.variants
+                  assign size_matches = false
+                  if size_pos == 1 and v.option1 == val_name
+                    assign size_matches = true
+                  elsif size_pos == 2 and v.option2 == val_name
+                    assign size_matches = true
+                  elsif size_pos == 3 and v.option3 == val_name
+                    assign size_matches = true
+                  elsif v.option1 == val_name or v.option2 == val_name or v.option3 == val_name
+                    assign size_matches = true
+                  endif
+
+                  if size_matches
+                    if color_option != blank and selected_color_val != blank
+                      if v.option1 == selected_color_val or v.option2 == selected_color_val or v.option3 == selected_color_val
+                        assign size_variant = v
+                        break
+                      endif
+                    else
+                      assign size_variant = v
+                      break
+                    endif
+                  endif
+                endfor
+
+                if size_variant == blank
+                  for v in selected_product.variants
+                    if size_pos == 1 and v.option1 == val_name
+                      assign size_variant = v
+                      break
+                    elsif size_pos == 2 and v.option2 == val_name
+                      assign size_variant = v
+                      break
+                    elsif size_pos == 3 and v.option3 == val_name
+                      assign size_variant = v
+                      break
+                    elsif v.option1 == val_name or v.option2 == val_name or v.option3 == val_name
+                      assign size_variant = v
+                      break
+                    endif
+                  endfor
+                endif
+
+                assign is_available = true
+                if size_variant != blank and size_variant.available == false
+                  assign is_available = false
+                elsif size_variant == blank
+                  assign is_available = false
+                endif
+
+                assign is_selected = false
+                if current_variant != blank and size_variant != blank and current_variant.id == size_variant.id
+                  assign is_selected = true
+                elsif forloop.first and current_variant == blank
+                  assign is_selected = true
+                endif
+              %}
+              <button
+                type="button"
+                class="pf-size-pill{% if is_selected %} is-active{% endif %}{% unless is_available %} is-unavailable{% endunless %}"
+                data-pf-size-pill
+                data-value="{{ val_name | escape }}"
+                data-variant-id="{{ size_variant.id | default: current_variant.id }}"
+                {% unless is_available %}data-sold-out="true"{% endunless %}
+                aria-label="Size {{ val_name }}"
+              >
+                <span class="pf-size-pill__text">{{ val_name }}</span>
+              </button>
+            {% endfor %}
+          </div>
+        {% elsif selected_product.has_only_default_variant == false and selected_product.variants.size > 1 and color_option == blank %}
+          <div class="pf-buybox__sizes" data-pf-size-selector>
+            {% for variant in selected_product.variants %}
+              <button
+                type="button"
+                class="pf-size-pill{% if variant.id == current_variant.id %} is-active{% endif %}{% unless variant.available %} is-unavailable{% endunless %}"
+                data-pf-size-pill
+                data-value="{{ variant.title | escape }}"
+                data-variant-id="{{ variant.id }}"
+                {% unless variant.available %}data-sold-out="true"{% endunless %}
+                aria-label="{{ variant.title }}"
+              >
+                <span class="pf-size-pill__text">{{ variant.title }}</span>
+              </button>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {%- form 'product', selected_product, id: form_id, class: 'pf-buybox__form', data-type: 'add-to-cart-form' -%}
+          <input type="hidden" name="id" value="{{ current_variant.id }}" data-pf-variant-id>
+          <input type="hidden" name="quantity" value="1" data-pf-qty-field>
+
+          <div class="pf-buybox__actions">
+            <button
+              type="button"
+              class="pf-btn pf-btn--add-to-bag"
+              data-pf-add-to-bag
+              {% unless current_variant.available %}disabled{% endunless %}
+            >
+              <span data-pf-add-text>{% if current_variant.available %}ADD TO BAG{% else %}SOLD OUT{% endif %}</span>
+            </button>
+
+            <button
+              type="button"
+              class="pf-btn pf-btn--buy-now"
+              data-pf-buy-now
+              {% unless current_variant.available %}disabled{% endunless %}
+            >
+              BUY NOW
+            </button>
+          </div>
+        {%- endform -%}
+
+        <!-- Clean Divider Line -->
+        <div class="pf-product-card__divider"></div>
+
+        <!-- Description Tabs Section -->
+        <div class="pf-tabs__container">
+          <div class="pf-tabs__nav" role="tablist">
+            <button type="button" class="pf-tabs__tab is-active" data-pf-tab="description" role="tab" aria-selected="true">
+              Description
+            </button>
+            {% if product_care_content != blank %}
+              <button type="button" class="pf-tabs__tab" data-pf-tab="washcare" role="tab" aria-selected="false">
+                Washcare
+              </button>
+            {% endif %}
+            {% if delivery_returns_content != blank %}
+              <button type="button" class="pf-tabs__tab" data-pf-tab="shipping" role="tab" aria-selected="false">
+                Shipping
+              </button>
+            {% endif %}
+          </div>
+
+          <div class="pf-tabs__content">
+            <!-- Description Pane -->
+            <div class="pf-tabs__pane is-active" data-pf-pane="description" role="tabpanel">
+              <div class="pf-tabs__section">
+                <div class="pf-tabs__description-body rte">
+                  {% assign clean_desc = selected_product.description | strip_html | strip %}
+                  {% if clean_desc != blank %}
+                    {{ selected_product.description }}
+                  {% else %}
+                    {{ default_product_description }}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            {% if product_care_content != blank %}
+              <!-- Washcare Pane -->
+              <div class="pf-tabs__pane" data-pf-pane="washcare" role="tabpanel" hidden>
+                <div class="pf-tabs__section">
+                  <h4 class="pf-tabs__section-title">Washcare</h4>
+                  <div class="pf-tabs__washcare-body rte">
+                    {% if selected_product.metafields.custom.product_care != blank %}
+                      {{ selected_product.metafields.custom.product_care | metafield_tag }}
+                    {% else %}
+                      {{ product_care_content }}
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+
+            {% if delivery_returns_content != blank %}
+              <!-- Shipping Pane -->
+              <div class="pf-tabs__pane" data-pf-pane="shipping" role="tabpanel" hidden>
+                <div class="pf-tabs__section">
+                  <h4 class="pf-tabs__section-title">Shipping & Returns</h4>
+                  <div class="pf-tabs__shipping-body rte">
+                    {% if selected_product.metafields.custom.delivery_returns != blank %}
+                      {{ selected_product.metafields.custom.delivery_returns | metafield_tag }}
+                    {% else %}
+                      {{ delivery_returns_content }}
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Size Guide Modal -->
+  <div class="pf-modal" id="pf-size-guide-modal" data-pf-size-guide-modal aria-hidden="true" style="display:none;" hidden>
+    <div class="pf-modal__backdrop" data-pf-modal-close></div>
+    <div class="pf-modal__dialog" role="dialog" aria-labelledby="pf-size-guide-title">
+      <div class="pf-modal__header">
+        <h3 id="pf-size-guide-title" class="pf-modal__title">Size guide</h3>
+        <div class="pf-size-guide__unit-toggle" data-pf-unit-toggle role="radiogroup" aria-label="Unit of measurement">
+          <button type="button" class="pf-unit-btn" data-unit="in" aria-label="Show measurements in Inches" role="radio" aria-checked="false">
+            IN
+          </button>
+          <button type="button" class="pf-unit-btn is-active" data-unit="cm" aria-label="Show measurements in Centimeters" role="radio" aria-checked="true">
+            CM
+          </button>
+        </div>
+        <button type="button" class="pf-modal__close" data-pf-modal-close aria-label="Close size guide">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="pf-modal__body">
+        <div class="pf-size-table-wrapper">
+          <table class="pf-size-table" data-pf-size-table data-active-unit="cm">
+            <thead>
+              <tr>
+                <th>Size</th>
+                <th>Chest</th>
+                <th>Shoulder</th>
+                <th>Length</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>XXXS</td>
+                <td data-val-cm="88.90" data-val-in="35.00">88.90</td>
+                <td data-val-cm="41.91" data-val-in="16.50">41.91</td>
+                <td data-val-cm="63.50" data-val-in="25.00">63.50</td>
+              </tr>
+              <tr>
+                <td>XXS</td>
+                <td data-val-cm="93.98" data-val-in="37.00">93.98</td>
+                <td data-val-cm="43.18" data-val-in="17.00">43.18</td>
+                <td data-val-cm="66.04" data-val-in="26.00">66.04</td>
+              </tr>
+              <tr>
+                <td>XS</td>
+                <td data-val-cm="99.06" data-val-in="39.00">99.06</td>
+                <td data-val-cm="44.45" data-val-in="17.50">44.45</td>
+                <td data-val-cm="69.85" data-val-in="27.50">69.85</td>
+              </tr>
+              <tr>
+                <td>S</td>
+                <td data-val-cm="106.68" data-val-in="42.00">106.68</td>
+                <td data-val-cm="46.99" data-val-in="18.50">46.99</td>
+                <td data-val-cm="71.12" data-val-in="28.00">71.12</td>
+              </tr>
+              <tr>
+                <td>M</td>
+                <td data-val-cm="111.76" data-val-in="44.00">111.76</td>
+                <td data-val-cm="48.26" data-val-in="19.00">48.26</td>
+                <td data-val-cm="73.66" data-val-in="29.00">73.66</td>
+              </tr>
+              <tr>
+                <td>L</td>
+                <td data-val-cm="116.84" data-val-in="46.00">116.84</td>
+                <td data-val-cm="48.26" data-val-in="19.00">48.26</td>
+                <td data-val-cm="74.93" data-val-in="29.50">74.93</td>
+              </tr>
+              <tr>
+                <td>XL</td>
+                <td data-val-cm="119.38" data-val-in="47.00">119.38</td>
+                <td data-val-cm="49.53" data-val-in="19.50">49.53</td>
+                <td data-val-cm="78.74" data-val-in="31.00">78.74</td>
+              </tr>
+              <tr>
+                <td>XXL</td>
+                <td data-val-cm="129.54" data-val-in="51.00">129.54</td>
+                <td data-val-cm="53.34" data-val-in="21.00">53.34</td>
+                <td data-val-cm="78.74" data-val-in="31.00">78.74</td>
+              </tr>
+              <tr>
+                <td>XXXL</td>
+                <td data-val-cm="134.62" data-val-in="53.00">134.62</td>
+                <td data-val-cm="57.15" data-val-in="22.50">57.15</td>
+                <td data-val-cm="82.55" data-val-in="32.50">82.55</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="application/json" id="VariantData-{{ section.id }}">
+    {{ selected_product.variants | json }}
+  </script>
+
+  <!-- Desktop Structured Minimal Sticky Bar -->
+  <div class="pf-product-template__sticky-bar" data-pf-sticky-bar aria-hidden="true">
+    <div class="pf-product-template__sticky-shell">
+      <div class="pf-product-template__sticky-info">
+        <div class="pf-product-template__sticky-img">
+          <img
+            src="{{ selected_product.featured_media.preview_image | default: selected_product.featured_image | image_url: width: 160 }}"
+            alt="{{ selected_product.title | escape }}"
+            width="56"
+            height="56"
+            loading="lazy"
+            data-pf-sticky-image
+          >
+        </div>
+        <div class="pf-product-template__sticky-details">
+          <h4 class="pf-product-template__sticky-title">{{ selected_product.title }}</h4>
+          <div class="pf-product-template__sticky-price-wrap">
+            <span class="pf-product-template__sticky-price" data-pf-sticky-price>
+              {{ current_variant.price | money }}
+            </span>
+            {% if current_variant.compare_at_price > current_variant.price %}
+              <span class="pf-product-template__sticky-compare-price" data-pf-sticky-compare-price>
+                {{ current_variant.compare_at_price | money }}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="pf-product-template__sticky-right">
+        <div class="pf-product-template__sticky-actions">
+          <button
+            type="button"
+            class="pf-sticky-wishlist-btn"
+            data-pf-sticky-wishlist
+            data-wishlist-button
+            data-product-handle="{{ selected_product.handle }}"
+            data-product-id="{{ selected_product.id }}"
+            data-product-title="{{ selected_product.title | escape }}"
+            data-product-image="{{ selected_product.featured_media.preview_image | default: selected_product.featured_image | image_url: width: 360 }}"
+            data-product-price="{{ selected_product.price | money | strip_html | escape }}"
+            aria-label="Add to wishlist"
+            aria-pressed="false"
+            title="Add to wishlist"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            class="pf-btn pf-btn--add-to-bag pf-sticky-btn pf-sticky-btn--add"
+            data-pf-sticky-add
+            {% unless current_variant.available %}disabled{% endunless %}
+          >
+            <span data-pf-sticky-add-text>{% if current_variant.available %}ADD TO BAG{% else %}SOLD OUT{% endif %}</span>
+          </button>
+
+          <button
+            type="button"
+            class="pf-btn pf-btn--buy-now pf-sticky-btn pf-sticky-btn--buy"
+            data-pf-sticky-buy
+            {% unless current_variant.available %}disabled{% endunless %}
+          >
+            BUY NOW
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </section>
+
+<style>
+    /* ---- FAQ Section Styling ---- */
+    .pf-product-template__faq-section {
+      padding-top: 34px;
+      border-top: 1px solid rgb(17 17 17 / 0.12);
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+
+    .pf-product-template__description{
+      padding-top: 5px;
+    }
+
+    .pf-product-template__faq-heading {
+      margin: 0 0 16px;
+      color: #111111;
+      font-size: 18px;
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .pf-product-template__faq-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .pf-product-template__faq-item {
+      border: 1px solid rgb(47 28 25 / 0.12);
+      border-radius: 12px;
+      background: #ffffff;
+      overflow: hidden;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .pf-product-template__faq-item[open] {
+      border-color: #000000;
+      box-shadow: 0 4px 14px rgb(0 0 0 / 0.08);
+    }
+
+    .pf-product-template__faq-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 18px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #2f1c19;
+      list-style: none;
+      user-select: none;
+      outline: none;
+    }
+    .pf-product-template__faq-summary:hover{
+      color: #000000;
+    }
+
+    .pf-product-template__faq-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .pf-product-template__faq-item[open] .pf-product-template__faq-summary {
+      color: #000000;
+      background: rgb(253 236 235 / 0.35);
+    }
+
+    .pf-product-template__faq-item[open] .pf-product-template__faq-summary:hover{
+      color: #000000 !important;
+    }
+
+    .pf-product-template__faq-body {
+      padding: 14px 18px 18px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: rgb(47 28 25 / 0.85);
+      border-top: 1px solid rgb(47 28 25 / 0.08);
+    }
+
+    .pf-product-template__faq-body :is(p, ul, ol):last-child {
+      margin-bottom: 0;
+    }
+
+    /* ---- Customer Reviews Section ---- */
+    .pf-product-template__reviews {
+      padding: 15px 15px 0px;
+      border-top: 1px solid rgb(17 17 17 / 0.12);
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+    .pf-product-template__reviews-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .pf-product-template__reviews-heading {
+      margin: 0;
+      color: #111111;
+      font-size: 18px;
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+    .pf-product-template__reviews-badge {
+      flex: 0 0 auto;
+      background: #0800CF;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 6px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.02em;
+    }
+    .pf-product-template__reviews-subtitle {
+      margin: 6px 0 16px;
+      color: #111111;
+      font-size: 13px;
+      font-weight: 400;
+    }
+    .pf-product-template__reviews-write-btn {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100% !important;
+      min-height: 48px !important;
+      background: #ffffff !important;
+      color: #0800CF !important;
+      border: 1.5px solid #0800CF !important;
+      border-radius: 10px !important;
+      font-size: 0.98rem !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      text-align: center !important;
+      box-shadow: none !important;
+      transition: background 0.18s ease, color 0.18s ease !important;
+    }
+    .pf-product-template__reviews-write-btn:hover {
+      background: #0800CF !important;
+      color: #ffffff !important;
+    }
+    .pf-product-template__reviews-widget {
+      margin-top: 16px;
+    }
+    .pf-product-template__reviews-widget .jdgm-rev-wid {
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
+    }
+
+    /* 1. Hide the outer Judge.me widget completely when empty and form is closed (collapses all padding/margins) */
+    #judgeme_product_reviews[data-empty-state="empty_widget"]:not(.jdgm-form-open),
+    .jm-review-widget[data-empty-state="empty_widget"]:not(.jdgm-form-open),
+    .jdgm-review-widget[data-empty-state="empty_widget"]:not(.jdgm-form-open),
+    #judgeme_product_reviews:has(.jdgm-empty-state):not(.jdgm-form-open),
+    .jdgm-widget:has(.jdgm-empty-state):not(.jdgm-form-open),
+    .jm-review-widget:has(.jdgm-empty-state):not(.jdgm-form-open),
+    .jm-review-widget:has(.jm-no-reviews-state):not(.jdgm-form-open) {
+      display: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      height: 0 !important;
+      min-height: 0 !important;
+    }
+    /* 2. Force show the widget container when the review form is opened */
+    #judgeme_product_reviews.jdgm-form-open,
+    .jm-review-widget.jdgm-form-open,
+    .jdgm-widget.jdgm-form-open {
+      display: block !important;
+      height: auto !important;
+      min-height: auto !important;
+    }
+    /* 3. Collapse the custom theme widget container margin if empty */
+    .pf-product-template__reviews-widget:has([data-empty-state="empty_widget"]):not(:has(.jdgm-form-open)),
+    .pf-product-template__reviews-widget:has(.jdgm-empty-state):not(:has(.jdgm-form-open)) {
+      margin: 0 !important;
+    }
+    /* 4. Hide default headers inside the widget if reviews exist */
+    .jdgm-rev-wid__header,
+    .jdgm-rev-wid__title,
+    .jdgm-rev-wid__summary,
+    .jdgm-rev-wid__summary-text,
+    .jdgm-rev-wid__header-actions,
+    .jdgm-histogram,
+    [data-testid="header"],
+    .jdgm-rev-wid .jdgm-write-rev-link,
+    .jdgm-rev-wid .jdgm-rev-mgr__write-rev-btn,
+    .jm-review-widget__header,
+    .jm-no-reviews-state,
+    .jdgm-empty-state {
+      display: none !important;
+    }
+    /* Custom Styling for Judge.me Review Form & Stars to match custom theme */
+    .jdgm-write-rev-form, .jm-write-rev-form, .jm-form {
+      border: 1px solid rgb(0 0 0 / 0.2) !important;
+      border-radius: 14px !important;
+      padding: 20px !important;
+      margin-top: 16px !important;
+      background: #ffffff !important;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.05) !important;
+    }
+    .jdgm-submit-rev-btn, .jm-submit-rev-btn {
+      background-color: #0800CF !important;
+      color: #ffffff !important;
+      border-radius: 10px !important;
+      font-weight: 600 !important;
+      border: none !important;
+      padding: 12px 24px !important;
+      cursor: pointer !important;
+      transition: background 0.2s ease !important;
+    }
+    .jdgm-submit-rev-btn:hover, .jm-submit-rev-btn:hover {
+      background-color: #0600a3 !important;
+    }
+    .jdgm-star, .jm-star {
+      color: #0800CF !important;
+    }
+
+    @media screen and (min-width: 990px) {
+      .pf-product-template__reviews {
+        grid-column: 1 / -1;
+        margin-top: 0;
+      }
+
+      .pf-product-template__reviews-heading {
+        font-size: 18px;
+      }
+    }
+
+    @media screen and (max-width: 749px) {
+      .pf-product-template__reviews-heading {
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .pf-product-template__faq-heading {
+        font-size: 14px;
+        font-weight: 700;
+      }
+    }
+
+  .pf-product-template {
+    background: #ffffff;
+    color: #111111;
+    margin-top: 0;
+    padding-top: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: 1px solid rgb(17 17 17 / 0.12);
+  }
+
+  .pf-product-template__shell {
+    width: min(100%, 1520px);
+    margin: 0 auto;
+    padding: 8px 16px 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .pf-product-template__media {
+    position: relative;
+    grid-column: 1;
+    min-width: 0;
+  }
+
+  .pf-product-template__gallery {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pf-gallery-layout {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0;
+  }
+
+  .pf-gallery-layout::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pf-gallery__primary,
+  .pf-gallery__secondary,
+  .pf-product-slider__track {
+    display: contents;
+  }
+
+  .pf-slider-nav,
+  .pf-product-slider__dots {
+    display: none;
+  }
+
+  .pf-product-template__slide {
+    position: relative;
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    overflow: hidden;
+    background: #f4f4f4;
+    border-radius: 8px;
+    aspect-ratio: 9 / 16;
+    width: 100%;
+    height: auto;
+    max-height: 72svh;
+  }
+
+  .pf-product-template__image,
+  .pf-product-template__video,
+  .pf-product-template__video img,
+  .pf-product-template__video video,
+  .pf-product-template__video iframe {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  /* Right column / Content container */
+  .pf-product-template__content {
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-width: 0;
+  }
+
+  /* Single Minimal Structured Card */
+  .pf-product-card {
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+    padding: 24px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .pf-product-card__divider {
+    height: 1px;
+    background: #f0f0f0;
+    margin: 18px 0 16px;
+  }
+
+  /* Buy Box Elements */
+  .pf-buybox__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .pf-buybox__title {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.25;
+    font-weight: 600;
+    color: #111111;
+    letter-spacing: -0.01em;
+  }
+
+  .pf-buybox__wishlist {
+    appearance: none;
+    background: transparent;
+    border: none;
+    padding: 4px;
+    color: #666666;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    transition: transform 0.18s ease, color 0.18s ease;
+  }
+
+  .pf-buybox__wishlist:hover {
+    color: #000000;
+    transform: scale(1.08);
+  }
+
+  .pf-buybox__wishlist[aria-pressed="true"],
+  .pf-buybox__wishlist.is-active {
+    color: #000000;
+  }
+
+  .pf-buybox__wishlist[aria-pressed="true"] svg path,
+  .pf-buybox__wishlist.is-active svg path {
+    fill: #000000 !important;
+    stroke: #000000 !important;
+  }
+
+  .pf-bookmark-icon {
+    width: 19px;
+    height: 19px;
+    display: block;
+  }
+
+  .pf-buybox__price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .pf-buybox__price {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #111111;
+    line-height: 1.2;
+  }
+
+  .pf-buybox__price div[ref="priceContainer"] {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .pf-buybox__price .price__sale:not(.price__hidden),
+  .pf-buybox__price .price__regular:not(.price__hidden) {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .pf-buybox__price .price__hidden {
+    display: none !important;
+  }
+
+  .pf-buybox__price .price,
+  .pf-buybox__price .price-item--sale,
+  .pf-buybox__price .price-item {
+    font-size: 0.88rem !important;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+    color: #111111;
+    line-height: 1.2;
+  }
+
+  .pf-buybox__price .compare-at-price,
+  .pf-buybox__price .price-item--regular {
+    font-size: 0.76rem !important;
+    letter-spacing: 0;
+    font-weight: 400;
+    color: #888888;
+    text-decoration: line-through;
+    line-height: 1.2;
+  }
+
+  .pf-buybox__size-guide-btn {
+    appearance: none;
+    background: transparent;
+    color: #111111;
+    border: none;
+    border-bottom: 1px solid #111111;
+    border-radius: 0;
+    padding: 0 0 2px 0;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: opacity 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+    text-decoration: none;
+  }
+
+  .pf-buybox__size-guide-btn:hover {
+    opacity: 0.65;
+    color: #111111;
+  }
+
+  .pf-buybox__colors {
+    margin-bottom: 14px;
+  }
+
+  .pf-buybox__option-label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #666666;
+    margin-bottom: 7px;
+  }
+
+  .pf-buybox__color-list {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .pf-color-swatch-item {
+    appearance: none;
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+
+  .pf-color-swatch {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: block;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    transition: transform 0.18s ease, border-color 0.18s ease;
+  }
+
+  .pf-color-swatch-item.is-active .pf-color-swatch {
+    border-color: #000000;
+    border-width: 2px;
+    padding: 2px;
+  }
+
+  .pf-color-swatch-item:hover .pf-color-swatch {
+    transform: translateY(-1px);
+  }
+
+  .pf-color-swatch-fallback {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #bbb;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  /* Minimal Size Selector Pills (Home page pill style) */
+  .pf-buybox__sizes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    width: 100%;
+  }
+
+  .pf-size-pill {
+    appearance: none;
+    border: 1px solid rgb(0 0 0 / 0.15);
+    background: #ffffff;
+    color: #111111;
+    border-radius: 6px;
+    height: 34px;
+    flex: 1 1 0;
+    min-width: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11.5px;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.18s ease;
+    padding: 0 10px;
+  }
+
+  .pf-size-pill:hover:not(.is-unavailable) {
+    border-color: #0800CF;
+    color: #0800CF;
+    background: #ffffff;
+  }
+
+  .pf-size-pill.is-active {
+    background: #0800CF !important;
+    color: #ffffff !important;
+    border-color: #0800CF !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(8, 0, 207, 0.25);
+  }
+
+  .pf-size-pill.is-unavailable {
+    opacity: 0.35;
+    text-decoration: line-through;
+    cursor: not-allowed;
+    background: #f9f9f9;
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+
+  /* Action Buttons */
+  .pf-buybox__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .pf-btn {
+    appearance: none;
+    height: 42px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+    outline: none;
+    text-decoration: none;
+    padding: 0 16px;
+    width: 100%;
+  }
+
+  .pf-btn--add-to-bag {
+    background: #ffffff;
+    color: #0800CF;
+    border: 1.5px solid #0800CF;
+  }
+
+  .pf-btn--add-to-bag:hover:not(:disabled) {
+    border-color: #0800CF;
+    background: rgba(8, 0, 207, 0.06);
+  }
+
+  .pf-btn--buy-now {
+    background: #0800CF;
+    color: #ffffff;
+    border: 1.5px solid #0800CF;
+  }
+
+  .pf-btn--buy-now:hover:not(:disabled) {
+    background: #0600a3;
+    border-color: #0600a3;
+  }
+
+  .pf-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  /* Details & Tabs Section */
+  .pf-tabs__nav {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 12px;
+    padding-bottom: 0;
+  }
+
+  .pf-tabs__tab {
+    appearance: none;
+    background: transparent;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    color: #777777;
+    padding: 4px 0 8px;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.18s ease;
+    outline: none;
+    white-space: nowrap;
+  }
+
+  .pf-tabs__tab:hover {
+    color: #111111;
+  }
+
+  .pf-tabs__tab.is-active {
+    color: #0800CF;
+    font-weight: 600;
+  }
+
+  .pf-tabs__tab.is-active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #0800CF;
+    border-radius: 1px;
+  }
+
+  .pf-tabs__pane {
+    animation: pfTabFade 0.2s ease;
+  }
+
+  .pf-tabs__pane[hidden] {
+    display: none;
+  }
+
+  @keyframes pfTabFade {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .pf-tabs__section {
+    margin-bottom: 12px;
+  }
+
+  .pf-tabs__section:last-child {
+    margin-bottom: 0;
+  }
+
+  .pf-tabs__section-title {
+    margin: 0 0 4px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #111111;
+    text-transform: capitalize;
+  }
+
+  .pf-tabs__details-list,
+  .pf-tabs__description-body,
+  .pf-tabs__washcare-body,
+  .pf-tabs__shipping-body {
+    font-size: 13px;
+    line-height: 1.55;
+    color: #555555;
+  }
+
+  .pf-tabs__details-list :is(p, ul, ol),
+  .pf-tabs__description-body :is(p, ul, ol),
+  .pf-tabs__washcare-body :is(p, ul, ol),
+  .pf-tabs__shipping-body :is(p, ul, ol) {
+    margin-block: 0 6px;
+  }
+
+  .pf-tabs__details-list :is(p, ul, ol):last-child,
+  .pf-tabs__description-body :is(p, ul, ol):last-child,
+  .pf-tabs__washcare-body :is(p, ul, ol):last-child,
+  .pf-tabs__shipping-body :is(p, ul, ol):last-child {
+    margin-bottom: 0;
+  }
+
+  .pf-bullet-list {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .pf-bullet-list li {
+    position: relative;
+    padding-left: 0;
+    margin-bottom: 2px;
+  }
+
+  /* Size Guide Modal */
+  .pf-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+  }
+
+  .pf-modal.is-open {
+    display: flex !important;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .pf-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .pf-modal__dialog {
+    position: relative;
+    background: #ffffff;
+    border-radius: 24px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+    padding: 24px 26px;
+    transform: translateY(10px);
+    transition: transform 0.22s ease;
+  }
+
+  .pf-modal.is-open .pf-modal__dialog {
+    transform: translateY(0);
+  }
+
+  .pf-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .pf-modal__title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111111;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .pf-size-guide__unit-toggle {
+    display: inline-flex;
+    align-items: center;
+    background: #f1f3f5;
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+    margin-left: auto;
+    margin-right: 8px;
+  }
+
+  .pf-unit-btn {
+    appearance: none;
+    border: none;
+    background: transparent;
+    padding: 5px 14px;
+    border-radius: 16px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    line-height: 1;
+  }
+
+  .pf-unit-btn:hover {
+    color: #111111;
+  }
+
+  .pf-unit-btn.is-active {
+    background: #ffffff;
+    color: #111111;
+    font-weight: 700;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+
+  .pf-modal__close {
+    appearance: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #666666;
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.18s ease;
+    flex-shrink: 0;
+  }
+
+  .pf-modal__close:hover {
+    color: #000000;
+  }
+
+  .pf-modal__close svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .pf-size-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid #edf0f2;
+    border-radius: 16px;
+    background: #ffffff;
+  }
+
+  .pf-size-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+
+  .pf-size-table th,
+  .pf-size-table td {
+    padding: 11px 14px;
+    text-align: center;
+    border-bottom: 1px solid #f1f3f5;
+    border-right: 1px solid #f1f3f5;
+    color: #495057;
+    font-weight: 400;
+  }
+
+  .pf-size-table th:last-child,
+  .pf-size-table td:last-child {
+    border-right: none;
+  }
+
+  .pf-size-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .pf-size-table th {
+    background: #ffffff;
+    font-weight: 700;
+    color: #212529;
+    font-size: 13px;
+    border-bottom: 1px solid #edf0f2;
+  }
+
+  .pf-size-table td:first-child {
+    font-weight: 600;
+    color: #212529;
+  }
+
+  .pf-product-template__summary:focus-visible {
+    outline: 2px solid #000000;
+    outline-offset: 4px;
+    border-radius: 10px;
+  }
+
+  .pf-product-template__accordion-body {
+    padding: 0 0 16px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: rgb(47 28 25 / 0.82);
+  }
+
+  .pf-product-template__accordion-body strong {
+    font-weight: 600 !important;
+  }
+
+  .pf-product-template__accordion-body :is(p, ul, ol) {
+    margin-block: 0 10px;
+  }
+
+  .pf-product-template__accordion-body :is(p, ul, ol):last-child {
+    margin-bottom: 0;
+  }
+
+  .pf-product-template__story,
+  .pf-product-template__reallife,
+  .pf-product-template__faq-section,
+  .pf-product-template__lookbook,
+  .pf-product-template__related {
+    padding-top: 34px;
+    border-top: 1px solid rgb(17 17 17 / 0.12);
+    padding: 15px 15px 15px;
+  }
+
+  .pf-product-template__aplus-section {
+    grid-column: 1 / -1;
+  }
+
+  .pf-product-template__aplus-blocks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 18px;
+    padding-bottom: 15px;
+  }
+
+  .pf-product-template__aplus-block {
+    display: grid;
+    gap: 14px;
+  }
+
+  .pf-product-template__story {
+    margin-top: 0;
+  }
+
+  .pf-product-template__story-heading {
+    margin: 0;
+    color: #111111;
+    font-size: clamp(1.55rem, 1rem + 1.4vw, 2.25rem);
+    line-height: 1.05;
+    font-weight: 500;
+  }
+
+  .pf-product-template__story-text {
+    margin-top: 14px;
+    color: rgb(47 28 25 / 0.86);
+    font-size: clamp(0.98rem, 0.9rem + 0.3vw, 1.12rem);
+    line-height: 1.6;
+    letter-spacing: -0.02em;
+  }
+
+  .pf-product-template__story-text :is(p, ul, ol) {
+    margin-block: 0;
+  }
+
+  .pf-product-template__story-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    margin-top: 22px;
+    padding-bottom: 4px;
+  }
+
+  .pf-product-template__story-card {
+    overflow: hidden;
+    border-radius: 18px;
+    background: #f1f1f1;
+    box-shadow: 0 12px 28px rgb(0 0 0 / 0.06);
+  }
+
+  .pf-product-template__story-image {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    aspect-ratio: 16 / 9;
+  }
+
+  .pf-product-template__reallife {
+    margin-top: 0;
+  }
+
+  .pf-product-template__reallife-head,
+  .pf-product-template__lookbook-head {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    justify-content: space-between;
+  }
+
+  .pf-product-template__reallife-heading {
+    flex: 0 0 auto;
+    margin: 0;
+    color: #111111;
+    font-size: clamp(1.55rem, 1rem + 1.4vw, 2.25rem);
+    line-height: 1.05;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .pf-product-template__reallife-controls,
+  .pf-product-template__lookbook-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+  }
+
+  .pf-product-template__reallife-control,
+  .pf-product-template__lookbook-control {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgb(17 17 17 / 0.18);
+    border-radius: 999px;
+    background: #ffffff;
+    color: #111111;
+    cursor: pointer;
+    transition: border-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .pf-product-template__reallife-control:hover:not(:disabled),
+  .pf-product-template__lookbook-control:hover:not(:disabled) {
+    border-color: rgb(17 17 17 / 0.5);
+    transform: translateY(-1px);
+  }
+
+  .pf-product-template__reallife-control:disabled,
+  .pf-product-template__lookbook-control:disabled {
+    cursor: default;
+    opacity: 0.34;
+  }
+
+  .pf-product-template__reallife-control span,
+  .pf-product-template__lookbook-control span {
+    width: 7px;
+    height: 7px;
+    border-left: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translateX(2px) rotate(45deg);
+  }
+
+  .pf-product-template__reallife-control--next span,
+  .pf-product-template__lookbook-control--next span {
+    transform: translateX(-2px) rotate(225deg);
+  }
+
+  .pf-product-template__reallife-carousel {
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .pf-product-template__reallife-track {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+
+  .pf-product-template__reallife-card {
+    flex: 0 0 calc((100% - 32px) / 3);
+    min-width: 0;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #f1f1f1;
+    aspect-ratio: 0.78 / 1;
+    scroll-snap-align: start;
+    box-shadow: 0 12px 28px rgb(0 0 0 / 0.06);
+  }
+
+  .pf-product-template__reallife-image {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .pf-product-template__aplus-section {
+    margin-top: 0;
+  }
+
+  .pf-product-template__aplus-heading {
+    margin: 0;
+    color: #111111;
+    font-size: clamp(1.6rem, 1.05rem + 1.45vw, 2.35rem);
+    line-height: 1.06;
+    font-weight: 500;
+    padding: 15px 15px 0px;
+    border-top: 1px solid rgb(17 17 17 / 0.12);
+  }
+
+  .pf-product-template__aplus-block-media {
+    overflow: hidden;
+  }
+
+  .pf-product-template__aplus-block-image {
+    width: 100%;
+    display: block;
+    aspect-ratio: 1.24 / 0.84;
+    object-fit: cover;
+    object-position: center;
+    background: #f2f2f2;
+  }
+
+  .pf-product-template__aplus-block-content {
+    display: grid;
+    gap: 8px;
+    align-content: start;
+    padding-inline: 2px;
+    padding: 15px 15px 0px;
+  }
+
+  .pf-product-template__aplus-block-title {
+    margin: 0;
+    color: #111111;
+    font-size: clamp(1rem, 0.88rem + 0.72vw, 1.22rem);
+    line-height: 1.18;
+    font-weight: 500;
+  }
+
+  .pf-product-template__aplus-block-description {
+    color: rgb(47 28 25 / 0.8);
+    font-size: clamp(0.88rem, 0.84rem + 0.16vw, 0.98rem);
+    line-height: 1.5;
+    letter-spacing: -0.02em;
+  }
+
+  @media screen and (max-width: 767px) {
+    .pf-product-template__aplus-blocks {
+      grid-template-columns: 1fr;
+    }
+
+    .pf-product-template__aplus-block-image{
+      height: 438px;
+    }
+    .pf-product-template__story-image{
+      height: 209px;
+    }
+  }
+
+  .pf-product-template__lookbook {
+    margin-top: 0;
+  }
+
+  .pf-product-template__lookbook-heading {
+    margin: 0 0 18px;
+    color: #111111;
+    font-size: clamp(1.6rem, 1rem + 1.45vw, 2.35rem);
+    line-height: 1.06;
+    font-weight: 500;
+  }
+
+  .pf-product-template__lookbook-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.16fr) repeat(2, minmax(0, 0.84fr));
+    grid-template-rows: 1fr 0.9fr 0.9fr;
+    grid-template-areas:
+      'lead top1 top2'
+      'lead banner banner'
+      'lead bottom1 bottom2';
+    gap: 12px;
+    align-items: stretch;
+    height: clamp(720px, 56vw, 980px);
+  }
+
+  .pf-product-template__lookbook-card {
+    overflow: hidden;
+    background: #f1f1f1;
+    border-radius: 10px;
+    box-shadow: 0 14px 32px rgb(0 0 0 / 0.07);
+    min-height: 0;
+    height: 100%;
+  }
+
+  .pf-product-template__lookbook-card--lead { grid-area: lead; height: 100%; }
+  .pf-product-template__lookbook-card--top-right { grid-area: top1; height: 100%; }
+  .pf-product-template__lookbook-card--top-right-2 { grid-area: top2; height: 100%; }
+  .pf-product-template__lookbook-card--bottom-left { grid-area: banner; height: 100%; }
+  .pf-product-template__lookbook-card--bottom-center { grid-area: bottom1; height: 100%; }
+  .pf-product-template__lookbook-card--bottom-right { grid-area: bottom2; height: 100%; }
+
+  .pf-product-template__lookbook-image {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .pf-product-template__related {
+    margin-top: 0;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .pf-product-template__related-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+
+  .pf-product-template__related-heading {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    color: #111111;
+    font-size: clamp(1.6rem, 1rem + 1.45vw, 2.35rem);
+    line-height: 1.06;
+    font-weight: 500;
+  }
+
+  .pf-product-template__related-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+  }
+
+  .pf-product-template__related-control {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgb(17 17 17 / 0.18);
+    border-radius: 999px;
+    background: #ffffff;
+    color: #111111;
+    cursor: pointer;
+    transition: border-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .pf-product-template__related-control:hover:not(:disabled) {
+    border-color: rgb(17 17 17 / 0.5);
+    transform: translateY(-1px);
+  }
+
+  .pf-product-template__related-control:disabled {
+    cursor: default;
+    opacity: 0.34;
+  }
+
+  .pf-product-template__related-control span {
+    width: 7px;
+    height: 7px;
+    border-left: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translateX(2px) rotate(45deg);
+  }
+
+  .pf-product-template__related-control--next span {
+    transform: translateX(-2px) rotate(225deg);
+  }
+
+  .pf-product-template__related-carousel {
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .pf-product-template__related-track {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+
+  .pf-product-template__related-card {
+    display: block;
+    flex: 0 0 calc((100% - 20px) / 2);
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+    scroll-snap-align: start;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .pf-product-template__related-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .pf-product-template__related-media {
+    overflow: hidden;
+    background: #dedede;
+    aspect-ratio: 0.84 / 1;
+    border-radius: 10px;
+    box-shadow: 0 12px 28px rgb(0 0 0 / 0.06);
+  }
+
+  .pf-product-template__related-image,
+  .pf-product-template__related-placeholder {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.28s ease;
+  }
+
+  .pf-product-template__related-card:hover .pf-product-template__related-image,
+  .pf-product-template__related-card:hover .pf-product-template__related-placeholder {
+    transform: scale(1.03);
+  }
+
+  .pf-product-template__related-placeholder {
+    background: linear-gradient(180deg, #d5d5d5, #efefef);
+  }
+
+  .pf-product-template__related-body {
+    padding-top: 12px;
+  }
+
+  .pf-product-template__related-title,
+  .pf-product-template__related-price {
+    display: block;
+    color: #111111;
+    letter-spacing: -0.04em;
+  }
+
+  .pf-product-template__related-title {
+    font-size: clamp(1.08rem, 0.9rem + 0.45vw, 1.4rem);
+    line-height: 1.1;
+    font-weight: 500;
+  }
+
+  .pf-product-template__related-price {
+    margin-top: 6px;
+    font-size: clamp(0.98rem, 0.84rem + 0.34vw, 1.18rem);
+    line-height: 1.1;
+    font-weight: 400;
+    color: rgb(47 28 25 / 0.78);
+  }
+
+  .pf-product-template__wishlist {
+    position: absolute;
+    bottom: 60px;
+    right: 16px;
+    z-index: 5;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+    display: grid;
+    place-items: center;
+    color: #2f1c19;
+    cursor: pointer;
+  }
+
+  .pf-product-template__wishlist[aria-pressed="true"] {
+    color: #000000;
+  }
+
+  .pf-product-template__wishlist[aria-pressed="true"] svg path {
+    fill: currentColor;
+  }
+
+  .pf-product-template__wishlist svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .pf-product-template__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(255, 255, 255, 0.85);
+    display: grid;
+    place-items: center;
+    color: #2f1c19;
+  }
+
+  .pf-product-template__nav--prev { left: 12px; }
+  .pf-product-template__nav--next { right: 12px; }
+
+  .pf-product-template__nav span {
+    width: 8px;
+    height: 8px;
+    display: block;
+    border-left: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+  }
+
+  .pf-product-template__nav--prev span { transform: translateX(1px) rotate(45deg); }
+  .pf-product-template__nav--next span { transform: translateX(-1px) rotate(225deg); }
+
+  .pf-product-template__dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .pf-product-template__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: 0;
+    padding: 0;
+    background: rgb(47 28 25 / 0.25);
+    transition: width 0.2s ease, background 0.2s ease;
+  }
+
+  .pf-product-template__dot.is-active {
+    width: 16px;
+    border-radius: 4px;
+    background: #2f1c19;
+  }
+
+  .pf-product-template__share {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    z-index: 5;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+    display: grid;
+    place-items: center;
+    color: #2f1c19;
+    cursor: pointer;
+  }
+
+  .pf-product-template__share svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .pf-product-template__trust-bar {
+    display: flex;
+    margin-top: 26px;
+    /* margin-left: -24px;
+    margin-right: -24px;
+    width: calc(100% + 48px); */
+    border-top: 1px solid rgb(47 28 25 / 0.1);
+    border-bottom: 1px solid rgb(47 28 25 / 0.1);
+    background: #fdeceb;
+  }
+
+  .pf-product-template__trust-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 8px;
+    text-align: center;
+    border-right: 1px solid rgb(47 28 25 / 0.1);
+  }
+
+  .pf-product-template__trust-item:last-child {
+    border-right: 0;
+  }
+
+  .pf-product-template__trust-icon {
+    color: #000000;
+    display: grid;
+    place-items: center;
+  }
+
+  .pf-product-template__trust-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .pf-product-template__trust-label {
+    font-size: 0.72rem;
+    line-height: 1.2;
+    color: #2f1c19;
+    font-weight: 500;
+  }
+
+  @media screen and (min-width: 990px) {
+    .pf-product-template {
+      position: static !important;
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+      margin-bottom: 0 !important;
+      padding-bottom: 0 !important;
+    }
+
+    .pf-product-template__shell {
+      position: relative !important;
+      grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.9fr);
+      gap: clamp(20px, 2vw, 32px);
+      align-items: start;
+      padding: 8px 32px 20px;
+    }
+
+    .pf-product-template__media,
+    .pf-product-template__gallery {
+      grid-column: 1;
+      display: block;
+      width: 100%;
+      overflow: visible !important;
+    }
+
+    .pf-gallery-layout {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+      gap: 16px !important;
+      overflow: visible !important;
+      scroll-snap-type: none !important;
+      padding: 0 !important;
+      align-items: start !important;
+      width: 100% !important;
+    }
+
+    .pf-gallery-layout.is-single-media {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .pf-product-template__slide {
+      aspect-ratio: auto !important;
+      max-height: none !important;
+      height: 100% !important;
+      flex: none !important;
+    }
+
+    .pf-gallery__primary {
+      display: block !important;
+      position: sticky !important;
+      top: calc(var(--header-group-height, var(--header-height, 66px)) + 8px) !important;
+      align-self: start !important;
+      width: 100% !important;
+      height: 88vh !important;
+      min-height: 540px !important;
+      max-height: none !important;
+    }
+
+    .pf-gallery-card--primary {
+      width: 100% !important;
+      height: 100% !important;
+      max-height: none !important;
+      aspect-ratio: auto !important;
+      border-radius: 8px !important;
+      overflow: hidden !important;
+      background: #f4f4f4 !important;
+    }
+
+    .pf-gallery__secondary {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 16px !important;
+      width: 100% !important;
+    }
+
+    .pf-gallery-card--secondary {
+      flex: none !important;
+      border-radius: 8px !important;
+      overflow: hidden !important;
+      background: #f4f4f4 !important;
+      width: 100% !important;
+      height: 88vh !important;
+      min-height: 540px !important;
+      max-height: none !important;
+      aspect-ratio: auto !important;
+    }
+
+    .pf-product-template__image,
+    .pf-product-template__video,
+    .pf-product-template__video img,
+    .pf-product-template__video video,
+    .pf-product-template__video iframe {
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+      object-fit: cover !important;
+      object-position: center !important;
+    }
+
+    .pf-product-template__dots,
+    .pf-product-template__nav {
+      display: none !important;
+    }
+
+    .pf-product-template__content {
+      grid-column: 2 !important;
+      position: sticky !important;
+      top: calc(var(--header-group-height, var(--header-height, 66px)) + 8px) !important;
+      align-self: start !important;
+      max-width: 100% !important;
+      padding: 0 !important;
+    }
+
+    .pf-product-template__detail-extended {
+      grid-column: 1 / -1;
+      padding: 0;
+      margin-top: 0px;
+      gap: 0px;
+    }
+
+    .pf-product-template__accordions,
+    .pf-product-template__story,
+    .pf-product-template__reallife,
+    .pf-product-template__aplus-section,
+    .pf-product-template__faq-section,
+    .pf-product-template__lookbook,
+    .pf-product-template__related,
+    .pf-product-template__trust-bar {
+      grid-column: 1 / -1;
+    }
+
+    .pf-product-template__story-heading,
+    .pf-product-template__reallife-heading,
+    .pf-product-template__lookbook-heading,
+    .pf-product-template__related-heading,
+    .pf-product-template__aplus-heading,
+    .pf-product-template__faq-heading {
+      line-height: 1.08;
+    }
+
+    .pf-product-template__faq-heading {
+      font-size: 30px;
+    }
+
+    .pf-product-template__story {
+      margin-top: 0;
+    }
+
+    .pf-product-template__story-heading {
+      font-size: 30px;
+    }
+
+    .pf-product-template__story-text {
+      font-size: 1.02rem;
+      line-height: 1.65;
+    }
+
+    .pf-product-template__story-grid {
+      margin-top: 24px;
+      gap: 16px;
+    }
+
+    .pf-product-template__story-card {
+      border-radius: 10px;
+      height: 600px;
+    }
+
+    .pf-product-template__reallife {
+      margin-top: 0px;
+    }
+
+    .pf-product-template__reallife-heading {
+      font-size: 30px;
+    }
+
+    .pf-product-template__reallife-head {
+      margin-bottom: 24px;
+    }
+
+    .pf-product-template__reallife-track {
+      gap: 20px;
+    }
+
+    .pf-product-template__reallife-card {
+      flex: 0 0 calc((100% - 40px) / 3);
+      height: 400px;
+    }
+
+    .pf-product-template__aplus-blocks {
+      gap: 32px;
+    }
+
+    .pf-product-template__aplus-section {
+      margin-top: 0;
+    }
+
+    .pf-product-template__aplus-heading {
+      font-size: 30px;
+    }
+
+    .pf-product-template__lookbook {
+      margin-top: 0px;
+    }
+
+    .pf-product-template__lookbook-heading {
+      margin-bottom: 22px;
+      font-size: 30px;
+    }
+
+    .pf-product-template__lookbook-grid {
+      gap: 10px;
+    }
+
+    .pf-product-template__related {
+      margin-top: 0px;
+    }
+
+    .pf-product-template__related-head {
+      margin-bottom: 22px;
+    }
+
+    .pf-product-template__related-heading {
+      font-size: 30px;
+    }
+
+    .pf-product-template__related-track {
+      gap: 24px;
+    }
+
+    .pf-product-template__related-card {
+      flex-basis: calc((100% - 72px) / 4);
+    }
+
+    .pf-product-template__trust-bar {
+      display: none;
+    }
+
+    .pf-product-template__wishlist {
+      bottom: 68px;
+      right: 24px;
+    }
+
+    .pf-product-template__share {
+      bottom: 24px;
+      right: 24px;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    .pf-product-template__shell {
+      gap: clamp(24px, 2.5vw, 48px);
+    }
+    
+    .pf-product-template__lookbook-controls {
+      display: none;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .pf-product-template__aplus-block-description :is(p, ul, ol):last-child {
+        font-size: 16px;
+        font-weight: 400;
+        color: black;
+        letter-spacing: 0;
+    }
+    .pf-product-template__aplus-block-title{
+      font-size: 18px !important;
+    }
+    .pf-product-template__shell {
+      width: 100%;
+      padding: 10px 12px 10px;
+      gap: 14px;
+    }
+
+    .pf-product-template__slides {
+      padding-inline: 0;
+    }
+
+    .pf-product-template__slide {
+      aspect-ratio: 9 / 16;
+      width: 100%;
+      height: auto;
+      max-height: 72svh;
+      border-radius: 8px;
+    }
+
+    .pf-product-template__content {
+      padding: 0;
+      gap: 12px;
+    }
+
+    .pf-product-card {
+      padding: 16px;
+      border: 1px solid #e8e8e8;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+      background: #ffffff;
+    }
+
+    .pf-buybox__sizes {
+      gap: 6px;
+    }
+
+    .pf-size-pill {
+      min-width: 32px;
+      height: 32px;
+      font-size: 11px;
+      border-radius: 6px;
+      padding: 0 8px;
+    }
+
+    .pf-btn {
+      height: 40px;
+      font-size: 11px;
+      border-radius: 6px;
+    }
+
+    .pf-modal__backdrop {
+      background: transparent !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    .pf-product-template__story {
+      margin-top: 0;
+    }
+
+    .pf-product-template__story-heading {
+      font-size: 24px;
+    }
+
+    .pf-product-template__story-text {
+      margin-top: 12px;
+      font-size: 0.96rem;
+      line-height: 1.52;
+    }
+
+    .pf-product-template__story-grid {
+      margin-top: 18px;
+      gap: 10px;
+    }
+
+    .pf-product-template__story-card {
+      border-radius: 18px;
+    }
+
+    .pf-product-template__reallife {
+      margin-top: 0px;
+    }
+
+    .pf-product-template__reallife-heading {
+      font-size: 24px;
+    }
+
+    .pf-product-template__reallife-head,
+    .pf-product-template__lookbook-head {
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .pf-product-template__reallife-control,
+    .pf-product-template__lookbook-control {
+      width: 30px;
+      height: 30px;
+    }
+
+    .pf-product-template__reallife-track {
+      gap: 10px;
+    }
+
+    .pf-product-template__reallife-card {
+      flex: 0 0 calc((100% - 10px) / 2);
+    }
+
+    .pf-product-template__aplus-blocks {
+      grid-template-columns: 1fr;
+    }
+
+    .pf-product-template__aplus-section {
+      margin-top: 0;
+    }
+
+    .pf-product-template__aplus-heading {
+      font-size: 24px;
+    }
+
+    .pf-product-template__lookbook {
+      margin-top: 0px;
+    }
+
+    .pf-product-template__lookbook-heading {
+      margin-bottom: 14px;
+      font-size: 24px;
+    }
+
+    .pf-product-template__lookbook-grid {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      padding-bottom: 4px;
+      height: auto;
+    }
+
+    .pf-product-template__lookbook-card {
+      border-radius: 12px;
+      flex: 0 0 calc((100% - 10px) / 1.5);
+      min-width: 0;
+      scroll-snap-align: start;
+    }
+
+    .pf-product-template__lookbook-card--lead,
+    .pf-product-template__lookbook-card--top-right,
+    .pf-product-template__lookbook-card--top-right-2,
+    .pf-product-template__lookbook-card--bottom-left,
+    .pf-product-template__lookbook-card--bottom-center,
+    .pf-product-template__lookbook-card--bottom-right {
+      aspect-ratio: 0.78 / 1;
+      height: auto;
+    }
+
+    .pf-product-template__related {
+      margin-top: 0px;
+    }
+
+    .pf-product-template__related-head {
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .pf-product-template__related-heading {
+      font-size: 24px;
+    }
+
+    .pf-product-template__related-controls {
+      gap: 6px;
+    }
+
+    .pf-product-template__related-control {
+      width: 30px;
+      height: 30px;
+    }
+
+    .pf-product-template__related-track {
+      gap: 12px;
+    }
+
+    .pf-product-template__related-card {
+      flex-basis: calc((100% - 12px) / 2);
+    }
+
+    .pf-product-template__related-body {
+      padding-top: 10px;
+    }
+
+    .pf-product-template__related-title {
+      font-size: 16px;
+      line-height: 1.12;
+    }
+
+    .pf-product-template__related-price {
+      margin-top: 6px;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .pf-product-template__trust-bar {
+      margin-top: 20px;
+    }
+
+    .pf-product-template__trust-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .pf-product-template__trust-label {
+      font-size: 0.68rem;
+    }
+  }
+
+  /* ── Desktop & Mobile Structured Minimal Sticky Bottom Bar ────────────── */
+  .pf-product-template__sticky-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 999998;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    transform: translateY(100%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.32s ease, visibility 0.38s;
+    will-change: transform, opacity;
+  }
+
+  .pf-product-template__sticky-bar[data-visible="true"],
+  .pf-product-template__sticky-bar[data-mobile-visible="true"],
+  body[data-mobile-nav-hidden="true"] .pf-product-template__sticky-bar {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* Instant Complete Hide when Drawer / Story Modal / Cart is open */
+  body.pf-drawer-open .pf-product-template__sticky-bar,
+  body.story-modal-open .pf-product-template__sticky-bar,
+  body:has(.cart-drawer[open]) .pf-product-template__sticky-bar,
+  body:has(cart-drawer[open]) .pf-product-template__sticky-bar,
+  body:has(.quick-add-modal[open]) .pf-product-template__sticky-bar {
+    transform: translateY(100%) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  .pf-product-template__sticky-shell {
+    width: min(100%, 1520px);
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 12px 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    box-sizing: border-box;
+  }
+
+  .pf-product-template__sticky-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    flex: 0 1 auto;
+  }
+
+  .pf-product-template__sticky-img {
+    width: 54px;
+    height: 54px;
+    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    background: #fafafa;
+    flex-shrink: 0;
+  }
+
+  .pf-product-template__sticky-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .pf-product-template__sticky-details {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    justify-content: center;
+  }
+
+  .pf-product-template__sticky-title {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: 15px;
+    font-weight: 600;
+    color: #111111;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+    max-width: 420px;
+  }
+
+  .pf-product-template__sticky-price-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    line-height: 1.2;
+  }
+
+  .pf-product-template__sticky-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111111;
+  }
+
+  .pf-product-template__sticky-compare-price {
+    font-size: 13px;
+    font-weight: 400;
+    color: #888888;
+    text-decoration: line-through;
+  }
+
+  .pf-product-template__sticky-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .pf-product-template__sticky-sizes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .pf-product-template__sticky-size-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #777777;
+    letter-spacing: 0.05em;
+    margin-right: 2px;
+    text-transform: uppercase;
+  }
+
+  .pf-sticky-size-btn {
+    min-width: 38px;
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 5px;
+    border: 1.5px solid #e0e0e0;
+    background: #ffffff;
+    color: #111111;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .pf-sticky-size-btn:hover {
+    border-color: #0800CF;
+    background: #f5f5f5;
+  }
+
+  .pf-sticky-size-btn.is-active {
+    background: #0800CF;
+    border-color: #0800CF;
+    color: #ffffff;
+  }
+
+  .pf-sticky-size-btn.is-unavailable {
+    opacity: 0.35;
+    text-decoration: line-through;
+    cursor: not-allowed;
+  }
+
+  .pf-product-template__sticky-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .pf-sticky-wishlist-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    flex: 0 0 44px !important;
+    border-radius: 5px !important;
+    border: 1.5px solid #e0e0e0 !important;
+    background: #ffffff !important;
+    color: #0800CF !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+    box-sizing: border-box !important;
+    transition: all 0.18s ease !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+  }
+
+  .pf-sticky-wishlist-btn:hover {
+    border-color: #0800CF !important;
+    background: #f5f5f5 !important;
+  }
+
+  .pf-sticky-wishlist-btn svg {
+    width: 20px !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    min-height: 20px !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+  }
+
+  .pf-sticky-wishlist-btn.is-saved svg path,
+  .pf-sticky-wishlist-btn.is-active svg path,
+  .pf-sticky-wishlist-btn[aria-pressed="true"] svg path {
+    fill: #0800CF !important;
+    stroke: #0800CF !important;
+  }
+
+  .pf-sticky-btn {
+    height: 44px;
+    padding: 0 28px;
+    border-radius: 5px;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .pf-sticky-btn--add {
+    background: #ffffff;
+    color: #0800CF;
+    border: 1.5px solid #0800CF;
+  }
+
+  .pf-sticky-btn--add:hover {
+    background: #0800CF;
+    color: #ffffff;
+  }
+
+  .pf-sticky-btn--buy {
+    background: #0800CF;
+    color: #ffffff;
+    border: 1.5px solid #0800CF;
+  }
+
+  .pf-sticky-btn--buy:hover {
+    background: #0600a3;
+    border-color: #0600a3;
+  }
+
+  .pf-sticky-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  @media screen and (min-width: 1025px) {
+    .pf-product-template {
+      padding-bottom: 0px !important;
+    }
+    .pf-product-template__sticky-bar {
+      display: none !important;
+    }
+  }
+
+  /* ── Responsive: Mobile & Tablet Sticky Bottom Bar ── */
+  @media screen and (max-width: 1024px) {
+    .pf-product-template {
+      padding-bottom: 0px;
+    }
+
+    .pf-product-template__sticky-bar {
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px)) 14px;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 -4px 22px rgba(0, 0, 0, 0.09);
+    }
+
+    .pf-product-template__sticky-shell {
+      padding: 0;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .pf-product-template__sticky-info {
+      gap: 10px;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .pf-product-template__sticky-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+    }
+
+    .pf-product-template__sticky-details {
+      gap: 2px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .pf-product-template__sticky-title {
+      font-size: 13px;
+      line-height: 1.2;
+      max-width: 130px;
+    }
+
+    .pf-product-template__sticky-price-wrap {
+      gap: 6px;
+    }
+
+    .pf-product-template__sticky-price {
+      font-size: 13px;
+    }
+
+    .pf-product-template__sticky-compare-price {
+      font-size: 11px;
+    }
+
+    .pf-product-template__sticky-right {
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .pf-product-template__sticky-actions {
+      gap: 6px;
+    }
+
+    .pf-sticky-wishlist-btn {
+      width: 38px !important;
+      min-width: 38px !important;
+      max-width: 38px !important;
+      height: 38px !important;
+      min-height: 38px !important;
+      max-height: 38px !important;
+      flex: 0 0 38px !important;
+      border-radius: 5px !important;
+    }
+
+    .pf-sticky-wishlist-btn svg {
+      width: 18px !important;
+      height: 18px !important;
+    }
+
+    .pf-sticky-btn {
+      height: 38px;
+      padding: 0 14px;
+      font-size: 11px;
+      border-radius: 5px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+  }
+
+  @media screen and (max-width: 380px) {
+    .pf-product-template__sticky-img {
+      width: 38px;
+      height: 38px;
+    }
+
+    .pf-product-template__sticky-title {
+      max-width: 90px;
+      font-size: 12px;
+    }
+
+    .pf-sticky-btn {
+      padding: 0 10px;
+      font-size: 10.5px;
+    }
+
+    .pf-sticky-wishlist-btn {
+      display: none !important;
+    }
+  }
+</style>
+
+{% javascript %}
+  (() => {
+    const root = document.querySelector('[data-pf-product]');
+    if (!root) return;
+
+    const gallery = root.querySelector('[data-pf-gallery]');
+    const slidesRail = root.querySelector('[data-pf-slides]');
+    const slides = [...root.querySelectorAll('[data-pf-slide]')];
+    const dots = [...root.querySelectorAll('[data-pf-dot]')];
+    const sizePills = [...root.querySelectorAll('[data-pf-size-pill]')];
+    const swatches = [...root.querySelectorAll('[data-pf-swatch]')];
+    const variantIdInput = root.querySelector('[data-pf-variant-id]');
+    const addToBagBtn = root.querySelector('[data-pf-add-to-bag]');
+    const buyNowBtn = root.querySelector('[data-pf-buy-now]');
+    const addTextEl = root.querySelector('[data-pf-add-text]');
+    const priceEl = root.querySelector('[data-pf-price]');
+    const selectedColorLabel = root.querySelector('[data-pf-selected-color]');
+    const tabs = [...root.querySelectorAll('[data-pf-tab]')];
+    const panes = [...root.querySelectorAll('[data-pf-pane]')];
+    const sizeGuideOpenBtn = root.querySelector('[data-pf-size-guide-open]');
+    const sizeGuideModal = document.getElementById('pf-size-guide-modal');
+    const modalCloseBtns = [...document.querySelectorAll('[data-pf-modal-close]')];
+    const wishlist = root.querySelector('[data-pf-wishlist]');
+    const navPrev = root.querySelector('[data-pf-nav-prev]');
+    const navNext = root.querySelector('[data-pf-nav-next]');
+
+    const stickyBar = root.querySelector('[data-pf-sticky-bar]');
+    const stickySizes = [...root.querySelectorAll('[data-pf-sticky-size]')];
+    const stickyAddBtn = root.querySelector('[data-pf-sticky-add]');
+    const stickyBuyBtn = root.querySelector('[data-pf-sticky-buy]');
+    const stickyAddText = root.querySelector('[data-pf-sticky-add-text]');
+    const stickyPriceEl = root.querySelector('[data-pf-sticky-price]');
+    const buyboxActions = root.querySelector('.pf-buybox__actions');
+
+    const variantDataEl = root.querySelector('[id^="VariantData-"]');
+    const variantData = variantDataEl ? JSON.parse(variantDataEl.textContent) : [];
+    const variantMap = {};
+    if (Array.isArray(variantData)) {
+      variantData.forEach((v) => {
+        variantMap[v.id] = v;
+      });
+    }
+
+    function formatMoney(cents, format) {
+      if (typeof cents === 'string') cents = parseInt(cents, 10);
+      let value = '';
+      const placeholderRegex = /\{\{\s*(\w+)\s*\}\}/;
+      const cleanFormat = (format || 'RS. {{amount}}').replace(/₹/g, 'RS.');
+      const match = cleanFormat.match(placeholderRegex);
+      if (!match) return `RS. ${(cents / 100).toLocaleString()}`;
+
+      const placeholder = match[1];
+      switch (placeholder) {
+        case 'amount':
+          value = (cents / 100).toFixed(2);
+          break;
+        case 'amount_no_decimals':
+          value = Math.round(cents / 100).toString();
+          break;
+        case 'amount_with_comma_separator':
+          value = (cents / 100).toFixed(2).replace('.', ',');
+          break;
+        case 'amount_no_decimals_with_comma_separator':
+          value = Math.round(cents / 100).toString().replace('.', ',');
+          break;
+        default:
+          value = (cents / 100).toFixed(2);
+      }
+
+      if (placeholder.includes('comma_separator')) {
+        const parts = value.split(',');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        value = parts.join(',');
+      } else {
+        const parts = value.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        value = parts.join('.');
+      }
+
+      return cleanFormat.replace(placeholderRegex, value);
+    }
+
+    const syncVariant = (variantId) => {
+      if (variantIdInput && variantId) {
+        variantIdInput.value = variantId;
+      }
+
+      const v = variantMap[variantId];
+      if (v) {
+        // Update Add / Buy button state
+        const available = v.available;
+        if (addToBagBtn) {
+          addToBagBtn.disabled = !available;
+          if (addTextEl) {
+            addTextEl.textContent = available ? 'ADD TO BAG' : 'SOLD OUT';
+          }
+        }
+        if (buyNowBtn) {
+          buyNowBtn.disabled = !available;
+        }
+
+        if (stickyAddBtn) {
+          stickyAddBtn.disabled = !available;
+          if (stickyAddText) {
+            stickyAddText.textContent = available ? 'ADD TO BAG' : 'SOLD OUT';
+          }
+        }
+        if (stickyBuyBtn) {
+          stickyBuyBtn.disabled = !available;
+        }
+
+        // Update Price if present
+        if (priceEl && v.price) {
+          const moneyFormat = root.dataset.moneyFormat || 'RS. {{amount}}';
+          const priceText = formatMoney(v.price, moneyFormat);
+          const priceValEl = priceEl.querySelector('.price') || priceEl;
+          if (priceValEl) priceValEl.textContent = priceText;
+
+          const compareValEl = priceEl.querySelector('.compare-at-price');
+          if (compareValEl && v.compare_at_price && v.compare_at_price > v.price) {
+            compareValEl.textContent = formatMoney(v.compare_at_price, moneyFormat);
+          }
+
+          if (stickyPriceEl) {
+            stickyPriceEl.textContent = priceText;
+          }
+
+          const stickyCompareEl = root.querySelector('[data-pf-sticky-compare-price]');
+          if (stickyCompareEl) {
+            if (v.compare_at_price && v.compare_at_price > v.price) {
+              stickyCompareEl.textContent = formatMoney(v.compare_at_price, moneyFormat);
+              stickyCompareEl.style.display = 'inline';
+            } else {
+              stickyCompareEl.style.display = 'none';
+            }
+          }
+        }
+
+        if (v.featured_media && v.featured_media.id) {
+          goToMediaId(v.featured_media.id);
+        }
+      }
+    };
+
+    // Size Pills Selection
+    sizePills.forEach((pill) => {
+      pill.addEventListener('click', (e) => {
+        e.preventDefault();
+        sizePills.forEach((p) => {
+          p.classList.remove('is-active');
+          p.classList.remove('is-selected');
+        });
+        pill.classList.add('is-active');
+        pill.classList.add('is-selected');
+
+        const pillSize = (pill.dataset.pfSizePill || pill.textContent || '').trim();
+        if (wishlist && pillSize) {
+          wishlist.dataset.productSize = pillSize;
+        }
+
+        // Sync sticky size buttons
+        stickySizes.forEach((sb) => {
+          const sVal = (sb.dataset.pfStickySize || '').trim().toLowerCase();
+          sb.classList.toggle('is-active', sVal === pillSize.toLowerCase());
+        });
+
+        const variantId = pill.dataset.variantId;
+        if (variantId) {
+          syncVariant(variantId);
+        }
+      });
+    });
+
+    // Color Swatches Selection
+    swatches.forEach((swatch) => {
+      swatch.addEventListener('click', (e) => {
+        e.preventDefault();
+        swatches.forEach((s) => {
+          s.classList.remove('is-active');
+          s.setAttribute('aria-pressed', 'false');
+        });
+        swatch.classList.add('is-active');
+        swatch.setAttribute('aria-pressed', 'true');
+
+        if (selectedColorLabel && swatch.dataset.colorName) {
+          selectedColorLabel.textContent = swatch.dataset.colorName;
+        }
+
+        const variantId = swatch.dataset.variantId;
+        if (variantId) {
+          syncVariant(variantId);
+        }
+
+        const mediaId = swatch.dataset.mediaId;
+        if (mediaId) {
+          goToMediaId(mediaId);
+        }
+      });
+    });
+
+    // Tabs Switching
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = tab.dataset.pfTab;
+        if (!target) return;
+
+        tabs.forEach((t) => {
+          const active = t === tab;
+          t.classList.toggle('is-active', active);
+          t.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+
+        panes.forEach((pane) => {
+          const active = pane.dataset.pfPane === target;
+          pane.classList.toggle('is-active', active);
+          if (active) {
+            pane.removeAttribute('hidden');
+          } else {
+            pane.setAttribute('hidden', '');
+          }
+        });
+      });
+    });
+
+    // Size Guide Modal Open / Close
+    const openSizeGuide = () => {
+      if (sizeGuideModal) {
+        sizeGuideModal.style.display = 'flex';
+        sizeGuideModal.removeAttribute('hidden');
+        requestAnimationFrame(() => {
+          sizeGuideModal.classList.add('is-open');
+          sizeGuideModal.setAttribute('aria-hidden', 'false');
+        });
+        document.body.style.overflow = 'hidden';
+      }
+    };
+
+    const closeSizeGuide = () => {
+      if (sizeGuideModal) {
+        sizeGuideModal.classList.remove('is-open');
+        sizeGuideModal.setAttribute('aria-hidden', 'true');
+        setTimeout(() => {
+          if (!sizeGuideModal.classList.contains('is-open')) {
+            sizeGuideModal.style.display = 'none';
+            sizeGuideModal.setAttribute('hidden', '');
+          }
+        }, 220);
+        document.body.style.overflow = '';
+      }
+    };
+
+    if (sizeGuideOpenBtn) {
+      sizeGuideOpenBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openSizeGuide();
+      });
+    }
+
+    // Size Guide Unit Switcher (IN / CM)
+    const unitButtons = [...document.querySelectorAll('.pf-unit-btn')];
+    const sizeTable = document.querySelector('[data-pf-size-table]');
+
+    unitButtons.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const unit = btn.dataset.unit;
+        if (!unit || !sizeTable) return;
+
+        unitButtons.forEach((b) => {
+          const isActive = b === btn;
+          b.classList.toggle('is-active', isActive);
+          b.setAttribute('aria-checked', isActive ? 'true' : 'false');
+        });
+        sizeTable.dataset.activeUnit = unit;
+
+        const cells = sizeTable.querySelectorAll('td[data-val-cm]');
+        cells.forEach((cell) => {
+          cell.textContent = unit === 'in' ? cell.dataset.valIn : cell.dataset.valCm;
+        });
+      });
+    });
+
+    modalCloseBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeSizeGuide();
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sizeGuideModal?.classList.contains('is-open')) {
+        closeSizeGuide();
+      }
+    });
+
+    // Add To Bag Action
+    if (addToBagBtn) {
+      addToBagBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const variantId = variantIdInput?.value || root.querySelector('[data-pf-variant-id]')?.value;
+        if (!variantId || addToBagBtn.disabled) return;
+
+        const originalText = addTextEl ? addTextEl.textContent : 'ADD TO BAG';
+        addToBagBtn.disabled = true;
+        if (addTextEl) addTextEl.textContent = 'ADDING...';
+
+        try {
+          const cartItemsComponents = document.querySelectorAll('cart-items-component');
+          const sectionIds = [];
+          cartItemsComponents.forEach((item) => {
+            if (item.dataset.sectionId && !sectionIds.includes(item.dataset.sectionId)) {
+              sectionIds.push(item.dataset.sectionId);
+            }
+          });
+
+          const formData = new FormData();
+          formData.append('id', variantId);
+          formData.append('quantity', 1);
+          if (sectionIds.length > 0) {
+            formData.append('sections', sectionIds.join(','));
+            formData.append('sections_url', window.location.pathname);
+          }
+
+          const response = await fetch('/cart/add.js', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: formData
+          });
+
+          if (!response.ok) throw new Error('Add to cart failed');
+          const addData = await response.json();
+
+          const cartResponse = await fetch('/cart.js');
+          const cartData = await cartResponse.json();
+
+          document.dispatchEvent(new CustomEvent('cart:update', {
+            bubbles: true,
+            detail: {
+              resource: cartData,
+              sourceId: 'pf-product-template',
+              data: {
+                itemCount: cartData.item_count,
+                sections: addData.sections
+              }
+            }
+          }));
+
+          const cartDrawer = document.querySelector('cart-drawer, #cart-drawer, [data-cart-drawer], cart-drawer-component');
+          if (cartDrawer && typeof cartDrawer.open === 'function') {
+            cartDrawer.open();
+          } else {
+            window.location.href = window.Shopify?.routes?.root ? `${window.Shopify.routes.root}cart` : '/cart';
+          }
+
+          if (addTextEl) addTextEl.textContent = 'ADDED!';
+          setTimeout(() => {
+            if (addTextEl) addTextEl.textContent = originalText;
+            addToBagBtn.disabled = false;
+          }, 1500);
+        } catch (err) {
+          if (addTextEl) addTextEl.textContent = 'TRY AGAIN';
+          setTimeout(() => {
+            if (addTextEl) addTextEl.textContent = originalText;
+            addToBagBtn.disabled = false;
+          }, 1500);
+        }
+      });
+    }
+
+    // Buy Now Action
+    const handleBuyNow = (btn) => {
+      const variantId = variantIdInput?.value || root.querySelector('[data-pf-variant-id]')?.value;
+      if (!variantId || (btn && btn.disabled)) return;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'REDIRECTING...';
+      }
+
+      const rootUrl = window.Shopify?.routes?.root || '/';
+      const cleanRoot = rootUrl.endsWith('/') ? rootUrl : rootUrl + '/';
+      window.location.href = `${cleanRoot}cart/${variantId}:1`;
+    };
+
+    if (buyNowBtn) {
+      buyNowBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleBuyNow(buyNowBtn);
+      });
+    }
+
+    if (stickyBuyBtn) {
+      stickyBuyBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleBuyNow(stickyBuyBtn);
+      });
+    }
+
+    if (stickyAddBtn) {
+      stickyAddBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (addToBagBtn) addToBagBtn.click();
+      });
+    }
+
+    // Carousel slides & navigation
+    const setActive = (index) => {
+      dots.forEach((dot, dotIndex) => {
+        dot.classList.toggle('is-active', dotIndex === index);
+      });
+
+      slides.forEach((slide, slideIndex) => {
+        slide.classList.toggle('is-active', slideIndex === index);
+        slide.setAttribute('aria-hidden', slideIndex === index ? 'false' : 'true');
+      });
+    };
+
+    const goToSlide = (index) => {
+      const slide = slides[index];
+      if (!slide) return;
+      if (window.innerWidth >= 990) {
+        slide.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (slidesRail) {
+        const targetLeft = slide.offsetLeft - (slidesRail.clientWidth - slide.clientWidth) / 2;
+        slidesRail.scrollTo({
+          left: Math.max(0, targetLeft),
+          behavior: 'smooth'
+        });
+      }
+      setActive(index);
+    };
+
+    const goToMediaId = (mediaId) => {
+      if (!mediaId) return;
+      const index = slides.findIndex((slide) => slide.dataset.mediaId === String(mediaId));
+      if (index >= 0) {
+        goToSlide(index);
+      }
+    };
+
+    const getNearestIndex = () => {
+      const rail = slidesRail || gallery;
+      if (!rail) return 0;
+      const rect = rail.getBoundingClientRect();
+      const railCenter = rect.left + rect.width / 2;
+      let bestIndex = 0;
+      let bestDistance = Infinity;
+
+      slides.forEach((slide, index) => {
+        const slideRect = slide.getBoundingClientRect();
+        const slideCenter = slideRect.left + slideRect.width / 2;
+        const distance = Math.abs(slideCenter - railCenter);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestIndex = index;
+        }
+      });
+
+      return bestIndex;
+    };
+
+    if (slidesRail && slides.length) {
+      let raf = 0;
+      slidesRail.addEventListener('scroll', () => {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => setActive(getNearestIndex()));
+      });
+
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => goToSlide(index));
+      });
+
+      navPrev?.addEventListener('click', () => {
+        const current = slides.findIndex((s) => s.classList.contains('is-active'));
+        goToSlide(Math.max(0, current - 1));
+      });
+
+      navNext?.addEventListener('click', () => {
+        const current = slides.findIndex((s) => s.classList.contains('is-active'));
+        goToSlide(Math.min(slides.length - 1, current + 1));
+      });
+
+      setActive(0);
+    }
+
+    // Related & Reallife carousel handlers
+    const relatedTrack = root.querySelector('[data-pf-related-track]');
+    const relatedPrev = root.querySelector('[data-pf-related-prev]');
+    const relatedNext = root.querySelector('[data-pf-related-next]');
+
+    if (relatedTrack && relatedPrev && relatedNext) {
+      const getRelatedStep = () => {
+        const firstCard = relatedTrack.querySelector('.pf-product-template__related-card');
+        if (!firstCard) return relatedTrack.clientWidth;
+        const gap = parseFloat(window.getComputedStyle(relatedTrack).columnGap || 0);
+        return firstCard.getBoundingClientRect().width + gap;
+      };
+
+      const updateRelatedControls = () => {
+        const maxScroll = relatedTrack.scrollWidth - relatedTrack.clientWidth;
+        const canScroll = maxScroll > 1;
+        relatedPrev.disabled = !canScroll || relatedTrack.scrollLeft <= 1;
+        relatedNext.disabled = !canScroll || relatedTrack.scrollLeft >= maxScroll - 1;
+      };
+
+      relatedPrev.addEventListener('click', () => {
+        relatedTrack.scrollBy({ left: -getRelatedStep(), behavior: 'smooth' });
+      });
+
+      relatedNext.addEventListener('click', () => {
+        relatedTrack.scrollBy({ left: getRelatedStep(), behavior: 'smooth' });
+      });
+
+      let relatedRaf = 0;
+      relatedTrack.addEventListener('scroll', () => {
+        cancelAnimationFrame(relatedRaf);
+        relatedRaf = requestAnimationFrame(updateRelatedControls);
+      });
+
+      window.addEventListener('resize', updateRelatedControls);
+      updateRelatedControls();
+    }
+
+    // Sticky Bar Interactions (Desktop Only)
+    const stickyWishlistBtn = root.querySelector('[data-pf-sticky-wishlist]');
+
+    if (stickyBar) {
+      // Sync wishlist bookmark button states
+      const syncAllWishlistStates = () => {
+        try {
+          const list = JSON.parse(localStorage.getItem('wishlist') || '[]');
+          const currentHandle = root.dataset.productHandle || '{{ selected_product.handle }}';
+          const isSaved = list.some((i) => i.handle === currentHandle);
+          if (wishlist) {
+            wishlist.setAttribute('aria-pressed', isSaved.toString());
+            wishlist.classList.toggle('is-saved', isSaved);
+            wishlist.classList.toggle('is-active', isSaved);
+          }
+          if (stickyWishlistBtn) {
+            stickyWishlistBtn.setAttribute('aria-pressed', isSaved.toString());
+            stickyWishlistBtn.classList.toggle('is-saved', isSaved);
+            stickyWishlistBtn.classList.toggle('is-active', isSaved);
+          }
+        } catch (err) {}
+      };
+
+      document.addEventListener('wishlist:update', syncAllWishlistStates);
+      syncAllWishlistStates();
+
+      // Sticky size buttons click handler
+      stickySizes.forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const targetSize = btn.dataset.pfStickySize;
+          const matchingPill = sizePills.find((p) => {
+            const pillSize = (p.dataset.pfSizePill || p.textContent || '').trim().toLowerCase();
+            return pillSize === targetSize.trim().toLowerCase();
+          });
+          if (matchingPill) {
+            matchingPill.click();
+          }
+        });
+      });
+
+      // Delegate sticky add/buy to main buttons
+      stickyAddBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        addToBagBtn?.click();
+      });
+
+      stickyBuyBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        buyNowBtn?.click();
+      });
+
+      // Sticky bar show/hide scroll controller for Mobile Responsive Only
+      let stickyTicking = false;
+
+      const updateStickyVisibility = () => {
+        const isMobile = window.innerWidth <= 1024;
+        if (!isMobile) {
+          stickyBar.removeAttribute('data-visible');
+          stickyBar.removeAttribute('data-mobile-visible');
+          stickyBar.setAttribute('aria-hidden', 'true');
+          stickyTicking = false;
+          return;
+        }
+
+        const currentY = window.scrollY;
+        // On mobile, show sticky bar when mobile nav is hidden AND past top scroll threshold
+        const isNavHidden =
+          document.body.getAttribute('data-mobile-nav-hidden') === 'true' ||
+          document.getElementById('stagmenfashion-mobile-nav')?.getAttribute('data-hidden') === 'true';
+
+        if (isNavHidden && currentY > 90) {
+          stickyBar.setAttribute('data-mobile-visible', 'true');
+          stickyBar.setAttribute('aria-hidden', 'false');
+        } else {
+          stickyBar.removeAttribute('data-mobile-visible');
+          stickyBar.setAttribute('aria-hidden', 'true');
+        }
+
+        stickyTicking = false;
+      };
+
+      window.addEventListener(
+        'scroll',
+        () => {
+          if (!stickyTicking) {
+            window.requestAnimationFrame(updateStickyVisibility);
+            stickyTicking = true;
+          }
+        },
+        { passive: true }
+      );
+
+      window.addEventListener('mobilenav:toggle', (e) => {
+        if (window.innerWidth <= 1024) {
+          if (e.detail?.hidden && window.scrollY > 90) {
+            stickyBar.setAttribute('data-mobile-visible', 'true');
+            stickyBar.setAttribute('aria-hidden', 'false');
+          } else {
+            stickyBar.removeAttribute('data-mobile-visible');
+            stickyBar.setAttribute('aria-hidden', 'true');
+          }
+        }
+      });
+
+      window.addEventListener('resize', updateStickyVisibility, { passive: true });
+      updateStickyVisibility();
+    }
+
+    // Pre-select size from URL query param ?size=... or from saved wishlist item
+    const preselectSavedSize = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      let targetSize = urlParams.get('size');
+
+      if (!targetSize) {
+        try {
+          const currentHandle = root.dataset.productHandle || window.location.pathname.split('/products/')[1]?.split('?')[0];
+          const list = JSON.parse(localStorage.getItem('wishlist') || '[]');
+          const item = list.find((i) => i.handle === currentHandle);
+          if (item && item.size && item.size !== 'Default') {
+            targetSize = item.size;
+          }
+        } catch (err) {}
+      }
+
+      if (targetSize && sizePills.length > 0) {
+        const matchingPill = sizePills.find((p) => {
+          const pillSize = (p.dataset.pfSizePill || p.textContent || '').trim().toLowerCase();
+          return pillSize === targetSize.trim().toLowerCase();
+        });
+
+        if (matchingPill) {
+          matchingPill.click();
+        }
+      }
+    };
+
+    preselectSavedSize();
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Product template",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Product Information Tabs"
+    },
+    {
+      "type": "richtext",
+      "id": "default_description",
+      "label": "Common / Default Description",
+      "default": "<p>Premium 100% Combed Heavyweight Cotton. Relaxed oversized drape with reinforced ribbed collar, drop shoulders, and anti-pilling finish. Designed for everyday comfort, enduring style, and all-day versatility.</p>",
+      "info": "Used whenever a product has no description set."
+    },
+    {
+      "type": "richtext",
+      "id": "product_care",
+      "label": "Default Washcare",
+      "default": "<p>• Machine wash cold with like colors, inside out.<br>• Do not bleach or tumble dry.<br>• Warm iron inside-out if required.<br>• Dry flat in shade.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "delivery_returns",
+      "label": "Default Delivery and returns",
+      "default": "<p>• Fast dispatch within 24-48 business hours.<br>• Free shipping across India on prepaid orders.<br>• 7-day hassle-free returns and exchanges.</p>"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product template"
+    }
+  ]
+}
+{% endschema %}

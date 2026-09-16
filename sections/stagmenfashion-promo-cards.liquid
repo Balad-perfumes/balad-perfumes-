@@ -1,0 +1,493 @@
+{% liquid
+  assign padding_top = section.settings.padding_top
+  assign padding_bottom = section.settings.padding_bottom
+%}
+
+<section
+  class="stagmenfashion-promo-cards color-{{ section.settings.color_scheme }}"
+  id="stagmenfashion-promo-cards-{{ section.id }}"
+  style="
+    padding-top: 0;
+    padding-bottom: clamp(10px, 3.5vw, 12px);
+    --desktop-card-height: {{ section.settings.height_desktop }}px;
+    --mobile-card-height: {{ section.settings.height_mobile }}px;
+  "
+>
+  <div class="stagmenfashion-promo-cards__shell">
+    {% if section.settings.heading != blank or section.settings.subheading != blank %}
+      <div class="stagmenfashion-promo-cards__header">
+        {% if section.settings.subheading != blank %}
+          <span class="stagmenfashion-promo-cards__subheading">{{ section.settings.subheading | escape }}</span>
+        {% endif %}
+        {% if section.settings.heading != blank %}
+          <h2 class="stagmenfashion-promo-cards__main-heading">{{ section.settings.heading | escape }}</h2>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="stagmenfashion-promo-cards__grid" style="--grid-gap: {{ section.settings.gap }}px;">
+      {% for block in section.blocks %}
+        {% liquid
+          assign overlay_opacity = block.settings.overlay_opacity | divided_by: 100.0
+          assign overlay_color = block.settings.overlay_color | default: '#000000'
+        %}
+        <div
+          class="stagmenfashion-promo-card block-{{ block.id }} text-align-{{ block.settings.text_align }} content-pos-{{ block.settings.content_position }}"
+          style="--overlay-opacity: {{ overlay_opacity }}; --overlay-color: {{ overlay_color }};"
+          {{ block.shopify_attributes }}
+        >
+          <div class="stagmenfashion-promo-card__media">
+            {% if block.settings.image != blank %}
+              {{
+                block.settings.image
+                | image_url: width: 1200
+                | image_tag:
+                  class: 'stagmenfashion-promo-card__image',
+                  widths: '480, 720, 960, 1200',
+                  loading: 'lazy',
+                  alt: block.settings.heading | default: 'Promo card image'
+              }}
+            {% else %}
+              {{ 'lifestyle-1' | placeholder_svg_tag: 'stagmenfashion-promo-card__placeholder' }}
+            {% endif %}
+            
+            <div class="stagmenfashion-promo-card__overlay"></div>
+          </div>
+
+          <div class="stagmenfashion-promo-card__content">
+            {% if block.settings.subheading != blank %}
+              <p class="stagmenfashion-promo-card__subheading">{{ block.settings.subheading | escape }}</p>
+            {% endif %}
+
+            {% if block.settings.heading != blank %}
+              <h3 class="stagmenfashion-promo-card__heading">{{ block.settings.heading | escape }}</h3>
+            {% endif %}
+
+            {% if block.settings.description != blank %}
+              <div class="stagmenfashion-promo-card__description rte">
+                {{ block.settings.description }}
+              </div>
+            {% endif %}
+
+            {% if block.settings.button_label != blank %}
+              <a
+                class="stagmenfashion-promo-card__button"
+                href="{{ block.settings.button_link | default: '#' }}"
+              >
+                {{ block.settings.button_label | escape }}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+  .stagmenfashion-promo-cards {
+    background: #ffffff;
+    width: 100%;
+  }
+
+  .stagmenfashion-promo-cards__shell {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 36px;
+  }
+
+  .stagmenfashion-promo-cards__header {
+    margin-bottom: clamp(24px, 4vw, 36px);
+    text-align: center;
+  }
+
+  .stagmenfashion-promo-cards__subheading {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-foreground-heading);
+    opacity: 0.6;
+    margin-bottom: 6px;
+  }
+
+  .stagmenfashion-promo-cards__main-heading {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--color-foreground-heading);
+  }
+
+  .stagmenfashion-promo-cards__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--grid-gap, 20px);
+  }
+
+  @media screen and (max-width: 749px) {
+    .stagmenfashion-promo-cards__shell {
+      padding: 10px 10px 10px;
+    }
+
+    .stagmenfashion-promo-cards__grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    /* Section-level heading & subheading */
+    .stagmenfashion-promo-cards__main-heading {
+      font-size: 14px !important;
+    }
+
+    .stagmenfashion-promo-cards__subheading {
+      font-size: 10px !important;
+    }
+
+    /* Card-level text */
+    .stagmenfashion-promo-card__heading {
+      font-size: 14px !important;
+    }
+
+    .stagmenfashion-promo-card__subheading {
+      font-size: 10px !important;
+    }
+
+    .stagmenfashion-promo-card__description {
+      font-size: 10px !important;
+    }
+  }
+
+  .stagmenfashion-promo-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 5px;
+    height: var(--desktop-card-height, 480px);
+    display: flex;
+    box-shadow: none;
+    border: 1px solid rgb(17 17 17 / 0.08);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  @media screen and (max-width: 749px) {
+    .stagmenfashion-promo-card {
+      height: var(--mobile-card-height, 350px);
+    }
+  }
+
+  .stagmenfashion-promo-card__media {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    background: #f5f5f5;
+  }
+
+  .stagmenfashion-promo-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .stagmenfashion-promo-card__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #fafafa;
+    color: #c5c5c5;
+  }
+
+  .stagmenfashion-promo-card__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background-color: var(--overlay-color, #000000);
+    opacity: var(--overlay-opacity, 0.3);
+    transition: opacity 0.4s ease;
+  }
+
+  .stagmenfashion-promo-card__content {
+    position: relative;
+    z-index: 3;
+    padding: clamp(20px, 4vw, 40px);
+    max-width: 480px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    color: #ffffff;
+    pointer-events: none;
+  }
+
+  .stagmenfashion-promo-card__content * {
+    pointer-events: auto;
+  }
+
+  /* Content position alignments (applied to flex container matching vertical/horizontal axes) */
+  .content-pos-top-left { align-items: flex-start; justify-content: flex-start; }
+  .content-pos-top-center { align-items: flex-start; justify-content: center; }
+  .content-pos-top-right { align-items: flex-start; justify-content: flex-end; }
+  .content-pos-middle-left { align-items: center; justify-content: flex-start; }
+  .content-pos-middle-center { align-items: center; justify-content: center; }
+  .content-pos-middle-right { align-items: center; justify-content: flex-end; }
+  .content-pos-bottom-left { align-items: flex-end; justify-content: flex-start; }
+  .content-pos-bottom-center { align-items: flex-end; justify-content: center; }
+  .content-pos-bottom-right { align-items: flex-end; justify-content: flex-end; }
+
+  /* Text alignments (aligned within the flex column box) */
+  .text-align-left .stagmenfashion-promo-card__content { text-align: left; align-items: flex-start; }
+  .text-align-center .stagmenfashion-promo-card__content { text-align: center; align-items: center; }
+  .text-align-right .stagmenfashion-promo-card__content { text-align: right; align-items: flex-end; }
+
+  .stagmenfashion-promo-card__subheading {
+    margin: 0 0 6px 0;
+    font-size: clamp(0.75rem, 0.8vw, 0.88rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.85;
+  }
+
+  .stagmenfashion-promo-card__heading {
+    margin: 0 0 10px 0;
+    font-family: var(--font-heading--family);
+    font-size: clamp(1.3rem, 1.8vw, 2rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+  }
+
+  .stagmenfashion-promo-card__description {
+    margin: 0 0 20px 0;
+    max-width: 480px;
+    font-size: clamp(0.85rem, 0.95vw, 1rem);
+    line-height: 1.5;
+    opacity: 0.9;
+  }
+
+  .stagmenfashion-promo-card__description p {
+    margin: 0;
+  }
+
+  .stagmenfashion-promo-card__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    padding: 0 24px;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #111111;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    width: fit-content;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s ease, color 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s ease;
+  }
+
+  .stagmenfashion-promo-card__button:hover {
+    background: #0800CF;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(8, 0, 207, 0.35);
+  }
+
+  /* Hover effects on cards */
+  .stagmenfashion-promo-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  }
+
+  .stagmenfashion-promo-card:hover .stagmenfashion-promo-card__image {
+    transform: scale(1.05);
+  }
+
+  .stagmenfashion-promo-card:hover .stagmenfashion-promo-card__overlay {
+    opacity: min(0.95, calc(var(--overlay-opacity, 0.3) + 0.1));
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Promo Cards Grid",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "min": 10,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap between cards",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "height_desktop",
+      "min": 200,
+      "max": 800,
+      "step": 10,
+      "unit": "px",
+      "label": "Card height (Desktop)",
+      "default": 380
+    },
+    {
+      "type": "range",
+      "id": "height_mobile",
+      "min": 100,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "label": "Card height (Mobile)",
+      "default": 280
+    }
+  ],
+  "blocks": [
+    {
+      "type": "promo_card",
+      "name": "Promo Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Background Image"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Promo Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description",
+          "default": "<p>Introduce a custom description text for this card banner layout here.</p>"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button Label",
+          "default": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button Link"
+        },
+        {
+          "type": "select",
+          "id": "text_align",
+          "label": "Text Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Content Position",
+          "options": [
+            { "value": "top-left", "label": "Top Left" },
+            { "value": "top-center", "label": "Top Center" },
+            { "value": "top-right", "label": "Top Right" },
+            { "value": "middle-left", "label": "Middle Left" },
+            { "value": "middle-center", "label": "Middle Center" },
+            { "value": "middle-right", "label": "Middle Right" },
+            { "value": "bottom-left", "label": "Bottom Left" },
+            { "value": "bottom-center", "label": "Bottom Center" },
+            { "value": "bottom-right", "label": "Bottom Right" }
+          ],
+          "default": "bottom-left"
+        },
+        {
+          "type": "color",
+          "id": "overlay_color",
+          "label": "Overlay Color",
+          "default": "#000000"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "min": 0,
+          "max": 90,
+          "step": 5,
+          "unit": "%",
+          "label": "Overlay Opacity",
+          "default": 30
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Promo Cards Grid",
+      "blocks": [
+        {
+          "type": "promo_card"
+        },
+        {
+          "type": "promo_card"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

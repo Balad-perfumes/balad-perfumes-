@@ -1,0 +1,250 @@
+<section class="pf-newsletter color-{{ section.settings.color_scheme }}">
+  <div class="pf-section-shell pf-newsletter__shell">
+    {% if section.settings.image != blank %}
+      <div class="pf-newsletter__media">
+        {{
+          section.settings.image
+          | image_url: width: 1800
+          | image_tag:
+            class: 'pf-newsletter__image',
+            widths: '480, 720, 960, 1200, 1600, 1800',
+            loading: 'lazy',
+            alt: section.settings.image.alt | escape
+        }}
+      </div>
+    {% endif %}
+
+    <div class="pf-newsletter__content">
+      <div class="pf-newsletter__copy">
+        {% if section.settings.heading != blank %}<h2 class="pf-newsletter__heading">{{ section.settings.heading }}</h2>{% endif %}
+      </div>
+
+      {% form 'customer', class: 'pf-newsletter__form' %}
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        <input type="email" name="contact[email]" placeholder="{{ section.settings.placeholder }}" required>
+        <button type="submit">
+          <span>{{ section.settings.button_label }}</span>
+          <span class="pf-newsletter__button-arrow" aria-hidden="true">→</span>
+        </button>
+      {% endform %}
+
+      {% if section.settings.subheading != blank %}<p class="pf-newsletter__subheading">{{ section.settings.subheading }}</p>{% endif %}
+    </div>
+  </div>
+</section>
+
+<style>
+  .pf-newsletter__shell {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    align-items: start;
+    padding: 0 0 22px;
+    border-radius: 0;
+    background: #fffafe;
+  }
+
+    .pf-newsletter__content {
+      padding: 0 8vw 0 6vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0;
+    }
+
+  .pf-newsletter__media {
+    overflow: hidden;
+    border-radius: 0;
+  }
+
+  .pf-newsletter__image {
+    display: block;
+    width: 100%;
+    height: clamp(380px, 70vw, 640px);
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  .pf-newsletter__heading {
+    margin: 0;
+    font-size: clamp(2.05rem, 4vw, 4.2rem);
+    line-height: 0.95;
+    letter-spacing: -0.06em;
+    font-weight: 500;
+  }
+
+  .pf-newsletter__subheading {
+    margin: 14px 0 0;
+    max-width: 42ch;
+    line-height: 1.38;
+    color: rgb(17 17 17 / 0.56);
+    font-size: 0.88rem;
+  }
+
+  .pf-newsletter__form {
+    display: grid;
+    gap: 12px;
+    justify-items: stretch;
+  }
+
+  .pf-newsletter__form input {
+    width: 100%;
+    min-height: 62px;
+    padding: 0 22px;
+    border-radius: 999px;
+    border: 1px solid rgb(0 0 0 / 0.14);
+    background: #fff;
+    font-size: 0.96rem;
+  }
+
+  .pf-newsletter__form button {
+    width: 100%;
+    min-height: 62px;
+    padding: 0 24px;
+    border: 0;
+    border-radius: 999px;
+    background: #0800CF;
+    color: #fff;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .pf-newsletter__form button:hover {
+    background: #0600a3;
+    transform: translateY(-1px);
+  }
+
+  @media screen and (min-width: 990px) {
+    .pf-newsletter__shell {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+      gap: 0;
+      align-items: stretch;
+      padding: 0;
+    }
+
+    .pf-newsletter__media {
+      min-height: 100%;
+    }
+
+    .pf-newsletter__image {
+      height: 100%;
+      min-height: 760px;
+    }
+
+    .pf-newsletter__heading {
+      max-width: 11ch;
+      font-size: clamp(3rem, 3.6vw, 4.6rem);
+      line-height: 0.94;
+    }
+
+    .pf-newsletter__subheading {
+      max-width: 54ch;
+      font-size: 1rem;
+      line-height: 1.48;
+      margin-top: 16px;
+    }
+
+    .pf-newsletter__form {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0;
+      align-items: stretch;
+      margin-top: 28px;
+      max-width: 100%;
+    }
+
+    .pf-newsletter__form input {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      min-height: 60px;
+      font-size: 0.98rem;
+    }
+
+    .pf-newsletter__form button {
+      width: auto;
+      min-width: 190px;
+      min-height: 60px;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      padding-inline: 26px;
+      margin-left: -1px;
+      font-size: 0.98rem;
+    }
+  }
+
+  @media screen and (max-width: 989px) {
+    .pf-newsletter__shell {
+      gap: 14px;
+      padding: 0 0 14px;
+    }
+
+    .pf-newsletter__media {
+      margin-bottom: 2px;
+    }
+
+    .pf-newsletter__image {
+      height: 430px;
+    }
+
+    .pf-newsletter__content {
+      padding-inline: 18px;
+    }
+
+    .pf-newsletter__heading {
+      font-size: 2.15rem;
+      line-height: 0.96;
+    }
+
+    .pf-newsletter__subheading {
+      max-width: none;
+      font-size: 0.88rem;
+      line-height: 1.34;
+    }
+
+    .pf-newsletter__form input,
+    .pf-newsletter__form button {
+      min-height: 54px;
+    }
+
+    .pf-newsletter__form input {
+      padding-inline: 18px;
+      font-size: 0.92rem;
+    }
+
+    .pf-newsletter__form button {
+      font-size: 0.92rem;
+      padding-inline: 20px;
+    }
+  }
+
+  .pf-newsletter__button-arrow {
+    font-size: 1.05em;
+    line-height: 1;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Stay in the Vibe Loop" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Fresh launches, styling hacks, secret sales, and all things loud and lovely." },
+    { "type": "text", "id": "placeholder", "label": "Placeholder", "default": "E-mail" },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Subscribe" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" }
+  ],
+  "presets": [{ "name": "Newsletter" }]
+}
+{% endschema %}

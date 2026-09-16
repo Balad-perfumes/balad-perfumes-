@@ -1,0 +1,480 @@
+<link rel="stylesheet" href="{{ 'gift-card.css' | asset_url }}">
+<script src="{{ 'gift-card.js' | asset_url }}" type="module" fetchpriority="low"></script>
+
+{% liquid
+  assign main_image = product.featured_image | default: product.media.first.preview_image
+  assign gallery_media = product.media
+%}
+
+<section
+  class="pf-gift-card color-{{ section.settings.color_scheme }}"
+  data-gift-card-page
+  data-product-id="{{ product.id }}"
+  data-button-style="{{ section.settings.button_style }}"
+  style="
+    --pf-gift-card-shell-padding-top: {{ section.settings.padding_top }}px;
+    --pf-gift-card-shell-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --pf-gift-card-radius: {{ section.settings.card_radius }}px;
+    --pf-gift-card-button-radius: {{ section.settings.button_radius }}px;
+    --pf-gift-card-title-scale: {{ section.settings.title_scale | divided_by: 100.0 }};
+    --pf-gift-card-button-style: {{ section.settings.button_style }};
+  "
+>
+  <div class="pf-gift-card__shell">
+    <div class="pf-gift-card__gallery">
+      <div class="pf-gift-card__main">
+        {% if main_image != blank %}
+          {{
+            main_image
+            | image_url: width: 1800
+            | image_tag:
+              class: 'pf-gift-card__main-image',
+              loading: 'eager',
+              fetchpriority: 'high',
+              widths: '640, 960, 1200, 1600, 1800',
+              alt: product.title
+          }}
+        {% endif %}
+      </div>
+
+      {% if gallery_media.size > 1 %}
+        <div class="pf-gift-card__thumbs" aria-label="Gift card previews">
+          {% for media in gallery_media limit: 4 %}
+            {% if media.preview_image != blank %}
+              <button
+                class="pf-gift-card__thumb{% if forloop.first %} is-active{% endif %}"
+                type="button"
+                data-thumb-index="{{ forloop.index0 }}"
+                data-full-image="{{ media.preview_image | image_url: width: 1800 }}"
+                data-full-alt="{{ product.title | escape }}"
+              >
+                {{
+                  media.preview_image
+                  | image_url: width: 700
+                  | image_tag:
+                    class: 'pf-gift-card__thumb-image',
+                    loading: 'lazy',
+                    widths: '180, 240, 360, 540, 700',
+                    alt: product.title
+                }}
+              </button>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="pf-gift-card__content">
+      {% if section.settings.eyebrow != blank %}<p class="pf-gift-card__eyebrow">{{ section.settings.eyebrow }}</p>{% endif %}
+      <h1 class="pf-gift-card__title">{{ product.title }}</h1>
+
+      <div class="pf-gift-card__price-row">
+        <span class="pf-gift-card__price">{{ product.selected_or_first_available_variant.price | money }}</span>
+        {% if product.compare_at_price_max > product.price_min %}
+          <s class="pf-gift-card__compare">{{ product.compare_at_price_max | money }}</s>
+        {% endif %}
+      </div>
+
+      {% if product.description != blank %}
+        <div class="pf-gift-card__description rte">{{ product.description }}</div>
+      {% endif %}
+
+      <div class="pf-gift-card__feature-grid">
+        <div class="pf-gift-card__feature"><span>Instant by email</span></div>
+        <div class="pf-gift-card__feature"><span>Redeemable online</span></div>
+        <div class="pf-gift-card__feature"><span>{{ section.settings.no_expiry_text }}</span></div>
+        <div class="pf-gift-card__feature"><span>Secure code delivery</span></div>
+      </div>
+
+      {% render 'gift-card-form', product: product, section: section %}
+
+      <div class="pf-gift-card__note">
+        <span class="pf-gift-card__note-pill">Digital delivery</span>
+        <span class="pf-gift-card__note-pill">Checkout ready</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pf-gift-card__toast" data-toast hidden>
+    <span class="pf-gift-card__toast-icon" aria-hidden="true">✓</span>
+    <span data-toast-message>Added to cart.</span>
+  </div>
+</section>
+
+<style>
+  .pf-gift-card {
+    background: #fff;
+    color: #111;
+  }
+
+  .pf-gift-card__shell {
+    width: min(100%, 1600px);
+    margin: 0 auto;
+    padding: var(--pf-gift-card-shell-padding-top, 24px) 24px var(--pf-gift-card-shell-padding-bottom, 60px);
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .pf-gift-card__gallery {
+    position: sticky;
+    top: 92px;
+    align-self: start;
+    display: grid;
+    gap: 16px;
+  }
+
+  .pf-gift-card__main,
+  .pf-gift-card__thumb {
+    overflow: hidden;
+    border-radius: var(--pf-gift-card-radius, 28px);
+    border: 1px solid rgb(17 17 17 / 0.08);
+    box-shadow: 0 16px 40px rgb(0 0 0 / 0.05);
+    background: #f5f5f5;
+  }
+
+  .pf-gift-card__main-image {
+    width: 100%;
+    aspect-ratio: 0.92;
+    object-fit: cover;
+  }
+
+  .pf-gift-card__thumbs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .pf-gift-card__thumb {
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+
+  .pf-gift-card__thumb:hover,
+  .pf-gift-card__thumb.is-active {
+    transform: translateY(-3px);
+    border-color: rgb(17 17 17 / 0.18);
+    box-shadow: 0 18px 38px rgb(0 0 0 / 0.08);
+  }
+
+  .pf-gift-card__thumb-image {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  .pf-gift-card__content {
+    padding: clamp(24px, 4vw, 48px);
+    border-radius: calc(var(--pf-gift-card-radius, 28px) + 4px);
+    border: 1px solid rgb(17 17 17 / 0.08);
+    background: linear-gradient(135deg, #fff7f0, #ffffff 60%);
+    box-shadow: 0 20px 60px rgb(0 0 0 / 0.05);
+  }
+
+  .pf-gift-card__eyebrow {
+    margin: 0 0 10px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .pf-gift-card__title {
+    margin: 0;
+    font-size: clamp(2.4rem, 4vw, 5rem);
+    line-height: 0.92;
+    letter-spacing: -0.08em;
+    transform: scale(var(--pf-gift-card-title-scale, 1));
+    transform-origin: left center;
+  }
+
+  .pf-gift-card__price-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .pf-gift-card__price {
+    font-size: 1.2rem;
+    font-weight: 800;
+  }
+
+  .pf-gift-card__compare {
+    color: rgb(17 17 17 / 0.42);
+  }
+
+  .pf-gift-card__description {
+    margin-top: 16px;
+    color: rgb(17 17 17 / 0.72);
+    line-height: 1.8;
+  }
+
+  .pf-gift-card__feature-grid {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .pf-gift-card__feature {
+    padding: 16px 18px;
+    border-radius: 20px;
+    border: 1px solid rgb(17 17 17 / 0.08);
+    background: #fff;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.04);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .pf-gift-card__feature span {
+    display: block;
+    font-size: 0.92rem;
+  }
+
+  .pf-gift-card__form-component {
+    display: block;
+    margin-top: 26px;
+  }
+
+  .pf-gift-card__amounts {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .pf-gift-card__amount {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 52px;
+    padding: 0 12px;
+    border-radius: var(--pf-gift-card-button-radius, 999px);
+    border: 1px solid rgb(17 17 17 / 0.12);
+    background: #fff;
+    color: #111;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .pf-gift-card__amount:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgb(0 0 0 / 0.06);
+  }
+
+  .pf-gift-card__amount input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .pf-gift-card__amount span {
+    font-size: 0.88rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+
+  .pf-gift-card__amount.is-active {
+    border-color: #111;
+    background: #111;
+    color: #fff;
+  }
+
+  .pf-gift-card__recipient-shell {
+    margin-top: 18px;
+  }
+
+  .pf-gift-card__native-form {
+    display: grid;
+    gap: 18px;
+  }
+
+  .pf-gift-card__actions {
+    margin-top: 18px;
+  }
+
+  .pf-gift-card__button {
+    width: 100%;
+    border-radius: var(--pf-gift-card-button-radius, 999px);
+  }
+
+  .pf-gift-card[data-button-style='outline'] .pf-gift-card__button {
+    background: transparent;
+    color: #111;
+    border: 1px solid rgb(17 17 17 / 0.14);
+  }
+
+  .pf-gift-card[data-button-style='outline'] .pf-gift-card__button:hover {
+    background: rgb(17 17 17 / 0.04);
+  }
+
+  .pf-gift-card__note {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .pf-gift-card__note-pill {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgb(17 17 17 / 0.06);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .pf-gift-card__toast {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: #111;
+    color: #fff;
+    box-shadow: 0 16px 40px rgb(0 0 0 / 0.2);
+    z-index: 70;
+  }
+
+  .pf-gift-card__toast-icon {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.16);
+    font-weight: 800;
+  }
+
+  @media screen and (max-width: 989px) {
+    .pf-gift-card__shell {
+      grid-template-columns: 1fr;
+    }
+
+    .pf-gift-card__gallery {
+      position: static;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .pf-gift-card__shell {
+      padding-inline: 16px;
+    }
+
+    .pf-gift-card__thumbs,
+    .pf-gift-card__amounts,
+    .pf-gift-card__feature-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .pf-gift-card .recipient-form {
+    padding-bottom: 0;
+  }
+
+  .pf-gift-card .recipient-form__send-to {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .pf-gift-card[data-loading='true'] .pf-gift-card__button {
+    opacity: 0.92;
+    pointer-events: none;
+  }
+
+  .pf-gift-card[data-loading='true'] .pf-gift-card__button.is-loading {
+    position: relative;
+  }
+
+  .pf-gift-card[data-loading='true'] .pf-gift-card__button.is-loading::after {
+    content: '';
+    position: absolute;
+    right: 18px;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    border: 2px solid rgb(255 255 255 / 0.35);
+    border-top-color: #fff;
+    animation: pf-gift-card-spin 0.8s linear infinite;
+  }
+
+  .pf-gift-card__toast[hidden] {
+    display: none;
+  }
+
+  .pf-gift-card__toast.is-visible {
+    display: flex;
+    animation: pf-gift-card-toast-in 0.28s ease;
+  }
+
+  @keyframes pf-gift-card-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes pf-gift-card-toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .pf-gift-card__toast {
+      left: 16px;
+      right: 16px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Gift card product",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Digital gift card" },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Add to cart" },
+    { "type": "text", "id": "no_expiry_text", "label": "No expiry text", "default": "No expiration" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 24 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 140, "step": 4, "unit": "px", "default": 60 },
+    { "type": "range", "id": "card_radius", "label": "Card radius", "min": 12, "max": 40, "step": 1, "unit": "px", "default": 28 },
+    { "type": "range", "id": "button_radius", "label": "Button radius", "min": 20, "max": 1000, "step": 10, "unit": "px", "default": 1000 },
+    { "type": "range", "id": "title_scale", "label": "Title scale", "min": 90, "max": 110, "step": 1, "unit": "%", "default": 100 },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "outline", "label": "Outline" }
+      ],
+      "default": "solid"
+    },
+    { "type": "text", "id": "amount_label_1", "label": "Amount label 1", "default": "₹500" },
+    { "type": "text", "id": "amount_label_2", "label": "Amount label 2", "default": "₹1,000" },
+    { "type": "text", "id": "amount_label_3", "label": "Amount label 3", "default": "₹2,000" },
+    { "type": "text", "id": "amount_label_4", "label": "Amount label 4", "default": "₹5,000" },
+    { "type": "text", "id": "amount_label_5", "label": "Amount label 5", "default": "₹10,000" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" }
+  ],
+  "presets": [
+    {
+      "name": "Gift card product"
+    }
+  ]
+}
+{% endschema %}

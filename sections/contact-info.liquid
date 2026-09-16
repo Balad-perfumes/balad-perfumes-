@@ -1,0 +1,389 @@
+<section
+  class="pf-contact-info color-{{ section.settings.color_scheme }}"
+  style="--info-pt: {{ section.settings.padding_top | default: 32 }}px; --info-pb: {{ section.settings.padding_bottom | default: 56 }}px;"
+>
+  <div class="pf-contact-shell">
+    {% if section.settings.heading != blank or section.settings.eyebrow != blank %}
+      <div class="pf-contact-info__head">
+        {% if section.settings.eyebrow != blank %}
+          <span class="pf-contact-info__eyebrow">{{ section.settings.eyebrow }}</span>
+        {% endif %}
+        {% if section.settings.heading != blank %}
+          <h2 class="pf-contact-info__title">{{ section.settings.heading }}</h2>
+        {% endif %}
+        {% if section.settings.subheading != blank %}
+          <p class="pf-contact-info__desc">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="pf-contact-info__grid pf-contact-info__grid--cols-{{ section.settings.columns_desktop | default: 4 }}">
+      {% for block in section.blocks %}
+        <article class="pf-contact-info__card" {{ block.shopify_attributes }}>
+          <div class="pf-contact-info__card-header">
+            <div class="pf-contact-info__icon" aria-hidden="true">
+              {% case block.settings.icon %}
+                {% when 'phone' %}
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                  </svg>
+                {% when 'email' %}
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="20" height="16" x="2" y="4" rx="3"/>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                  </svg>
+                {% when 'location' %}
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                {% when 'clock' %}
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                {% when 'chat' %}
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+                  </svg>
+                {% when 'whatsapp' %}
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.03-1.25-.75-.67-1.26-1.5-1.41-1.75-.14-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.34-.76-1.84-.2-.49-.4-.42-.56-.43h-.47c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.77 2.7 4.29 3.78.6.26 1.07.41 1.43.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.18-.48-.3"/>
+                  </svg>
+              {% endcase %}
+            </div>
+            {% if block.settings.tag != blank %}
+              <span class="pf-contact-info__tag">{{ block.settings.tag }}</span>
+            {% endif %}
+          </div>
+
+          <div class="pf-contact-info__body">
+            <h3 class="pf-contact-info__card-title">{{ block.settings.label }}</h3>
+            <p class="pf-contact-info__card-text">{{ block.settings.text }}</p>
+            {% if block.settings.subtext != blank %}
+              <p class="pf-contact-info__card-subtext">{{ block.settings.subtext }}</p>
+            {% endif %}
+          </div>
+
+          {% if block.settings.link != blank and block.settings.link_label != blank %}
+            <div class="pf-contact-info__card-footer">
+              <a href="{{ block.settings.link }}" class="pf-contact-info__action-link">
+                <span>{{ block.settings.link_label }}</span>
+                <svg class="pf-contact-info__arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M3 8h10M9 4l4 4-4 4"/>
+                </svg>
+              </a>
+            </div>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+  .pf-contact-shell {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 36px;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 749px) {
+    .pf-contact-shell {
+      padding: 0 10px;
+    }
+  }
+
+  .pf-contact-info {
+    padding-top: var(--info-pt, 32px);
+    padding-bottom: var(--info-pb, 56px);
+  }
+
+  .pf-contact-info__head {
+    max-width: 680px;
+    margin: 0 auto 36px;
+    text-align: center;
+  }
+
+  .pf-contact-info__eyebrow {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: currentColor;
+    opacity: 0.6;
+    margin-bottom: 8px;
+  }
+
+  .pf-contact-info__title {
+    margin: 0;
+    font-family: var(--font-heading--family), sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--color-foreground-heading, #111111);
+  }
+
+  .pf-contact-info__desc {
+    margin: 8px auto 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: currentColor;
+    opacity: 0.75;
+  }
+
+  .pf-contact-info__grid {
+    display: grid;
+    gap: 20px;
+  }
+
+  .pf-contact-info__grid--cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .pf-contact-info__grid--cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pf-contact-info__grid--cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pf-contact-info__card {
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .pf-contact-info__card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(8, 0, 207, 0.25);
+    box-shadow: 0 12px 30px -4px rgba(8, 0, 207, 0.12);
+  }
+
+  .pf-contact-info__card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .pf-contact-info__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    background: rgba(8, 0, 207, 0.06);
+    color: #0800CF;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .pf-contact-info__card:hover .pf-contact-info__icon {
+    background: #0800CF;
+    color: #ffffff;
+  }
+
+  .pf-contact-info__tag {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: rgba(8, 0, 207, 0.06);
+    color: #0800CF;
+    opacity: 0.9;
+  }
+
+  .pf-contact-info__body {
+    flex: 1 1 auto;
+  }
+
+  .pf-contact-info__card-title {
+    margin: 0 0 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: currentColor;
+    opacity: 0.6;
+  }
+
+  .pf-contact-info__card-text {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--color-foreground-heading, #111111);
+    word-break: break-word;
+  }
+
+  .pf-contact-info__card-subtext {
+    margin: 6px 0 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: currentColor;
+    opacity: 0.7;
+  }
+
+  .pf-contact-info__card-footer {
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .pf-contact-info__action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0800CF;
+    text-decoration: none;
+    transition: gap 0.2s ease, opacity 0.2s ease;
+  }
+
+  .pf-contact-info__action-link:hover {
+    gap: 10px;
+    opacity: 0.85;
+  }
+
+  .pf-contact-info__arrow {
+    transition: transform 0.2s ease;
+  }
+
+  .pf-contact-info__action-link:hover .pf-contact-info__arrow {
+    transform: translateX(2px);
+  }
+
+  @media screen and (max-width: 1024px) {
+    .pf-contact-info__grid--cols-4 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (max-width: 640px) {
+    .pf-contact-info__grid {
+      grid-template-columns: 1fr !important;
+      gap: 14px;
+    }
+
+    .pf-contact-info__card {
+      padding: 20px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Contact info",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Direct Channels" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Reach our studio directly" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "We pride ourselves on prompt, thoughtful support for all questions and consultations." },
+    {
+      "type": "select",
+      "id": "columns_desktop",
+      "label": "Desktop columns",
+      "options": [
+        { "value": "2", "label": "2 Columns" },
+        { "value": "3", "label": "3 Columns" },
+        { "value": "4", "label": "4 Columns" }
+      ],
+      "default": "4"
+    },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 2, "unit": "px", "label": "Top padding", "default": 32 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 2, "unit": "px", "label": "Bottom padding", "default": 56 }
+  ],
+  "blocks": [
+    {
+      "type": "info",
+      "name": "Info channel",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "phone", "label": "Phone" },
+            { "value": "email", "label": "Email" },
+            { "value": "location", "label": "Location / Studio" },
+            { "value": "clock", "label": "Clock / Hours" },
+            { "value": "chat", "label": "Chat" },
+            { "value": "whatsapp", "label": "WhatsApp" }
+          ],
+          "default": "phone"
+        },
+        { "type": "text", "id": "tag", "label": "Status tag (e.g., Quickest response)", "default": "Fastest" },
+        { "type": "text", "id": "label", "label": "Category label", "default": "Phone" },
+        { "type": "text", "id": "text", "label": "Primary text", "default": "+91 98765 43210" },
+        { "type": "text", "id": "subtext", "label": "Secondary note", "default": "Mon - Sat, 10am to 6pm IST" },
+        { "type": "url", "id": "link", "label": "Action link" },
+        { "type": "text", "id": "link_label", "label": "Action link label", "default": "Call our team" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Contact info",
+      "blocks": [
+        {
+          "type": "info",
+          "settings": {
+            "icon": "email",
+            "tag": "24h turnaround",
+            "label": "Email Concierge",
+            "text": "hello@stagmenfashion.com",
+            "subtext": "For order updates, sizing advice & support",
+            "link_label": "Send an email"
+          }
+        },
+        {
+          "type": "info",
+          "settings": {
+            "icon": "phone",
+            "tag": "Instant",
+            "label": "Direct Call",
+            "text": "+91 98765 43210",
+            "subtext": "Mon-Sat: 10:00 AM - 6:30 PM",
+            "link_label": "Call now"
+          }
+        },
+        {
+          "type": "info",
+          "settings": {
+            "icon": "location",
+            "tag": "Flagship",
+            "label": "Fashion Studio",
+            "text": "Kochi, Kerala, India",
+            "subtext": "Store visits & styling sessions",
+            "link_label": "Get directions"
+          }
+        },
+        {
+          "type": "info",
+          "settings": {
+            "icon": "clock",
+            "tag": "Active",
+            "label": "Working Hours",
+            "text": "10:00 AM – 6:30 PM",
+            "subtext": "Sunday by prior appointment",
+            "link_label": "Book a styling visit"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

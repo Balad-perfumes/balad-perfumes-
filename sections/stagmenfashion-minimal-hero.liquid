@@ -1,0 +1,1611 @@
+{% liquid
+  assign layout_mode = section.settings.layout_mode | default: 'full_bleed'
+  assign autoplay_ms = section.settings.autoplay_speed | times: 1000
+  assign overlay_opacity = section.settings.overlay_opacity | default: 20 | divided_by: 100.0
+  assign slide_count = section.blocks.size
+  assign desktop_h = section.settings.desktop_height | default: 'fit_screen'
+  assign mobile_h = section.settings.mobile_height | default: 'fit_screen'
+  assign first_slide = section.blocks.first
+  assign show_text = section.settings.show_text
+  if show_text == nil
+    assign show_text = true
+  endif
+%}
+
+<section
+  class="stagmenfashion-min-hero stagmenfashion-min-hero--{{ layout_mode }} color-{{ section.settings.color_scheme }}{% if section.settings.enable_container %} stagmenfashion-min-hero--contained{% endif %}"
+  data-stagmenfashion-min-hero
+  data-layout="{{ layout_mode }}"
+  data-autoplay="{{ autoplay_ms }}"
+  data-slide-count="{{ slide_count }}"
+  style="
+    --hero-overlay-opacity: {{ overlay_opacity }};
+    --hero-overlay-color: {{ section.settings.overlay_color | default: '#000000' }};
+    {% if desktop_h == 'fit_screen' or desktop_h == '100vh' %}
+      --hero-desktop-height-final: 100vh;
+    {% else %}
+      --hero-desktop-height-final: {{ desktop_h }};
+    {% endif %}
+    {% if mobile_h == 'fit_screen' or mobile_h == '100vh' %}
+      --hero-mobile-height-final: 100vh;
+    {% else %}
+      --hero-mobile-height-final: {{ mobile_h }};
+    {% endif %}
+    --hero-radius: {{ section.settings.corner_radius | default: 0 }}px;
+    --hero-padding-bottom: {% if section.settings.padding_bottom != blank %}{{ section.settings.padding_bottom }}px{% else %}0px{% endif %};
+    {% if section.settings.custom_bg != blank %}--hero-custom-bg: {{ section.settings.custom_bg }};{% endif %}
+    {% if section.settings.custom_text != blank %}--hero-custom-text: {{ section.settings.custom_text }};{% endif %}
+  "
+>
+  <div class="stagmenfashion-min-hero__container">
+    <div class="stagmenfashion-min-hero__viewport">
+      <div class="stagmenfashion-min-hero__track" data-track>
+        {% for block in section.blocks %}
+          {% liquid
+            assign btn_label = block.settings.button_label | default: 'Shop now'
+            assign btn_link = block.settings.button_link | default: routes.all_products_collection_url
+            assign has_btn = true
+
+            assign has_product = false
+            if block.settings.featured_product != blank
+              assign has_product = true
+              assign feat_prod = block.settings.featured_product
+            endif
+
+            assign has_headings = false
+            if block.settings.eyebrow != blank or block.settings.heading != blank or block.settings.subheading != blank
+              assign has_headings = true
+            endif
+          %}
+
+          <article
+            class="stagmenfashion-min-hero__slide stagmenfashion-min-hero__slide--{{ layout_mode }}{% if forloop.first %} is-active{% endif %}"
+            data-slide
+            data-index="{{ forloop.index0 }}"
+            aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}"
+            {{ block.shopify_attributes }}
+          >
+            {%- comment -%} ==================== LAYOUT 1: FULL BLEED MINIMAL ==================== {%- endcomment -%}
+            {% if layout_mode == 'full_bleed' %}
+              <div class="stagmenfashion-min-hero__media-wrapper">
+                <div class="stagmenfashion-min-hero__media{% if section.settings.enable_zoom %} stagmenfashion-min-hero__media--zoom{% endif %}">
+                  {% if block.settings.image != blank %}
+                    {% assign loading_attr = 'lazy' %}
+                    {% assign priority_attr = 'auto' %}
+                    {% if forloop.first %}
+                      {% assign loading_attr = 'eager' %}
+                      {% assign priority_attr = 'high' %}
+                    {% endif %}
+                    {% if block.settings.mobile_image != blank %}
+                      <picture class="stagmenfashion-min-hero__picture">
+                        <source media="(max-width: 749px)" srcset="{{ block.settings.mobile_image | image_url: width: 375, format: 'webp' }} 375w, {{ block.settings.mobile_image | image_url: width: 550, format: 'webp' }} 550w, {{ block.settings.mobile_image | image_url: width: 750, format: 'webp' }} 750w" sizes="100vw">
+                        {{ block.settings.image | image_url: width: 1200, format: 'webp' | image_tag: class: 'stagmenfashion-min-hero__img', widths: '550, 750, 950, 1200', sizes: '100vw', loading: loading_attr, fetchpriority: priority_attr, decoding: 'async', alt: block.settings.heading | default: 'Hero image' }}
+                      </picture>
+                    {% else %}
+                      {{ block.settings.image | image_url: width: 1200, format: 'webp' | image_tag: class: 'stagmenfashion-min-hero__img', widths: '550, 750, 950, 1200', sizes: '100vw', loading: loading_attr, fetchpriority: priority_attr, decoding: 'async', alt: block.settings.heading | default: 'Hero image' }}
+                    {% endif %}
+                  {% else %}
+                    <div class="stagmenfashion-min-hero__placeholder">
+                      <span>Select Hero Image</span>
+                    </div>
+                  {% endif %}
+                </div>
+
+                {% if section.settings.enable_overlay %}
+                  <div class="stagmenfashion-min-hero__overlay overlay--{{ section.settings.overlay_type | default: 'backdrop_blur' }}{% if section.settings.enable_backdrop_blur %} overlay--has-backdrop{% endif %}"></div>
+                {% endif %}
+              </div>
+
+              <div class="stagmenfashion-min-hero__content-box pos-{{ block.settings.content_position | default: 'bottom-left' }} align-{{ block.settings.text_alignment | default: 'left' }}">
+                <div class="stagmenfashion-min-hero__inner{% if section.settings.enable_content_backdrop %} stagmenfashion-min-hero__inner--backdrop{% endif %}">
+                  {% if show_text and has_headings %}
+                    {% if block.settings.eyebrow != blank %}
+                      <div class="stagmenfashion-min-hero__eyebrow-wrap">
+                        <span class="stagmenfashion-min-hero__eyebrow">{{ block.settings.eyebrow | escape }}</span>
+                      </div>
+                    {% endif %}
+
+                    {% if block.settings.heading != blank %}
+                      <h1 class="stagmenfashion-min-hero__heading stagmenfashion-min-hero__heading--{{ section.settings.heading_size | default: 'medium' }}">
+                        {{ block.settings.heading | escape }}
+                      </h1>
+                    {% endif %}
+
+                    {% if block.settings.subheading != blank %}
+                      <div class="stagmenfashion-min-hero__subheading">
+                        {{ block.settings.subheading }}
+                      </div>
+                    {% endif %}
+                  {% endif %}
+
+                  {% if has_btn %}
+                    <div class="stagmenfashion-min-hero__actions">
+                      <a href="{{ btn_link }}" class="stagmenfashion-min-btn stagmenfashion-min-btn--{{ block.settings.button_style | default: 'text_underline' }}">
+                        <span>{{ btn_label | escape }}</span>
+                      </a>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+
+            {%- comment -%} ==================== LAYOUT 2: EDITORIAL SPLIT ==================== {%- endcomment -%}
+            {% elsif layout_mode == 'editorial_split' %}
+              <div class="stagmenfashion-min-hero__split-grid">
+                <div class="stagmenfashion-min-hero__split-text align-{{ block.settings.text_alignment | default: 'left' }}">
+                  <div class="stagmenfashion-min-hero__split-inner">
+                    {% if block.settings.eyebrow != blank %}
+                      <div class="stagmenfashion-min-hero__eyebrow-wrap">
+                        <span class="stagmenfashion-min-hero__eyebrow stagmenfashion-min-hero__eyebrow--dark">{{ block.settings.eyebrow | escape }}</span>
+                      </div>
+                    {% endif %}
+
+                    {% if block.settings.heading != blank %}
+                      <h1 class="stagmenfashion-min-hero__heading stagmenfashion-min-hero__heading--dark stagmenfashion-min-hero__heading--{{ section.settings.heading_size | default: 'medium' }}">
+                        {{ block.settings.heading | escape }}
+                      </h1>
+                    {% endif %}
+
+                    {% if block.settings.subheading != blank %}
+                      <div class="stagmenfashion-min-hero__subheading stagmenfashion-min-hero__subheading--dark">
+                        {{ block.settings.subheading }}
+                      </div>
+                    {% endif %}
+
+                    {% if has_btn %}
+                      <div class="stagmenfashion-min-hero__actions">
+                        <a href="{{ btn_link }}" class="stagmenfashion-min-btn stagmenfashion-min-btn--dark stagmenfashion-min-btn--{{ block.settings.button_style | default: 'text_underline' }}">
+                          <span>{{ btn_label | escape }}</span>
+                        </a>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="stagmenfashion-min-hero__split-media-col">
+                  <div class="stagmenfashion-min-hero__split-media-frame">
+                    {% if block.settings.image != blank %}
+                      {{ block.settings.image | image_url: width: 1600 | image_tag: class: 'stagmenfashion-min-hero__split-img', widths: '600, 900, 1200, 1600', loading: 'eager', alt: block.settings.heading | default: 'Editorial Image' }}
+                    {% else %}
+                      <div class="stagmenfashion-min-hero__placeholder"><span>Editorial Image</span></div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+            {%- comment -%} ==================== LAYOUT 3: FRAMED LOOKBOOK ==================== {%- endcomment -%}
+            {% elsif layout_mode == 'framed_lookbook' %}
+              <div class="stagmenfashion-min-hero__lookbook-wrap">
+                <div class="stagmenfashion-min-hero__lookbook-card">
+                  <div class="stagmenfashion-min-hero__lookbook-primary">
+                    {% if block.settings.image != blank %}
+                      {{ block.settings.image | image_url: width: 2200 | image_tag: class: 'stagmenfashion-min-hero__lookbook-img', widths: '700, 1100, 1500, 2200', loading: 'eager', alt: block.settings.heading | default: 'Lookbook Primary' }}
+                    {% else %}
+                      <div class="stagmenfashion-min-hero__placeholder"><span>Lookbook Main Image</span></div>
+                    {% endif %}
+                  </div>
+
+                  {% if section.settings.enable_overlay %}
+                    <div class="stagmenfashion-min-hero__overlay overlay--{{ section.settings.overlay_type | default: 'backdrop_blur' }}{% if section.settings.enable_backdrop_blur %} overlay--has-backdrop{% endif %}"></div>
+                  {% endif %}
+
+                  {% if show_text and has_headings %}
+                    <div class="stagmenfashion-min-hero__lookbook-overlay">
+                      <div class="stagmenfashion-min-hero__lookbook-meta{% if section.settings.enable_content_backdrop %} stagmenfashion-min-hero__inner--backdrop{% endif %}">
+                        {% if block.settings.eyebrow != blank %}
+                          <span class="stagmenfashion-min-hero__eyebrow">{{ block.settings.eyebrow }}</span>
+                        {% endif %}
+                        {% if block.settings.heading != blank %}
+                          <h2 class="stagmenfashion-min-hero__heading stagmenfashion-min-hero__heading--{{ section.settings.heading_size | default: 'medium' }}">
+                            {{ block.settings.heading }}
+                          </h2>
+                        {% endif %}
+                      </div>
+
+                      {% if has_btn %}
+                        <a href="{{ btn_link }}" class="stagmenfashion-min-btn stagmenfashion-min-btn--{{ block.settings.button_style | default: 'text_underline' }}">
+                          <span>{{ btn_label }}</span>
+                        </a>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+
+            {%- comment -%} ==================== LAYOUT 4: FLOATING BADGE SPOTLIGHT ==================== {%- endcomment -%}
+            {% elsif layout_mode == 'floating_badge' %}
+              <div class="stagmenfashion-min-hero__media-wrapper">
+                <div class="stagmenfashion-min-hero__media{% if section.settings.enable_zoom %} stagmenfashion-min-hero__media--zoom{% endif %}">
+                  {% if block.settings.image != blank %}
+                    {% if block.settings.mobile_image != blank %}
+                      <picture class="stagmenfashion-min-hero__picture">
+                        <source media="(max-width: 749px)" srcset="{{ block.settings.mobile_image | image_url: width: 600 }} 600w, {{ block.settings.mobile_image | image_url: width: 1000 }} 1000w">
+                        {{ block.settings.image | image_url: width: 3000 | image_tag: class: 'stagmenfashion-min-hero__img', widths: '750, 1100, 1600, 2200, 3000', loading: 'eager', alt: block.settings.heading | default: 'Hero image' }}
+                      </picture>
+                    {% else %}
+                      {{ block.settings.image | image_url: width: 3000 | image_tag: class: 'stagmenfashion-min-hero__img', widths: '750, 1100, 1600, 2200, 3000', loading: 'eager', alt: block.settings.heading | default: 'Hero image' }}
+                    {% endif %}
+                  {% else %}
+                    <div class="stagmenfashion-min-hero__placeholder"><span>Select Spotlight Image</span></div>
+                  {% endif %}
+                </div>
+
+                {% if section.settings.enable_overlay %}
+                  <div class="stagmenfashion-min-hero__overlay overlay--{{ section.settings.overlay_type | default: 'backdrop_blur' }}{% if section.settings.enable_backdrop_blur %} overlay--has-backdrop{% endif %}"></div>
+                {% endif %}
+              </div>
+
+              <div class="stagmenfashion-min-hero__spotlight-shell">
+                <div class="stagmenfashion-min-hero__spotlight-content">
+                  {% if show_text and has_headings %}
+                    {% if block.settings.eyebrow != blank %}
+                      <div class="stagmenfashion-min-hero__eyebrow-wrap">
+                        <span class="stagmenfashion-min-hero__eyebrow">{{ block.settings.eyebrow }}</span>
+                      </div>
+                    {% endif %}
+                    {% if block.settings.heading != blank %}
+                      <h1 class="stagmenfashion-min-hero__heading stagmenfashion-min-hero__heading--{{ section.settings.heading_size | default: 'medium' }}">
+                        {{ block.settings.heading }}
+                      </h1>
+                    {% endif %}
+                    {% if block.settings.subheading != blank %}
+                      <div class="stagmenfashion-min-hero__subheading">{{ block.settings.subheading }}</div>
+                    {% endif %}
+                  {% endif %}
+                  {% if has_btn %}
+                    <div class="stagmenfashion-min-hero__actions">
+                      <a href="{{ btn_link }}" class="stagmenfashion-min-btn stagmenfashion-min-btn--{{ block.settings.button_style | default: 'text_underline' }}">
+                        <span>{{ btn_label }}</span>
+                      </a>
+                    </div>
+                  {% endif %}
+                </div>
+
+                {% if has_product %}
+                  <a href="{{ feat_prod.url }}" class="stagmenfashion-min-hero__product-card" aria-label="View {{ feat_prod.title }}">
+                    <div class="stagmenfashion-min-hero__product-thumb">
+                      {% if feat_prod.featured_image != blank %}
+                        <img src="{{ feat_prod.featured_image | image_url: width: 140 }}" alt="{{ feat_prod.title }}" loading="lazy" width="60" height="72">
+                      {% endif %}
+                    </div>
+                    <div class="stagmenfashion-min-hero__product-info">
+                      <span class="stagmenfashion-min-hero__product-tag">Featured</span>
+                      <span class="stagmenfashion-min-hero__product-title">{{ feat_prod.title | truncate: 24 }}</span>
+                      <span class="stagmenfashion-min-hero__product-price">{{ feat_prod.price | money }}</span>
+                    </div>
+                  </a>
+                {% endif %}
+              </div>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </div>
+
+      {%- comment -%} Ultra-Minimal Hairline Pagination {%- endcomment -%}
+      {% if slide_count > 1 %}
+        <div class="stagmenfashion-min-hero__controls">
+          <div class="stagmenfashion-min-hero__pagination">
+            <span class="stagmenfashion-min-hero__counter-current" data-counter-current>01</span>
+            <div class="stagmenfashion-min-hero__progress-bar">
+              <div class="stagmenfashion-min-hero__progress-fill" data-progress-fill></div>
+            </div>
+            <span class="stagmenfashion-min-hero__counter-total">0{{ slide_count }}</span>
+          </div>
+
+          <div class="stagmenfashion-min-hero__nav-arrows">
+            <button class="stagmenfashion-min-hero__nav-btn" type="button" data-action="prev" aria-label="Previous slide">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M10 13l-5-5 5-5"/></svg>
+            </button>
+            <button class="stagmenfashion-min-hero__nav-btn" type="button" data-action="next" aria-label="Next slide">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M6 3l5 5-5 5"/></svg>
+            </button>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ----------------------------------------------------
+     BASE CONTAINER & RESET
+  ---------------------------------------------------- */
+  .stagmenfashion-min-hero,
+  .stagmenfashion-min-hero[class*="color-"] {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: var(--hero-custom-text, var(--color-foreground, #111111));
+    font-family: inherit;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: var(--hero-padding-bottom, 0px) !important;
+    box-sizing: border-box;
+    --hero-calc-desktop: 100vh;
+    --hero-calc-mobile: 100vh;
+  }
+
+  .stagmenfashion-min-hero--contained {
+    --hero-container-pad-v: 0px;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .stagmenfashion-min-hero__container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .stagmenfashion-min-hero__viewport {
+    position: relative;
+    width: 100%;
+    height: var(--hero-desktop-height-final, var(--hero-calc-desktop));
+    min-height: var(--hero-desktop-height-final, var(--hero-calc-desktop));
+    max-height: var(--hero-desktop-height-final, var(--hero-calc-desktop));
+    overflow: hidden;
+    border-radius: var(--hero-radius, 0px);
+    touch-action: pan-y;
+  }
+
+  .stagmenfashion-min-hero__track {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    transition: transform 0.75s cubic-bezier(0.25, 1, 0.5, 1);
+    will-change: transform;
+  }
+
+  .stagmenfashion-min-hero__slide {
+    position: relative;
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .stagmenfashion-min-hero__full-link {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  @media (max-width: 989px) {
+    .stagmenfashion-min-hero__viewport {
+      height: var(--hero-mobile-height-final, var(--hero-calc-mobile));
+      min-height: var(--hero-mobile-height-final, var(--hero-calc-mobile));
+      max-height: var(--hero-mobile-height-final, var(--hero-calc-mobile));
+    }
+  }
+
+  /* ----------------------------------------------------
+     MEDIA & LIGHTWEIGHT OVERLAYS
+  ---------------------------------------------------- */
+  .stagmenfashion-min-hero__media-wrapper {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .stagmenfashion-min-hero__media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .stagmenfashion-min-hero__picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .stagmenfashion-min-hero__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+  }
+
+  .stagmenfashion-min-hero__media--zoom .stagmenfashion-min-hero__img {
+    transform: scale(1);
+  }
+
+  .stagmenfashion-min-hero__slide.is-active .stagmenfashion-min-hero__media--zoom .stagmenfashion-min-hero__img {
+    transform: scale(1.03);
+    transition: transform 7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .stagmenfashion-min-hero__placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+    background: #f4f4f5;
+    color: #71717a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Overlay Styles - Clean Black Overlay Without Blur or Distorting Effects */
+  .stagmenfashion-min-hero__overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+    background-color: var(--hero-overlay-color, #000000);
+    opacity: var(--hero-overlay-opacity, 0.3);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .stagmenfashion-min-hero__overlay.overlay--has-backdrop,
+  .stagmenfashion-min-hero__overlay.overlay--backdrop_blur,
+  .stagmenfashion-min-hero__overlay.overlay--solid,
+  .stagmenfashion-min-hero__overlay.overlay--black_light,
+  .stagmenfashion-min-hero__overlay.overlay--luxury_scrim {
+    background-color: var(--hero-overlay-color, #000000);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .stagmenfashion-min-hero__overlay.overlay--soft_bottom {
+    background: linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.75) 0%,
+      rgba(0, 0, 0, 0.35) 45%,
+      transparent 100%
+    );
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .stagmenfashion-min-hero__overlay.overlay--cinematic_vignette {
+    background: radial-gradient(
+      circle at center,
+      rgba(0, 0, 0, 0.1) 0%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Frosted Glass Content Backdrop Card */
+  .stagmenfashion-min-hero__inner--backdrop {
+    background: rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    padding: clamp(20px, 3.2vw, 36px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+  }
+
+  /* ----------------------------------------------------
+     MINIMAL AIRY CONTENT LAYOUT
+  ---------------------------------------------------- */
+  .stagmenfashion-min-hero__content-box {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: calc(var(--header-group-height, 66px) + clamp(16px, 3vw, 36px)) clamp(24px, 5vw, 64px) clamp(32px, 5vw, 64px);
+    box-sizing: border-box;
+    pointer-events: none;
+  }
+
+  .stagmenfashion-min-hero__content-box.pos-bottom-left { justify-content: flex-end; align-items: flex-start; }
+  .stagmenfashion-min-hero__content-box.pos-bottom-center { justify-content: flex-end; align-items: center; }
+  .stagmenfashion-min-hero__content-box.pos-center-left { justify-content: center; align-items: flex-start; }
+  .stagmenfashion-min-hero__content-box.pos-center { justify-content: center; align-items: center; }
+  .stagmenfashion-min-hero__content-box.pos-top-left { justify-content: flex-start; align-items: flex-start; padding-top: clamp(60px, 8vw, 90px); }
+
+  .stagmenfashion-min-hero__inner {
+    max-width: 680px;
+    width: 100%;
+    pointer-events: auto;
+  }
+
+  .stagmenfashion-min-hero__content-box.align-left .stagmenfashion-min-hero__inner { text-align: left; }
+  .stagmenfashion-min-hero__content-box.align-center .stagmenfashion-min-hero__inner,
+  .stagmenfashion-min-hero__content-box.pos-bottom-center .stagmenfashion-min-hero__inner,
+  .stagmenfashion-min-hero__content-box.pos-center .stagmenfashion-min-hero__inner {
+    text-align: center;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .stagmenfashion-min-hero__content-box.align-right .stagmenfashion-min-hero__inner { text-align: right; margin-left: auto; }
+
+  /* Whisper-thin refined typography */
+  .stagmenfashion-min-hero__eyebrow-wrap {
+    margin-bottom: 12px;
+  }
+
+  .stagmenfashion-min-hero__eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  }
+
+  .stagmenfashion-min-hero__eyebrow--dark {
+    color: #71717a;
+    text-shadow: none;
+  }
+
+  .stagmenfashion-min-hero__heading {
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    color: #ffffff;
+    margin: 0 0 14px;
+    text-wrap: balance;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+  }
+
+  .stagmenfashion-min-hero__heading--dark {
+    color: var(--hero-custom-text, #111111);
+    text-shadow: none;
+  }
+
+  .stagmenfashion-min-hero__heading--small { font-size: clamp(1.6rem, 3vw, 2.4rem); }
+  .stagmenfashion-min-hero__heading--medium { font-size: clamp(2rem, 4.2vw, 3.4rem); }
+  .stagmenfashion-min-hero__heading--large { font-size: clamp(2.4rem, 5.5vw, 4.4rem); }
+
+  .stagmenfashion-min-hero__subheading {
+    font-size: clamp(0.88rem, 1.1vw, 1.02rem);
+    font-weight: 300;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 22px;
+    max-width: 520px;
+    text-wrap: pretty;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  .stagmenfashion-min-hero__subheading--dark {
+    color: #52525b;
+    text-shadow: none;
+  }
+
+  .stagmenfashion-min-hero__content-box.align-center .stagmenfashion-min-hero__subheading,
+  .stagmenfashion-min-hero__content-box.pos-bottom-center .stagmenfashion-min-hero__subheading,
+  .stagmenfashion-min-hero__content-box.pos-center .stagmenfashion-min-hero__subheading {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Ultra-minimal delicate buttons */
+  .stagmenfashion-min-hero__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 24px;
+    margin-top: 4px;
+  }
+
+  .stagmenfashion-min-hero__content-box.align-center .stagmenfashion-min-hero__actions,
+  .stagmenfashion-min-hero__content-box.pos-bottom-center .stagmenfashion-min-hero__actions,
+  .stagmenfashion-min-hero__content-box.pos-center .stagmenfashion-min-hero__actions {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .stagmenfashion-min-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+    color: #ffffff;
+  }
+
+  .stagmenfashion-min-btn--dark {
+    color: #111111;
+  }
+
+  /* Underline / Border Bottom Style (Refined Delicate Minimal) */
+  .stagmenfashion-min-btn--text_underline {
+    position: relative;
+    background: transparent;
+    padding: 0 0 4px 0;
+    font-size: clamp(0.85rem, 0.95vw, 0.94rem);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    color: #ffffff;
+    border-bottom: 1px solid #ffffff;
+    text-decoration: none;
+    transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+  .stagmenfashion-min-btn--text_underline:hover {
+    color: #ffffff;
+    opacity: 0.8;
+    transform: translateY(-1px);
+  }
+  .stagmenfashion-min-btn--dark.stagmenfashion-min-btn--text_underline {
+    color: #111111;
+    border-bottom: 1px solid #111111;
+    text-shadow: none;
+  }
+  .stagmenfashion-min-btn--dark.stagmenfashion-min-btn--text_underline:hover {
+    color: #0800CF;
+    border-bottom-color: #0800CF;
+  }
+
+  /* Minimal Clean Pill */
+  .stagmenfashion-min-btn--minimal_pill {
+    background: #ffffff;
+    color: #111111;
+    padding: 10px 22px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+  }
+  .stagmenfashion-min-btn--minimal_pill:hover {
+    background: #f4f4f5;
+    transform: translateY(-1px);
+  }
+
+  /* Thin Outline */
+  .stagmenfashion-min-btn--thin_outline {
+    background: transparent;
+    color: #ffffff;
+    padding: 9px 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+  }
+  .stagmenfashion-min-btn--thin_outline:hover {
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* ----------------------------------------------------
+     LAYOUT 2: EDITORIAL SPLIT
+  ---------------------------------------------------- */
+  .stagmenfashion-min-hero__split-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    width: 100%;
+    min-height: var(--hero-desktop-height, 82vh);
+    align-items: center;
+    gap: clamp(24px, 4vw, 56px);
+    padding: clamp(24px, 4vw, 56px);
+    box-sizing: border-box;
+  }
+
+  .stagmenfashion-min-hero__split-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .stagmenfashion-min-hero__split-inner {
+    max-width: 500px;
+  }
+
+  .stagmenfashion-min-hero__split-media-col {
+    position: relative;
+    height: 100%;
+    min-height: 440px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stagmenfashion-min-hero__split-media-frame {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-height: 580px;
+    border-radius: var(--hero-radius, 8px);
+    overflow: hidden;
+  }
+
+  .stagmenfashion-min-hero__split-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 1s ease;
+  }
+
+  .stagmenfashion-min-hero__split-media-frame:hover .stagmenfashion-min-hero__split-img {
+    transform: scale(1.02);
+  }
+
+  /* ----------------------------------------------------
+     LAYOUT 3: FRAMED LOOKBOOK
+  ---------------------------------------------------- */
+  .stagmenfashion-min-hero__lookbook-wrap {
+    width: 100%;
+    min-height: var(--hero-desktop-height, 82vh);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(16px, 3vw, 40px);
+    box-sizing: border-box;
+  }
+
+  .stagmenfashion-min-hero__lookbook-card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: calc(var(--hero-desktop-height, 82vh) - 60px);
+    border-radius: var(--hero-radius, 8px);
+    overflow: hidden;
+  }
+
+  .stagmenfashion-min-hero__lookbook-primary {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .stagmenfashion-min-hero__lookbook-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .stagmenfashion-min-hero__lookbook-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    padding: clamp(24px, 4vw, 48px);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+  }
+
+  .stagmenfashion-min-hero__lookbook-meta {
+    max-width: 550px;
+  }
+
+  /* ----------------------------------------------------
+     LAYOUT 4: FLOATING SPOTLIGHT
+  ---------------------------------------------------- */
+  .stagmenfashion-min-hero__spotlight-shell {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: clamp(32px, 5vw, 64px);
+    box-sizing: border-box;
+    gap: 24px;
+    pointer-events: none;
+  }
+
+  .stagmenfashion-min-hero__spotlight-content {
+    max-width: 600px;
+    pointer-events: auto;
+  }
+
+  .stagmenfashion-min-hero__product-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #111111;
+    pointer-events: auto;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+  }
+
+  .stagmenfashion-min-hero__product-card:hover {
+    transform: translateY(-2px);
+    background: #ffffff;
+  }
+
+  .stagmenfashion-min-hero__product-thumb {
+    width: 44px;
+    height: 52px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f4f4f5;
+    flex-shrink: 0;
+  }
+
+  .stagmenfashion-min-hero__product-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .stagmenfashion-min-hero__product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .stagmenfashion-min-hero__product-tag {
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #71717a;
+  }
+
+  .stagmenfashion-min-hero__product-title {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #111111;
+  }
+
+  .stagmenfashion-min-hero__product-price {
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: #52525b;
+  }
+
+  /* ----------------------------------------------------
+     MINIMAL CONTROLS (NO BULK)
+  ---------------------------------------------------- */
+  .stagmenfashion-min-hero__controls {
+    position: absolute;
+    bottom: clamp(20px, 3.5vw, 36px);
+    right: clamp(20px, 3.5vw, 48px);
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: #ffffff;
+    pointer-events: auto;
+  }
+
+  .stagmenfashion-min-hero__pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
+  .stagmenfashion-min-hero__progress-bar {
+    width: 32px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.35);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stagmenfashion-min-hero__progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: #ffffff;
+    transition: width 0.1s linear;
+  }
+
+  .stagmenfashion-min-hero__nav-arrows {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .stagmenfashion-min-hero__nav-btn {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    padding: 0;
+  }
+
+  .stagmenfashion-min-hero__nav-btn:hover {
+    opacity: 1;
+  }
+
+  .stagmenfashion-min-hero__nav-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* ----------------------------------------------------
+     STAGGERED SLIDE ENTRANCE ANIMATIONS
+  ---------------------------------------------------- */
+  .stagmenfashion-min-hero__eyebrow,
+  .stagmenfashion-min-hero__heading,
+  .stagmenfashion-min-hero__subheading,
+  .stagmenfashion-min-hero__actions {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .stagmenfashion-min-hero__slide.is-active .stagmenfashion-min-hero__eyebrow {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.08s;
+  }
+
+  .stagmenfashion-min-hero__slide.is-active .stagmenfashion-min-hero__heading {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.16s;
+  }
+
+  .stagmenfashion-min-hero__slide.is-active .stagmenfashion-min-hero__subheading {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.24s;
+  }
+
+  .stagmenfashion-min-hero__slide.is-active .stagmenfashion-min-hero__actions {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.32s;
+  }
+
+  /* ----------------------------------------------------
+     RESPONSIVE BREAKPOINTS
+  ---------------------------------------------------- */
+  @media (max-width: 899px) {
+    .stagmenfashion-min-hero,
+    .stagmenfashion-min-hero--contained {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      padding-top: 0 !important;
+    }
+
+    .stagmenfashion-min-hero--contained .stagmenfashion-min-hero__viewport {
+      border-radius: 0;
+    }
+
+    .stagmenfashion-min-hero__viewport {
+      height: var(--hero-mobile-height-final, 75vh);
+      min-height: var(--hero-mobile-height-final, 75vh);
+      max-height: var(--hero-mobile-height-final, 75vh);
+    }
+
+    .stagmenfashion-min-hero__track,
+    .stagmenfashion-min-hero__slide {
+      height: 100%;
+      min-height: 100%;
+    }
+
+    .stagmenfashion-min-hero__content-box {
+      padding: calc(var(--header-group-height, 60px) + 20px) 20px 48px;
+    }
+
+    .stagmenfashion-min-hero__content-box.pos-top-left {
+      padding-top: calc(var(--header-group-height, 60px) + 24px);
+    }
+
+    .stagmenfashion-min-hero__inner {
+      max-width: 100%;
+    }
+
+    .stagmenfashion-min-hero__eyebrow-wrap {
+      margin-bottom: 8px;
+    }
+
+    .stagmenfashion-min-hero__eyebrow {
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+    }
+
+    .stagmenfashion-min-hero__heading {
+      font-size: clamp(1.75rem, 7vw, 2.35rem);
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    .stagmenfashion-min-hero__heading--small { font-size: clamp(1.4rem, 5.5vw, 1.8rem); }
+    .stagmenfashion-min-hero__heading--medium { font-size: clamp(1.75rem, 7vw, 2.35rem); }
+    .stagmenfashion-min-hero__heading--large { font-size: clamp(2.1rem, 8.5vw, 2.75rem); }
+
+    .stagmenfashion-min-hero__subheading {
+      font-size: 0.88rem;
+      line-height: 1.45;
+      margin-bottom: 18px;
+      max-width: 100%;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .stagmenfashion-min-hero__actions {
+      gap: 16px;
+      margin-top: 2px;
+    }
+
+    .stagmenfashion-min-btn {
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+    }
+
+    .stagmenfashion-min-btn--minimal_pill {
+      padding: 9px 20px;
+      font-size: 0.78rem;
+    }
+
+    .stagmenfashion-min-btn--thin_outline {
+      padding: 8px 18px;
+      font-size: 0.78rem;
+    }
+
+    .stagmenfashion-min-hero__split-grid {
+      grid-template-columns: 1fr;
+      padding: 24px 20px;
+      gap: 20px;
+      min-height: auto;
+    }
+
+    .stagmenfashion-min-hero__split-media-col {
+      min-height: 300px;
+      height: 48vh;
+    }
+
+    .stagmenfashion-min-hero__lookbook-wrap {
+      padding: 0;
+      min-height: var(--hero-mobile-height-final, 75vh);
+    }
+
+    .stagmenfashion-min-hero__lookbook-card {
+      border-radius: 0;
+      min-height: var(--hero-mobile-height-final, 75vh);
+    }
+
+    .stagmenfashion-min-hero__lookbook-overlay {
+      padding: 24px 20px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .stagmenfashion-min-hero__spotlight-shell {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 24px 20px 56px;
+      gap: 16px;
+    }
+
+    .stagmenfashion-min-hero__controls {
+      bottom: 16px;
+      right: 18px;
+      gap: 10px;
+    }
+
+    .stagmenfashion-min-hero__pagination {
+      font-size: 0.68rem;
+      gap: 6px;
+    }
+
+    .stagmenfashion-min-hero__progress-bar {
+      width: 24px;
+    }
+
+    .stagmenfashion-min-hero__nav-btn {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .stagmenfashion-min-hero__content-box {
+      padding: calc(var(--header-group-height, 56px) + 16px) 16px 44px;
+    }
+
+    .stagmenfashion-min-hero__heading {
+      font-size: clamp(1.65rem, 8vw, 2.15rem);
+    }
+
+    .stagmenfashion-min-hero__controls {
+      bottom: 14px;
+      right: 16px;
+    }
+  }
+</style>
+
+{% javascript %}
+  (function () {
+    const initHero = () => {
+      document.querySelectorAll('[data-stagmenfashion-min-hero]').forEach((hero) => {
+        if (hero.dataset.initialized === 'true') return;
+        hero.dataset.initialized = 'true';
+
+        const track = hero.querySelector('[data-track]');
+        const slides = Array.from(hero.querySelectorAll('[data-slide]'));
+        const total = slides.length;
+        if (total <= 1) return;
+
+        const counterCurrent = hero.querySelector('[data-counter-current]');
+        const progressFill = hero.querySelector('[data-progress-fill]');
+        const prevBtn = hero.querySelector('[data-action="prev"]');
+        const nextBtn = hero.querySelector('[data-action="next"]');
+        const autoplayMs = parseInt(hero.dataset.autoplay, 10) || 0;
+
+        let currentIndex = 0;
+        let autoplayTimer = null;
+        let progressTimer = null;
+        let progressStart = 0;
+
+        const updatePagination = (idx) => {
+          if (counterCurrent) {
+            counterCurrent.textContent = (idx + 1 < 10 ? '0' : '') + (idx + 1);
+          }
+        };
+
+        const resetProgress = () => {
+          if (progressTimer) cancelAnimationFrame(progressTimer);
+          if (progressFill) progressFill.style.width = '0%';
+        };
+
+        const startProgress = () => {
+          if (!autoplayMs || !progressFill) return;
+          resetProgress();
+          progressStart = performance.now();
+
+          const frame = (now) => {
+            const elapsed = now - progressStart;
+            const pct = Math.min(100, (elapsed / autoplayMs) * 100);
+            progressFill.style.width = pct + '%';
+            if (pct < 100) {
+              progressTimer = requestAnimationFrame(frame);
+            }
+          };
+          progressTimer = requestAnimationFrame(frame);
+        };
+
+        const goToSlide = (newIndex) => {
+          currentIndex = (newIndex + total) % total;
+          track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+          slides.forEach((s, idx) => {
+            if (idx === currentIndex) {
+              s.classList.add('is-active');
+              s.setAttribute('aria-hidden', 'false');
+            } else {
+              s.classList.remove('is-active');
+              s.setAttribute('aria-hidden', 'true');
+            }
+          });
+
+          updatePagination(currentIndex);
+          startAutoplay();
+        };
+
+        const startAutoplay = () => {
+          if (autoplayTimer) clearInterval(autoplayTimer);
+          if (autoplayMs > 0) {
+            startProgress();
+            autoplayTimer = setInterval(() => {
+              goToSlide(currentIndex + 1);
+            }, autoplayMs);
+          }
+        };
+
+        const stopAutoplay = () => {
+          if (autoplayTimer) clearInterval(autoplayTimer);
+          resetProgress();
+        };
+
+        if (prevBtn) {
+          prevBtn.addEventListener('click', () => {
+            goToSlide(currentIndex - 1);
+          });
+        }
+
+        if (nextBtn) {
+          nextBtn.addEventListener('click', () => {
+            goToSlide(currentIndex + 1);
+          });
+        }
+
+        hero.addEventListener('mouseenter', stopAutoplay);
+        hero.addEventListener('mouseleave', startAutoplay);
+
+        // Touch swipe support
+        let startX = 0;
+        let currentX = 0;
+        let isTouching = false;
+
+        hero.addEventListener('touchstart', (e) => {
+          isTouching = true;
+          startX = e.touches[0].clientX;
+          currentX = startX;
+          stopAutoplay();
+        }, { passive: true });
+
+        hero.addEventListener('touchmove', (e) => {
+          if (!isTouching) return;
+          currentX = e.touches[0].clientX;
+        }, { passive: true });
+
+        hero.addEventListener('touchend', () => {
+          if (!isTouching) return;
+          isTouching = false;
+          const diffX = startX - currentX;
+          if (diffX > 40) {
+            goToSlide(currentIndex + 1);
+          } else if (diffX < -40) {
+            goToSlide(currentIndex - 1);
+          } else {
+            startAutoplay();
+          }
+        });
+
+        // Initialize first state
+        updatePagination(0);
+        startAutoplay();
+      });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initHero);
+    } else {
+      initHero();
+    }
+
+    document.addEventListener('shopify:section:load', initHero);
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Stag Minimal Hero",
+  "tag": "section",
+  "class": "section-stagmenfashion-min-hero",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout_mode",
+      "label": "Hero Style Mode",
+      "options": [
+        { "value": "full_bleed", "label": "Full-Bleed Minimal Luxury" },
+        { "value": "editorial_split", "label": "Editorial Duo-Split" },
+        { "value": "framed_lookbook", "label": "Framed Lookbook" },
+        { "value": "floating_badge", "label": "Modern Floating Spotlight" }
+      ],
+      "default": "full_bleed"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_text",
+      "label": "Show banner text & buttons",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_container",
+      "label": "Enable framed container mode",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "label": "Corner radius",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "select",
+      "id": "desktop_height",
+      "label": "Desktop Height",
+      "options": [
+        { "value": "fit_screen", "label": "Fit 1 Page Exactly (Full Viewport without scroll)" },
+        { "value": "75vh", "label": "Compact (75vh)" },
+        { "value": "80vh", "label": "Medium (80vh)" },
+        { "value": "85vh", "label": "Standard (85vh)" },
+        { "value": "90vh", "label": "Tall (90vh)" },
+        { "value": "100vh", "label": "Full Screen (100vh)" }
+      ],
+      "default": "fit_screen"
+    },
+    {
+      "type": "select",
+      "id": "mobile_height",
+      "label": "Mobile Height",
+      "options": [
+        { "value": "fit_screen", "label": "Fit 1 Page Exactly (Full Viewport without scroll)" },
+        { "value": "65vh", "label": "Compact (65vh)" },
+        { "value": "75vh", "label": "Standard (75vh)" },
+        { "value": "82vh", "label": "Tall (82vh)" },
+        { "value": "90vh", "label": "Extra Tall (90vh)" },
+        { "value": "100vh", "label": "Full Screen (100vh)" }
+      ],
+      "default": "fit_screen"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading Size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_zoom",
+      "label": "Enable subtle image zoom effect",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Overlay & Backdrop"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_overlay",
+      "label": "Enable overlay",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_backdrop_blur",
+      "label": "Enable frosted glass backdrop blur",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_content_backdrop",
+      "label": "Enable frosted glass card behind text",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "overlay_type",
+      "label": "Overlay Type",
+      "options": [
+        { "value": "backdrop_blur", "label": "Frosted Glass Backdrop Blur (Recommended)" },
+        { "value": "black_light", "label": "Black Light Ambient Overlay" },
+        { "value": "soft_bottom", "label": "Soft Feather Bottom Gradient" },
+        { "value": "cinematic_vignette", "label": "Cinematic Vignette" },
+        { "value": "solid", "label": "Uniform Solid Tint" }
+      ],
+      "default": "backdrop_blur"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Slideshow"
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Autoplay transition speed",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "s",
+      "default": 7,
+      "info": "Set to 0 to disable autoplay"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Theme Color Scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "color",
+      "id": "custom_bg",
+      "label": "Custom background override"
+    },
+    {
+      "type": "color",
+      "id": "custom_text",
+      "label": "Custom text color override"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Hero Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Desktop Hero Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile Hero Image"
+        },
+        {
+          "type": "text",
+          "id": "eyebrow",
+          "label": "Eyebrow Text",
+          "default": "New Season / Drop 01"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Minimalist Streetwear Curation"
+        },
+        {
+          "type": "richtext",
+          "id": "subheading",
+          "label": "Subheading / Description",
+          "default": "<p>Heavyweight cottons and relaxed tailoring designed for effortless daily wear.</p>"
+        },
+        {
+          "type": "header",
+          "content": "Button Settings"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button Label",
+          "default": "Shop now"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button Link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button Style",
+          "options": [
+            { "value": "text_underline", "label": "Minimal Border Bottom (Recommended)" },
+            { "value": "minimal_pill", "label": "Clean Solid Pill" },
+            { "value": "thin_outline", "label": "Thin Line Outline" }
+          ],
+          "default": "text_underline"
+        },
+        {
+          "type": "header",
+          "content": "Position & Alignment"
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Content Position",
+          "options": [
+            { "value": "bottom-center", "label": "Bottom Center (Recommended)" },
+            { "value": "bottom-left", "label": "Bottom Left" },
+            { "value": "center-left", "label": "Center Left" },
+            { "value": "center", "label": "Center" }
+          ],
+          "default": "bottom-center"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text Alignment",
+          "options": [
+            { "value": "center", "label": "Center" },
+            { "value": "left", "label": "Left" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "header",
+          "content": "Spotlight Mode Feature"
+        },
+        {
+          "type": "product",
+          "id": "featured_product",
+          "label": "Featured Product (Spotlight Mode)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Stag Minimal Hero",
+      "category": "Image",
+      "settings": {
+        "layout_mode": "full_bleed",
+        "desktop_height": "82vh",
+        "mobile_height": "72vh",
+        "overlay_opacity": 20
+      },
+      "blocks": [
+        {
+          "type": "slide",
+          "settings": {
+            "eyebrow": "Autumn / Winter 26",
+            "heading": "Minimalist Streetwear Curation",
+            "subheading": "<p>Heavyweight cottons and relaxed tailoring designed for effortless daily wear.</p>",
+            "button_label": "Shop Collection",
+            "button_style": "text_underline"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

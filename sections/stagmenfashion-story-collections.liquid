@@ -1,0 +1,775 @@
+{% liquid
+  assign story_collections = section.settings.collection_list
+
+  if story_collections == blank
+    assign story_collections = collections
+  endif
+
+  assign active_collection = story_collections | find: 'id', collection.id | default: story_collections.first
+  if active_collection == blank
+    assign active_collection = collections.all
+  endif
+
+  assign story_id = 'stagmenfashion-story-' | append: section.id
+%}
+
+<section class="stagmenfashion-story-collections color-{{ section.settings.color_scheme }}" data-stagmenfashion-story-collections="{{ section.id }}" data-cart-add-url="{{ routes.cart_add_url }}">
+  <div class="section section--full-width stagmenfashion-story-collections__shell">
+    <div class="stagmenfashion-story-collections__top">
+      <div class="stagmenfashion-story-collections__heading-wrap">
+        {% if section.settings.heading != blank %}
+          <h2 class="stagmenfashion-story-collections__heading">{{ section.settings.heading }}</h2>
+        {% endif %}
+        {% if section.settings.subtext != blank %}
+          <div class="stagmenfashion-story-collections__subtext rte">{{ section.settings.subtext }}</div>
+        {% endif %}
+      </div>
+
+      {% if active_collection != blank %}
+        <a class="stagmenfashion-story-collections__see-all" href="{{ active_collection.url }}" data-story-see-all>
+          {{ section.settings.see_all_text }}
+        </a>
+      {% endif %}
+    </div>
+
+    {% if story_collections != blank %}
+      <div class="stagmenfashion-story-collections__stories" role="tablist" aria-label="{{ section.settings.heading | escape }}">
+        {% for story_collection in story_collections %}
+          {% liquid
+            assign story_active = false
+            if active_collection.id == story_collection.id
+              assign story_active = true
+            endif
+          %}
+          <button
+            type="button"
+            class="stagmenfashion-story-collections__story{% if story_active %} is-active{% endif %}"
+            role="tab"
+            aria-selected="{% if story_active %}true{% else %}false{% endif %}"
+            aria-controls="{{ story_id }}-panel-{{ forloop.index0 }}"
+            data-story-tab
+            data-story-target="{{ story_id }}-panel-{{ forloop.index0 }}"
+            data-story-url="{{ story_collection.url }}"
+          >
+            <span class="stagmenfashion-story-collections__story-ring">
+              {% liquid
+                assign story_cover_image = story_collection.image
+                if story_cover_image == blank and story_collection.products != blank
+                  assign story_cover_image = story_collection.products.first.featured_image | default: story_collection.products.first.images.first
+                endif
+              %}
+              {% if story_cover_image != blank %}
+                {{
+                  story_cover_image
+                  | image_url: width: 180
+                  | image_tag:
+                    class: 'stagmenfashion-story-collections__story-image',
+                    widths: '90, 120, 150, 180',
+                    loading: 'lazy',
+                    alt: story_collection.title
+                }}
+              {% else %}
+                <span class="stagmenfashion-story-collections__story-fallback">{{ story_collection.title | slice: 0, 1 }}</span>
+              {% endif %}
+            </span>
+            <span class="stagmenfashion-story-collections__story-label">{{ story_collection.title }}</span>
+          </button>
+        {% endfor %}
+      </div>
+
+      <div class="stagmenfashion-story-collections__panels">
+        {% for story_collection in story_collections %}
+          {% liquid
+            assign panel_active = false
+            if active_collection.id == story_collection.id
+              assign panel_active = true
+            endif
+          %}
+          <div
+            id="{{ story_id }}-panel-{{ forloop.index0 }}"
+            class="stagmenfashion-story-collections__panel{% if panel_active %} is-active{% endif %}"
+            role="tabpanel"
+            {% unless panel_active %}hidden{% endunless %}
+            data-story-panel
+            data-story-url="{{ story_collection.url }}"
+          >
+            <div class="stagmenfashion-story-collections__carousel" aria-label="{{ story_collection.title | escape }}">
+              {% for product in story_collection.products %}
+                {% liquid
+                  assign product_price = product.price | money
+                  assign product_compare = blank
+                  if product.compare_at_price > product.price
+                    assign product_compare = product.compare_at_price | money
+                  endif
+                  assign product_image = product.featured_image
+                  assign product_hover_image = product.images[1]
+                  assign product_rating = product.metafields.reviews.rating.value.rating
+                  if product_rating == blank
+                    assign product_rating = 4.9
+                  endif
+                  assign product_review_count = product.metafields.reviews.rating_count
+                  if product_review_count == blank or product_review_count == 0
+                    assign product_review_seed = product.id | modulo: 4
+                    case product_review_seed
+                      when 0
+                        assign product_review_count = 8
+                      when 1
+                        assign product_review_count = 20
+                      when 2
+                        assign product_review_count = 26
+                      else
+                        assign product_review_count = 33
+                    endcase
+                  endif
+                  assign product_description = product.description | strip_html | truncatewords: 12
+                %}
+
+                <article class="stagmenfashion-story-card">
+                  <a class="stagmenfashion-story-card__media-link" href="{{ product.url }}" aria-label="{{ product.title | escape }}">
+                    <div class="stagmenfashion-story-card__media{% if product_hover_image != blank %} stagmenfashion-story-card__media--hover{% endif %}">
+                      {% if product_image != blank %}
+                        {{
+                          product_image
+                          | image_url: width: 900
+                          | image_tag:
+                            class: 'stagmenfashion-story-card__image stagmenfashion-story-card__image--primary',
+                            widths: '300, 420, 560, 720, 900',
+                            loading: 'lazy',
+                            alt: product.title
+                        }}
+                      {% else %}
+                        {{ 'product-1' | placeholder_svg_tag: 'stagmenfashion-story-card__image stagmenfashion-story-card__image--placeholder' }}
+                      {% endif %}
+
+                      {% if product_hover_image != blank %}
+                        {{
+                          product_hover_image
+                          | image_url: width: 900
+                          | image_tag:
+                            class: 'stagmenfashion-story-card__image stagmenfashion-story-card__image--secondary',
+                            widths: '300, 420, 560, 720, 900',
+                            loading: 'lazy',
+                            alt: product.title
+                        }}
+                      {% endif %}
+
+                      <span class="stagmenfashion-story-card__review-chip">
+                        <span class="stagmenfashion-story-card__stars" aria-hidden="true">
+                          {% for star in (1..5) %}
+                            <span class="{% if product_rating < star %}is-dim{% endif %}">★</span>
+                          {% endfor %}
+                        </span>
+                        <span class="stagmenfashion-story-card__review-text">{{ product_review_count }} reviews</span>
+                      </span>
+                    </div>
+                  </a>
+
+                  <div class="stagmenfashion-story-card__content">
+                    <a class="stagmenfashion-story-card__title-link" href="{{ product.url }}">
+                      <h3 class="stagmenfashion-story-card__title">{{ product.title }}</h3>
+                    </a>
+
+                    {% if product_description != blank %}
+                      <p class="stagmenfashion-story-card__excerpt">{{ product_description }}</p>
+                    {% endif %}
+
+                    <div class="stagmenfashion-story-card__separator"></div>
+
+                    <div class="stagmenfashion-story-card__footer">
+                      <div class="stagmenfashion-story-card__price-wrap">
+                        <span class="stagmenfashion-story-card__price">{{ product_price }}</span>
+                        {% if product_compare != blank %}
+                          <span class="stagmenfashion-story-card__compare">{{ product_compare }}</span>
+                        {% endif %}
+                      </div>
+
+                      {% form 'product', product, class: 'stagmenfashion-story-card__form' %}
+                        <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                        <button type="submit" class="stagmenfashion-story-card__cta" data-stagmenfashion-story-add>Add</button>
+                      {% endform %}
+                    </div>
+                  </div>
+                </article>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+  .stagmenfashion-story-collections {
+    background: linear-gradient(180deg, rgb(255 255 255 / 1), rgb(255 250 252 / 1));
+    color: #231821;
+  }
+
+  .stagmenfashion-story-collections__shell {
+    padding: clamp(42px, 6vw, 84px) clamp(14px, 3vw, 28px);
+  }
+
+  .stagmenfashion-story-collections__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 22px;
+    min-width: 0;
+  }
+
+  .stagmenfashion-story-collections__heading-wrap {
+    max-width: 62rem;
+    min-width: 0;
+  }
+
+  .stagmenfashion-story-collections__heading {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+    line-height: 0.98;
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    color: var(--color-primary);
+    text-shadow:
+      0 0 18px rgb(var(--color-primary-rgb) / 0.14),
+      0 1px 0 rgb(255 255 255 / 0.9);
+  }
+
+  .stagmenfashion-story-collections__subtext {
+    max-width: 48rem;
+    margin-top: 12px;
+    font-size: clamp(0.98rem, 0.92rem + 0.2vw, 1.08rem);
+    line-height: 1.6;
+    color: rgb(var(--color-primary-rgb) / 0.72);
+  }
+
+  .stagmenfashion-story-collections__subtext > * {
+    margin: 0;
+  }
+
+  .stagmenfashion-story-collections__see-all {
+    flex: 0 0 auto;
+    margin-top: 8px;
+    color: var(--color-primary);
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .stagmenfashion-story-collections__stories {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .stagmenfashion-story-collections__stories::-webkit-scrollbar {
+    display: none;
+  }
+
+  .stagmenfashion-story-collections__story {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    min-width: 76px;
+    max-width: 76px;
+    cursor: pointer;
+    text-align: center;
+    color: rgb(92 69 82 / 0.68);
+    font: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stagmenfashion-story-collections__story-ring {
+    display: grid;
+    place-items: center;
+    width: 74px;
+    height: 74px;
+    margin: 0 auto 8px;
+    padding: 3px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgb(255 255 255 / 1), rgb(255 255 255 / 1));
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 1), 0 0 0 3px rgb(var(--color-primary-rgb) / 0.14);
+  }
+
+  .stagmenfashion-story-collections__story.is-active .stagmenfashion-story-collections__story-ring {
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 1),
+      0 0 0 3px var(--color-primary),
+      0 10px 22px rgb(var(--color-primary-rgb) / 0.18);
+  }
+
+  .stagmenfashion-story-collections__story-image,
+  .stagmenfashion-story-collections__story-fallback {
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    object-fit: cover;
+    object-position: center center;
+    display: grid;
+    place-items: center;
+  }
+
+  .stagmenfashion-story-collections__story-fallback {
+    background: linear-gradient(180deg, rgb(var(--color-primary-rgb) / 0.18), rgb(255 255 255 / 1));
+    color: var(--color-primary);
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+
+  .stagmenfashion-story-collections__story-label {
+    display: block;
+    width: 100%;
+    margin-top: 2px;
+    min-height: 2.2em;
+    font-size: 0.76rem;
+    line-height: 1.2;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .stagmenfashion-story-collections__story.is-active {
+    color: var(--color-primary);
+  }
+
+  .stagmenfashion-story-collections__panels {
+    margin-top: 22px;
+  }
+
+  .stagmenfashion-story-collections__panel {
+    animation: stagStoryFade 0.34s ease;
+  }
+
+  .stagmenfashion-story-collections__carousel {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .stagmenfashion-story-card {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    border-radius: 24px;
+    background: rgb(255 255 255 / 0.98);
+    border: 1px solid rgb(30 30 30 / 0.08);
+    box-shadow: 0 10px 28px rgb(30 30 30 / 0.08);
+  }
+
+  .stagmenfashion-story-card__media-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .stagmenfashion-story-card__media {
+    position: relative;
+    aspect-ratio: 0.88;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgb(255 248 252 / 1), rgb(255 255 255 / 1));
+  }
+
+  .stagmenfashion-story-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.4s ease, transform 0.6s ease;
+  }
+
+  .stagmenfashion-story-card__image--secondary {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1.04);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .stagmenfashion-story-card__media--hover:hover .stagmenfashion-story-card__image--primary,
+    .stagmenfashion-story-card__media--hover:focus-within .stagmenfashion-story-card__image--primary {
+      opacity: 0;
+      transform: scale(1.03);
+    }
+
+    .stagmenfashion-story-card__media--hover:hover .stagmenfashion-story-card__image--secondary,
+    .stagmenfashion-story-card__media--hover:focus-within .stagmenfashion-story-card__image--secondary {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .stagmenfashion-story-card__review-chip {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgb(255 255 255 / 0.96);
+    box-shadow: 0 6px 16px rgb(30 30 30 / 0.12);
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #2b1d25;
+  }
+
+  .stagmenfashion-story-card__stars {
+    display: inline-flex;
+    gap: 1px;
+    color: var(--color-primary);
+    line-height: 1;
+  }
+
+  .stagmenfashion-story-card__stars .is-dim {
+    opacity: 0.22;
+  }
+
+  .stagmenfashion-story-card__content {
+    padding: 18px 18px 20px;
+  }
+
+  .stagmenfashion-story-card__title-link {
+    color: inherit;
+    text-decoration: none;
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+    position: relative;
+  }
+
+  .stagmenfashion-story-card__title {
+    margin: 0;
+    font-size: 1.18rem;
+    line-height: 1.18;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #161616;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    white-space: normal;
+    position: relative;
+  }
+
+  .stagmenfashion-story-card__title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1.5px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left bottom;
+    transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .stagmenfashion-story-card__title-link:hover .stagmenfashion-story-card__title::after {
+    transform: scaleX(1);
+  }
+
+  .stagmenfashion-story-card__excerpt {
+    margin: 10px 0 0;
+    min-height: 2.9em;
+    font-size: 0.86rem;
+    line-height: 1.4;
+    color: rgb(53 53 58 / 0.62);
+  }
+
+  .stagmenfashion-story-card__separator {
+    margin-top: 14px;
+    border-top: 1px solid rgb(30 30 30 / 0.18);
+  }
+
+  .stagmenfashion-story-card__footer {
+    margin-top: 14px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .stagmenfashion-story-card__price-wrap {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stagmenfashion-story-card__price {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1c1c1c;
+  }
+
+  .stagmenfashion-story-card__compare {
+    font-size: 0.84rem;
+    color: rgb(53 53 58 / 0.45);
+    text-decoration: line-through;
+  }
+
+  .stagmenfashion-story-card__form {
+    margin: 0;
+    flex: 0 0 auto;
+  }
+
+  .stagmenfashion-story-card__cta {
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    min-width: 76px;
+    min-height: 42px;
+    padding: 0 18px;
+    border-radius: 10px;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-size: 0.98rem;
+    font-weight: 800;
+    box-shadow: 0 12px 24px rgb(var(--color-primary-rgb) / 0.2);
+  }
+
+  @keyframes stagStoryFade {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .stagmenfashion-story-collections__shell {
+      padding: 28px 8px 36px;
+    }
+
+    .stagmenfashion-story-collections__top {
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stagmenfashion-story-collections__heading-wrap {
+      max-width: calc(100% - 92px);
+    }
+
+    .stagmenfashion-story-collections__see-all {
+      margin-left: auto;
+      margin-top: 0;
+      font-size: 0.98rem;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .stagmenfashion-story-collections__stories {
+      gap: 14px;
+    }
+
+    .stagmenfashion-story-collections__story {
+      min-width: 70px;
+      max-width: 70px;
+    }
+
+    .stagmenfashion-story-collections__story-ring {
+      width: 66px;
+      height: 66px;
+      padding: 2px;
+    }
+
+    .stagmenfashion-story-collections__carousel {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stagmenfashion-story-card {
+      border-radius: 18px;
+    }
+
+    .stagmenfashion-story-card__content {
+      padding: 12px 12px 14px;
+    }
+
+    .stagmenfashion-story-card__title {
+      font-size: 0.96rem;
+    }
+
+    .stagmenfashion-story-card__excerpt {
+      margin-top: 6px;
+      font-size: 0.72rem;
+      min-height: 2.4em;
+    }
+
+    .stagmenfashion-story-card__footer {
+      margin-top: 10px;
+      align-items: center;
+    }
+
+    .stagmenfashion-story-card__price {
+      font-size: 0.84rem;
+    }
+
+    .stagmenfashion-story-card__cta {
+      min-width: 58px;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+    }
+
+    .stagmenfashion-story-card__review-chip {
+      left: 10px;
+      bottom: 10px;
+      padding: 5px 8px;
+      font-size: 0.7rem;
+    }
+  }
+</style>
+
+{% javascript %}
+  (() => {
+    const initChibiStories = (scope = document) => {
+      scope.querySelectorAll('[data-stagmenfashion-story-collections]').forEach((section) => {
+        if (section.dataset.ready === 'true') return;
+        section.dataset.ready = 'true';
+
+        const tabs = Array.from(section.querySelectorAll('[data-story-tab]'));
+        const panels = Array.from(section.querySelectorAll('[data-story-panel]'));
+        const seeAll = section.querySelector('[data-story-see-all]');
+        const cartAddUrl = section.dataset.cartAddUrl || '/cart/add';
+
+        if (!tabs.length || !panels.length) return;
+
+        const activate = (targetId) => {
+          tabs.forEach((tab) => {
+            const isActive = tab.dataset.storyTarget === targetId;
+            tab.classList.toggle('is-active', isActive);
+            tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+          });
+
+          panels.forEach((panel) => {
+            const isActive = panel.id === targetId;
+            panel.hidden = !isActive;
+            panel.classList.toggle('is-active', isActive);
+
+            if (isActive && seeAll && panel.dataset.storyUrl) {
+              seeAll.href = panel.dataset.storyUrl;
+            }
+          });
+        };
+
+        tabs.forEach((tab) => tab.addEventListener('click', () => activate(tab.dataset.storyTarget)));
+
+        section.querySelectorAll('[data-stagmenfashion-story-add]').forEach((button) => {
+          button.addEventListener('click', async (event) => {
+            event.preventDefault();
+
+            const form = button.closest('form');
+            const variantId = form?.querySelector('input[name="id"]')?.value;
+            if (!variantId) return;
+
+            button.disabled = true;
+
+            try {
+              const response = await fetch(`${cartAddUrl}.js`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Accept: 'application/json',
+                },
+                body: JSON.stringify({ id: Number(variantId), quantity: 1 }),
+              });
+
+              const cart = await response.json();
+              if (!response.ok || cart?.status) throw new Error(cart?.description || cart?.message || 'Add to cart failed');
+
+              document.dispatchEvent(
+                new CustomEvent('cart:update', {
+                  bubbles: true,
+                  detail: {
+                    resource: cart,
+                    data: {
+                      source: 'stagmenfashion-story-collections',
+                      itemCount: cart.item_count,
+                    },
+                  },
+                })
+              );
+
+              document.querySelector('[data-testid="cart-drawer-trigger"]')?.click();
+            } catch (error) {
+              console.error(error);
+            } finally {
+              button.disabled = false;
+            }
+          });
+        });
+
+        const activeTab = tabs.find((tab) => tab.classList.contains('is-active')) || tabs[0];
+        if (activeTab?.dataset.storyTarget) {
+          activate(activeTab.dataset.storyTarget);
+        }
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => initChibiStories());
+    document.addEventListener('shopify:section:load', (event) => initChibiStories(event.target));
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Story Collections",
+  "settings": [
+    {
+      "type": "collection_list",
+      "id": "collection_list",
+      "label": "Story collections"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "stagmenfashion Stories"
+    },
+    {
+      "type": "richtext",
+      "id": "subtext",
+      "label": "Subtext",
+      "default": "<p>Tap a story to explore the matching collection in a smooth carousel view.</p>"
+    },
+    {
+      "type": "text",
+      "id": "see_all_text",
+      "label": "See all text",
+      "default": "See All"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Story Collections"
+    }
+  ]
+}
+{% endschema %}

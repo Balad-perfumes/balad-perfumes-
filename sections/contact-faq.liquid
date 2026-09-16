@@ -1,0 +1,316 @@
+<section
+  class="pf-contact-faq color-{{ section.settings.color_scheme }}"
+  style="--faq-pt: {{ section.settings.padding_top | default: 20 }}px; --faq-pb: {{ section.settings.padding_bottom | default: 28 }}px;"
+>
+  <div class="pf-contact-shell">
+    <div class="pf-contact-faq__container">
+      
+      <div class="pf-contact-faq__head">
+        {% if section.settings.eyebrow != blank %}
+          <span class="pf-contact-faq__eyebrow">{{ section.settings.eyebrow }}</span>
+        {% endif %}
+        {% if section.settings.heading != blank %}
+          <h2 class="pf-contact-faq__title">{{ section.settings.heading }}</h2>
+        {% endif %}
+        {% if section.settings.subheading != blank %}
+          <p class="pf-contact-faq__desc">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </div>
+
+      <div class="pf-contact-faq__accordion" data-contact-faq-list>
+        {% for block in section.blocks %}
+          <details class="pf-faq-item" name="contact-faq-{{ section.id }}" {{ block.shopify_attributes }}{% if forloop.first and section.settings.open_first %} open{% endif %}>
+            <summary class="pf-faq-summary">
+              <span class="pf-faq-question">{{ block.settings.question }}</span>
+              <span class="pf-faq-toggle-icon" aria-hidden="true">
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path class="pf-faq-icon-line-h" d="M3 8h10"/>
+                  <path class="pf-faq-icon-line-v" d="M8 3v10"/>
+                </svg>
+              </span>
+            </summary>
+            <div class="pf-faq-content rte">
+              {{ block.settings.answer }}
+            </div>
+          </details>
+        {% endfor %}
+      </div>
+
+      <script>
+        (() => {
+          const setupAccordion = (list) => {
+            if (!list || list.__faqExclusiveBound) return;
+            list.__faqExclusiveBound = true;
+
+            const details = list.querySelectorAll('.pf-faq-item');
+            details.forEach((item) => {
+              item.addEventListener('toggle', () => {
+                if (item.open) {
+                  details.forEach((other) => {
+                    if (other !== item && other.open) {
+                      other.open = false;
+                    }
+                  });
+                }
+              });
+            });
+          };
+
+          document.querySelectorAll('[data-contact-faq-list]').forEach(setupAccordion);
+
+          document.addEventListener('shopify:section:load', (e) => {
+            const list = e.target.querySelector('[data-contact-faq-list]');
+            if (list) setupAccordion(list);
+          });
+        })();
+      </script>
+
+      {% if section.settings.footer_note != blank %}
+        <div class="pf-contact-faq__footer-note">
+          <p>{{ section.settings.footer_note }}</p>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .pf-contact-shell {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 36px;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 749px) {
+    .pf-contact-shell {
+      padding: 0 10px;
+    }
+  }
+
+  .pf-contact-faq {
+    padding-top: var(--faq-pt, 48px);
+    padding-bottom: var(--faq-pb, 64px);
+  }
+
+  .pf-contact-faq__container {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .pf-contact-faq__head {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .pf-contact-faq__eyebrow {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: currentColor;
+    opacity: 0.6;
+    margin-bottom: 8px;
+  }
+
+  .pf-contact-faq__title {
+    margin: 0;
+    font-family: var(--font-heading--family), sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--color-foreground-heading, #111111);
+  }
+
+  .pf-contact-faq__desc {
+    margin: 8px auto 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: currentColor;
+    opacity: 0.75;
+    max-width: 48ch;
+  }
+
+  .pf-contact-faq__accordion {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .pf-faq-item {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease;
+  }
+
+  .pf-faq-summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px 0;
+    user-select: none;
+  }
+
+  .pf-faq-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .pf-faq-question {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--color-foreground-heading, #111111);
+    letter-spacing: -0.01em;
+    transition: opacity 0.2s ease;
+  }
+
+  .pf-faq-summary:hover .pf-faq-question {
+    color: #0800CF;
+    opacity: 1;
+  }
+
+  .pf-faq-toggle-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(8, 0, 207, 0.06);
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    color: #0800CF;
+    transition: background 0.2s ease, transform 0.25s ease, color 0.2s ease;
+  }
+
+  .pf-faq-summary:hover .pf-faq-toggle-icon {
+    background: #0800CF;
+    color: #ffffff;
+  }
+
+  .pf-faq-icon-line-v {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+    transform-origin: center;
+  }
+
+  .pf-faq-item[open] .pf-faq-icon-line-v {
+    transform: rotate(90deg);
+    opacity: 0;
+  }
+
+  .pf-faq-item[open] .pf-faq-toggle-icon {
+    background: #0800CF;
+    color: #ffffff;
+  }
+
+  .pf-faq-content {
+    padding: 0 0 22px 0;
+    font-size: 14px;
+    line-height: 1.65;
+    color: currentColor;
+    opacity: 0.78;
+    max-width: 68ch;
+  }
+
+  .pf-faq-content p {
+    margin: 0 0 12px;
+  }
+
+  .pf-faq-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  .pf-contact-faq__footer-note {
+    margin-top: 32px;
+    text-align: center;
+    padding: 16px 20px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.03);
+    font-size: 13px;
+    color: currentColor;
+    opacity: 0.8;
+  }
+
+  .pf-contact-faq__footer-note p {
+    margin: 0;
+  }
+
+  @media screen and (max-width: 640px) {
+    .pf-faq-summary {
+      padding: 16px 0;
+    }
+
+    .pf-faq-question {
+      font-size: 15px;
+    }
+
+    .pf-faq-content {
+      padding-bottom: 18px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Contact FAQ",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Common Questions" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Frequently asked questions" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Quick answers to help guide your shopping and styling experience." },
+    { "type": "checkbox", "id": "open_first", "label": "Open first item by default", "default": true },
+    { "type": "textarea", "id": "footer_note", "label": "Footer help note", "default": "Can't find what you're looking for? Feel free to contact our team directly above." },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 2, "unit": "px", "label": "Top padding", "default": 20 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 2, "unit": "px", "label": "Bottom padding", "default": 28 }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ Question",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question", "default": "How long do you take to respond to inquiries?" },
+        { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p>We typically review and respond to all email and form submissions within 2–4 hours during standard studio hours (Mon–Sat, 10 AM to 6:30 PM IST).</p>" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Contact FAQ",
+      "blocks": [
+        {
+          "type": "faq",
+          "settings": {
+            "question": "How quickly do you respond to inquiries?",
+            "answer": "<p>Our concierge team typically reviews and replies to all messages within 2 to 4 business hours.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Do you offer Cash on Delivery and Pan-India shipping?",
+            "answer": "<p>Yes! We offer COD across most pincodes in India and express doorstep delivery with end-to-end tracking.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "How do I choose the right size and fit?",
+            "answer": "<p>Our pieces feature contemporary relaxed, boxy, and tailored silhouettes for men. Check the size chart on each product page or reach out to our stylists for personalized size recommendations.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "What is your return and exchange policy?",
+            "answer": "<p>We offer hassle-free 7-day exchanges on all unworn items with tags intact if you ever need a different size or fit.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

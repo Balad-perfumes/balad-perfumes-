@@ -1,0 +1,2443 @@
+{% liquid
+  assign header_logo = settings.logo
+  assign logo_height = settings.logo_height | default: 36
+  assign logo_height_mobile = settings.logo_height_mobile | default: 28
+
+  if header_logo != blank
+    assign logo_width = logo_height | times: header_logo.aspect_ratio | ceil
+    assign logo_width_mobile = logo_height_mobile | times: header_logo.aspect_ratio | ceil
+  else
+    assign logo_width = 'auto'
+    assign logo_width_mobile = 'auto'
+  endif
+  assign selected_menu = section.settings.menu | default: 'main-menu'
+  assign main_menu = linklists[selected_menu]
+  assign brand_name = section.settings.brand_name | default: settings.brand_name | default: 'stagmenfashion'
+  assign logo_alt = brand_name
+  assign use_cart_drawer = section.settings.enable_cart_drawer
+  assign force_white_header = false
+  assign has_about_link = false
+  assign is_about_page = false
+
+  if template.name == 'collection' or template.name == 'search' or template.name == 'product'
+    assign force_white_header = true
+  endif
+
+  if template.name == 'page' and template.suffix == 'about'
+    assign is_about_page = true
+  elsif request.path contains '/pages/about'
+    assign is_about_page = true
+  endif
+
+  if header_logo != blank and header_logo.alt != blank
+    assign logo_alt = header_logo.alt
+  endif
+
+  if main_menu != blank and main_menu.links.size > 0
+    for link in main_menu.links
+      assign link_url = link.url | downcase
+      assign link_title = link.title | downcase
+      if link_url contains '/pages/about' or link_title contains 'about'
+        assign has_about_link = true
+        break
+      endif
+    endfor
+  endif
+%}
+
+<header
+  class="stagmenfashion-header color-{{ section.settings.color_scheme }}{% if template.name == 'index' or is_about_page %} stagmenfashion-header--hero-overlay{% endif %}{% if is_about_page %} stagmenfashion-header--about-page{% endif %}"
+  data-scrolled="false"
+  style="--stagmenfashion-header-background: {% if is_about_page %}transparent{% elsif force_white_header %}#ffffff{% else %}{{ section.settings.header_background }}{% endif %};"
+>
+  <div class="stagmenfashion-header__shell section section--full-width">
+    <div class="stagmenfashion-header__left">
+      <button
+        type="button"
+        class="stagmenfashion-header__icon-button stagmenfashion-header__menu-toggle"
+        data-open-mobile-menu
+        aria-label="Open categories"
+      >
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M5 7h14M5 12h14M5 17h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      {% if section.settings.show_search %}
+        <a class="stagmenfashion-header__icon-button stagmenfashion-header__search-button stagmenfashion-header__search-button--mobile" href="{{ routes.search_url }}" aria-label="Search">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"></circle>
+            <path d="M16 16l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+          </svg>
+        </a>
+      {% endif %}
+
+      <div class="stagmenfashion-header__mobile-nav">
+        {% render 'header-drawer', linklist: main_menu, class: 'stagmenfashion-header__mobile-nav-drawer', data_header_drawer_type: 'mobile-drawer', section: section %}
+      </div>
+
+      <a class="stagmenfashion-header__brand" href="{{ routes.root_url }}" aria-label="{{ brand_name | escape }}">
+        {% if header_logo != blank %}
+          {% capture logo_style %}--logo-height: {{ logo_height }}px; --logo-width: {{ logo_width }}px; --logo-height-mobile: {{ logo_height_mobile }}px; --logo-width-mobile: {{ logo_width_mobile }}px;{% endcapture %}
+          {{
+            header_logo
+            | image_url: width: 640
+            | image_tag:
+              class: 'stagmenfashion-header__logo-image stagmenfashion-header__logo-image--default',
+              widths: '160, 240, 320, 480, 640',
+              loading: 'eager',
+              alt: logo_alt,
+              style: logo_style
+          }}
+          {% if settings.logo_inverse != blank %}
+            {% liquid
+              if settings.logo_inverse != blank
+                assign inverse_logo_width = logo_height | times: settings.logo_inverse.aspect_ratio | ceil
+                assign inverse_logo_width_mobile = logo_height_mobile | times: settings.logo_inverse.aspect_ratio | ceil
+              else
+                assign inverse_logo_width = 'auto'
+                assign inverse_logo_width_mobile = 'auto'
+              endif
+            %}
+            {% capture inverse_logo_style %}--logo-height: {{ logo_height }}px; --logo-width: {{ inverse_logo_width }}px; --logo-height-mobile: {{ logo_height_mobile }}px; --logo-width-mobile: {{ inverse_logo_width_mobile }}px;{% endcapture %}
+            {{
+              settings.logo_inverse
+              | image_url: width: 640
+              | image_tag:
+                class: 'stagmenfashion-header__logo-image stagmenfashion-header__logo-image--inverse',
+                widths: '160, 240, 320, 480, 640',
+                loading: 'eager',
+                alt: logo_alt,
+                style: inverse_logo_style
+            }}
+          {% endif %}
+        {% else %}
+          <span class="stagmenfashion-header__logo-text">{{ brand_name }}</span>
+        {% endif %}
+      </a>
+    </div>
+
+    <div class="stagmenfashion-header__center">
+      {% if main_menu != blank and main_menu.links.size > 0 %}
+        <nav class="stagmenfashion-header__nav" aria-label="Primary navigation">
+          <ul class="stagmenfashion-header__nav-list" role="list">
+          {% for link in main_menu.links %}
+              {% liquid
+                assign child_active = false
+                for child_link in link.links
+                  if child_link.current
+                    assign child_active = true
+                    break
+                  endif
+                endfor
+                assign link_active = false
+                if link.current or child_active
+                  assign link_active = true
+                endif
+              %}
+              <li class="stagmenfashion-header__nav-item">
+                {% if link.links != blank %}
+                  <details class="stagmenfashion-header__dropdown">
+                    <summary class="stagmenfashion-header__nav-link{% if link_active %} is-active{% endif %}">
+                      <span>{{ link.title | escape }}</span>
+                      <span class="stagmenfashion-header__desktop-caret"></span>
+                    </summary>
+                    <div class="stagmenfashion-header__dropdown-panel">
+                      <ul class="stagmenfashion-header__dropdown-list" role="list">
+                        {% for child_link in link.links %}
+                          <li>
+                            <a class="stagmenfashion-header__dropdown-link{% if child_link.current %} is-current{% endif %}" href="{{ child_link.url }}">
+                              {{ child_link.title | escape }}
+                            </a>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  </details>
+                {% else %}
+                  <a class="stagmenfashion-header__nav-link{% if link.current %} is-active{% endif %}" href="{{ link.url }}">
+                    <span>{{ link.title | escape }}</span>
+                  </a>
+              {% endif %}
+            </li>
+          {% endfor %}
+          {% unless has_about_link %}
+            <li class="stagmenfashion-header__nav-item">
+              <a class="stagmenfashion-header__nav-link{% if request.path contains '/pages/about' %} is-active{% endif %}" href="/pages/about">
+                <span>About</span>
+              </a>
+            </li>
+          {% endunless %}
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+
+    <div class="stagmenfashion-header__right">
+      {% if section.settings.show_search %}
+        <a class="stagmenfashion-header__icon-button stagmenfashion-header__search-button stagmenfashion-header__search-button--desktop" href="{{ routes.search_url }}" aria-label="Search">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"></circle>
+            <path d="M16 16l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+          </svg>
+        </a>
+      {% endif %}
+
+      {% if section.settings.show_account %}
+        <a class="stagmenfashion-header__icon-button" href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" aria-label="Account">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      {% endif %}
+
+      {% if use_cart_drawer and template.name != 'cart' %}
+        <script
+          src="{{ 'cart-drawer.js' | asset_url }}"
+          type="module"
+          fetchpriority="low"
+        ></script>
+
+        {% capture empty_cart_drawer_content %}
+          <div class="cart-drawer__header">
+            <button
+              ref="closeButton"
+              on:click="cart-drawer-component/close"
+              class="button close-button cart-drawer__close-button button-unstyled"
+              aria-label="{{ 'actions.close_dialog' | t }}"
+            >
+              <span class="svg-wrapper">
+                {{- 'icon-close.svg' | inline_asset_content -}}
+              </span>
+            </button>
+          </div>
+
+          <div
+            class="cart-drawer__content"
+            aria-label="{{ 'accessibility.cart' | t }}"
+          >
+            <h2
+              class="cart-drawer__heading h4 cart-drawer__heading--empty"
+              id="cart-drawer-heading-empty"
+            >
+              {{ 'content.your_cart_is_empty' | t }}
+            </h2>
+
+            <div class="cart-drawer__items">
+              {% render 'cart-products', force_empty: true %}
+            </div>
+          </div>
+        {% endcapture %}
+
+        {% assign drawer_recommendation_cards = '' %}
+        {% assign drawer_recommendation_count = 0 %}
+
+        {% if cart != empty %}
+          {% for recommended_product in collections.all.products limit: 12 %}
+            {% if drawer_recommendation_count >= 4 %}
+              {% break %}
+            {% endif %}
+
+            {% assign recommended_in_cart = false %}
+            {% for cart_item in cart.items %}
+              {% if cart_item.product_id == recommended_product.id %}
+                {% assign recommended_in_cart = true %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+
+            {% unless recommended_in_cart or recommended_product.available == false %}
+              {% capture drawer_recommendation_card %}
+                <article class="cart-drawer__recommendation-slide" data-cart-drawer-recommendation-slide>
+                  <a class="cart-drawer__recommendation-card" href="{{ recommended_product.url }}">
+                    <span class="cart-drawer__recommendation-media">
+                      {%- if recommended_product.featured_image -%}
+                        {{
+                          recommended_product.featured_image
+                          | image_url: width: 360
+                          | image_tag:
+                            class: 'cart-drawer__recommendation-image',
+                            loading: 'lazy',
+                            alt: recommended_product.title
+                        }}
+                      {%- endif -%}
+                    </span>
+
+                    <span class="cart-drawer__recommendation-copy">
+                      <span class="cart-drawer__recommendation-title">
+                        {{ recommended_product.title | escape }}
+                      </span>
+
+                      <span class="cart-drawer__recommendation-price">
+                        {% if recommended_product.compare_at_price > recommended_product.price %}
+                          <s>{{ recommended_product.compare_at_price | money }}</s>
+                        {% endif %}
+                        <span>{{ recommended_product.price | money }}</span>
+                      </span>
+                    </span>
+
+                    <span class="cart-drawer__recommendation-eye" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                        <circle cx="12" cy="12" r="2.6" stroke="currentColor" stroke-width="1.7"/>
+                      </svg>
+                    </span>
+                  </a>
+                </article>
+              {% endcapture %}
+
+              {% assign drawer_recommendation_cards = drawer_recommendation_cards | append: drawer_recommendation_card %}
+              {% assign drawer_recommendation_count = drawer_recommendation_count | plus: 1 %}
+            {% endunless %}
+          {% endfor %}
+        {% endif %}
+
+        <cart-drawer-component
+          class="cart-drawer"
+          {% if section.settings.auto_open_cart_drawer %}
+            auto-open
+          {% endif %}
+        >
+          <template id="empty-cart-template">
+            {{ empty_cart_drawer_content }}
+          </template>
+          <button
+            class="stagmenfashion-header__icon-button stagmenfashion-header__cart-button"
+            on:click="/open"
+            aria-haspopup="dialog"
+            aria-label="Cart"
+            aria-describedby="cart-bubble-text"
+            data-testid="cart-drawer-trigger"
+          >
+            <span class="svg-wrapper" aria-hidden="true" style="line-height:0; display:inline-flex;">
+              {% if section.settings.custom_cart_icon != blank %}
+                {{
+                  section.settings.custom_cart_icon
+                  | image_url: width: 60
+                  | image_tag: class: 'stagmenfashion-header__custom-icon', loading: 'lazy', alt: 'Cart'
+                }}
+              {% else %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:22px; height:22px;">
+                  <circle cx="8.5" cy="20.5" r="1.5"></circle>
+                  <circle cx="18.5" cy="20.5" r="1.5"></circle>
+                  <path d="M2.5 2.5h3l2.7 12.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6l2.3-8.4H5.8"></path>
+                </svg>
+              {% endif %}
+            </span>
+            {% if cart != empty %}
+              <span class="stagmenfashion-header__cart-count">{{ cart.item_count }}</span>
+            {% endif %}
+          </button>
+
+          <dialog
+            ref="dialog"
+            class="cart-drawer__dialog dialog-modal dialog-drawer color-{{ settings.drawer_color_scheme }}{% if cart.empty? %} cart-drawer--empty{% endif %}"
+            data-testid="cart-drawer-dialog"
+            aria-labelledby="{% if cart.empty? %}cart-drawer-heading-empty{% else %}cart-drawer-heading{% endif %}"
+            scroll-lock
+            cart-summary-sticky="true"
+          >
+            <span
+              ref="liveRegion"
+              class="visually-hidden"
+              role="status"
+            ></span>
+            <div
+              class="cart-drawer__inner"
+              data-hydration-key="cart-drawer-inner"
+            >
+              {% capture cart_items_children %}
+                {%- if cart.empty? -%}
+                  {{ empty_cart_drawer_content }}
+                {%- else -%}
+                  <div
+                    class="cart-drawer__header"
+                    id="cart-drawer-header"
+                  >
+                    <h2
+                      class="cart-drawer__heading h4"
+                      id="cart-drawer-heading"
+                    >
+                      Shopping Bag
+                      {% render 'cart-bubble' %}
+                    </h2>
+
+                    <button
+                      ref="closeButton"
+                      on:click="cart-drawer-component/close"
+                      class="button close-button cart-drawer__close-button button-unstyled"
+                      aria-label="{{ 'actions.close_dialog' | t }}"
+                    >
+                      <span class="svg-wrapper">
+                        {{- 'icon-close.svg' | inline_asset_content -}}
+                      </span>
+                    </button>
+                  </div>
+
+                  <scroll-hint
+                    class="cart-drawer__content"
+                    aria-label="{{ 'accessibility.cart' | t }}"
+                    style="--header-height: 60px;"
+                  >
+                    <div class="cart-drawer__scroll-body">
+                      <scroll-hint class="cart-drawer__items">
+                        {% render 'cart-products' %}
+                      </scroll-hint>
+
+                      {% if drawer_recommendation_cards != blank %}
+                        <section class="cart-drawer__recommendations" data-cart-drawer-recommendations>
+                          <div class="cart-drawer__recommendations-card">
+                            <div class="cart-drawer__recommendations-header">
+                              <h3 class="cart-drawer__recommendations-title">You may also like</h3>
+                            </div>
+
+                            <div class="cart-drawer__recommendations-viewport" data-cart-drawer-recommendations-viewport>
+                              <div class="cart-drawer__recommendations-track">
+                                {{ drawer_recommendation_cards }}
+                              </div>
+                            </div>
+
+                            <div class="cart-drawer__recommendations-controls">
+                                <button
+                                  type="button"
+                                  class="cart-drawer__recommendations-arrow"
+                                  data-cart-drawer-recommendations-prev
+                                  aria-label="Previous recommendation"
+                                >
+                                  <span aria-hidden="true">‹</span>
+                                </button>
+
+                                <div
+                                  class="cart-drawer__recommendations-dots"
+                                  aria-label="Recommendation slides"
+                                >
+                                  {% for i in (1..drawer_recommendation_count) %}
+                                    <button
+                                      type="button"
+                                      class="cart-drawer__recommendations-dot{% if forloop.first %} is-active{% endif %}"
+                                      data-cart-drawer-recommendation-dot="{{ forloop.index0 }}"
+                                      aria-label="Go to recommendation {{ forloop.index }}"
+                                      {% if forloop.first %}aria-current="true"{% endif %}
+                                    ></button>
+                                  {% endfor %}
+                                </div>
+
+                                <button
+                                  type="button"
+                                  class="cart-drawer__recommendations-arrow"
+                                  data-cart-drawer-recommendations-next
+                                  aria-label="Next recommendation"
+                                >
+                                  <span aria-hidden="true">›</span>
+                                </button>
+                              </div>
+                            </div>
+                          </section>
+                        {% endif %}
+                    </div>
+
+                    <div class="cart-drawer__summary">
+                      {% render 'cart-summary', section_id: section.id, show_view_cart_button: false %}
+                    </div>
+                  </scroll-hint>
+                {%- endif -%}
+{% endcapture %}
+              {% render 'cart-items-component', children: cart_items_children, is_drawer: true, section_id: section.id %}
+            </div>
+          </dialog>
+        </cart-drawer-component>
+      {% else %}
+        <a class="stagmenfashion-header__icon-button stagmenfashion-header__cart-button" href="{{ routes.cart_url }}" aria-label="Cart">
+          <span class="svg-wrapper" aria-hidden="true" style="line-height:0; display:inline-flex;">
+            {% if section.settings.custom_cart_icon != blank %}
+              {{
+                section.settings.custom_cart_icon
+                | image_url: width: 60
+                | image_tag: class: 'stagmenfashion-header__custom-icon', loading: 'lazy', alt: 'Cart'
+              }}
+            {% else %}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:22px; height:22px;">
+                <circle cx="8.5" cy="20.5" r="1.5"></circle>
+                <circle cx="18.5" cy="20.5" r="1.5"></circle>
+                <path d="M2.5 2.5h3l2.7 12.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6l2.3-8.4H5.8"></path>
+              </svg>
+            {% endif %}
+          </span>
+          {% if cart != empty %}
+            <span class="stagmenfashion-header__cart-count">{{ cart.item_count }}</span>
+          {% endif %}
+        </a>
+      {% endif %}
+
+    </div>
+  </div>
+</header>
+
+<nav class="stagmenfashion-mobile-tabs" aria-label="Mobile quick navigation">
+  <a class="stagmenfashion-mobile-tabs__item{% if request.page_type == 'index' %} is-active{% endif %}" href="{{ routes.root_url }}" aria-label="Home">
+    <span class="stagmenfashion-mobile-tabs__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M4 11.5 12 5l8 6.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M6.5 10.5V20h4.5v-5h2v5h4.5v-9.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+    <span class="stagmenfashion-mobile-tabs__label">Home</span>
+  </a>
+
+  <a class="stagmenfashion-mobile-tabs__item" href="{{ routes.search_url }}" aria-label="Search">
+    <span class="stagmenfashion-mobile-tabs__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/>
+        <path d="M16.2 16.2 20 20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span class="stagmenfashion-mobile-tabs__label">Search</span>
+  </a>
+
+  <a class="stagmenfashion-mobile-tabs__item{% if request.page_type == 'collection' or request.page_type == 'search' and request.path contains '/collections' %} is-active{% endif %}" href="{{ routes.all_products_collection_url }}" aria-label="Shop">
+    <span class="stagmenfashion-mobile-tabs__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M4.5 8.5h15l-1.2 10h-12.6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+        <path d="M8 8.5c0-2.4 1.8-4.3 4-4.3s4 1.9 4 4.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span class="stagmenfashion-mobile-tabs__label">Shop</span>
+  </a>
+
+  {% if use_cart_drawer and template.name != 'cart' %}
+    <button
+      type="button"
+      class="stagmenfashion-mobile-tabs__item"
+      data-open-cart-drawer
+      aria-label="Cart"
+    >
+      <span class="stagmenfashion-mobile-tabs__icon" aria-hidden="true">
+        {% if section.settings.custom_cart_icon != blank %}
+          {{
+            section.settings.custom_cart_icon
+            | image_url: width: 60
+            | image_tag: class: 'stagmenfashion-mobile-tabs__custom-icon', loading: 'lazy', alt: 'Cart'
+          }}
+        {% else %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="8.5" cy="20.5" r="1.5"></circle>
+            <circle cx="18.5" cy="20.5" r="1.5"></circle>
+            <path d="M2.5 2.5h3l2.7 12.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6l2.3-8.4H5.8"></path>
+          </svg>
+        {% endif %}
+        {% if cart != empty %}
+          <span class="stagmenfashion-mobile-tabs__badge">{{ cart.item_count }}</span>
+        {% endif %}
+      </span>
+      <span class="stagmenfashion-mobile-tabs__label">Cart</span>
+    </button>
+  {% else %}
+    <a class="stagmenfashion-mobile-tabs__item" href="{{ routes.cart_url }}" aria-label="Cart">
+      <span class="stagmenfashion-mobile-tabs__icon" aria-hidden="true">
+        {% if section.settings.custom_cart_icon != blank %}
+          {{
+            section.settings.custom_cart_icon
+            | image_url: width: 60
+            | image_tag: class: 'stagmenfashion-mobile-tabs__custom-icon', loading: 'lazy', alt: 'Cart'
+          }}
+        {% else %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="8.5" cy="20.5" r="1.5"></circle>
+            <circle cx="18.5" cy="20.5" r="1.5"></circle>
+            <path d="M2.5 2.5h3l2.7 12.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6l2.3-8.4H5.8"></path>
+          </svg>
+        {% endif %}
+        {% if cart != empty %}
+          <span class="stagmenfashion-mobile-tabs__badge">{{ cart.item_count }}</span>
+        {% endif %}
+      </span>
+      <span class="stagmenfashion-mobile-tabs__label">Cart</span>
+    </a>
+  {% endif %}
+</nav>
+
+{% javascript %}
+  (() => {
+    const header = document.querySelector('.stagmenfashion-header--hero-overlay');
+    let lastScrollY = window.scrollY;
+
+    const applyHeroHeaderState = () => {
+      if (!header) return;
+
+      if (header.classList.contains('stagmenfashion-header--about-page')) {
+        header.dataset.scrollDirection = 'none';
+        header.dataset.scrolled = 'false';
+        header.dataset.stickyState = 'inactive';
+        return;
+      }
+
+      const currentScrollY = window.scrollY;
+      const isAtTop = currentScrollY <= 12;
+      const isScrollingUp = currentScrollY < lastScrollY;
+      const isScrollingDown = currentScrollY > lastScrollY;
+
+      header.dataset.scrollDirection = isAtTop ? 'none' : isScrollingUp ? 'up' : isScrollingDown ? 'down' : header.dataset.scrollDirection || 'none';
+
+      if (isAtTop) {
+        header.dataset.scrolled = 'false';
+        header.dataset.stickyState = 'inactive';
+      } else if (isScrollingUp) {
+        header.dataset.scrolled = 'true';
+        header.dataset.stickyState = 'active';
+      } else if (isScrollingDown) {
+        header.dataset.scrolled = 'false';
+        header.dataset.stickyState = 'inactive';
+      }
+
+      lastScrollY = currentScrollY;
+    };
+
+    const updateCartCount = (itemCount) => {
+      const cartButtons = document.querySelectorAll('.stagmenfashion-header__cart-button, .stagmenfashion-mobile-tabs__item[href*="/cart"], .stagmenfashion-mobile-tabs__item[aria-label="Cart"]');
+      
+      cartButtons.forEach((cartBtn) => {
+        let countNode = cartBtn.querySelector('.stagmenfashion-header__cart-count, .stagmenfashion-mobile-tabs__badge');
+        
+        if (!countNode) {
+          countNode = document.createElement('span');
+          if (cartBtn.classList.contains('stagmenfashion-mobile-tabs__item')) {
+            countNode.className = 'stagmenfashion-mobile-tabs__badge';
+            const iconWrapper = cartBtn.querySelector('.stagmenfashion-mobile-tabs__icon');
+            if (iconWrapper) {
+              iconWrapper.appendChild(countNode);
+            } else {
+              cartBtn.appendChild(countNode);
+            }
+          } else {
+            countNode.className = 'stagmenfashion-header__cart-count';
+            cartBtn.appendChild(countNode);
+          }
+        }
+
+        if (itemCount > 0) {
+          countNode.textContent = String(itemCount);
+          countNode.style.display = '';
+          countNode.hidden = false;
+          countNode.removeAttribute('aria-hidden');
+        } else {
+          countNode.textContent = '0';
+          countNode.style.display = 'none';
+          countNode.hidden = true;
+          countNode.setAttribute('aria-hidden', 'true');
+        }
+      });
+    };
+
+    const readSessionCount = () => {
+      try {
+        const raw = sessionStorage.getItem('cart-count');
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        const value = Number(parsed?.value);
+        return Number.isFinite(value) ? value : null;
+      } catch (error) {
+        return null;
+      }
+    };
+
+    const syncFromServer = async () => {
+      try {
+        const response = await fetch('/cart.js', {
+          headers: { Accept: 'application/json' },
+        });
+
+        if (!response.ok) return;
+        const cart = await response.json();
+        updateCartCount(Number(cart?.item_count) || 0);
+      } catch (error) {
+        // Ignore network failures; the session/event-based sync will still work.
+      }
+    };
+
+    document.addEventListener('cart:update', (event) => {
+      const itemCount = Number(event.detail?.data?.itemCount ?? event.detail?.resource?.item_count ?? 0);
+      updateCartCount(itemCount);
+    });
+
+    window.addEventListener('cart:update', (event) => {
+      const itemCount = Number(event.detail?.data?.itemCount ?? event.detail?.resource?.item_count ?? 0);
+      updateCartCount(itemCount);
+    });
+
+    const initialCount = readSessionCount();
+    if (initialCount !== null) {
+      updateCartCount(initialCount);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', syncFromServer, { once: true });
+    } else {
+      syncFromServer();
+    }
+
+    const openMobileMenu = () => {
+      const drawer = document.querySelector('header-drawer.header-drawer');
+      const details = drawer?.querySelector('details.menu-drawer-container');
+
+      if (drawer && typeof drawer.open === 'function') {
+        drawer.open();
+      }
+
+      if (details) {
+        details.open = true;
+        details.setAttribute('open', '');
+        details.classList.add('menu-open');
+        details.querySelector('summary')?.setAttribute('aria-expanded', 'true');
+      }
+    };
+
+    const openCartDrawer = () => {
+      const trigger = document.querySelector('[data-testid="cart-drawer-trigger"]');
+      if (trigger) {
+        trigger.click();
+        return;
+      }
+
+      window.location.href = document.querySelector('.stagmenfashion-mobile-tabs a[href*="/cart"]')?.href || '/cart';
+    };
+
+    document.querySelectorAll('[data-open-mobile-menu]').forEach((button) => {
+      button.addEventListener('click', openMobileMenu);
+    });
+
+    document.querySelectorAll('[data-open-cart-drawer]').forEach((button) => {
+      button.addEventListener('click', openCartDrawer);
+    });
+
+    document.querySelectorAll('[data-cart-drawer-recommendations]').forEach((drawer) => {
+      const track = drawer.querySelector('.cart-drawer__recommendations-track');
+      const prev = drawer.querySelector('[data-cart-drawer-recommendations-prev]');
+      const next = drawer.querySelector('[data-cart-drawer-recommendations-next]');
+      const slides = Array.from(drawer.querySelectorAll('[data-cart-drawer-recommendation-slide]'));
+      const dots = Array.from(drawer.querySelectorAll('[data-cart-drawer-recommendation-dot]'));
+
+      if (!track || slides.length === 0) return;
+
+      const getStep = () => {
+        const slide = slides[0];
+        const slideWidth = slide.getBoundingClientRect().width;
+        const gap = parseFloat(window.getComputedStyle(track).gap || '0') || 0;
+        return slideWidth + gap;
+      };
+
+      const setActiveDot = (index) => {
+        dots.forEach((dot, dotIndex) => {
+          const isActive = dotIndex === index;
+          dot.classList.toggle('is-active', isActive);
+          if (isActive) {
+            dot.setAttribute('aria-current', 'true');
+          } else {
+            dot.removeAttribute('aria-current');
+          }
+        });
+      };
+
+      const setArrowState = () => {
+        const atStart = track.scrollLeft <= 2;
+        const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
+
+        if (prev) prev.disabled = atStart;
+        if (next) next.disabled = atEnd;
+      };
+
+      const getActiveIndex = () => {
+        const viewportCenter = track.scrollLeft + track.clientWidth / 2;
+        let activeIndex = 0;
+        let activeDistance = Number.POSITIVE_INFINITY;
+
+        slides.forEach((slide, index) => {
+          const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+          const distance = Math.abs(slideCenter - viewportCenter);
+          if (distance < activeDistance) {
+            activeDistance = distance;
+            activeIndex = index;
+          }
+        });
+
+        return activeIndex;
+      };
+
+      const updateActiveState = () => {
+        setActiveDot(getActiveIndex());
+        setArrowState();
+      };
+
+      prev?.addEventListener('click', () => {
+        track.scrollBy({ left: -getStep(), behavior: 'smooth' });
+      });
+
+      next?.addEventListener('click', () => {
+        track.scrollBy({ left: getStep(), behavior: 'smooth' });
+      });
+
+      dots.forEach((dot) => {
+        dot.addEventListener('click', () => {
+          const index = Number(dot.dataset.cartDrawerRecommendationDot || 0);
+          const slide = slides[index];
+          if (!slide) return;
+          track.scrollTo({ left: slide.offsetLeft, behavior: 'smooth' });
+        });
+      });
+
+      track.addEventListener('scroll', () => {
+        window.requestAnimationFrame(updateActiveState);
+      }, { passive: true });
+
+      window.addEventListener('resize', updateActiveState, { passive: true });
+      updateActiveState();
+    });
+
+    if (header) {
+      applyHeroHeaderState();
+      window.addEventListener('scroll', applyHeroHeaderState, { passive: true });
+      window.addEventListener('resize', applyHeroHeaderState, { passive: true });
+    }
+  })();
+{% endjavascript %}
+
+<style>
+  .stagmenfashion-header {
+    --header-bg: var(--stagmenfashion-header-background, #ffffff);
+    --header-fg: #111111;
+    --header-border: rgb(17 17 17 / 0.08);
+    --header-muted: rgb(17 17 17 / 0.58);
+    --header-pill-bg: rgb(17 17 17 / 0.05);
+    --header-pill-fg: #111111;
+    --header-hover: rgb(17 17 17 / 0.7);
+    --header-desktop-height: 72px;
+    --header-mobile-height: 56px;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    background: var(--header-bg);
+    color: var(--header-fg);
+    border-bottom: 1px solid var(--header-border);
+    font-family: var(--font-body--family);
+    box-shadow: 0 10px 24px rgb(0 0 0 / 0.04);
+  }
+
+  .stagmenfashion-header:has(.menu-drawer-container[open]) {
+    z-index: 100;
+  }
+
+  /* Keep the home hero header fixed, but let all other pages reserve space for it. */
+  .stagmenfashion-header:not(.stagmenfashion-header--hero-overlay) {
+    position: sticky;
+  }
+
+  .stagmenfashion-header--hero-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    color: #ffffff;
+    border-bottom-color: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transition:
+      transform 0.28s ease,
+      opacity 0.28s ease,
+      background 0.25s ease,
+      color 0.25s ease,
+      border-color 0.25s ease,
+      box-shadow 0.25s ease,
+      backdrop-filter 0.25s ease;
+    will-change: transform, opacity;
+  }
+
+  .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) {
+    background: rgba(255, 255, 255, 0.08) !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
+    backdrop-filter: blur(20px) saturate(190%) contrast(90%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(190%) contrast(90%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+    color: #ffffff !important;
+  }
+
+  .stagmenfashion-header--hero-overlay::before {
+    content: none;
+  }
+
+  .stagmenfashion-header--hero-overlay[data-scrolled='true'] {
+    --header-bg: rgba(255, 255, 255, 0.38);
+    --header-fg: #111111;
+    --header-border: rgba(255, 255, 255, 0.45);
+    --header-pill-bg: rgba(255, 255, 255, 0.35);
+    --header-pill-fg: #111111;
+    --header-hover: rgba(0, 0, 0, 0.7);
+
+    background: rgba(255, 255, 255, 0.38) !important;
+    background-color: rgba(255, 255, 255, 0.38) !important;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.22) 100%) !important;
+    color: #111111 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.45) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(24px) saturate(200%) contrast(92%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(200%) contrast(92%) !important;
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .stagmenfashion-header--about-page[data-scrolled='true'] {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border-bottom-color: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .stagmenfashion-header--hero-overlay[data-scrolled='true'],
+  .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__icon-button,
+  .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__brand,
+  .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__nav-link,
+  .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__menu-toggle,
+  .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__search-button,
+  .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__mobile-nav .header__icon--summary {
+    color: #111111 !important;
+  }
+
+  .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__icon-button svg,
+  .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__search-button svg,
+  .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__menu-toggle svg,
+  .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__mobile-nav .header__icon--summary svg {
+    color: #111111 !important;
+    stroke: currentColor !important;
+  }
+
+  .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__icon-button,
+  .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__brand,
+  .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__nav-link,
+  .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__menu-toggle,
+  .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__search-button,
+  .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__mobile-nav .header__icon--summary {
+    color: #ffffff;
+  }
+
+  .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__icon-button svg,
+  .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__search-button svg,
+  .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__menu-toggle svg,
+  .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__mobile-nav .header__icon--summary svg {
+    color: #ffffff;
+  }
+
+  .stagmenfashion-header--hero-overlay[data-scrolled='true']::before {
+    content: none;
+  }
+
+  .stagmenfashion-header--hero-overlay[data-scroll-direction='down'] {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .stagmenfashion-header--hero-overlay[data-scroll-direction='up'],
+  .stagmenfashion-header--hero-overlay[data-scroll-direction='none'] {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .stagmenfashion-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.22), rgb(255 255 255 / 0));
+    pointer-events: none;
+  }
+
+  .stagmenfashion-header--hero-overlay::before {
+    content: none !important;
+    background: none !important;
+  }
+
+  .stagmenfashion-header__shell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    min-height: 68px;
+    width: min(100%, 1440px);
+    margin: 0 auto;
+    padding: 10px clamp(20px, 4vw, 42px);
+  }
+
+  .stagmenfashion-header__left,
+  .stagmenfashion-header__center,
+  .stagmenfashion-header__right {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    flex: 1 1 0;
+  }
+
+  .stagmenfashion-header__left {
+    justify-content: flex-start;
+  }
+
+  .stagmenfashion-header__center {
+    justify-content: flex-start;
+  }
+
+  .stagmenfashion-header__right {
+    justify-content: flex-end;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+
+  .stagmenfashion-header__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .stagmenfashion-header__logo-image {
+    display: block;
+    height: var(--logo-height-mobile, 28px);
+    width: var(--logo-width-mobile, auto);
+    max-width: 100%;
+    object-fit: contain;
+    transition: height 0.2s ease, width 0.2s ease;
+
+    @media screen and (min-width: 750px) {
+      height: var(--logo-height, 36px);
+      width: var(--logo-width, auto);
+    }
+  }
+
+  .stagmenfashion-header__logo-text {
+    color: #111111;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .stagmenfashion-header__nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .stagmenfashion-header__nav-list {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: clamp(22px, 2.6vw, 44px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    white-space: nowrap;
+  }
+
+  .stagmenfashion-header__nav-link,
+  .stagmenfashion-header__dropdown-link,
+  .stagmenfashion-header__mobile-link,
+  .stagmenfashion-header__mobile-sublink {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .stagmenfashion-header__nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 34px;
+    padding: 0 1px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+  }
+
+  .stagmenfashion-header__nav-link:hover {
+    color: #0800CF !important;
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  .stagmenfashion-header__nav-link:focus-visible,
+  .stagmenfashion-header__dropdown-link:focus-visible,
+  .stagmenfashion-header__mobile-link:focus-visible,
+  .stagmenfashion-header__mobile-sublink:focus-visible,
+  .stagmenfashion-header__icon-button:focus-visible {
+    outline: 2px solid rgba(8, 0, 207, 0.25);
+    outline-offset: 3px;
+  }
+
+  .stagmenfashion-header__nav-link.is-active,
+  .stagmenfashion-header__nav-link.is-current,
+  .stagmenfashion-header__nav-link[aria-current="page"] {
+    min-height: 34px;
+    padding: 0 1px 2px;
+    border-radius: 0;
+    background: transparent;
+    color: #0800CF !important;
+    font-weight: 600;
+    opacity: 1;
+    border-bottom: 2px solid #0800CF !important;
+    box-shadow: none;
+  }
+
+  .stagmenfashion-header__dropdown {
+    position: relative;
+  }
+
+  .stagmenfashion-header__dropdown > summary {
+    list-style: none;
+  }
+
+  .stagmenfashion-header__desktop-caret {
+    width: 7px;
+    height: 7px;
+    border-right: 1.25px solid currentColor;
+    border-bottom: 1.25px solid currentColor;
+    transform: rotate(45deg) translateY(-1px);
+    flex: 0 0 auto;
+  }
+
+  .stagmenfashion-header__dropdown > summary::-webkit-details-marker,
+  .stagmenfashion-header__mobile-group > summary::-webkit-details-marker,
+  .stagmenfashion-header__mobile-nav > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .stagmenfashion-header__dropdown-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 220px;
+    padding: 14px 16px;
+    border: 1px solid rgb(17 17 17 / 0.08);
+    border-radius: 8px;
+    background: rgb(255 255 255 / 0.98);
+    color: #111111;
+    box-shadow: 0 16px 36px rgb(0 0 0 / 0.08);
+  }
+
+  .stagmenfashion-header__dropdown-list,
+  .stagmenfashion-header__mobile-list,
+  .stagmenfashion-header__mobile-sublist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .stagmenfashion-header__dropdown-link {
+    display: block;
+    padding: 9px 0;
+    font-size: 12px;
+    color: rgb(17 17 17 / 0.76);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s ease, opacity 0.2s ease, letter-spacing 0.2s ease;
+  }
+
+  .stagmenfashion-header__dropdown-link:hover,
+  .stagmenfashion-header__dropdown-link.is-current {
+    color: #0800CF !important;
+    letter-spacing: 0.1em;
+  }
+
+  .stagmenfashion-header__icon-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    color: inherit;
+    background: transparent;
+    text-decoration: none;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .stagmenfashion-header__icon-button svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+  }
+
+  .stagmenfashion-header__custom-icon {
+    display: block;
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+  }
+
+  .stagmenfashion-mobile-tabs__custom-icon {
+    display: block;
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+  }
+
+  .stagmenfashion-header__cart-button {
+    width: auto;
+    height: auto;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    border: 0;
+    appearance: none;
+  }
+
+  .stagmenfashion-header__cart-button .svg-wrapper {
+    width: auto;
+    height: auto;
+    display: inline-flex;
+    line-height: 0;
+  }
+
+  .stagmenfashion-header__menu-toggle {
+    display: none;
+    color: inherit;
+  }
+
+  .cart-drawer {
+    --cart-drawer-padding: var(--padding-xl) var(--padding-xl);
+    --cart-drawer-padding-desktop: var(--padding-xl) var(--padding-2xl);
+  }
+
+  @media screen and (max-width: 749px) {
+    .cart-drawer {
+      --cart-drawer-padding: 16px 16px;
+      --cart-drawer-padding-desktop: 16px 16px;
+    }
+  }
+
+  .cart-drawer__dialog {
+    position: fixed;
+    overflow: hidden;
+    border-radius: 0;
+    width: min(92vw, 440px);
+    height: 100%;
+    margin: 0 0 0 auto;
+    padding: 0;
+    border: 1px solid rgb(0 0 0 / 0.08);
+    border-right: 0;
+    box-shadow: -18px 0 60px rgb(var(--color-primary-rgb) / 0.16);
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.98), rgb(255 248 244 / 0.94));
+    backdrop-filter: blur(14px);
+  }
+
+  .cart-drawer__dialog:modal {
+    max-height: 100dvh;
+    overflow-y: hidden;
+  }
+
+  .cart-drawer__inner {
+    height: 100%;
+    overflow: hidden;
+    border-radius: 0;
+  }
+
+  .cart-drawer__content {
+    height: calc(100% - 68px);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    background-color: var(--color-background);
+    flex-grow: 1;
+    overflow: hidden;
+  }
+
+  .cart-drawer__scroll-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .cart-drawer__recommendations {
+    padding-inline: var(--cart-drawer-padding);
+    padding-block: var(--padding-lg) var(--padding-md);
+  }
+
+  @media screen and (min-width: 750px) {
+    .cart-drawer__recommendations {
+      padding-inline: var(--cart-drawer-padding-desktop);
+    }
+  }
+
+  .cart-drawer__recommendations-card {
+    overflow: hidden;
+    border: 1px solid rgb(var(--color-border-rgb) / 0.75);
+    border-radius: 18px;
+    background: rgb(255 255 255 / 0.96);
+    box-shadow: 0 10px 26px rgb(var(--color-primary-rgb) / 0.08);
+  }
+
+  .cart-drawer__recommendations-header {
+    padding: 18px 18px 14px;
+    text-align: center;
+    border-bottom: 1px solid rgb(var(--color-border-rgb) / 0.7);
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.98), rgb(248 248 248 / 0.95));
+  }
+
+  .cart-drawer__recommendations-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-foreground);
+  }
+
+  .cart-drawer__recommendations-viewport {
+    overflow: hidden;
+  }
+
+  .cart-drawer__recommendations-track {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .cart-drawer__recommendations-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cart-drawer__recommendation-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    padding: 18px;
+  }
+
+  .cart-drawer__recommendation-card {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .cart-drawer__recommendation-media {
+    display: block;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 14px;
+    background: rgb(var(--color-foreground-rgb) / 0.04);
+  }
+
+  .cart-drawer__recommendation-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .cart-drawer__recommendation-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .cart-drawer__recommendation-title {
+    font-size: 1rem;
+    line-height: 1.25;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--color-foreground);
+    text-wrap: balance;
+  }
+
+  .cart-drawer__recommendation-price {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: baseline;
+    font-size: 0.96rem;
+    color: rgb(var(--color-foreground-rgb) / 0.85);
+  }
+
+  .cart-drawer__recommendation-price s {
+    color: rgb(var(--color-foreground-rgb) / 0.48);
+  }
+
+  .cart-drawer__recommendation-eye {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: var(--color-primary);
+    color: #ffffff;
+    box-shadow: 0 10px 18px rgb(var(--color-primary-rgb) / 0.18);
+  }
+
+  .cart-drawer__recommendation-eye svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .cart-drawer__recommendations-controls {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) 48px;
+    align-items: center;
+    gap: 12px;
+    padding: 0 14px 16px;
+    border-top: 1px solid rgb(var(--color-border-rgb) / 0.7);
+    background: rgb(255 255 255 / 0.92);
+  }
+
+  .cart-drawer__recommendations-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 0;
+    border: 1px solid rgb(var(--color-border-rgb) / 0.65);
+    background: #ffffff;
+    color: var(--color-foreground);
+    box-shadow: none;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .cart-drawer__recommendations-arrow:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgb(var(--color-primary-rgb) / 0.08);
+  }
+
+  .cart-drawer__recommendations-arrow:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .cart-drawer__recommendations-arrow:disabled:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .cart-drawer__recommendations-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .cart-drawer__recommendations-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    border: 2px solid rgb(var(--color-foreground-rgb) / 0.22);
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .cart-drawer__recommendations-dot.is-active,
+  .cart-drawer__recommendations-dot[aria-current='true'] {
+    background: var(--color-foreground);
+    border-color: var(--color-foreground);
+  }
+
+  @media screen and (max-width: 749px) {
+    .cart-drawer__dialog {
+      width: min(92vw, 440px);
+      max-width: min(92vw, 440px);
+    }
+
+    .cart-drawer__recommendation-card {
+      grid-template-columns: 96px minmax(0, 1fr) 42px;
+      gap: 12px;
+    }
+
+    .cart-drawer__recommendation-slide {
+      padding: 14px;
+    }
+
+    .cart-drawer__recommendations-header {
+      padding-inline: 16px;
+    }
+
+    .cart-drawer__recommendations-controls {
+      grid-template-columns: 42px minmax(0, 1fr) 42px;
+      padding-inline: 12px;
+    }
+
+    .cart-drawer__recommendations-arrow {
+      width: 42px;
+      height: 42px;
+    }
+
+    .cart-drawer__recommendation-eye {
+      width: 42px;
+      height: 42px;
+    }
+  }
+
+  .cart-drawer__heading {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    margin-bottom: 0;
+    font-size: 1.08rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .cart-drawer__header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 68px;
+    padding: 16px 18px;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.98), rgb(255 248 244 / 0.96));
+    border-bottom: 1px solid rgb(0 0 0 / 0.08);
+  }
+
+  .cart-drawer__close-button {
+    position: static;
+    margin-right: 0;
+    top: auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.9);
+    border: 1px solid rgb(0 0 0 / 0.12);
+    box-shadow: 0 10px 24px rgb(var(--color-primary-rgb) / 0.08);
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .cart-drawer__close-button:hover {
+    transform: translateY(-1px);
+    background: rgb(255 255 255 / 1);
+    box-shadow: 0 14px 30px rgb(var(--color-primary-rgb) / 0.12);
+  }
+
+  .cart-drawer--empty .cart-drawer__content {
+    text-align: center;
+    min-height: auto;
+  }
+
+  .cart-drawer--empty .cart-drawer__heading {
+    margin-bottom: var(--margin-md);
+  }
+
+  .cart-drawer__items {
+    display: flex;
+    flex-direction: column;
+    padding-inline: var(--cart-drawer-padding);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .cart-drawer__summary {
+    --cart-drawer-summary-padding: var(--padding-lg);
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-xl);
+    padding: var(--cart-drawer-summary-padding);
+    margin-top: auto;
+    background-color: var(--color-background);
+    mask-image: linear-gradient(to bottom, transparent, black var(--cart-drawer-summary-padding));
+  }
+
+  .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__nav-link.is-active {
+    background: rgb(255 255 255 / 0.16);
+    color: #ffffff;
+    border-color: rgb(255 255 255 / 0.22);
+    box-shadow: none;
+  }
+
+  .stagmenfashion-header__icon-button:hover {
+    opacity: 0.82;
+    background: rgb(255 255 255 / 0.04);
+    transform: translateY(-1px);
+  }
+
+  .stagmenfashion-header__icon-button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .stagmenfashion-header__cart-button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .stagmenfashion-header__search-button--mobile {
+    display: none;
+  }
+
+  .stagmenfashion-header__cart-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 16px;
+    height: 16px;
+    padding-inline: 3px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-size: 0.64rem;
+    line-height: 16px;
+    text-align: center;
+  }
+
+  .stagmenfashion-header__cart-count[hidden] {
+    display: none;
+  }
+
+  .stagmenfashion-header__mobile-nav {
+    display: none;
+    position: relative;
+    flex: 0 0 auto;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .stagmenfashion-header__mobile-nav .header__icon--summary {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid rgb(17 17 17 / 0.08);
+    border-radius: 999px;
+    color: #111111;
+    background: rgb(255 255 255 / 0.94);
+    box-shadow: 0 10px 24px rgb(0 0 0 / 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+
+  .stagmenfashion-mobile-tabs {
+    display: none !important;
+  }
+
+  .stagmenfashion-header__mobile-nav .header__icon--summary .header-drawer-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .stagmenfashion-header__mobile-nav .header__icon--summary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px rgb(0 0 0 / 0.1);
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer {
+    --drawer-width: 100vw;
+    --drawer-max-width: 100vw;
+    --drawer-height: 100dvh;
+    top: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .stagmenfashion-header:has(.menu-drawer-container[open]) {
+      z-index: 9998;
+    }
+
+    .stagmenfashion-header__mobile-nav,
+    .stagmenfashion-header__mobile-nav .menu-drawer-container {
+      position: relative;
+      z-index: 9998;
+    }
+
+    .stagmenfashion-header__mobile-nav .menu-drawer {
+      z-index: 9999;
+    }
+
+    .stagmenfashion-header__mobile-nav .menu-drawer__backdrop {
+      z-index: 9998;
+    }
+  }
+
+  .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__search-button,
+  .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__icon-button,
+  .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__brand,
+  .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__nav-link {
+    color: #ffffff;
+  }
+
+  .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__menu-toggle {
+    color: #ffffff;
+  }
+
+  .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__search-button svg,
+  .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__icon-button svg {
+    color: #ffffff;
+  }
+
+  body:has(.stagmenfashion-header--hero-overlay) .content-for-layout > .shopify-section:first-child {
+    margin-top: calc(var(--header-group-height, var(--header-height, 72px)) * -1);
+  }
+
+  @media screen and (max-width: 749px) {
+
+    .stagmenfashion-header--hero-overlay {
+      z-index: 60;
+      background: transparent !important;
+      background-color: transparent !important;
+      background-image: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    .stagmenfashion-header--hero-overlay[data-scroll-direction='down'] {
+      transform: translateY(0);
+    }
+
+    .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) {
+      background: rgba(255, 255, 255, 0.08) !important;
+      background-color: rgba(255, 255, 255, 0.08) !important;
+      background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.16) !important;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+      backdrop-filter: blur(20px) saturate(190%) contrast(90%) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(190%) contrast(90%) !important;
+      color: #ffffff !important;
+    }
+
+    .stagmenfashion-header--hero-overlay[data-scrolled='true'] {
+      background: rgba(255, 255, 255, 0.38) !important;
+      background-color: rgba(255, 255, 255, 0.38) !important;
+      background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.22) 100%) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.45) !important;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08) !important;
+      backdrop-filter: blur(24px) saturate(200%) contrast(92%) !important;
+      -webkit-backdrop-filter: blur(24px) saturate(200%) contrast(92%) !important;
+      color: #111111 !important;
+    }
+
+    .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__mobile-nav .header__icon--summary {
+      background: transparent !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+      color: #ffffff !important;
+    }
+
+    .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__mobile-nav .header__icon--summary {
+      background: transparent;
+      border-color: transparent;
+      color: #111111 !important;
+      box-shadow: none;
+    }
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer-container[open] > .menu-drawer,
+  .stagmenfashion-header__mobile-nav .menu-open > .menu-drawer {
+    visibility: visible;
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer,
+  .stagmenfashion-header__mobile-nav .menu-drawer__navigation,
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item {
+    font-family: var(--font-body--family);
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer {
+    display: flex;
+    flex-direction: column;
+    background: #fffafe;
+    color: #111111;
+    box-shadow: none;
+    border-left: 0;
+    border-radius: 0;
+    overflow: hidden;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__brand-panel {
+    position: relative;
+    display: grid;
+    grid-template-columns: 36px 36px minmax(0, 1fr) 36px;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 16px 12px;
+    background: transparent;
+    border-bottom: 1px solid rgb(17 17 17 / 0.08);
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__brand-panel--mobile {
+    min-height: 68px;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__brand-meta {
+    display: none;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__brand {
+    justify-self: center;
+    max-width: 150px;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__close-button {
+    position: static;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    color: #111111;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__close-button--top .header-drawer-icon,
+  .stagmenfashion-header__mobile-nav .menu-drawer__close-button--top .svg-wrapper {
+    width: 20px;
+    height: 20px;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__navigation {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 18px 0 0;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__contact-stack {
+    display: none;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__top-action {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #111111;
+    text-decoration: none;
+    background: transparent;
+    border: 0;
+    padding: 0;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__top-action svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__top-action--search {
+    justify-self: start;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__top-action--cart {
+    justify-self: end;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu {
+    padding-inline: 0;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item--mainlist,
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item--child {
+    font-size: 1.65rem;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    text-transform: none;
+    color: #111111;
+    padding-inline: 24px;
+    border-bottom: 0;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item--mainlist {
+    min-height: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item--mainlist::after {
+    content: none;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item--child {
+    font-size: 1.12rem;
+    padding-inline: 30px;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item-text {
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__utility-links--mobile {
+    margin-top: auto;
+    padding: 14px 0 calc(18px + env(safe-area-inset-bottom));
+    border-top: 1px solid rgb(17 17 17 / 0.08);
+    background: transparent;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__social-footer {
+    padding: 0 22px 12px;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__social-link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 36px;
+    height: 36px;
+    color: #111111;
+    text-decoration: none;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__social-link svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__account--mobile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 22px;
+    padding: 14px 0 0;
+    border-top: 1px solid rgb(17 17 17 / 0.08);
+    color: #111111;
+    text-decoration: none;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__account--mobile svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__account-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #111111;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__featured-content {
+    display: none;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__contact-row,
+  .stagmenfashion-header__mobile-nav .menu-drawer__localization {
+    display: none;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__contact-stack-link {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 0;
+    color: var(--header-fg);
+    text-decoration: none;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__contact-stack-link + .menu-drawer__contact-stack-link {
+    border-top: 1px solid rgb(17 17 17 / 0.08);
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__contact-stack-label {
+    font-size: 0.66rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #111111;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__contact-stack-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-block: 10px;
+    border-bottom: 0;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item-content {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item--mainlist,
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item--child {
+    font-size: 1.65rem;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    text-transform: none;
+    color: #111111;
+    padding-inline: 24px;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item--child {
+    padding-inline: 30px;
+    font-weight: 500;
+    font-size: 1.08rem;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item--active {
+    color: #111111;
+    font-weight: 700;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item--mainlist,
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item--parent {
+    letter-spacing: -0.03em;
+    text-transform: none;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__close-button {
+    color: #111111;
+    width: 36px;
+    height: 36px;
+    border-radius: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__backdrop {
+    background: rgb(0 0 0 / 0.16);
+    backdrop-filter: blur(4px);
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item-text {
+    display: block;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item-subtext {
+    display: none;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__list-item:last-child .menu-drawer__menu-item {
+    border-bottom-color: transparent;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__utility-links {
+    margin-top: auto;
+    padding: 14px 0 calc(18px + env(safe-area-inset-bottom));
+    border-top: 1px solid rgb(17 17 17 / 0.08);
+    background: transparent;
+  }
+
+  .stagmenfashion-header__mobile-nav .menu-drawer__menu-item--mainlist::after {
+    content: none;
+  }
+
+  @media screen and (max-width: 989px) {
+    .stagmenfashion-header {
+      z-index: 60;
+    }
+
+    .stagmenfashion-header__shell {
+      min-height: 64px;
+      padding: 10px 10px;
+      gap: 10px;
+    }
+
+    .stagmenfashion-header__left,
+    .stagmenfashion-header__center {
+      flex: 0 1 auto;
+    }
+
+    .stagmenfashion-header__left {
+      flex: 1 1 0;
+      justify-content: flex-start;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .stagmenfashion-header__brand {
+      pointer-events: auto;
+      position: relative;
+      z-index: 2;
+      line-height: 0;
+    }
+
+    .stagmenfashion-header__center {
+      display: none;
+    }
+
+    .stagmenfashion-header__right {
+      flex: 0 0 auto;
+      gap: 12px;
+      margin-left: auto;
+      min-width: 0;
+    }
+
+    .stagmenfashion-header__search-button--mobile {
+      display: inline-flex;
+    }
+
+    .stagmenfashion-header__left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .stagmenfashion-header__menu-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 0;
+    }
+
+    .stagmenfashion-header__menu-toggle {
+      position: relative;
+      z-index: 1;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      color: #111111;
+    }
+
+    .stagmenfashion-header__menu-toggle:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .stagmenfashion-header__left .stagmenfashion-header__search-button--mobile {
+      position: relative;
+      z-index: 1;
+      width: 36px;
+      height: 36px;
+      margin-left: 0;
+      order: 2;
+    }
+
+    .stagmenfashion-header__right .stagmenfashion-header__search-button--desktop {
+      display: none;
+    }
+
+    .stagmenfashion-header__left .stagmenfashion-header__mobile-nav {
+      display: none;
+      position: static;
+      order: 3;
+    }
+
+    .stagmenfashion-header__left .stagmenfashion-header__mobile-nav .menu-drawer-container {
+      display: block;
+    }
+
+    .stagmenfashion-header__left .stagmenfashion-header__mobile-nav .header__icon--summary {
+      display: none;
+    }
+
+    .stagmenfashion-header__right .stagmenfashion-header__icon-button[href*="/account"] {
+      display: none;
+    }
+
+    .stagmenfashion-header__right .stagmenfashion-header__icon-button {
+      width: 36px;
+      height: 36px;
+    }
+
+    .stagmenfashion-header__brand {
+      order: 4;
+      margin-left: 0;
+      justify-self: flex-start;
+    }
+
+    .stagmenfashion-header__right .stagmenfashion-header__cart-button {
+      width: auto;
+      height: auto;
+      min-width: 0;
+      min-height: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
+
+    .stagmenfashion-header__right .stagmenfashion-header__icon-button svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    .stagmenfashion-header__cart-button .svg-wrapper {
+      width: auto;
+      height: auto;
+    }
+
+    .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) {
+      background: rgba(255, 255, 255, 0.08) !important;
+      background-color: rgba(255, 255, 255, 0.08) !important;
+      background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.16) !important;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+      backdrop-filter: blur(20px) saturate(190%) contrast(90%) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(190%) contrast(90%) !important;
+    }
+
+    .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__menu-toggle,
+    .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__search-button--mobile,
+    .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__cart-button,
+    .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__menu-toggle svg,
+    .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__search-button--mobile svg,
+    .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__cart-button svg {
+      color: #ffffff !important;
+    }
+
+    .stagmenfashion-header--hero-overlay:not([data-scrolled='true'])::before {
+      content: none !important;
+    }
+
+    .stagmenfashion-header--hero-overlay[data-scrolled='true'] {
+      background: rgba(255, 255, 255, 0.38) !important;
+      background-color: rgba(255, 255, 255, 0.38) !important;
+      background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.22) 100%) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.45) !important;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08) !important;
+      backdrop-filter: blur(24px) saturate(200%) contrast(92%) !important;
+      -webkit-backdrop-filter: blur(24px) saturate(200%) contrast(92%) !important;
+    }
+
+    .stagmenfashion-header--about-page[data-scrolled='true'] {
+      background: transparent !important;
+      background-color: transparent !important;
+      background-image: none !important;
+      border-bottom-color: transparent !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__menu-toggle,
+    .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__search-button--mobile,
+    .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__cart-button,
+    .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__menu-toggle svg,
+    .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__search-button--mobile svg,
+    .stagmenfashion-header--hero-overlay[data-scrolled='true'] .stagmenfashion-header__cart-button svg {
+      color: #111111 !important;
+    }
+
+    .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__menu-toggle,
+    .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__search-button--mobile,
+    .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__cart-button,
+    .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__menu-toggle svg,
+    .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__search-button--mobile svg,
+    .stagmenfashion-header--about-page[data-scrolled='true'] .stagmenfashion-header__cart-button svg {
+      color: #ffffff !important;
+    }
+
+    .stagmenfashion-header__logo-image {
+      max-width: 176px;
+      max-height: 36px;
+    }
+
+  }
+
+  @media screen and (min-width: 990px) {
+    .stagmenfashion-header--hero-overlay .stagmenfashion-header__left {
+      flex: 0 0 0;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .stagmenfashion-header--hero-overlay .stagmenfashion-header__center {
+      justify-content: flex-start;
+      flex: 1 1 auto;
+    }
+
+    .stagmenfashion-header--hero-overlay .stagmenfashion-header__nav {
+      justify-content: flex-start;
+    }
+
+    .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__nav-link {
+      color: #ffffff;
+      font-size: 0.92rem;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      text-transform: none;
+    }
+
+    .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__nav-link:hover {
+      color: #ffffff;
+      opacity: 0.82;
+    }
+
+    .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__nav-link.is-active {
+      border-bottom: 0;
+      opacity: 0.92;
+    }
+
+    .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__icon-button {
+      background: transparent;
+    }
+
+    .stagmenfashion-header--hero-overlay:not([data-scrolled='true']) .stagmenfashion-header__icon-button:hover {
+      background: transparent;
+      opacity: 0.86;
+    }
+
+    .stagmenfashion-header__logo-image--inverse {
+      display: none;
+    }
+
+    .stagmenfashion-header[data-scrolled='true'] .stagmenfashion-header__logo-image--default {
+      display: none;
+    }
+
+    .stagmenfashion-header[data-scrolled='true'] .stagmenfashion-header__logo-image--inverse {
+      display: block;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Stag Header",
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "color",
+      "id": "header_background",
+      "label": "Header background",
+      "default": "#ffffff"
+    },
+
+    {
+      "type": "image_picker",
+      "id": "custom_cart_icon",
+      "label": "Custom Cart Icon (optional)",
+      "info": "Upload a custom PNG/SVG to replace the cart icon."
+    },
+    {
+      "type": "text",
+      "id": "brand_name",
+      "label": "Brand name",
+      "default": "stagmenfashion"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Navigation menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "Show search icon",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "label": "Show account icon",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_cart_drawer",
+      "label": "Enable cart drawer",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_open_cart_drawer",
+      "label": "Auto-open cart drawer after add",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "drawer_support_text",
+      "label": "Drawer support text",
+      "default": "Need help ordering?"
+    },
+    {
+      "type": "text",
+      "id": "contact_email_label",
+      "label": "Contact email label",
+      "default": "Email us"
+    },
+    {
+      "type": "text",
+      "id": "contact_email",
+      "label": "Contact email"
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_button_label",
+      "label": "WhatsApp button label",
+      "default": "WhatsApp us"
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_number",
+      "label": "WhatsApp number",
+      "default": "0000000000"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Stag Header"
+    }
+  ]
+}
+{% endschema %}

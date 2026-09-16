@@ -1,0 +1,232 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "about_story": {
+      "type": "about-story",
+      "settings": {
+        "section_label": "The Stag Men Fashion Story",
+        "heading": "Why Blend In, When You Can Pop?",
+        "content_heading": "Why settle for ordinary streetwear?",
+        "text": "<p>Stag Men Fashion started with a simple question: why settle for basic fast fashion? We looked around and saw racks filled with ordinary tees and bland cuts that lost shape after one wash.</p><p>So we created Stag Men Fashion, a homegrown fashion label crafted specially for modern men and streetwear enthusiasts with one simple belief: every fit should express your individuality and bring effortless confidence. We design and craft in-house with heavyweight fabrics, signature silhouettes, and bold palettes.</p>",
+        "image": "shopify://shop_images/ChatGPT_Image_Sep_4_2026_04_22_16_PM.png",
+        "reverse_layout": false,
+        "color_scheme": "scheme-1",
+        "enable_animations": true
+      }
+    },
+    "about_stats": {
+      "type": "about-stats",
+      "blocks": {
+        "stat_1": {
+          "type": "stat",
+          "settings": {
+            "number": "50k+",
+            "label": "Men Styled Worldwide"
+          }
+        },
+        "stat_2": {
+          "type": "stat",
+          "settings": {
+            "number": "100%",
+            "label": "In-House Tailored"
+          }
+        },
+        "stat_3": {
+          "type": "stat",
+          "settings": {
+            "number": "250+",
+            "label": "Signature Drops"
+          }
+        },
+        "stat_4": {
+          "type": "stat",
+          "settings": {
+            "number": "4.9/5",
+            "label": "Average Fit Rating"
+          }
+        }
+      },
+      "block_order": [
+        "stat_1",
+        "stat_2",
+        "stat_3",
+        "stat_4"
+      ],
+      "settings": {
+        "eyebrow": "Our Impact",
+        "heading": "Numbers that speak for our passion",
+        "color_scheme": "scheme-1",
+        "enable_animations": true
+      }
+    },
+    "about_values": {
+      "type": "about-values",
+      "blocks": {
+        "value_1": {
+          "type": "value",
+          "settings": {
+            "icon": "star",
+            "title": "100% In-House Crafted",
+            "text": "Every silhouette is conceived, patterned, and sampled in our dedicated studio with obsessive attention to fit and drape."
+          }
+        },
+        "value_2": {
+          "type": "value",
+          "settings": {
+            "icon": "leaf",
+            "title": "Heavyweight Cottons",
+            "text": "We select premium 100% combed cottons, rich French terry, and breathable natural fibers built to hold structure."
+          }
+        },
+        "value_3": {
+          "type": "value",
+          "settings": {
+            "icon": "heart",
+            "title": "Statement Silhouettes",
+            "text": "We don’t follow fast trends. We design contemporary oversized fits, co-ords, and daily streetwear that turn heads."
+          }
+        },
+        "value_4": {
+          "type": "value",
+          "settings": {
+            "icon": "truck",
+            "title": "Doorstep Delivery & Exchanges",
+            "text": "Swiftly dispatched across India with premium packaging, Cash on Delivery, and hassle-free 7-day exchanges."
+          }
+        }
+      },
+      "block_order": [
+        "value_1",
+        "value_2",
+        "value_3",
+        "value_4"
+      ],
+      "disabled": true,
+      "settings": {
+        "eyebrow": "Why Choose Us",
+        "heading": "Crafted for Character, Built for Confidence.",
+        "text": "<p>We combine premium fabrics, contemporary cuts, and joyful colorways to make every outfit feel uniquely yours.</p>",
+        "color_scheme": "scheme-1",
+        "enable_animations": true
+      }
+    },
+    "about_faq": {
+      "type": "about-faq",
+      "blocks": {
+        "faq_1": {
+          "type": "faq",
+          "settings": {
+            "question": "Are all collections designed and crafted in-house?",
+            "answer": "<p>Yes! Every design is patterned, sampled, and tailored in-house with rigorous quality inspections at each stitch.</p>"
+          }
+        },
+        "faq_2": {
+          "type": "faq",
+          "settings": {
+            "question": "What fabrics and materials do you use?",
+            "answer": "<p>We prioritize sustainable, high-grade combed cottons, heavyweight French terry, and durable pre-shrunk fabrics built for everyday comfort.</p>"
+          }
+        },
+        "faq_3": {
+          "type": "faq",
+          "settings": {
+            "question": "Do you offer doorstep delivery and COD across India?",
+            "answer": "<p>Yes, we ship across India with express doorstep delivery, Cash on Delivery, and full real-time tracking from our studio to your doorstep.</p>"
+          }
+        },
+        "faq_4": {
+          "type": "faq",
+          "settings": {
+            "question": "How do your sizes fit for men?",
+            "answer": "<p>Our pieces feature contemporary relaxed and oversized fits. You can consult each product's detailed size chart or reach out to our team for custom fit advice.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "faq_1",
+        "faq_2",
+        "faq_3",
+        "faq_4"
+      ],
+      "settings": {
+        "eyebrow": "Common Questions",
+        "heading": "Everything You Need to Know",
+        "text": "<p>Quick answers to frequently asked questions about our fits, fabrics, sizing, and shipping.</p>",
+        "color_scheme": "scheme-1",
+        "enable_animations": true
+      }
+    },
+    "testimonials": {
+      "type": "stagmenfashion-home-testimonials",
+      "blocks": {
+        "review_1": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "\"Finally found streetwear that gets the oversized silhouette just right for men. The heavyweight cotton feels incredibly luxe and holds its shape after multiple washes.\"",
+            "name": "Sneha M.",
+            "initials": "SM",
+            "role": "Fashion Creator"
+          }
+        },
+        "review_2": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "\"The co-ord sets are an absolute staple in my wardrobe now. Impeccable tailoring, vibrant colors, and super comfortable for all-day styling.\"",
+            "name": "Ananya R.",
+            "initials": "AR",
+            "role": "Verified Buyer"
+          }
+        },
+        "review_3": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "\"Stag Men Fashion has redefined daily fits for men. The attention to drop shoulders, neckline ribbing, and fabric weight is unmatched.\"",
+            "name": "Tanya K.",
+            "initials": "TK",
+            "role": "Stylist & Model"
+          }
+        },
+        "review_4": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "\"Obsessed with the boxy tees and hoodies! Constantly getting compliments whenever I step out wearing Stag Men Fashion.\"",
+            "name": "Riya P.",
+            "initials": "RP",
+            "role": "Verified Buyer"
+          }
+        }
+      },
+      "block_order": [
+        "review_1",
+        "review_2",
+        "review_3",
+        "review_4"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "eyebrow": "Community Voices",
+        "heading": "Loved by 50,000+ Men Worldwide",
+        "subheading": "Real feedback from men who rock our signature menswear and everyday fits."
+      }
+    }
+  },
+  "order": [
+    "about_story",
+    "about_stats",
+    "about_values",
+    "about_faq",
+    "testimonials"
+  ]
+}

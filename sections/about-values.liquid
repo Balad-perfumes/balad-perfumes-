@@ -1,0 +1,73 @@
+<section
+  class="about-values color-{{ section.settings.color_scheme }}"
+  {% if section.settings.enable_animations %}data-about-reveal{% endif %}
+>
+  <div class="about-shell">
+    <div class="about-values__intro">
+      {% if section.settings.eyebrow != blank %}
+        <p class="about-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {% endif %}
+      <h2 class="about-values__heading">{{ section.settings.heading | escape }}</h2>
+      {% if section.settings.text != blank %}
+        <div class="about-values__text rte">{{ section.settings.text }}</div>
+      {% endif %}
+    </div>
+
+    <div class="about-values__grid">
+      {% for block in section.blocks %}
+        <article class="about-values__card about-reveal-item" {{ block.shopify_attributes }} data-about-reveal>
+          <div class="about-values__icon">
+            {% render 'icon-or-image',
+              icon: block.settings.icon,
+              image_upload: block.settings.image,
+              width: 22,
+              class_name: 'about-values__icon-mark'
+            %}
+          </div>
+          <div class="about-values__content">
+            <h3 class="about-values__title">{{ block.settings.title | escape }}</h3>
+            {% if block.settings.text != blank %}
+              <div class="about-values__copy rte">{{ block.settings.text }}</div>
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About values",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "What We Stand For" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Fashion that makes you feel confident and unstoppable." },
+    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>The Stag Men Fashion approach is simple: keep it bold, keep it effortless, keep it real.</p>" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "checkbox", "id": "enable_animations", "label": "Enable animations", "default": true }
+  ],
+  "blocks": [
+    {
+      "type": "value",
+      "name": "Value",
+      "settings": [
+        { "type": "text", "id": "icon", "label": "Icon", "default": "star" },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Statement Silhouettes" },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "Pieces are designed to catch the eye, turn heads, and bring effortless comfort into your daily rotation." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "About values",
+      "blocks": [
+        { "type": "value" },
+        { "type": "value" },
+        { "type": "value" },
+        { "type": "value" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,187 @@
+<section class="pf-story pf-story--video color-{{ section.settings.color_scheme }}">
+  <div class="pf-story__stage">
+    <div class="pf-story__media">
+      {% if section.settings.video != blank %}
+        {% render 'video',
+          video: section.settings.video,
+          video_class: 'pf-story__video',
+          video_autoplay: true,
+          video_loop: true,
+          disable_controls: true,
+          video_style: '--video-aspect-ratio: auto;'
+        %}
+      {% elsif section.settings.image != blank %}
+        {{ section.settings.image | image_url: width: 2400 | image_tag: class: 'pf-story__image', loading: 'eager', fetchpriority: 'high', widths: '640, 960, 1200, 1600, 2000, 2400', alt: section.settings.eyebrow }}
+      {% else %}
+        {{ 'hero-apparel-3' | placeholder_svg_tag: 'pf-story__placeholder' }}
+      {% endif %}
+    </div>
+
+    <div class="pf-story__overlay" aria-hidden="true">
+      {% if section.settings.eyebrow != blank %}
+        <div class="pf-story__eyebrow">
+          <span class="pf-story__eyebrow-dot"></span>
+          <span>{{ section.settings.eyebrow }}</span>
+        </div>
+      {% endif %}
+
+      {% if section.settings.heading != blank %}
+        <div class="pf-story__heading">{{ section.settings.heading }}</div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<style>
+  .pf-story--video {
+    background: #f7f1ea;
+  }
+
+  .pf-story__stage {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    min-height: clamp(640px, 86svh, 1120px);
+    background: #efe6dc;
+  }
+
+  .pf-story__media,
+  .pf-story__video,
+  .pf-story__image,
+  .pf-story__placeholder {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .pf-story__media {
+    z-index: 1;
+  }
+
+  deferred-media.pf-story__video,
+  .pf-story__video video,
+  .pf-story__video iframe,
+  .pf-story__video img,
+  .pf-story__image,
+  .pf-story__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+  }
+
+  deferred-media.pf-story__video {
+    z-index: 1;
+  }
+
+  deferred-media.pf-story__video > *:not(template) {
+    width: 100%;
+    height: 100%;
+  }
+
+  deferred-media.pf-story__video video,
+  deferred-media.pf-story__video iframe {
+    position: absolute;
+    inset: 0;
+  }
+
+  .pf-story__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(24px, 7vw, 64px);
+    text-align: center;
+    color: #fff;
+    pointer-events: none;
+  }
+
+  .pf-story__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 0 clamp(18px, 3vw, 28px);
+    font-size: clamp(0.9rem, 1.6vw, 1.1rem);
+    line-height: 1;
+    letter-spacing: 0;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.95);
+  }
+
+  .pf-story__eyebrow-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgb(255 255 255 / 0.16);
+    flex: none;
+  }
+
+  .pf-story__heading {
+    width: min(88vw, 980px);
+    max-width: 980px;
+    margin: 0;
+    color: #fff;
+    font-size: clamp(2.55rem, 6.9vw, 6.4rem);
+    line-height: 0.9;
+    letter-spacing: -0.08em;
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  .pf-story__heading p {
+    margin: 0;
+  }
+
+  .pf-story__heading br {
+    display: block;
+  }
+
+  .pf-story__heading p + p {
+    margin-top: 0.35em;
+  }
+
+  @media screen and (max-width: 749px) {
+    .pf-story__stage {
+      min-height: clamp(560px, 79svh, 820px);
+    }
+
+    .pf-story__overlay {
+      justify-content: center;
+      padding-inline: 20px;
+      transform: translateY(2%);
+    }
+
+    .pf-story__eyebrow {
+      margin-bottom: 18px;
+      font-size: 1rem;
+    }
+
+    .pf-story__heading {
+      width: min(88vw, 18rem);
+      font-size: clamp(2.9rem, 13vw, 4.9rem);
+      line-height: 0.84;
+      letter-spacing: -0.075em;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Brand story",
+  "settings": [
+    { "type": "video", "id": "video", "label": "Video" },
+    { "type": "image_picker", "id": "image", "label": "Fallback image" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The Pop Story" },
+    { "type": "richtext", "id": "heading", "label": "Heading", "default": "<p>For Fits With Vibe. Because basic streetwear just isn’t enough.</p>" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" }
+  ],
+  "presets": [{ "name": "Brand story" }]
+}
+{% endschema %}

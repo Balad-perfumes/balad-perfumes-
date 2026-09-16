@@ -1,0 +1,887 @@
+{% liquid
+  assign autoplay_ms = section.settings.autoplay_speed | times: 1000
+  assign first_image = section.blocks.first.settings.image
+  assign aspect_ratio = first_image.aspect_ratio | default: 1.777
+  assign overlay_opacity = section.settings.overlay_opacity | default: 70 | divided_by: 100.0
+%}
+
+<section
+  class="stagmenfashion-hero color-{{ section.settings.color_scheme }}{% if section.blocks.size > 1 %} stagmenfashion-hero--has-slides{% endif %}{% if section.settings.enable_zoom %} stagmenfashion-hero--zoom{% endif %} stagmenfashion-hero--height-{{ section.settings.desktop_height }} stagmenfashion-hero--mobile-height-{{ section.settings.mobile_height }}"
+  data-stagmenfashion-hero
+  data-autoplay="{{ autoplay_ms }}"
+  style="
+    --aspect-ratio: {{ aspect_ratio }};
+    --stagmenfashion-hero-overlay-opacity: {{ overlay_opacity }};
+    --stagmenfashion-hero-overlay-color: {{ section.settings.overlay_color | default: '#000000' }};
+    {% if section.settings.surface_color != blank %}--stagmenfashion-hero-surface: {{ section.settings.surface_color }};{% endif %}
+  "
+>
+  <div class="stagmenfashion-hero__viewport">
+    <div class="stagmenfashion-hero__track" data-track>
+      {% for block in section.blocks %}
+        <article
+          class="stagmenfashion-hero__slide{% if forloop.first %} is-active{% endif %}"
+          data-slide
+          aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}"
+          {{ block.shopify_attributes }}
+        >
+          <div class="stagmenfashion-hero__media">
+            {% if block.settings.image != blank %}
+              {% assign loading_attr = 'lazy' %}
+              {% assign priority_attr = 'auto' %}
+              {% if forloop.first %}
+                {% assign loading_attr = 'eager' %}
+                {% assign priority_attr = 'high' %}
+              {% endif %}
+              {% if block.settings.mobile_image != blank %}
+                <picture class="stagmenfashion-hero__picture">
+                  <source media="(max-width: 749px)" srcset="{{ block.settings.mobile_image | image_url: width: 480 }} 480w, {{ block.settings.mobile_image | image_url: width: 768 }} 768w, {{ block.settings.mobile_image | image_url: width: 1024 }} 1024w">
+                  {{ block.settings.image | image_url: width: 2800 | image_tag: class: 'stagmenfashion-hero__image', widths: '768, 1024, 1400, 1800, 2000, 2400, 2800', loading: loading_attr, fetchpriority: priority_attr, alt: block.settings.image.alt | default: 'Banner image' }}
+                </picture>
+              {% else %}
+                {{ block.settings.image | image_url: width: 2800 | image_tag: class: 'stagmenfashion-hero__image', widths: '768, 1024, 1400, 1800, 2000, 2400, 2800', loading: loading_attr, fetchpriority: priority_attr, alt: block.settings.image.alt | default: 'Banner image' }}
+              {% endif %}
+            {% else %}
+              <div class="stagmenfashion-hero__placeholder"><span>No image</span></div>
+            {% endif %}
+          </div>
+
+          {%- comment -%} Bottom-to-Top Gradient Overlay {%- endcomment -%}
+          {% if section.settings.enable_overlay != false %}
+            <div class="stagmenfashion-hero__overlay"></div>
+          {% endif %}
+
+          {%- comment -%} Hero Content & CTA Buttons {%- endcomment -%}
+          {% assign has_btn_1 = false %}
+          {% assign has_btn_2 = false %}
+          {% if block.settings.button_label != blank and block.settings.button_link != blank %}
+            {% assign has_btn_1 = true %}
+          {% endif %}
+          {% if block.settings.secondary_button_label != blank and block.settings.secondary_button_link != blank %}
+            {% assign has_btn_2 = true %}
+          {% endif %}
+
+          {% if block.settings.eyebrow != blank or block.settings.heading != blank or block.settings.subheading != blank or has_btn_1 or has_btn_2 %}
+            <div class="stagmenfashion-hero__content-wrap content-pos-{{ block.settings.content_position | default: 'bottom' }} text-align-{{ block.settings.text_alignment | default: 'center' }}">
+              <div class="stagmenfashion-hero__content">
+                {% if block.settings.eyebrow != blank %}
+                  <span class="stagmenfashion-hero__eyebrow">{{ block.settings.eyebrow | escape }}</span>
+                {% endif %}
+
+                {% if block.settings.heading != blank %}
+                  <h2 class="stagmenfashion-hero__heading">{{ block.settings.heading | escape }}</h2>
+                {% endif %}
+
+                {% if block.settings.subheading != blank %}
+                  <div class="stagmenfashion-hero__subheading">{{ block.settings.subheading }}</div>
+                {% endif %}
+
+                {% if has_btn_1 %}
+                  <div class="stagmenfashion-hero__cta-group">
+                    <a class="stagmenfashion-hero__cta-button stagmenfashion-hero__cta-button--primary btn-style-{{ block.settings.button_style | default: 'glass_pill' }}" href="{{ block.settings.button_link }}">
+                      <span>{{ block.settings.button_label | escape }}</span>
+                      <svg class="stagmenfashion-hero__cta-icon" viewBox="0 0 18 12" fill="none" aria-hidden="true">
+                        <path d="M1 6h16M11 1l6 5-6 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </div>
+
+    {%- if section.blocks.size > 1 -%}
+      <div class="stagmenfashion-hero__pagination">
+        <div class="stagmenfashion-hero__dots" aria-label="Slide navigation">
+          {% for block in section.blocks %}
+            <button class="stagmenfashion-hero__dot{% if forloop.first %} is-active{% endif %}" type="button" data-dot="{{ forloop.index0 }}" aria-label="Go to slide {{ forloop.index }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"></button>
+          {% endfor %}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 1 -%}
+      <button class="stagmenfashion-hero__nav stagmenfashion-hero__nav--prev" type="button" data-action="prev" aria-label="Previous slide">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5 8 12l6.5 7"/></svg>
+      </button>
+      <button class="stagmenfashion-hero__nav stagmenfashion-hero__nav--next" type="button" data-action="next" aria-label="Next slide">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 5 6.5 7-6.5 7"/></svg>
+      </button>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  .stagmenfashion-hero {
+    --hero-bg: var(--stagmenfashion-hero-surface, var(--color-background, #ffffff));
+    position: relative;
+    background: var(--hero-bg);
+    padding: 0 !important;
+  }
+
+  .stagmenfashion-hero__viewport {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Heights (Desktop) */
+  .stagmenfashion-hero--height-adapt .stagmenfashion-hero__viewport {
+    height: auto;
+    aspect-ratio: var(--aspect-ratio);
+  }
+  .stagmenfashion-hero--height-small .stagmenfashion-hero__viewport {
+    height: 60vh;
+    min-height: 480px;
+  }
+  .stagmenfashion-hero--height-medium .stagmenfashion-hero__viewport {
+    height: 75vh;
+    min-height: 560px;
+  }
+  .stagmenfashion-hero--height-large .stagmenfashion-hero__viewport {
+    height: 88vh;
+    min-height: 600px;
+    max-height: 950px;
+  }
+  .stagmenfashion-hero--height-fullscreen .stagmenfashion-hero__viewport {
+    height: 100vh;
+    height: 100svh;
+    min-height: 600px;
+  }
+
+  .stagmenfashion-hero__track {
+    display: flex;
+    height: 100%;
+    transition: transform 0.85s cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .stagmenfashion-hero__slide {
+    position: relative;
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .stagmenfashion-hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .stagmenfashion-hero__picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .stagmenfashion-hero__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    transition: transform 7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+  }
+
+  /* Ken Burns zoom animation */
+  .stagmenfashion-hero--zoom .stagmenfashion-hero__image {
+    transform: scale(1.08);
+  }
+  .stagmenfashion-hero--zoom .stagmenfashion-hero__slide.is-active .stagmenfashion-hero__image {
+    transform: scale(1);
+  }
+  .stagmenfashion-hero:not(.stagmenfashion-hero--zoom) .stagmenfashion-hero__image {
+    transform: scale(1);
+  }
+
+  .stagmenfashion-hero__placeholder {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    background: #111;
+    color: #444;
+    font-size: 0.85rem;
+  }
+
+  /* ── Bottom-to-Top Gradient Overlay ── */
+  .stagmenfashion-hero__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, var(--stagmenfashion-hero-overlay-opacity, 0.7)) 0%,
+      rgba(0, 0, 0, calc(var(--stagmenfashion-hero-overlay-opacity, 0.7) * 0.7)) 35%,
+      rgba(0, 0, 0, calc(var(--stagmenfashion-hero-overlay-opacity, 0.7) * 0.25)) 65%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  }
+
+  @supports (color: color-mix(in srgb, red, blue)) {
+    .stagmenfashion-hero__overlay {
+      background: linear-gradient(
+        to top,
+        color-mix(in srgb, var(--stagmenfashion-hero-overlay-color, #000000) calc(var(--stagmenfashion-hero-overlay-opacity, 0.7) * 100%), transparent) 0%,
+        color-mix(in srgb, var(--stagmenfashion-hero-overlay-color, #000000) calc(var(--stagmenfashion-hero-overlay-opacity, 0.7) * 70%), transparent) 35%,
+        color-mix(in srgb, var(--stagmenfashion-hero-overlay-color, #000000) calc(var(--stagmenfashion-hero-overlay-opacity, 0.7) * 25%), transparent) 65%,
+        transparent 100%
+      );
+    }
+  }
+
+  /* ── Content Box ── */
+  .stagmenfashion-hero__content-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 24px 70px;
+    pointer-events: none;
+  }
+
+  .stagmenfashion-hero__content-wrap.content-pos-bottom {
+    justify-content: flex-end;
+  }
+  .stagmenfashion-hero__content-wrap.content-pos-center {
+    justify-content: center;
+  }
+  .stagmenfashion-hero__content-wrap.content-pos-top {
+    justify-content: flex-start;
+    padding-top: 80px;
+  }
+
+  .stagmenfashion-hero__content {
+    max-width: 820px;
+    width: 100%;
+    margin: 0 auto;
+    pointer-events: auto;
+  }
+
+  .stagmenfashion-hero__content-wrap.text-align-center .stagmenfashion-hero__content {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .stagmenfashion-hero__content-wrap.text-align-left .stagmenfashion-hero__content {
+    text-align: left;
+    margin-left: 0;
+    margin-right: auto;
+  }
+  .stagmenfashion-hero__content-wrap.text-align-right .stagmenfashion-hero__content {
+    text-align: right;
+    margin-left: auto;
+    margin-right: 0;
+  }
+
+  /* ── Staggered Entrance Animations ── */
+  .stagmenfashion-hero__eyebrow,
+  .stagmenfashion-hero__heading,
+  .stagmenfashion-hero__subheading,
+  .stagmenfashion-hero__cta-group {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .stagmenfashion-hero__slide.is-active .stagmenfashion-hero__eyebrow {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.12s;
+  }
+  .stagmenfashion-hero__slide.is-active .stagmenfashion-hero__heading {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.22s;
+  }
+  .stagmenfashion-hero__slide.is-active .stagmenfashion-hero__subheading {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.32s;
+  }
+  .stagmenfashion-hero__slide.is-active .stagmenfashion-hero__cta-group {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.42s;
+  }
+
+  /* Eyebrow / Badge */
+  .stagmenfashion-hero__eyebrow {
+    display: inline-block;
+    padding: 6px 16px;
+    margin-bottom: 14px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Heading */
+  .stagmenfashion-hero__heading {
+    margin: 0 0 14px;
+    font-family: var(--font-heading--family, inherit);
+    font-size: clamp(2.2rem, 5.5vw, 4.2rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Subheading */
+  .stagmenfashion-hero__subheading {
+    margin: 0 0 26px;
+    font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.92);
+    max-width: 580px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  }
+  .text-align-center .stagmenfashion-hero__subheading { margin-left: auto; margin-right: auto; }
+  .text-align-left .stagmenfashion-hero__subheading { margin-left: 0; margin-right: auto; }
+  .text-align-right .stagmenfashion-hero__subheading { margin-left: auto; margin-right: 0; }
+
+  /* ── CTA Group ── */
+  .stagmenfashion-hero__cta-group {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 4px;
+  }
+  .text-align-center .stagmenfashion-hero__cta-group { justify-content: center; }
+  .text-align-left .stagmenfashion-hero__cta-group { justify-content: flex-start; }
+  .text-align-right .stagmenfashion-hero__cta-group { justify-content: flex-end; }
+
+  /* ── Text & Underline CTA Button (Smaller text) ── */
+  .stagmenfashion-hero__cta-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px 0 8px;
+    min-height: auto;
+    border-radius: 0;
+    text-decoration: none;
+    font-family: var(--font-body--family);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    position: relative;
+    cursor: pointer;
+    z-index: 1;
+    background: transparent;
+    color: #ffffff;
+    border: none;
+    box-shadow: none;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+    transition: color 0.35s ease, opacity 0.35s ease;
+  }
+
+  /* Underline line animation */
+  .stagmenfashion-hero__cta-button::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1.5px;
+    background: #ffffff;
+    transform-origin: left;
+    transform: scaleX(1);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.35s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  .stagmenfashion-hero__cta-button:hover::after {
+    transform: scaleX(1.1);
+    background: #ffffff;
+  }
+
+  .stagmenfashion-hero__cta-button:hover {
+    color: #ffffff;
+    opacity: 0.9;
+  }
+
+  /* Style: Fashion Solid White (Option) */
+  .stagmenfashion-hero__cta-button.btn-style-fashion_white {
+    padding: 0 36px;
+    min-height: 48px;
+    background: #ffffff;
+    color: #111111;
+    border: 1px solid #ffffff;
+    text-shadow: none;
+    font-size: 0.72rem;
+  }
+  .stagmenfashion-hero__cta-button.btn-style-fashion_white::after { display: none; }
+  .stagmenfashion-hero__cta-button.btn-style-fashion_white:hover {
+    background: #111111;
+    color: #ffffff;
+    border-color: #111111;
+  }
+
+  /* Secondary CTA Button */
+  .stagmenfashion-hero__cta-button--secondary {
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.6);
+    background: transparent;
+    color: #ffffff;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: 0.72rem;
+  }
+
+  /* Icon animation */
+  .stagmenfashion-hero__cta-icon {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+  }
+
+  .stagmenfashion-hero__cta-button:hover .stagmenfashion-hero__cta-icon {
+    transform: translateX(6px);
+  }
+
+  .stagmenfashion-hero__cta-button:active {
+    opacity: 0.75;
+  }
+
+  /* ── Dots Pagination ── */
+  .stagmenfashion-hero__pagination {
+    position: absolute;
+    bottom: 22px;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .stagmenfashion-hero__dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    pointer-events: auto;
+    background: transparent;
+    padding: 0;
+    border: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .stagmenfashion-hero__dot {
+    position: relative;
+    height: 6px;
+    width: 6px;
+    padding: 0;
+    border: 0;
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 50%;
+    cursor: pointer;
+    overflow: hidden;
+    transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-radius 0.35s ease, background-color 0.35s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  }
+
+  .stagmenfashion-hero__dot.is-active {
+    width: 22px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .stagmenfashion-hero__dot::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.6);
+    transform-origin: left;
+    transform: scaleX(0);
+    border-radius: 999px;
+  }
+
+  .stagmenfashion-hero--has-slides .stagmenfashion-hero__dot.is-active::after {
+    animation: stagmenfashion-dot-fill var(--stagmenfashion-autoplay, 6000ms) linear forwards;
+  }
+
+  .stagmenfashion-hero:not(.stagmenfashion-hero--has-slides) .stagmenfashion-hero__dot.is-active::after {
+    transform: scaleX(1);
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .stagmenfashion-hero__dot:not(.is-active):hover {
+    background: rgba(255, 255, 255, 0.75);
+  }
+
+  @keyframes stagmenfashion-dot-fill {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+
+  /* ── Nav Arrows ── */
+  .stagmenfashion-hero__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 0;
+  }
+
+  .stagmenfashion-hero:hover .stagmenfashion-hero__nav {
+    opacity: 1;
+  }
+
+  .stagmenfashion-hero__nav--prev { left: 24px; }
+  .stagmenfashion-hero__nav--next { right: 24px; }
+
+  .stagmenfashion-hero__nav:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-50%) scale(1.08);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .stagmenfashion-hero__nav:active { transform: translateY(-50%) scale(0.93); }
+
+  /* ── Mobile ── */
+  @media screen and (max-width: 749px) {
+    .stagmenfashion-hero {
+      --stagmenfashion-hero-overlay-color: #00000038 !important;
+    }
+
+    .stagmenfashion-hero__overlay {
+      background: linear-gradient(
+        to top,
+        #00000038 0%,
+        #00000028 35%,
+        #00000010 65%,
+        transparent 100%
+      );
+    }
+
+    .stagmenfashion-hero--mobile-height-small .stagmenfashion-hero__viewport { height: 50svh; min-height: 400px; }
+    .stagmenfashion-hero--mobile-height-medium .stagmenfashion-hero__viewport { height: 78svh; min-height: 540px; }
+    .stagmenfashion-hero--mobile-height-large .stagmenfashion-hero__viewport { height: 88svh; min-height: 620px; }
+    .stagmenfashion-hero--mobile-height-fullscreen .stagmenfashion-hero__viewport { height: 100svh; min-height: 500px; }
+    .stagmenfashion-hero--mobile-height-adapt .stagmenfashion-hero__viewport { height: auto; aspect-ratio: var(--aspect-ratio); }
+
+    .stagmenfashion-hero__image { object-position: center 25%; }
+
+    .stagmenfashion-hero__content-wrap {
+      padding: 24px 18px 58px;
+    }
+
+    .stagmenfashion-hero__eyebrow {
+      padding: 4px 12px;
+      font-size: 0.68rem;
+      margin-bottom: 8px;
+    }
+
+    .stagmenfashion-hero__heading {
+      margin-bottom: 10px;
+    }
+
+    .stagmenfashion-hero__subheading {
+      margin-bottom: 18px;
+      font-size: 0.9rem;
+    }
+
+    .stagmenfashion-hero__cta-group {
+      gap: 10px;
+    }
+
+    .stagmenfashion-hero__cta-button {
+      min-height: 46px;
+      padding: 0 26px;
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
+    }
+
+    .stagmenfashion-hero__pagination {
+      bottom: 18px;
+    }
+
+    .stagmenfashion-hero__dot { height: 4px; width: 4px; }
+    .stagmenfashion-hero__dot.is-active { width: 16px; }
+
+    /* Always show nav arrows on mobile */
+    .stagmenfashion-hero__nav {
+      opacity: 1;
+      width: 38px;
+      height: 38px;
+    }
+    .stagmenfashion-hero__nav--prev { left: 12px; }
+    .stagmenfashion-hero__nav--next { right: 12px; }
+    .stagmenfashion-hero__nav svg { width: 16px; height: 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stagmenfashion-hero__track, .stagmenfashion-hero__image, .stagmenfashion-hero__eyebrow, .stagmenfashion-hero__heading, .stagmenfashion-hero__subheading, .stagmenfashion-hero__cta-group { transition: none !important; }
+    .stagmenfashion-hero__image { transform: scale(1) !important; }
+    .stagmenfashion-hero__eyebrow, .stagmenfashion-hero__heading, .stagmenfashion-hero__subheading, .stagmenfashion-hero__cta-group { transform: none !important; opacity: 1 !important; }
+    .stagmenfashion-hero__dot.is-active::after { animation: none !important; transform: scaleX(1) !important; }
+  }
+</style>
+
+{% javascript %}
+  (() => {
+    document.querySelectorAll('[data-stagmenfashion-hero]').forEach((root) => {
+      if (root.dataset.ready === 'true') return;
+      root.dataset.ready = 'true';
+
+      const track = root.querySelector('[data-track]');
+      const slides = Array.from(root.querySelectorAll('[data-slide]'));
+      const dots = Array.from(root.querySelectorAll('[data-dot]'));
+      const prevBtn = root.querySelector('[data-action="prev"]');
+      const nextBtn = root.querySelector('[data-action="next"]');
+      const autoplay = Number(root.dataset.autoplay) || 0;
+      let index = 0;
+      let timer = null;
+      let pointerId = null;
+      let dragStartX = 0;
+      let dragDeltaX = 0;
+      let isDragging = false;
+
+      if (!track || slides.length === 0) return;
+
+      const autoplayMs = autoplay > 0 ? autoplay : 6000;
+
+      root.style.setProperty('--stagmenfashion-autoplay', autoplayMs + 'ms');
+
+      const activate = (nextIndex) => {
+        index = (nextIndex + slides.length) % slides.length;
+        track.style.transform = `translateX(-${index * 100}%)`;
+
+        slides.forEach((slide, i) => {
+          const active = i === index;
+          slide.classList.toggle('is-active', active);
+          slide.setAttribute('aria-hidden', String(!active));
+        });
+
+        dots.forEach((dot, i) => {
+          const active = i === index;
+          if (active) {
+            dot.classList.remove('is-active');
+            void dot.offsetWidth;
+            dot.classList.add('is-active');
+          } else {
+            dot.classList.remove('is-active');
+          }
+          dot.setAttribute('aria-selected', String(active));
+        });
+      };
+
+      if (slides.length > 1) {
+        prevBtn?.addEventListener('click', () => activate(index - 1));
+        nextBtn?.addEventListener('click', () => activate(index + 1));
+        dots.forEach((dot) => {
+          dot.addEventListener('click', () => activate(Number(dot.dataset.dot)));
+        });
+
+        const startAutoplay = () => {
+          if (autoplay > 0) {
+            timer = setInterval(() => activate(index + 1), autoplay);
+          }
+        };
+
+        const stopAutoplay = () => {
+          if (timer) { clearInterval(timer); timer = null; }
+        };
+
+        root.addEventListener('mouseenter', stopAutoplay);
+        root.addEventListener('mouseleave', startAutoplay);
+
+        root.addEventListener('pointerdown', (e) => {
+          if (e.pointerType === 'mouse' && e.button !== 0) return;
+          pointerId = e.pointerId;
+          dragStartX = e.clientX;
+          dragDeltaX = 0;
+          isDragging = true;
+          stopAutoplay();
+          track.style.transition = 'none';
+        });
+
+        root.addEventListener('pointermove', (e) => {
+          if (!isDragging || e.pointerId !== pointerId) return;
+          dragDeltaX = e.clientX - dragStartX;
+          const offset = -index * 100 + (dragDeltaX / root.offsetWidth) * 100;
+          track.style.transform = `translateX(${offset}%)`;
+        });
+
+        const endDrag = () => {
+          if (!isDragging) return;
+          isDragging = false;
+          pointerId = null;
+          track.style.transition = '';
+          if (dragDeltaX < -25) activate(index + 1);
+          else if (dragDeltaX > 25) activate(index - 1);
+          else activate(index);
+          dragDeltaX = 0;
+          startAutoplay();
+        };
+
+        root.addEventListener('pointerup', endDrag);
+        root.addEventListener('pointercancel', endDrag);
+        window.addEventListener('resize', () => activate(index));
+
+        activate(index);
+        startAutoplay();
+      } else {
+        activate(0);
+      }
+    });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Stag Hero Slider",
+  "disabled_on": { "groups": ["header", "footer"] },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_overlay",
+      "label": "Enable bottom gradient overlay",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 70
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay color",
+      "default": "#000000"
+    },
+    { "type": "range", "id": "autoplay_speed", "label": "Autoplay speed", "min": 0, "max": 12, "step": 1, "unit": "s", "default": 7 },
+    {
+      "type": "select",
+      "id": "desktop_height",
+      "label": "Desktop height",
+      "options": [
+        { "value": "adapt", "label": "Adapt to first image" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" },
+        { "value": "fullscreen", "label": "Full screen" }
+      ],
+      "default": "large"
+    },
+    {
+      "type": "select",
+      "id": "mobile_height",
+      "label": "Mobile height",
+      "options": [
+        { "value": "adapt", "label": "Adapt to first image" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" },
+        { "value": "fullscreen", "label": "Full screen" }
+      ],
+      "default": "fullscreen"
+    },
+    { "type": "checkbox", "id": "enable_zoom", "label": "Enable image zoom effect", "default": true },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "color", "id": "surface_color", "label": "Background color", "default": "#000000" }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Desktop image" },
+        { "type": "image_picker", "id": "mobile_image", "label": "Mobile image" },
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow / Badge text" },
+        { "type": "text", "id": "heading", "label": "Heading text" },
+        { "type": "richtext", "id": "subheading", "label": "Subheading / Description text" },
+        { "type": "text", "id": "button_label", "label": "Primary button label", "default": "Shop Now" },
+        { "type": "url", "id": "button_link", "label": "Primary button link" },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            { "value": "text_underline", "label": "Text & Underline (Minimalist)" },
+            { "value": "fashion_white", "label": "Fashion Solid White" },
+            { "value": "minimal_outline", "label": "Minimalist Outline" }
+          ],
+          "default": "text_underline"
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Content position",
+          "options": [
+            { "value": "bottom", "label": "Bottom" },
+            { "value": "center", "label": "Center" },
+            { "value": "top", "label": "Top" }
+          ],
+          "default": "bottom"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text alignment",
+          "options": [
+            { "value": "center", "label": "Center" },
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "center"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "Stag Hero Slider", "category": "Image", "blocks": [{ "type": "slide" }, { "type": "slide" }] }
+  ]
+}
+{% endschema %}

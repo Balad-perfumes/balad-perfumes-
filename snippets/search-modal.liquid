@@ -1,0 +1,858 @@
+{% doc %}
+  Renders the clean minimal full-width search dropdown modal.
+
+  @param {block} [block] - The block object, used for Shopify editor attributes.
+  @param {string} [class] - Additional CSS classes to apply to the predictive search component.
+{% enddoc %}
+
+<script
+  src="{{ 'dialog.js' | asset_url }}"
+  type="module"
+></script>
+
+<script
+  src="{{ 'predictive-search.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+<dialog-component
+  id="search-modal"
+  class="search-modal"
+  {{ block.shopify_attributes }}
+>
+  <dialog
+    ref="dialog"
+    class="search-modal__content dialog-modal"
+    scroll-lock
+    aria-labelledby="search-modal-heading"
+    data-lenis-prevent
+  >
+    <h2
+      id="search-modal-heading"
+      class="visually-hidden"
+    >
+      {{ 'content.search' | t }}
+    </h2>
+    <predictive-search-component
+      class="predictive-search color-{{ settings.popover_color_scheme }}{% if class != blank %} {{ class | strip }}{% endif %}"
+      style="--product-corner-radius: {{ settings.product_corner_radius | default: 8 | append: 'px' }}; --card-corner-radius: {{ settings.card_corner_radius | default: 8 | append: 'px' }};{% if settings.card_title_case == 'uppercase' %} --title-case: uppercase;{% endif %}"
+      data-section-id="predictive-search"
+      data-testid="{{ 'search-component--modal' }}"
+      role="search"
+      aria-label="{{ 'content.search_input_label' | t }}"
+      data-lenis-prevent
+    >
+      <form
+        action="{{ routes.search_url }}"
+        method="get"
+        role="search"
+        class="predictive-search-form"
+        ref="form"
+        on:keydown="/onSearchKeyDown"
+        data-lenis-prevent
+      >
+        <!-- Sticky Top Search Bar Row -->
+        <div class="predictive-search-form__header">
+          <div class="predictive-search-form__header-inner">
+            <label
+              for="{{ 'cmdk-input' | default: 'Search' }}"
+              class="visually-hidden"
+            >
+              {{- 'content.search_input_label' | t -}}
+            </label>
+            <input
+              class="search-input"
+              id="{{ 'cmdk-input' | default: 'Search' }}"
+              type="search"
+              name="q"
+              role="combobox"
+              aria-expanded="false"
+              aria-owns="predictive-search-results"
+              aria-controls="predictive-search-results"
+              aria-haspopup="listbox"
+              aria-autocomplete="list"
+              autocomplete="off"
+              placeholder="Search here....."
+              ref="searchInput"
+              on:input="/search"
+              on:keydown="/onSearchKeyDown"
+            >
+            <input
+              name="options[prefix]"
+              type="hidden"
+              value="last"
+            >
+            <button
+              type="button"
+              class="predictive-search__reset-button"
+              ref="resetButton"
+              hidden
+              on:click="/resetSearch"
+              aria-label="{{ 'actions.clear' | t }}"
+            >
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+            <span class="predictive-search__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"/>
+                <path d="m20 20-3.5-3.5"/>
+              </svg>
+            </span>
+          </div>
+
+          <!-- Close Button -->
+          <button
+            type="button"
+            class="predictive-search__close-modal-button"
+            aria-label="{{ 'accessibility.close_dialog' | t }}"
+            on:click="dialog-component/closeDialog"
+            ref="closeModalButton"
+          >
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Scrollable Search Results Container -->
+        <div class="predictive-search-form__content-wrapper" data-lenis-prevent>
+          <div
+            class="predictive-search-form__content"
+            ref="predictiveSearchResults"
+            on:click="/handleModalClick"
+            data-lenis-prevent
+          >
+            {% render 'predictive-search-empty-state',
+              load_empty_state: true,
+              shadow_opacity: 0.1,
+              products_test_id: 'products-list-default--modal'
+            %}
+          </div>
+        </div>
+
+        <!-- Fixed Bottom Footer CTA Button -->
+        <div class="predictive-search-form__footer">
+          <button
+            type="submit"
+            class="button predictive-search__search-button"
+            ref="viewAllButton"
+          >
+            {{ 'content.search_results_view_all' | t }}
+          </button>
+        </div>
+      </form>
+    </predictive-search-component>
+  </dialog>
+</dialog-component>
+
+<style>
+  /* =============================================================
+     Full-Width Minimal Search Dropdown Sheet
+     ============================================================= */
+
+  .search-modal {
+    display: contents;
+  }
+
+  /* Crucial: Hide dialog completely when not open */
+  dialog.search-modal__content:not([open]),
+  .search-modal__content:not([open]),
+  dialog-component#search-modal dialog:not([open]) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+  }
+
+  /* Frosted Glass Backdrop */
+  dialog.search-modal__content::backdrop {
+    background: rgba(0, 0, 0, 0.45) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+  }
+
+  /* Top Dropdown Sheet Dialog when Open */
+  dialog.search-modal__content[open] {
+    display: flex !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: auto !important;
+    max-height: 85dvh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 0 20px 20px !important;
+    background: #ffffff !important;
+    color: #111111 !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    outline: none !important;
+    z-index: 999999 !important;
+    animation: searchSheetSlideIn 0.22s ease-out;
+  }
+
+  dialog.search-modal__content.dialog-closing {
+    animation: searchSheetSlideOut 0.18s ease-in !important;
+  }
+
+  .search-modal__content predictive-search-component {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 85dvh !important;
+    min-height: 0 !important;
+    background: #ffffff;
+    color: #111111;
+    overflow: hidden !important;
+    position: relative;
+    box-sizing: border-box;
+  }
+
+  .search-modal__content .predictive-search-form {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 85dvh !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    position: relative;
+    background: #ffffff;
+    box-sizing: border-box;
+  }
+
+  /* Sticky Top Header Bar with Pill Search Input + Close Button */
+  .search-modal__content .predictive-search-form__header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    padding: 18px clamp(18px, 3.5vw, 44px) 14px clamp(18px, 3.5vw, 44px) !important;
+    margin: 0 !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+    z-index: 10 !important;
+  }
+
+  /* Capsule Pill Search Field */
+  .search-modal__content .predictive-search-form__header-inner {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    height: 46px;
+    background: #efefef;
+    border-radius: 999px;
+    padding: 0 20px;
+    box-sizing: border-box;
+    transition: background-color 0.2s ease;
+  }
+
+  .search-modal__content .predictive-search-form__header-inner:focus-within {
+    background: #e8e8e8;
+  }
+
+  .search-modal__content input.search-input {
+    flex: 1;
+    height: 100%;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 400;
+    color: #111111;
+    outline: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .search-modal__content input.search-input::placeholder {
+    color: #9e9e9e;
+    font-size: 13.5px;
+    font-weight: 400;
+  }
+
+  .search-modal__content input.search-input::-webkit-search-cancel-button,
+  .search-modal__content input.search-input::-webkit-search-decoration {
+    -webkit-appearance: none;
+    display: none;
+  }
+
+  /* Search Magnifying Glass Icon on Right */
+  .search-modal__content .predictive-search__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #777777;
+    margin-left: 10px;
+    flex-shrink: 0;
+  }
+
+  /* Reset Button inside Pill */
+  .search-modal__content .predictive-search__reset-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #d4d4d8;
+    color: #333333;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 8px;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .search-modal__content .predictive-search__reset-button:hover {
+    background: #bbbbc0;
+    color: #000000;
+  }
+
+  .search-modal__content .predictive-search__reset-button[hidden] {
+    display: none !important;
+  }
+
+  /* Close Button (✕) */
+  .search-modal__content .predictive-search__close-modal-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: #111111;
+    cursor: pointer;
+    padding: 6px;
+    flex-shrink: 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .search-modal__content .predictive-search__close-modal-button:hover {
+    opacity: 0.6;
+    transform: scale(1.08);
+  }
+
+  /* Scrollable Content Container */
+  .search-modal__content .predictive-search-form__content-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    position: relative !important;
+    background: #ffffff;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-y !important;
+    padding: 20px clamp(18px, 3.5vw, 44px) 24px clamp(18px, 3.5vw, 44px) !important;
+    box-sizing: border-box !important;
+  }
+
+  .search-modal__content .predictive-search-form__content-wrapper::-webkit-scrollbar {
+    width: 6px;
+    display: block !important;
+  }
+
+  .search-modal__content .predictive-search-form__content-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 10px;
+  }
+
+  .search-modal__content .predictive-search-form__content-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .search-modal__content .predictive-search-form__content {
+    flex: 1 0 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #ffffff;
+    width: 100%;
+  }
+
+  /* Full-Width Layout */
+  .search-modal__layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .search-modal__section-heading {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+    margin: 0 0 16px 0 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+  }
+
+  /* Products Section - Full Width Adaptive Grid */
+  .search-modal__products-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .search-modal__products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 18px;
+    width: 100%;
+  }
+
+  @media screen and (min-width: 1200px) {
+    .search-modal__products-grid {
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 20px;
+    }
+  }
+
+  @media screen and (max-width: 600px) {
+    .search-modal__products-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+  }
+
+  .search-modal__product-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: #111111;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+  }
+
+  .search-modal__product-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .search-modal__product-media {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #f6f6f7;
+    margin-bottom: 8px;
+  }
+
+  .search-modal__product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+
+  .search-modal__product-card:hover .search-modal__product-img {
+    transform: scale(1.04);
+  }
+
+  .search-modal__product-img-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #eeeeee;
+  }
+
+  .search-modal__product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .search-modal__product-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #111111;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    position: relative;
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .search-modal__product-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1.5px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left bottom;
+    transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .search-modal__product-card:hover .search-modal__product-title::after {
+    transform: scaleX(1);
+  }
+
+  .search-modal__product-price {
+    font-size: 12px;
+    font-weight: 600;
+    color: #111111;
+  }
+
+  /* Live Predictive Search Results Grid */
+  .search-modal__content .predictive-search-results__title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+    margin: 16px 0 12px 0 !important;
+  }
+
+  .search-modal__content .predictive-search-results__wrapper-queries {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px 0;
+  }
+
+  .search-modal__content .predictive-search-results__pill {
+    display: inline-flex;
+    align-items: center;
+    background: #f4f4f6;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #111111;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .search-modal__content .predictive-search-results__pill:hover {
+    background: #111111;
+    color: #ffffff;
+  }
+
+  .search-modal__content .predictive-search-results__products {
+    padding: 0;
+    margin: 0;
+  }
+
+  .search-modal__content .predictive-search-results__wrapper-products {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+    gap: 18px !important;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  @media screen and (max-width: 600px) {
+    .search-modal__content .predictive-search-results__wrapper-products {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 12px !important;
+    }
+  }
+
+  .search-modal__content .predictive-search-results__card--product {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border-radius: 6px;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    transition: transform 0.2s ease;
+  }
+
+  .search-modal__content .predictive-search-results__card--product:hover {
+    transform: translateY(-2px);
+  }
+
+  .search-modal__content .resource-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .search-modal__content .resource-card__media {
+    border-radius: 6px;
+    overflow: hidden;
+    background: #f6f6f7;
+    margin-bottom: 8px;
+  }
+
+  .search-modal__content .resource-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .search-modal__content .resource-card:hover .resource-card__image {
+    transform: scale(1.03);
+  }
+
+  .search-modal__content .resource-card__title {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    line-height: 1.3 !important;
+    color: #111111 !important;
+    margin: 0 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .search-modal__content .price {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #111111 !important;
+  }
+
+  /* Fixed Bottom Footer CTA Button */
+  .search-modal__content .predictive-search-form__footer {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 8px clamp(18px, 3.5vw, 44px) 10px clamp(18px, 3.5vw, 44px) !important;
+    background: #ffffff !important;
+    border-top: 1px solid #eeeeee !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+    z-index: 10 !important;
+  }
+
+  .search-modal__content .predictive-search__search-button {
+    width: auto !important;
+    min-width: 140px !important;
+    max-width: 200px !important;
+    height: 30px !important;
+    padding: 0 16px !important;
+    background: #111111 !important;
+    color: #ffffff !important;
+    border: 1px solid #111111 !important;
+    border-radius: 3px !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: none !important;
+  }
+
+  .search-modal__content .predictive-search__search-button:hover {
+    background: #333333 !important;
+    border-color: #333333 !important;
+  }
+
+  .search-modal__content .predictive-search__search-button:active {
+    transform: translateY(0) !important;
+  }
+
+  /* Animations */
+  @keyframes searchSheetSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes searchSheetSlideOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-16px);
+    }
+  }
+
+  /* Mobile Responsive Spacing */
+  @media screen and (max-width: 749px) {
+    dialog.search-modal__content[open] {
+      max-height: 90dvh !important;
+    }
+
+    .search-modal__content predictive-search-component {
+      max-height: 90dvh !important;
+    }
+
+    .search-modal__content .predictive-search-form {
+      max-height: 90dvh !important;
+    }
+
+    .search-modal__content .predictive-search-form__header {
+      padding: 14px 16px 12px 16px !important;
+      gap: 12px !important;
+    }
+
+    .search-modal__content .predictive-search-form__header-inner {
+      height: 42px !important;
+      padding: 0 14px !important;
+    }
+
+    .search-modal__content input.search-input {
+      font-size: 13.5px !important;
+    }
+
+    .search-modal__content .predictive-search-form__content-wrapper {
+      padding: 14px 16px 20px 16px !important;
+    }
+
+    .search-modal__content .predictive-search-form__footer {
+      padding: 8px 16px 10px 16px !important;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    function getSearchDialog() {
+      const modal = document.querySelector('dialog-component#search-modal');
+      const dialog = modal ? modal.querySelector('dialog') : document.querySelector('dialog.search-modal__content');
+      return { modal, dialog };
+    }
+
+    function closeSearchModal() {
+      const { modal, dialog } = getSearchDialog();
+      if (!dialog) return;
+
+      // Call component close method if available
+      if (modal && typeof modal.closeDialog === 'function') {
+        try {
+          modal.closeDialog();
+        } catch (_) {}
+      }
+
+      // Hard safety fallback to guarantee closing and unlock body
+      setTimeout(function() {
+        if (dialog && dialog.hasAttribute('open')) {
+          try {
+            dialog.close();
+          } catch (_) {}
+          dialog.removeAttribute('open');
+          dialog.classList.remove('dialog-closing');
+        }
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.top = '';
+      }, 50);
+    }
+
+    function openSearchModal() {
+      const { modal, dialog } = getSearchDialog();
+      if (!modal && !dialog) return;
+
+      if (modal && typeof modal.showDialog === 'function') {
+        modal.showDialog();
+      } else if (dialog && typeof dialog.showModal === 'function') {
+        dialog.showModal();
+      }
+      setTimeout(function() {
+        const input = document.querySelector('.search-modal__content input.search-input');
+        if (input) input.focus();
+      }, 100);
+    }
+
+    // Ensure dialog is strictly closed on initial page load
+    function ensureInitialClosed() {
+      const { dialog } = getSearchDialog();
+      if (dialog && !window.location.hash.includes('search-modal-open')) {
+        try {
+          if (dialog.open) dialog.close();
+        } catch (_) {}
+        dialog.removeAttribute('open');
+        dialog.classList.remove('dialog-closing');
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', ensureInitialClosed);
+    } else {
+      ensureInitialClosed();
+    }
+
+    // Event delegation for all search triggers and close actions
+    document.addEventListener('click', function(e) {
+      // 1. Close button click
+      const closeBtn = e.target.closest('.predictive-search__close-modal-button, [data-close-search-modal]');
+      if (closeBtn) {
+        e.preventDefault();
+        closeSearchModal();
+        return;
+      }
+
+      // 2. Click outside the modal content (on the native dialog backdrop)
+      const { dialog } = getSearchDialog();
+      if (dialog && dialog.hasAttribute('open') && e.target === dialog) {
+        const rect = dialog.getBoundingClientRect();
+        const isInDialog = (
+          rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
+          rect.left <= e.clientX && e.clientX <= rect.left + rect.width
+        );
+        if (!isInDialog) {
+          closeSearchModal();
+          return;
+        }
+      }
+
+      // 3. Open trigger click
+      const openBtn = e.target.closest('.pf-header__search-btn, .menu-drawer__top-action--search, [data-open-search-modal]');
+      if (openBtn) {
+        e.preventDefault();
+        openSearchModal();
+      }
+    });
+
+    // Escape key closes modal
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        const { dialog } = getSearchDialog();
+        if (dialog && dialog.hasAttribute('open')) {
+          closeSearchModal();
+        }
+      }
+    });
+
+    // Ensure wheel events inside the search modal wrapper scroll properly
+    document.addEventListener('wheel', function(e) {
+      const scrollWrapper = e.target.closest('.predictive-search-form__content-wrapper');
+      if (scrollWrapper) {
+        e.stopPropagation();
+      }
+    }, { passive: true });
+  })();
+</script>

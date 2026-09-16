@@ -1,0 +1,245 @@
+<section
+  class="about-faq color-{{ section.settings.color_scheme }}"
+  {% if section.settings.enable_animations %}data-about-reveal{% endif %}
+>
+  <div class="about-shell">
+    <div class="about-faq__intro">
+      {% if section.settings.eyebrow != blank %}
+        <p class="about-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {% endif %}
+      <h2 class="about-faq__heading">{{ section.settings.heading | escape }}</h2>
+      {% if section.settings.text != blank %}
+        <div class="about-faq__text rte">{{ section.settings.text }}</div>
+      {% endif %}
+    </div>
+
+    <div class="about-faq__list" data-about-faq-list>
+      {% for block in section.blocks %}
+        <details class="about-faq__item about-reveal-item" name="about-faq-{{ section.id }}" {{ block.shopify_attributes }} {% if forloop.first %}open{% endif %}>
+          <summary class="about-faq__summary">
+            <span class="about-faq__question">{{ block.settings.question | escape }}</span>
+            <span class="about-faq__icon" aria-hidden="true"></span>
+          </summary>
+          <div class="about-faq__answer rte">
+            {{ block.settings.answer }}
+          </div>
+        </details>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const setupAccordion = (list) => {
+      if (!list || list.__faqExclusiveBound) return;
+      list.__faqExclusiveBound = true;
+
+      const details = list.querySelectorAll('.about-faq__item');
+      details.forEach((item) => {
+        item.addEventListener('toggle', () => {
+          if (item.open) {
+            details.forEach((other) => {
+              if (other !== item && other.open) {
+                other.open = false;
+              }
+            });
+          }
+        });
+      });
+    };
+
+    document.querySelectorAll('[data-about-faq-list]').forEach(setupAccordion);
+
+    document.addEventListener('shopify:section:load', (e) => {
+      const list = e.target.querySelector('[data-about-faq-list]');
+      if (list) setupAccordion(list);
+    });
+  })();
+</script>
+
+<style>
+  .about-faq {
+    padding-block: clamp(16px, 2.5vw, 28px);
+    border-top: 1px solid rgba(var(--color-foreground-rgb), 0.06);
+    background: transparent;
+  }
+
+  .about-faq__intro {
+    max-width: 680px;
+    margin: 0 auto clamp(20px, 3vw, 36px);
+    text-align: center;
+  }
+
+  .about-faq__heading {
+    font-family: var(--font-heading--family), sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--color-foreground-heading, #111111);
+    margin: 0 0 6px;
+  }
+
+  .about-faq__text {
+    font-size: 13px;
+    color: rgba(var(--color-foreground-rgb, 17, 17, 17), 0.65);
+    line-height: 1.55;
+  }
+
+  .about-faq__list {
+    max-width: 780px;
+    margin: 0 auto;
+    display: grid;
+    gap: 12px;
+  }
+
+  .about-faq__item {
+    border-radius: 14px;
+    border: 1px solid rgba(var(--color-foreground-rgb, 17, 17, 17), 0.1);
+    background: transparent;
+    overflow: hidden;
+    box-shadow: none;
+    transition: border-color 0.2s ease;
+  }
+
+  .about-faq__item[open] {
+    border-color: rgba(var(--color-foreground-rgb, 17, 17, 17), 0.35);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .about-faq__summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 18px;
+    user-select: none;
+    outline: none;
+  }
+
+  .about-faq__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .about-faq__question {
+    font-family: var(--font-heading--family), sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--color-foreground-heading, #111111);
+  }
+
+  .about-faq__summary:hover .about-faq__question {
+    color: #0800CF;
+  }
+
+  .about-faq__icon {
+    width: 14px;
+    height: 14px;
+    position: relative;
+    flex: 0 0 auto;
+  }
+
+  .about-faq__icon::before,
+  .about-faq__icon::after {
+    content: '';
+    position: absolute;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    background: #0800CF;
+    border-radius: 999px;
+  }
+
+  .about-faq__icon::before {
+    width: 14px;
+    height: 2px;
+  }
+
+  .about-faq__icon::after {
+    width: 2px;
+    height: 14px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .about-faq__item[open] .about-faq__icon::after {
+    opacity: 0;
+    transform: translate(-50%, -50%) scaleY(0);
+  }
+
+  .about-faq__answer {
+    padding: 0 18px 16px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(var(--color-foreground-rgb, 17, 17, 17), 0.7);
+  }
+
+  .about-faq__answer :is(p, ul, ol):last-child {
+    margin-bottom: 0;
+  }
+
+  .about-faq__item:not([open]) .about-faq__answer {
+    display: none;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "About FAQ",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Common Questions" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Everything You Need to Know" },
+    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Quick answers to frequently asked questions about our fits, fabrics, sizing, and shipping.</p>" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "checkbox", "id": "enable_animations", "label": "Enable animations", "default": true }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ Item",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question", "default": "Are all collections designed and crafted in-house?" },
+        { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p>Yes! Every design is patterned, sampled, and tailored in-house with rigorous quality inspections at each stitch.</p>" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "About FAQ",
+      "blocks": [
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Are all collections designed and crafted in-house?",
+            "answer": "<p>Yes! Every design is patterned, sampled, and tailored in-house with rigorous quality inspections at each stitch.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "What fabrics and materials do you use?",
+            "answer": "<p>We prioritize sustainable, high-grade combed cottons, heavyweight French terry, and durable pre-shrunk fabrics built for everyday comfort.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Do you offer doorstep delivery and COD across India?",
+            "answer": "<p>Yes, we ship across India with express doorstep delivery, Cash on Delivery, and full real-time tracking from our studio to your doorstep.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "How do your sizes fit for men?",
+            "answer": "<p>Our pieces feature contemporary relaxed, boxy, and tailored fits designed specifically for men. You can consult each product's detailed size chart or reach out to our team for custom fit advice.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

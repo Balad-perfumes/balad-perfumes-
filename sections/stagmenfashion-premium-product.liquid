@@ -1,0 +1,2422 @@
+{% liquid
+  assign selected_product = product
+  if selected_product == blank
+    assign selected_product = section.settings.product
+  endif
+
+  if selected_product != blank
+    assign current_variant = selected_product.selected_or_first_available_variant
+    assign initial_image = current_variant.featured_image | default: selected_product.featured_image | default: selected_product.images.first
+    assign form_id = 'MyopPremiumProductForm-' | append: section.id
+
+    assign review_rating = selected_product.metafields.reviews.rating.value.rating
+    if review_rating == blank
+      assign review_rating = 4.9
+    endif
+    assign filled_stars = review_rating | round
+    assign review_count = selected_product.metafields.reviews.rating_count
+    assign size_label = blank
+    for product_option in selected_product.options_with_values
+      assign product_option_name = product_option.name | downcase
+      if product_option_name contains 'size'
+        assign size_label = product_option.selected_value
+        break
+      endif
+    endfor
+    if size_label == blank
+      assign variant_label = current_variant.title
+      if variant_label == blank or variant_label == 'Default Title'
+        assign size_label = 'One Size'
+      else
+        assign size_label = variant_label
+      endif
+    endif
+
+    assign intensity_content = selected_product.metafields.custom.intensity | default: section.settings.intensity_content
+    assign notes_content = selected_product.metafields.custom.notes_composition | default: section.settings.notes_content
+    assign personality_content = selected_product.metafields.custom.personality | default: section.settings.personality_content
+    assign shipping_policy_body = shop.shipping_policy.body
+    assign shipping_policy_url = shop.shipping_policy.url
+    assign return_policy_body = shop.refund_policy.body
+    assign return_policy_url = shop.refund_policy.url
+    assign description_text = selected_product.description | strip_html | strip_newlines | strip
+    assign shipping_policy_text = shipping_policy_body | strip_html | strip_newlines | strip
+    assign return_policy_text = return_policy_body | strip_html | strip_newlines | strip
+    assign show_description_more = false
+    assign show_shipping_more = false
+    assign show_return_more = false
+
+    if description_text.size > 240
+      assign show_description_more = true
+    endif
+
+    if shipping_policy_text.size > 180
+      assign show_shipping_more = true
+    endif
+
+    if return_policy_text.size > 180
+      assign show_return_more = true
+    endif
+
+    assign product_url = selected_product.url | default: request.path
+    assign share_title = selected_product.title | url_param_escape
+    assign share_url = shop.url | append: product_url | url_param_escape
+  endif
+%}
+
+{% if selected_product != blank %}
+  <section
+    class="stagmenfashion-premium-product color-{{ section.settings.color_scheme }}"
+    data-stagmenfashion-premium-product
+    data-section-id="{{ section.id }}"
+  >
+    <div class="stagmenfashion-premium-product__inner">
+      <div class="stagmenfashion-premium-product__grid">
+        <div class="stagmenfashion-premium-product__media">
+          <div class="stagmenfashion-premium-product__media-grid">
+            {% if selected_product.images.size > 1 %}
+              <div class="stagmenfashion-premium-product__thumbs" role="list" aria-label="{{ selected_product.title | escape }} media">
+                {% for image in selected_product.images limit: 5 %}
+                  <button
+                    type="button"
+                    class="stagmenfashion-premium-product__thumb{% if image.id == initial_image.id %} is-active{% endif %}"
+                    data-thumb
+                    data-image-id="{{ image.id }}"
+                    data-image-alt="{{ image.alt | default: selected_product.title | escape }}"
+                    data-image-src="{{ image | image_url: width: 1600 }}"
+                    aria-label="{{ selected_product.title | escape }} image {{ forloop.index }}"
+                  >
+                    {{
+                      image
+                      | image_url: width: 280
+                      | image_tag:
+                        class: 'stagmenfashion-premium-product__thumb-image',
+                        widths: '120, 180, 240, 280',
+                        loading: 'lazy',
+                        alt: image.alt | default: selected_product.title
+                    }}
+                  </button>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <div class="stagmenfashion-premium-product__main-media">
+              {% if initial_image != blank %}
+                {{
+                  initial_image
+                  | image_url: width: 1600
+                  | image_tag:
+                    class: 'stagmenfashion-premium-product__main-image',
+                    widths: '720, 960, 1200, 1440, 1600',
+                    loading: 'eager',
+                    fetchpriority: 'high',
+                    alt: initial_image.alt | default: selected_product.title,
+                    data-main-image: ''
+                }}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="stagmenfashion-premium-product__content">
+          <div class="stagmenfashion-premium-product__panel">
+            <div class="stagmenfashion-premium-product__header">
+              <h2 class="stagmenfashion-premium-product__title">{{ selected_product.title }}</h2>
+
+              {% if review_rating != blank %}
+                <div class="stagmenfashion-premium-product__rating" aria-label="Rated {{ review_rating }} out of 5">
+                  <div class="stagmenfashion-premium-product__stars" aria-hidden="true">
+                    {% for star in (1..5) %}
+                      <span class="stagmenfashion-premium-product__star{% if star > filled_stars %} is-dim{% endif %}">★</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+
+              <div class="stagmenfashion-premium-product__price-line">
+                <div class="stagmenfashion-premium-product__price-wrap">
+                  <span class="stagmenfashion-premium-product__price" data-price>{{ current_variant.price | money }}</span>
+                  <span
+                    class="stagmenfashion-premium-product__compare{% if current_variant.compare_at_price <= current_variant.price or current_variant.compare_at_price == blank %} hidden{% endif %}"
+                    data-compare-price
+                  >
+                    {{ current_variant.compare_at_price | money }}
+                  </span>
+                  {% if current_variant.compare_at_price > current_variant.price %}
+                    {% assign discount_amount = current_variant.compare_at_price | minus: current_variant.price %}
+                    {% assign discount_percent = discount_amount | times: 100.0 | divided_by: current_variant.compare_at_price | round: 2 %}
+                    <span class="stagmenfashion-premium-product__discount">{{ discount_percent }}%</span>
+                  {% endif %}
+                </div>
+              </div>
+
+            </div>
+
+            <div class="stagmenfashion-premium-product__social-proof">
+              <div class="stagmenfashion-premium-product__social-pill stagmenfashion-premium-product__social-pill--viewers">
+                <span class="stagmenfashion-premium-product__social-icon">👁</span>
+                <span
+                  class="stagmenfashion-premium-product__social-value"
+                  data-social-count="viewing"
+                  data-social-base="{{ section.settings.viewing_count }}"
+                >
+                  {{ section.settings.viewing_count }}
+                </span>
+                <span class="stagmenfashion-premium-product__social-label">viewing now</span>
+              </div>
+              <div class="stagmenfashion-premium-product__social-pill stagmenfashion-premium-product__social-pill--cart">
+                <span class="stagmenfashion-premium-product__social-icon">🛒</span>
+                <span
+                  class="stagmenfashion-premium-product__social-value"
+                  data-social-count="cart"
+                  data-social-base="{{ section.settings.recent_cart_count }}"
+                >
+                  {{ section.settings.recent_cart_count }}
+                </span>
+                <span class="stagmenfashion-premium-product__social-label">added to cart</span>
+              </div>
+            </div>
+
+            {% if current_variant.inventory_management == 'shopify' and current_variant.inventory_quantity > 0 and current_variant.inventory_quantity <= section.settings.low_stock_threshold %}
+              <div class="stagmenfashion-premium-product__stock-alert">
+                <span class="stagmenfashion-premium-product__stock-dot"></span>
+                High demand - only {{ current_variant.inventory_quantity }} units left at this price
+              </div>
+            {% endif %}
+
+            {% form 'product', selected_product, id: form_id, class: 'stagmenfashion-premium-product__form', data-type: 'add-to-cart-form' %}
+              <input
+                type="hidden"
+                name="id"
+                value="{{ current_variant.id }}"
+                data-variant-id-input
+              >
+
+              <script type="application/json" data-variants-json>
+                [
+                  {% for variant in selected_product.variants %}
+                    {
+                      "id": {{ variant.id | json }},
+                      "available": {{ variant.available | json }},
+                      "title": {{ variant.title | json }},
+                      "options": {{ variant.options | json }},
+                      "price": {{ variant.price | json }},
+                      "compare_at_price": {{ variant.compare_at_price | json }},
+                      "formatted_price": {{ variant.price | money | json }},
+                      "formatted_compare_at_price": {{ variant.compare_at_price | money | json }},
+                      "featured_image_id": {{ variant.featured_image.id | default: blank | json }}
+                    }{% unless forloop.last %},{% endunless %}
+                  {% endfor %}
+                ]
+              </script>
+
+              {% for option in selected_product.options_with_values %}
+                <fieldset class="stagmenfashion-premium-product__option-group">
+                  <legend class="stagmenfashion-premium-product__label">{{ option.name }}:</legend>
+                  <div class="stagmenfashion-premium-product__option-values">
+                    {% for value in option.values %}
+                      <button
+                        type="button"
+                        class="stagmenfashion-premium-product__option-button{% if value == option.selected_value %} is-active{% endif %}"
+                        data-option-button
+                        data-option-index="{{ forloop.parentloop.index0 }}"
+                        data-option-value="{{ value | escape }}"
+                      >
+                        {{ value }}
+                      </button>
+                    {% endfor %}
+                  </div>
+                </fieldset>
+              {% endfor %}
+
+              <div class="stagmenfashion-premium-product__cta-area">
+                <div class="stagmenfashion-premium-product__quantity">
+                  <span class="stagmenfashion-premium-product__qty-label visually-hidden">Quantity</span>
+                  <button type="button" class="stagmenfashion-premium-product__qty-button" data-qty-minus aria-label="Decrease quantity">−</button>
+                  <input
+                    class="stagmenfashion-premium-product__qty-input"
+                    type="number"
+                    name="quantity"
+                    min="1"
+                    value="{{ current_variant.quantity_rule.min | default: 1 }}"
+                    data-qty-input
+                    aria-label="Quantity"
+                  >
+                  <button type="button" class="stagmenfashion-premium-product__qty-button" data-qty-plus aria-label="Increase quantity">+</button>
+                </div>
+
+                <div class="stagmenfashion-premium-product__buttons">
+                  <button
+                    type="submit"
+                    class="stagmenfashion-premium-product__button stagmenfashion-premium-product__button--primary"
+                    data-add-to-cart
+                    {% unless current_variant.available %}
+                      disabled
+                    {% endunless %}
+                  >
+                    <span data-add-to-cart-text>
+                      {% if current_variant.available %}
+                        Add to cart
+                      {% else %}
+                        Sold out
+                      {% endif %}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            {% endform %}
+
+            <div class="stagmenfashion-premium-product__details-divider stagmenfashion-premium-product__details-divider--compact"></div>
+
+            <div class="stagmenfashion-premium-product__safe-checkout">
+              <span class="stagmenfashion-premium-product__safe-label">Guaranteed safe checkout:</span>
+              <ul class="stagmenfashion-premium-product__safe-icons" role="list" aria-label="Safe checkout payment methods">
+                {%- for type in shop.enabled_payment_types limit: 6 -%}
+                  <li class="stagmenfashion-premium-product__safe-icon">
+                    {{ type | payment_type_svg_tag: class: 'icon icon--full-color' }}
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="stagmenfashion-premium-product__info-tabs" data-product-info-tabs>
+          <div class="stagmenfashion-premium-product__tab-carousel">
+            <button
+              type="button"
+              class="stagmenfashion-premium-product__tab-arrow stagmenfashion-premium-product__tab-arrow--prev"
+              data-info-tab-arrow="prev"
+              aria-label="Scroll tabs left"
+            ></button>
+
+            <div
+              class="stagmenfashion-premium-product__tablist"
+              role="tablist"
+              aria-label="Product information"
+              data-info-tablist
+            >
+              <button
+                type="button"
+                class="stagmenfashion-premium-product__tab is-active"
+                role="tab"
+                aria-selected="true"
+                aria-controls="product-info-description"
+                id="product-info-description-tab"
+                data-info-tab="description"
+              >
+                Description
+              </button>
+              <button
+                type="button"
+                class="stagmenfashion-premium-product__tab"
+                role="tab"
+                aria-selected="false"
+                aria-controls="product-info-shipping"
+                id="product-info-shipping-tab"
+                data-info-tab="shipping"
+              >
+                Shipping &amp; Returns
+              </button>
+              <button
+                type="button"
+                class="stagmenfashion-premium-product__tab"
+                role="tab"
+                aria-selected="false"
+                aria-controls="product-info-reviews"
+                id="product-info-reviews-tab"
+                data-info-tab="reviews"
+              >
+                Customer Reviews
+              </button>
+              <button
+                type="button"
+                class="stagmenfashion-premium-product__tab"
+                role="tab"
+                aria-selected="false"
+                aria-controls="product-info-policy"
+                id="product-info-policy-tab"
+                data-info-tab="policy"
+              >
+                Return Policies
+              </button>
+            </div>
+
+            <button
+              type="button"
+              class="stagmenfashion-premium-product__tab-arrow stagmenfashion-premium-product__tab-arrow--next"
+              data-info-tab-arrow="next"
+              aria-label="Scroll tabs right"
+            ></button>
+          </div>
+
+          <div class="stagmenfashion-premium-product__tab-panels">
+            <section
+              class="stagmenfashion-premium-product__tab-panel is-active"
+              role="tabpanel"
+              tabindex="0"
+              aria-labelledby="product-info-description-tab"
+              id="product-info-description"
+              data-info-panel="description"
+            >
+              <div class="stagmenfashion-premium-product__panel-card">
+                <div class="stagmenfashion-premium-product__panel-kicker">Product details</div>
+                <div class="stagmenfashion-premium-product__panel-body rte">
+                  {% if selected_product.description != blank %}
+                    {% if show_description_more %}
+                      <div class="stagmenfashion-premium-product__expand" data-read-more-group>
+                        <div class="stagmenfashion-premium-product__expand-preview">
+                          <p>{{ description_text | truncatewords: 36 }}</p>
+                        </div>
+                        <div class="stagmenfashion-premium-product__expand-full" hidden>
+                          {{ selected_product.description }}
+                        </div>
+                        <button
+                          type="button"
+                          class="stagmenfashion-premium-product__read-more"
+                          data-read-more-toggle
+                          aria-expanded="false"
+                        >
+                          Read more
+                        </button>
+                      </div>
+                    {% else %}
+                      {{ selected_product.description }}
+                    {% endif %}
+                  {% else %}
+                    <p>Crafted from premium quality heavyweight fabric with an ultra-soft touch and a relaxed modern silhouette. Designed for everyday comfort, enduring style, and all-day versatility.</p>
+                  {% endif %}
+                </div>
+              </div>
+            </section>
+
+            <section
+              class="stagmenfashion-premium-product__tab-panel"
+              role="tabpanel"
+              tabindex="0"
+              aria-labelledby="product-info-shipping-tab"
+              id="product-info-shipping"
+              data-info-panel="shipping"
+              hidden
+            >
+              <div class="stagmenfashion-premium-product__panel-card stagmenfashion-premium-product__panel-card--soft">
+                <div class="stagmenfashion-premium-product__panel-kicker">Shipping snapshot</div>
+                <div class="stagmenfashion-premium-product__shipping-grid">
+                  <div class="stagmenfashion-premium-product__shipping-tile">
+                    <div class="stagmenfashion-premium-product__shipping-title">Delivery</div>
+                    <div class="stagmenfashion-premium-product__shipping-copy">
+                      {% if section.settings.shipping_text != blank %}
+                        <p>{{ section.settings.shipping_text }}</p>
+                      {% else %}
+                        <p>Shipping information will be updated here.</p>
+                      {% endif %}
+                      {% if shipping_policy_body != blank %}
+                        {% if show_shipping_more %}
+                          <div class="stagmenfashion-premium-product__expand stagmenfashion-premium-product__expand--compact" data-read-more-group>
+                            <div class="stagmenfashion-premium-product__expand-preview">
+                              <p>{{ shipping_policy_text | truncatewords: 26 }}</p>
+                            </div>
+                            <div class="stagmenfashion-premium-product__expand-full" hidden>
+                              {{ shipping_policy_body }}
+                            </div>
+                            <button
+                              type="button"
+                              class="stagmenfashion-premium-product__read-more"
+                              data-read-more-toggle
+                              aria-expanded="false"
+                            >
+                              Read more
+                            </button>
+                          </div>
+                        {% else %}
+                          <p class="stagmenfashion-premium-product__shipping-excerpt">{{ shipping_policy_text }}</p>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                    {% if shipping_policy_body != blank and shipping_policy_url != blank %}
+                      <a class="stagmenfashion-premium-product__panel-link" href="{{ shipping_policy_url }}">Read shipping policy</a>
+                    {% endif %}
+                  </div>
+
+                  <div class="stagmenfashion-premium-product__shipping-tile">
+                    <div class="stagmenfashion-premium-product__shipping-title">Returns</div>
+                    <div class="stagmenfashion-premium-product__shipping-copy">
+                      {% if return_policy_body != blank %}
+                        {% if show_return_more %}
+                          <div class="stagmenfashion-premium-product__expand stagmenfashion-premium-product__expand--compact" data-read-more-group>
+                            <div class="stagmenfashion-premium-product__expand-preview">
+                              <p>{{ return_policy_text | truncatewords: 28 }}</p>
+                            </div>
+                            <div class="stagmenfashion-premium-product__expand-full" hidden>
+                              {{ return_policy_body }}
+                            </div>
+                            <button
+                              type="button"
+                              class="stagmenfashion-premium-product__read-more"
+                              data-read-more-toggle
+                              aria-expanded="false"
+                            >
+                              Read more
+                            </button>
+                          </div>
+                        {% else %}
+                          <p>{{ return_policy_text }}</p>
+                        {% endif %}
+                      {% else %}
+                        <p>Return information will be updated in your store policies.</p>
+                      {% endif %}
+                    </div>
+                    {% if return_policy_url != blank %}
+                      <a class="stagmenfashion-premium-product__panel-link" href="{{ return_policy_url }}">Read return policy</a>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section
+              class="stagmenfashion-premium-product__tab-panel"
+              role="tabpanel"
+              tabindex="0"
+              aria-labelledby="product-info-reviews-tab"
+              id="product-info-reviews"
+              data-info-panel="reviews"
+              hidden
+            >
+              <div class="stagmenfashion-premium-product__panel-card stagmenfashion-premium-product__panel-card--reviews">
+                <div class="stagmenfashion-premium-product__panel-kicker">Customer reviews</div>
+                <div class="stagmenfashion-premium-product__review-summary">
+                  <div class="stagmenfashion-premium-product__review-summary-title">Judge.me reviews will appear here</div>
+                  <p class="stagmenfashion-premium-product__review-summary-copy">
+                    Install Judge.me and connect the widget below to display verified customer reviews.
+                  </p>
+                </div>
+
+                {% if selected_product.metafields.judgeme.widget != blank %}
+                  {{ selected_product.metafields.judgeme.widget }}
+                {% else %}
+                  <div
+                    id="judgeme_product_reviews"
+                    class="jdgm-widget jdgm-review-widget stagmenfashion-premium-product__review-widget"
+                    data-product-title="{{ selected_product.title | escape }}"
+                    data-product-type="{{ selected_product.type | escape }}"
+                    data-product-handle="{{ selected_product.handle }}"
+                    data-product-id="{{ selected_product.id }}"
+                    data-url="{{ shop.url | append: product_url }}"
+                  >
+                    <div class="stagmenfashion-premium-product__review-placeholder">
+                      <span class="stagmenfashion-premium-product__review-placeholder-icon">★</span>
+                      <span>Judge.me review widget will load here after installation.</span>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+            </section>
+
+            <section
+              class="stagmenfashion-premium-product__tab-panel"
+              role="tabpanel"
+              tabindex="0"
+              aria-labelledby="product-info-policy-tab"
+              id="product-info-policy"
+              data-info-panel="policy"
+              hidden
+            >
+              <div class="stagmenfashion-premium-product__panel-card">
+                <div class="stagmenfashion-premium-product__panel-kicker">Return policy</div>
+                <div class="stagmenfashion-premium-product__panel-body rte">
+                  {% if return_policy_body != blank %}
+                    {% if show_return_more %}
+                      <div class="stagmenfashion-premium-product__expand" data-read-more-group>
+                        <div class="stagmenfashion-premium-product__expand-preview">
+                          <p>{{ return_policy_text | truncatewords: 32 }}</p>
+                        </div>
+                        <div class="stagmenfashion-premium-product__expand-full" hidden>
+                          {{ return_policy_body }}
+                        </div>
+                        <button
+                          type="button"
+                          class="stagmenfashion-premium-product__read-more"
+                          data-read-more-toggle
+                          aria-expanded="false"
+                        >
+                          Read more
+                        </button>
+                      </div>
+                    {% else %}
+                      {{ return_policy_body }}
+                    {% endif %}
+                  {% else %}
+                    <p>Your return policy from Shopify settings will appear here.</p>
+                  {% endif %}
+                </div>
+                {% if return_policy_url != blank %}
+                  <a class="stagmenfashion-premium-product__panel-link" href="{{ return_policy_url }}">Open full return policy</a>
+                {% endif %}
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div class="stagmenfashion-premium-product__promise-card" aria-label="Complete promise">
+          <div class="stagmenfashion-premium-product__promise-card-header">
+            <span class="stagmenfashion-premium-product__promise-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 3.5 19.5 6.5V12c0 4.7-3.1 7.9-7.5 9.6C7.1 19.9 4 16.7 4 12V6.5L12 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="m8.8 12.1 2.1 2.2 4.6-4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="stagmenfashion-premium-product__promise-card-title">OUR COMPLETE PROMISE TO YOU</span>
+          </div>
+
+          <div class="stagmenfashion-premium-product__promise-list">
+            <div class="stagmenfashion-premium-product__promise-item">
+              <span class="stagmenfashion-premium-product__promise-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12 3a9 9 0 1 0 9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <div class="stagmenfashion-premium-product__promise-copy">
+                <strong>60-day money back</strong>
+                <span>Full refund, no questions asked</span>
+              </div>
+            </div>
+
+            <div class="stagmenfashion-premium-product__promise-item">
+              <span class="stagmenfashion-premium-product__promise-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M13 3 5 13h6l-1 8 9-11h-6l0-7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <div class="stagmenfashion-premium-product__promise-copy">
+                <strong>Results in 7-30 days</strong>
+                <span>Visible difference guaranteed</span>
+              </div>
+            </div>
+
+            <div class="stagmenfashion-premium-product__promise-item">
+              <span class="stagmenfashion-premium-product__promise-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 3.5 4.5 7.4v4.1c0 4.1 2.4 7.1 7.5 9 5.1-1.9 7.5-4.9 7.5-9V7.4L12 3.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <div class="stagmenfashion-premium-product__promise-copy">
+                <strong>FDA-cleared technology</strong>
+                <span>Patented &amp; clinically tested</span>
+              </div>
+            </div>
+
+            <div class="stagmenfashion-premium-product__promise-item">
+              <span class="stagmenfashion-premium-product__promise-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M4.5 11.5 12 5l7.5 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M6.5 10.5V20h4.5v-5h2v5h4.5v-9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <div class="stagmenfashion-premium-product__promise-copy">
+                <strong>Ships from the USA</strong>
+                <span>Fast, tracked delivery nationwide</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stagmenfashion-premium-product__promise-footer" aria-label="Promise rating">
+            <span class="stagmenfashion-premium-product__promise-stars" aria-hidden="true">★★★★★</span>
+            <span class="stagmenfashion-premium-product__promise-score">4.6</span>
+            <span class="stagmenfashion-premium-product__promise-divider" aria-hidden="true">|</span>
+            <span class="stagmenfashion-premium-product__promise-count">1,000,000+ customers</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stagmenfashion-premium-product__sticky-mobile">
+      <div class="stagmenfashion-premium-product__sticky-price" data-sticky-price>{{ current_variant.price | money }}</div>
+      <button
+        type="button"
+        class="stagmenfashion-premium-product__button stagmenfashion-premium-product__button--primary stagmenfashion-premium-product__sticky-button"
+        {% unless current_variant.available %}
+          disabled
+        {% endunless %}
+      >
+        <span data-sticky-button-text>
+          {% if current_variant.available %}
+            Add to cart
+          {% else %}
+            Sold out
+          {% endif %}
+        </span>
+      </button>
+    </div>
+  </section>
+
+  {% style %}
+    .stagmenfashion-premium-product {
+      --stagmenfashion-text: #111827;
+      --stagmenfashion-muted: #6b7280;
+      --stagmenfashion-border: #e5e7eb;
+      --stagmenfashion-soft: #f9fafb;
+      --stagmenfashion-radius: 20px;
+      --stagmenfashion-panel-radius: 28px;
+      --stagmenfashion-transition: 0.3s ease-in-out;
+      background: #ffffff;
+      color: var(--stagmenfashion-text);
+      padding: 24px 0 72px;
+      font-family: var(--font-body--family);
+    }
+
+    .stagmenfashion-premium-product__inner {
+      width: min(100%, 1240px);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .stagmenfashion-premium-product__grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(360px, 450px);
+      gap: clamp(20px, 2.4vw, 36px);
+      align-items: start;
+    }
+
+    .stagmenfashion-premium-product__media-grid {
+      display: grid;
+      grid-template-columns: 108px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .stagmenfashion-premium-product__main-media {
+      position: relative;
+      aspect-ratio: 0.88;
+      border-radius: 0;
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.04);
+    }
+
+    .stagmenfashion-premium-product__main-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity var(--stagmenfashion-transition), transform var(--stagmenfashion-transition);
+    }
+
+    .stagmenfashion-premium-product__main-media:hover .stagmenfashion-premium-product__main-image {
+      transform: scale(1.03);
+    }
+
+    .stagmenfashion-premium-product__main-image.is-switching {
+      opacity: 0.35;
+    }
+
+    .stagmenfashion-premium-product__thumbs {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .stagmenfashion-premium-product__thumb {
+      border: 1px solid var(--stagmenfashion-border);
+      border-radius: 14px;
+      padding: 0;
+      background: #ffffff;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color var(--stagmenfashion-transition), transform var(--stagmenfashion-transition), box-shadow var(--stagmenfashion-transition);
+    }
+
+    .stagmenfashion-premium-product__thumb:hover,
+    .stagmenfashion-premium-product__thumb.is-active {
+      border-color: var(--color-primary);
+      box-shadow: 0 10px 24px rgb(var(--color-primary-rgb) / 0.12);
+    }
+
+    .stagmenfashion-premium-product__thumb:hover {
+      transform: translateY(-1px);
+    }
+
+    .stagmenfashion-premium-product__thumb-image {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      display: block;
+    }
+
+    .stagmenfashion-premium-product__panel {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-width: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .stagmenfashion-premium-product__header {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stagmenfashion-premium-product__title {
+      margin: 0;
+      font-size: clamp(3rem, 2.3rem + 2vw, 4.1rem);
+      line-height: 0.95;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      max-width: 11ch;
+      text-wrap: balance;
+    }
+
+    .stagmenfashion-premium-product__rating {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 15px;
+    }
+
+    .stagmenfashion-premium-product__stars {
+      display: inline-flex;
+      gap: 4px;
+      color: #111111;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .stagmenfashion-premium-product__star.is-dim {
+      opacity: 0.28;
+    }
+
+    .stagmenfashion-premium-product__price-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .stagmenfashion-premium-product__price-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-shrink: 0;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .stagmenfashion-premium-product__price {
+      font-size: clamp(1.8rem, 1.5rem + 0.9vw, 2.25rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: #111111;
+    }
+
+    .stagmenfashion-premium-product__compare {
+      font-size: 18px;
+      color: var(--stagmenfashion-muted);
+      text-decoration: line-through;
+    }
+
+    .stagmenfashion-premium-product__discount {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: #f15d4f;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .stagmenfashion-premium-product__description {
+      margin: 6px 0 0;
+      font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
+      line-height: 1.65;
+      color: rgba(17, 17, 17, 0.78);
+      max-width: 54ch;
+    }
+
+    .stagmenfashion-premium-product__social-proof {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .stagmenfashion-premium-product__social-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 54px;
+      padding: 0 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(17, 17, 17, 0.08);
+      font-size: 15px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .stagmenfashion-premium-product__social-pill--viewers {
+      background: #fff7f0;
+      color: #b86e23;
+      border-color: rgba(239, 170, 90, 0.35);
+    }
+
+    .stagmenfashion-premium-product__social-pill--cart {
+      background: #f4fbf4;
+      color: #4a8d56;
+      border-color: rgba(113, 207, 130, 0.35);
+    }
+
+    .stagmenfashion-premium-product__social-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .stagmenfashion-premium-product__social-value {
+      font-size: 1.18em;
+      font-weight: 700;
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+
+    .stagmenfashion-premium-product__social-value.is-updated {
+      transform: translateY(-1px) scale(1.04);
+      opacity: 0.92;
+    }
+
+    .stagmenfashion-premium-product__social-label {
+      font-weight: 600;
+    }
+
+    .stagmenfashion-premium-product__stock-alert {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 58px;
+      padding: 0 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(226, 179, 89, 0.55);
+      background: #fff7ea;
+      color: #8c6320;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .stagmenfashion-premium-product__stock-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: #e5a23d;
+      box-shadow: 0 0 0 4px rgba(229, 162, 61, 0.12);
+      flex-shrink: 0;
+    }
+
+    .stagmenfashion-premium-product__size-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 15px;
+    }
+
+    .stagmenfashion-premium-product__size-label {
+      color: var(--stagmenfashion-muted);
+      font-weight: 600;
+    }
+
+    .stagmenfashion-premium-product__size-value {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: rgba(17, 24, 39, 0.06);
+      color: var(--stagmenfashion-text);
+      font-weight: 600;
+    }
+
+    .stagmenfashion-premium-product__form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .stagmenfashion-premium-product__info-tabs {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-top: 6px;
+    }
+
+    .stagmenfashion-premium-product__tab-carousel {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .stagmenfashion-premium-product__tablist {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-inline: 0;
+      padding-inline: 0;
+      min-width: 0;
+      scrollbar-width: none;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+    }
+
+    .stagmenfashion-premium-product__tablist::-webkit-scrollbar {
+      display: none;
+    }
+
+    .stagmenfashion-premium-product__tab {
+      position: relative;
+      flex: 0 0 auto;
+      min-height: 46px;
+      padding: 0 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(17, 17, 17, 0.08);
+      background: #ffffff;
+      color: var(--stagmenfashion-muted);
+      font-size: 15px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition:
+        transform var(--stagmenfashion-transition),
+        color var(--stagmenfashion-transition),
+        background-color var(--stagmenfashion-transition),
+        border-color var(--stagmenfashion-transition),
+        box-shadow var(--stagmenfashion-transition);
+      scroll-snap-align: start;
+    }
+
+    .stagmenfashion-premium-product__tab-arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: transparent;
+      font-size: 0;
+      line-height: 0;
+      box-shadow: none;
+      cursor: pointer;
+      transition: opacity var(--stagmenfashion-transition), transform var(--stagmenfashion-transition);
+      flex-shrink: 0;
+    }
+
+    .stagmenfashion-premium-product__tab-arrow:hover {
+      transform: none;
+    }
+
+    .stagmenfashion-premium-product__tab-arrow:disabled {
+      opacity: 0.2;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .stagmenfashion-premium-product__tab:hover {
+      transform: translateY(-1px);
+      color: var(--stagmenfashion-text);
+      border-color: rgba(var(--color-primary-rgb), 0.25);
+    }
+
+    .stagmenfashion-premium-product__tab:focus-visible,
+    .stagmenfashion-premium-product__panel-link:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 3px;
+    }
+
+    .stagmenfashion-premium-product__tab.is-active {
+      background: linear-gradient(135deg, #0800CF, #05008f);
+      color: #ffffff;
+      border-color: #0800CF;
+      box-shadow: 0 14px 28px rgba(8, 0, 207, 0.2);
+    }
+
+    .stagmenfashion-premium-product__tab-panels {
+      display: grid;
+      gap: 14px;
+    }
+
+    .stagmenfashion-premium-product__tab-panel {
+      animation: stagPremiumTabFade 220ms ease;
+    }
+
+    .stagmenfashion-premium-product__tab-panel[hidden] {
+      display: none;
+    }
+
+    @keyframes stagPremiumTabFade {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .stagmenfashion-premium-product__panel-card {
+      border: 1px solid rgba(17, 17, 17, 0.08);
+      border-radius: 24px;
+      background: linear-gradient(180deg, #ffffff, #fbfbfc);
+      padding: 22px 22px 20px;
+      box-shadow: 0 18px 40px rgba(17, 17, 17, 0.06);
+    }
+
+    .stagmenfashion-premium-product__panel-card--soft {
+      background: linear-gradient(180deg, #fffdfa, #ffffff);
+    }
+
+    .stagmenfashion-premium-product__panel-card--reviews {
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+    }
+
+    .stagmenfashion-premium-product__panel-kicker {
+      margin-bottom: 14px;
+      color: var(--stagmenfashion-muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .stagmenfashion-premium-product__panel-body {
+      color: var(--stagmenfashion-text);
+      font-size: 15px;
+      line-height: 1.75;
+    }
+
+    .stagmenfashion-premium-product__panel-body :is(p, ul, ol):first-child {
+      margin-top: 0;
+    }
+
+    .stagmenfashion-premium-product__panel-body :is(p, ul, ol):last-child {
+      margin-bottom: 0;
+    }
+
+    .stagmenfashion-premium-product__expand {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stagmenfashion-premium-product__expand--compact {
+      gap: 10px;
+    }
+
+    .stagmenfashion-premium-product__expand-preview {
+      color: inherit;
+    }
+
+    .stagmenfashion-premium-product__expand-preview :is(p, ul, ol):first-child {
+      margin-top: 0;
+    }
+
+    .stagmenfashion-premium-product__expand-preview :is(p, ul, ol):last-child {
+      margin-bottom: 0;
+    }
+
+    .stagmenfashion-premium-product__expand-full[hidden] {
+      display: none;
+    }
+
+    .stagmenfashion-premium-product__read-more {
+      align-self: flex-start;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      color: var(--color-primary);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .stagmenfashion-premium-product__read-more:hover {
+      color: var(--color-primary-hover);
+    }
+
+    .stagmenfashion-premium-product__shipping-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .stagmenfashion-premium-product__shipping-tile {
+      padding: 18px;
+      border: 1px solid rgba(17, 17, 17, 0.06);
+      border-radius: 18px;
+      background: #ffffff;
+    }
+
+    .stagmenfashion-premium-product__shipping-title {
+      margin-bottom: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--stagmenfashion-text);
+    }
+
+    .stagmenfashion-premium-product__shipping-copy {
+      color: rgba(17, 17, 17, 0.72);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .stagmenfashion-premium-product__shipping-copy p {
+      margin: 0;
+    }
+
+    .stagmenfashion-premium-product__shipping-excerpt {
+      display: block;
+      margin-top: 8px;
+      color: rgba(17, 17, 17, 0.88);
+    }
+
+    .stagmenfashion-premium-product__panel-link {
+      display: inline-flex;
+      margin-top: 12px;
+      color: var(--color-primary);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .stagmenfashion-premium-product__panel-link:hover {
+      text-decoration: underline;
+    }
+
+    .stagmenfashion-premium-product__review-summary {
+      margin-bottom: 18px;
+      padding: 18px;
+      border: 1px solid rgba(17, 17, 17, 0.06);
+      border-radius: 18px;
+      background: #ffffff;
+    }
+
+    .stagmenfashion-premium-product__review-summary-title {
+      margin-bottom: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--stagmenfashion-text);
+    }
+
+    .stagmenfashion-premium-product__review-summary-copy {
+      margin: 0;
+      color: rgba(17, 17, 17, 0.72);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .stagmenfashion-premium-product__review-widget {
+      min-height: 120px;
+    }
+
+    .stagmenfashion-premium-product__review-placeholder {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 120px;
+      padding: 18px;
+      border: 1px dashed rgba(17, 17, 17, 0.14);
+      border-radius: 18px;
+      background: #ffffff;
+      color: rgba(17, 17, 17, 0.68);
+    }
+
+    .stagmenfashion-premium-product__review-placeholder-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: rgb(var(--color-primary-rgb) / 0.1);
+      color: var(--color-primary);
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .stagmenfashion-premium-product__option-group {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .stagmenfashion-premium-product__label {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--stagmenfashion-text);
+    }
+
+    .stagmenfashion-premium-product__option-values {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .stagmenfashion-premium-product__option-button {
+      min-height: 54px;
+      padding: 0 24px;
+      border-radius: 10px;
+      border: 1px solid var(--stagmenfashion-border);
+      background: #ffffff;
+      color: var(--stagmenfashion-text);
+      font: inherit;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color var(--stagmenfashion-transition), background-color var(--stagmenfashion-transition), transform var(--stagmenfashion-transition), box-shadow var(--stagmenfashion-transition);
+    }
+
+    .stagmenfashion-premium-product__option-button:hover {
+      transform: translateY(-1px);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .stagmenfashion-premium-product__option-button.is-active {
+      border-color: var(--color-primary);
+      background: rgb(var(--color-primary-rgb) / 0.08);
+      box-shadow: inset 0 0 0 1px var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .stagmenfashion-premium-product__accordions {
+      border-top: 1px solid rgba(17, 24, 39, 0.08);
+      border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+    }
+
+    .stagmenfashion-premium-product__accordion {
+      border-top: 1px solid var(--stagmenfashion-border);
+    }
+
+    .stagmenfashion-premium-product__accordion:first-child {
+      border-top: 0;
+    }
+
+    .stagmenfashion-premium-product__accordion summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 22px 0;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .stagmenfashion-premium-product__accordion summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .stagmenfashion-premium-product__accordion-icon {
+      position: relative;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .stagmenfashion-premium-product__accordion-icon::before,
+    .stagmenfashion-premium-product__accordion-icon::after {
+      content: "";
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: 18px;
+      height: 1.5px;
+      background: #111827;
+      transform: translate(-50%, -50%);
+      transition: transform var(--stagmenfashion-transition), opacity var(--stagmenfashion-transition);
+    }
+
+    .stagmenfashion-premium-product__accordion-icon::after {
+      transform: translate(-50%, -50%) rotate(90deg);
+    }
+
+    .stagmenfashion-premium-product__accordion[open] .stagmenfashion-premium-product__accordion-icon::after {
+      opacity: 0;
+      transform: translate(-50%, -50%) rotate(90deg) scaleX(0.3);
+    }
+
+    .stagmenfashion-premium-product__accordion-content {
+      padding: 0 0 22px;
+      color: var(--stagmenfashion-muted);
+      font-size: 15px;
+      line-height: 1.7;
+      max-width: 42ch;
+    }
+
+    .stagmenfashion-premium-product__accordion-content > *:first-child {
+      margin-top: 0;
+    }
+
+    .stagmenfashion-premium-product__accordion-content > *:last-child {
+      margin-bottom: 0;
+    }
+
+    .stagmenfashion-premium-product__cta-area {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stagmenfashion-premium-product__quantity {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      min-width: 164px;
+      min-height: 54px;
+      border: 1px solid var(--stagmenfashion-border);
+      border-radius: 999px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .stagmenfashion-premium-product__qty-button,
+    .stagmenfashion-premium-product__qty-input {
+      border: 0;
+      background: transparent;
+      color: var(--stagmenfashion-text);
+      font: inherit;
+      text-align: center;
+      min-height: 54px;
+    }
+
+    .stagmenfashion-premium-product__qty-button {
+      width: 52px;
+      cursor: pointer;
+      font-size: 24px;
+      transition: background-color var(--stagmenfashion-transition), color var(--stagmenfashion-transition);
+    }
+
+    .stagmenfashion-premium-product__qty-button:hover {
+      background: #f3f4f6;
+    }
+
+    .stagmenfashion-premium-product__qty-input {
+      width: 56px;
+      font-size: 18px;
+      font-weight: 500;
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+
+    .stagmenfashion-premium-product__qty-input::-webkit-outer-spin-button,
+    .stagmenfashion-premium-product__qty-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .stagmenfashion-premium-product__buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .stagmenfashion-premium-product__button,
+    .stagmenfashion-premium-product .shopify-payment-button__button--unbranded {
+      min-height: 58px;
+      width: 100%;
+      border-radius: 999px;
+      font: inherit;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      transition: background-color var(--stagmenfashion-transition), color var(--stagmenfashion-transition), border-color var(--stagmenfashion-transition), transform var(--stagmenfashion-transition);
+    }
+
+    .stagmenfashion-premium-product__button:hover,
+    .stagmenfashion-premium-product .shopify-payment-button__button--unbranded:hover:not([disabled]) {
+      transform: translateY(-1px);
+    }
+
+    .stagmenfashion-premium-product__button--primary {
+      border: 1px solid #0800CF;
+      background: #0800CF;
+      color: #ffffff;
+      box-shadow: 0 14px 28px rgba(8, 0, 207, 0.16);
+    }
+
+    .stagmenfashion-premium-product__button--primary:hover:not([disabled]) {
+      background: #0600a3;
+      border-color: #0600a3;
+      color: #ffffff;
+    }
+
+    .stagmenfashion-premium-product__details-divider {
+      width: 100%;
+      height: 1px;
+      background: rgba(17, 17, 17, 0.09);
+      margin-top: 4px;
+    }
+
+    .stagmenfashion-premium-product__details-divider--compact {
+      margin-top: 8px;
+    }
+
+    .stagmenfashion-premium-product__delivery {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .stagmenfashion-premium-product__delivery-heading {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: var(--stagmenfashion-text);
+    }
+
+    .stagmenfashion-premium-product__delivery-icon {
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    .stagmenfashion-premium-product__delivery-text {
+      margin: 0;
+      color: rgba(17, 17, 17, 0.74);
+      font-size: 0.98rem;
+      line-height: 1.55;
+      max-width: 50ch;
+    }
+
+    .stagmenfashion-premium-product__safe-checkout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .stagmenfashion-premium-product__safe-label {
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: var(--stagmenfashion-text);
+    }
+
+    .stagmenfashion-premium-product__safe-icons {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .stagmenfashion-premium-product__safe-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 52px;
+      height: 38px;
+    }
+
+    .stagmenfashion-premium-product__safe-icon .icon {
+      width: auto;
+      height: 30px;
+    }
+
+    .stagmenfashion-premium-product__promise-card {
+      margin-top: 6px;
+      border: 1px solid rgba(17, 17, 17, 0.08);
+      border-radius: 28px;
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: 0 20px 46px rgba(17, 17, 17, 0.08);
+    }
+
+    .stagmenfashion-premium-product__promise-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 20px;
+      background: #0d0d0d;
+      color: #ffffff;
+    }
+
+    .stagmenfashion-premium-product__promise-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      color: #d61c1c;
+      flex-shrink: 0;
+    }
+
+    .stagmenfashion-premium-product__promise-badge svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .stagmenfashion-premium-product__promise-card-title {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1.3;
+    }
+
+    .stagmenfashion-premium-product__promise-list {
+      display: grid;
+    }
+
+    .stagmenfashion-premium-product__promise-item {
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr);
+      align-items: center;
+      gap: 14px;
+      padding: 18px 20px;
+      border-top: 1px solid rgba(17, 17, 17, 0.08);
+      background: #ffffff;
+    }
+
+    .stagmenfashion-premium-product__promise-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      border: 1px solid rgba(122, 227, 183, 0.55);
+      background: linear-gradient(180deg, #ecfff4, #f6fff9);
+      color: #b52828;
+      flex-shrink: 0;
+      box-shadow: inset 0 0 0 1px rgba(122, 227, 183, 0.18);
+    }
+
+    .stagmenfashion-premium-product__promise-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .stagmenfashion-premium-product__promise-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .stagmenfashion-premium-product__promise-copy strong {
+      color: #10141f;
+      font-size: 18px;
+      line-height: 1.2;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .stagmenfashion-premium-product__promise-copy span {
+      color: rgba(16, 20, 31, 0.68);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .stagmenfashion-premium-product__promise-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 20px 20px;
+      border-top: 1px solid rgba(17, 17, 17, 0.08);
+      color: #10141f;
+      font-size: 14px;
+      font-weight: 600;
+      flex-wrap: wrap;
+    }
+
+    .stagmenfashion-premium-product__promise-stars {
+      color: #f4b000;
+      letter-spacing: 0.15em;
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .stagmenfashion-premium-product__promise-score {
+      font-weight: 800;
+    }
+
+    .stagmenfashion-premium-product__promise-divider {
+      color: rgba(16, 20, 31, 0.3);
+    }
+
+    .stagmenfashion-premium-product__info-tabs,
+    .stagmenfashion-premium-product__promise-card {
+      grid-column: 1 / -1;
+    }
+
+    @media screen and (min-width: 990px) {
+      .stagmenfashion-premium-product__info-tabs {
+        gap: 18px;
+        padding-top: 10px;
+      }
+
+      .stagmenfashion-premium-product__tab-carousel {
+        display: block;
+      }
+
+      .stagmenfashion-premium-product__tablist {
+        justify-content: center;
+        gap: 44px;
+        overflow: visible;
+        padding-bottom: 0;
+      }
+
+      .stagmenfashion-premium-product__tab-arrow {
+        display: none;
+      }
+
+      .stagmenfashion-premium-product__tab {
+        min-height: 44px;
+        padding-inline: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        color: rgba(17, 17, 17, 0.82);
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      .stagmenfashion-premium-product__tab:hover {
+        transform: none;
+        border-color: transparent;
+        color: #111111;
+      }
+
+      .stagmenfashion-premium-product__tab.is-active {
+        color: #111111;
+        background: transparent;
+        box-shadow: none;
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 8px;
+        text-decoration-color: currentColor;
+      }
+
+      .stagmenfashion-premium-product__panel-card {
+        padding: 24px 28px 24px;
+      }
+
+      .stagmenfashion-premium-product__panel-body {
+        font-size: 16px;
+      }
+
+      .stagmenfashion-premium-product__shipping-grid {
+        gap: 12px;
+      }
+
+      .stagmenfashion-premium-product__promise-card {
+        border-radius: 26px;
+      }
+
+      .stagmenfashion-premium-product__promise-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .stagmenfashion-premium-product__promise-item {
+        min-height: 118px;
+        border-top: 1px solid rgba(17, 17, 17, 0.08);
+      }
+
+      .stagmenfashion-premium-product__promise-item:nth-child(1),
+      .stagmenfashion-premium-product__promise-item:nth-child(2) {
+        border-top: 0;
+      }
+
+      .stagmenfashion-premium-product__promise-item:nth-child(odd) {
+        border-right: 1px solid rgba(17, 17, 17, 0.08);
+      }
+
+      .stagmenfashion-premium-product__promise-item:nth-child(even) {
+        border-right: 0;
+      }
+
+      .stagmenfashion-premium-product__promise-copy strong {
+        font-size: 18px;
+      }
+
+      .stagmenfashion-premium-product__promise-copy span {
+        font-size: 15px;
+      }
+    }
+
+    .stagmenfashion-premium-product__sticky-mobile {
+      position: fixed;
+      inset: auto 0 0;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+      background: rgba(255, 255, 255, 0.96);
+      border-top: 1px solid rgba(17, 24, 39, 0.08);
+      backdrop-filter: blur(18px);
+    }
+
+    .stagmenfashion-premium-product__sticky-price {
+      flex-shrink: 0;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+
+    .stagmenfashion-premium-product__sticky-button {
+      flex: 1 1 auto;
+      min-height: 52px;
+    }
+
+    @media screen and (max-width: 989px) {
+      .stagmenfashion-premium-product {
+        padding: 20px 0 92px;
+      }
+
+      .stagmenfashion-premium-product__grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      .stagmenfashion-premium-product__media-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stagmenfashion-premium-product__thumbs {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+        gap: 8px;
+        scroll-snap-type: x mandatory;
+      }
+
+      .stagmenfashion-premium-product__thumbs::-webkit-scrollbar {
+        display: none;
+      }
+
+      .stagmenfashion-premium-product__thumb {
+        width: 88px;
+        flex: 0 0 88px;
+        scroll-snap-align: start;
+      }
+
+      .stagmenfashion-premium-product__option-values {
+        gap: 10px;
+      }
+
+      .stagmenfashion-premium-product__option-button {
+        min-height: 48px;
+        padding-inline: 16px;
+        font-size: 15px;
+      }
+
+      .stagmenfashion-premium-product__button,
+      .stagmenfashion-premium-product .shopify-payment-button__button--unbranded {
+        min-height: 54px;
+        font-size: 16px;
+      }
+
+      .stagmenfashion-premium-product__sticky-mobile {
+        display: flex;
+      }
+    }
+
+    @media screen and (max-width: 749px) {
+      .stagmenfashion-premium-product__inner {
+        padding-inline: 16px;
+      }
+
+      .stagmenfashion-premium-product__title {
+        font-size: 30px;
+        max-width: none;
+      }
+
+      .stagmenfashion-premium-product__price {
+        font-size: 21px;
+      }
+
+      .stagmenfashion-premium-product__rating,
+      .stagmenfashion-premium-product__label,
+      .stagmenfashion-premium-product__delivery-heading,
+      .stagmenfashion-premium-product__safe-label {
+        font-size: 14px;
+      }
+
+      .stagmenfashion-premium-product__stars {
+        font-size: 22px;
+      }
+
+      .stagmenfashion-premium-product__accordion summary {
+        padding-block: 18px;
+        font-size: 15px;
+      }
+
+      .stagmenfashion-premium-product__accordion-content {
+        font-size: 14px;
+      }
+
+      .stagmenfashion-premium-product__social-proof {
+        grid-template-columns: 1fr;
+      }
+
+      .stagmenfashion-premium-product__panel-card {
+        padding: 18px;
+        border-radius: 20px;
+      }
+
+      .stagmenfashion-premium-product__tablist {
+        gap: 8px;
+        scroll-padding-inline: 16px;
+      }
+
+      .stagmenfashion-premium-product__tab {
+        min-height: 42px;
+        padding-inline: 16px;
+        font-size: 14px;
+      }
+
+      .stagmenfashion-premium-product__tab-arrow {
+        width: 38px;
+        height: 38px;
+      }
+
+      .stagmenfashion-premium-product__review-summary,
+      .stagmenfashion-premium-product__shipping-tile,
+      .stagmenfashion-premium-product__review-placeholder {
+        border-radius: 16px;
+      }
+
+      .stagmenfashion-premium-product__promise-card {
+        border-radius: 22px;
+      }
+
+      .stagmenfashion-premium-product__promise-card-header {
+        padding: 16px 16px;
+      }
+
+      .stagmenfashion-premium-product__promise-item {
+        grid-template-columns: 44px minmax(0, 1fr);
+        gap: 12px;
+        padding: 16px;
+      }
+
+      .stagmenfashion-premium-product__promise-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+      }
+
+      .stagmenfashion-premium-product__promise-copy strong {
+        font-size: 16px;
+      }
+
+      .stagmenfashion-premium-product__promise-footer {
+        padding: 14px 16px 16px;
+      }
+    }
+  {% endstyle %}
+
+  <script>
+    (() => {
+      const runtimeLocale = document.documentElement.lang || navigator.language || 'en-IN';
+      const runtimeCurrency = document.querySelector('meta[property="og:price:currency"]')?.content || 'INR';
+      const money = new Intl.NumberFormat(runtimeLocale, {
+        style: 'currency',
+        currency: runtimeCurrency,
+        maximumFractionDigits: 2,
+      });
+
+      function formatMoney(cents) {
+        return money.format((cents || 0) / 100);
+      }
+
+      function initSection(section) {
+        if (!section || section.dataset.initialized === 'true') return;
+        section.dataset.initialized = 'true';
+
+        const variantsNode = section.querySelector('[data-variants-json]');
+        const variants = variantsNode ? JSON.parse(variantsNode.textContent) : [];
+        const mainImage = section.querySelector('[data-main-image]');
+        const thumbs = Array.from(section.querySelectorAll('[data-thumb]'));
+        const optionButtons = Array.from(section.querySelectorAll('[data-option-button]'));
+        const variantInput = section.querySelector('[data-variant-id-input]');
+        const priceNode = section.querySelector('[data-price]');
+        const compareNode = section.querySelector('[data-compare-price]');
+        const addToCart = section.querySelector('[data-add-to-cart]');
+        const addToCartText = section.querySelector('[data-add-to-cart-text]');
+        const stickyPrice = section.querySelector('[data-sticky-price]');
+        const stickyButtonText = section.querySelector('[data-sticky-button-text]');
+        const stickyButton = section.querySelector('.stagmenfashion-premium-product__sticky-button');
+        const qtyInput = section.querySelector('[data-qty-input]');
+        const minus = section.querySelector('[data-qty-minus]');
+        const plus = section.querySelector('[data-qty-plus]');
+        const socialCountNodes = Array.from(section.querySelectorAll('[data-social-count]'));
+        const infoTabs = Array.from(section.querySelectorAll('[data-info-tab]'));
+        const infoPanels = Array.from(section.querySelectorAll('[data-info-panel]'));
+        const tablist = section.querySelector('[data-info-tablist]');
+        const tabArrowPrev = section.querySelector('[data-info-tab-arrow="prev"]');
+        const tabArrowNext = section.querySelector('[data-info-tab-arrow="next"]');
+
+        function setMainImage(button) {
+          if (!button || !mainImage) return;
+          const nextSrc = button.dataset.imageSrc;
+          const nextAlt = button.dataset.imageAlt || '';
+          if (!nextSrc || mainImage.getAttribute('src') === nextSrc) {
+            thumbs.forEach((thumb) => thumb.classList.toggle('is-active', thumb === button));
+            return;
+          }
+
+          const preload = new Image();
+          preload.onload = () => {
+            mainImage.classList.add('is-switching');
+            window.setTimeout(() => {
+              mainImage.src = nextSrc;
+              mainImage.alt = nextAlt;
+              mainImage.classList.remove('is-switching');
+            }, 120);
+          };
+          preload.src = nextSrc;
+
+          thumbs.forEach((thumb) => thumb.classList.toggle('is-active', thumb === button));
+        }
+
+        function getSelectedOptions() {
+          const selected = [];
+          const groups = new Map();
+
+          optionButtons.forEach((button) => {
+            const index = Number(button.dataset.optionIndex || 0);
+            if (!groups.has(index)) groups.set(index, []);
+            groups.get(index).push(button);
+          });
+
+          Array.from(groups.keys())
+            .sort((a, b) => a - b)
+            .forEach((index) => {
+              const active = groups.get(index).find((button) => button.classList.contains('is-active'));
+              selected.push(active ? active.dataset.optionValue : groups.get(index)[0]?.dataset.optionValue || '');
+            });
+
+          return selected;
+        }
+
+        function updateVariant() {
+          if (!variants.length) return;
+          const selectedOptions = getSelectedOptions();
+          const matched = variants.find((variant) =>
+            Array.isArray(variant.options) &&
+            variant.options.every((optionValue, index) => optionValue === selectedOptions[index])
+          );
+
+          if (!matched) return;
+
+          if (variantInput) variantInput.value = matched.id;
+          if (priceNode) priceNode.textContent = matched.formatted_price || formatMoney(matched.price);
+          if (stickyPrice) stickyPrice.textContent = matched.formatted_price || formatMoney(matched.price);
+
+          if (compareNode) {
+            const hasCompare = matched.compare_at_price && matched.compare_at_price > matched.price;
+            compareNode.textContent = hasCompare
+              ? matched.formatted_compare_at_price || formatMoney(matched.compare_at_price)
+              : '';
+            compareNode.classList.toggle('hidden', !hasCompare);
+          }
+
+          const isAvailable = Boolean(matched.available);
+          if (addToCart) addToCart.disabled = !isAvailable;
+          if (stickyButton) stickyButton.disabled = !isAvailable;
+          if (addToCartText) addToCartText.textContent = isAvailable ? 'Add to cart' : 'Sold out';
+          if (stickyButtonText) stickyButtonText.textContent = isAvailable ? 'Add to cart' : 'Sold out';
+
+          if (matched.featured_image_id) {
+            const thumb = thumbs.find((item) => item.dataset.imageId === String(matched.featured_image_id));
+            if (thumb) setMainImage(thumb);
+          }
+        }
+
+        const updateTabArrowState = () => {
+          if (!tablist) return;
+
+          const maxScrollLeft = tablist.scrollWidth - tablist.clientWidth;
+          const isScrollable = maxScrollLeft > 4;
+
+          if (tabArrowPrev instanceof HTMLButtonElement) {
+            tabArrowPrev.hidden = !isScrollable;
+            tabArrowPrev.disabled = tablist.scrollLeft <= 4;
+          }
+
+          if (tabArrowNext instanceof HTMLButtonElement) {
+            tabArrowNext.hidden = !isScrollable;
+            tabArrowNext.disabled = tablist.scrollLeft >= maxScrollLeft - 4;
+          }
+        };
+
+        const scrollTabList = (direction) => {
+          if (!tablist) return;
+          const amount = Math.max(220, tablist.clientWidth * 0.8);
+          tablist.scrollBy({ left: direction === 'prev' ? -amount : amount, behavior: 'smooth' });
+        };
+
+        const setActiveInfoTab = (tabId, shouldScroll = false) => {
+          const nextTabId = infoTabs.some((tab) => tab.dataset.infoTab === tabId)
+            ? tabId
+            : infoTabs[0]?.dataset.infoTab;
+
+          if (!nextTabId) return;
+
+          infoTabs.forEach((tab) => {
+            const isActive = tab.dataset.infoTab === nextTabId;
+            tab.classList.toggle('is-active', isActive);
+            tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            tab.tabIndex = isActive ? 0 : -1;
+            if (isActive && shouldScroll) {
+              tab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }
+          });
+
+          infoPanels.forEach((panel) => {
+            const isActive = panel.dataset.infoPanel === nextTabId;
+            panel.hidden = !isActive;
+            panel.classList.toggle('is-active', isActive);
+          });
+
+          window.requestAnimationFrame(updateTabArrowState);
+        };
+
+        const toggleReadMore = (button) => {
+          const group = button.closest('[data-read-more-group]');
+          if (!group) return;
+
+          const preview = group.querySelector('.stagmenfashion-premium-product__expand-preview');
+          const full = group.querySelector('.stagmenfashion-premium-product__expand-full');
+          if (!preview || !full) return;
+
+          const isExpanded = button.getAttribute('aria-expanded') === 'true';
+          const nextExpanded = !isExpanded;
+
+          button.setAttribute('aria-expanded', nextExpanded ? 'true' : 'false');
+          button.textContent = nextExpanded ? 'Read less' : 'Read more';
+          preview.hidden = nextExpanded;
+          full.hidden = !nextExpanded;
+        };
+
+        infoTabs.forEach((tab) => {
+          tab.addEventListener('click', () => {
+            setActiveInfoTab(tab.dataset.infoTab || 'description', true);
+          });
+        });
+
+        if (tabArrowPrev instanceof HTMLButtonElement) {
+          tabArrowPrev.addEventListener('click', () => scrollTabList('prev'));
+        }
+
+        if (tabArrowNext instanceof HTMLButtonElement) {
+          tabArrowNext.addEventListener('click', () => scrollTabList('next'));
+        }
+
+        tablist?.addEventListener('scroll', () => {
+          window.requestAnimationFrame(updateTabArrowState);
+        });
+
+        window.addEventListener('resize', updateTabArrowState, { passive: true });
+
+        section.addEventListener('click', (event) => {
+          const button = /** @type {HTMLElement | null} */ (event.target instanceof HTMLElement ? event.target.closest('[data-read-more-toggle]') : null);
+          if (!button) return;
+          toggleReadMore(button);
+        });
+
+        const initialTabFromHash = window.location.hash.replace('#product-info-', '');
+        setActiveInfoTab(initialTabFromHash || infoTabs[0]?.dataset.infoTab || 'description');
+        updateTabArrowState();
+
+        thumbs.forEach((thumb) => {
+          thumb.addEventListener('click', () => setMainImage(thumb));
+        });
+
+        optionButtons.forEach((button) => {
+          button.addEventListener('click', () => {
+            const groupIndex = button.dataset.optionIndex;
+            optionButtons.forEach((item) => {
+              if (item.dataset.optionIndex === groupIndex) item.classList.remove('is-active');
+            });
+            button.classList.add('is-active');
+            updateVariant();
+          });
+        });
+
+        const form = section.querySelector('.stagmenfashion-premium-product__form');
+        
+        const handleAddToCart = async (e, btn) => {
+          e.preventDefault();
+          if (btn) btn.disabled = true;
+
+          try {
+            const formData = new FormData(form);
+            
+            const cartItemsComponents = document.querySelectorAll('cart-items-component');
+            let sectionIds = [];
+            cartItemsComponents.forEach((item) => {
+              if (item.dataset.sectionId && !sectionIds.includes(item.dataset.sectionId)) {
+                sectionIds.push(item.dataset.sectionId);
+              }
+            });
+            
+            if (sectionIds.length > 0) {
+              formData.append('sections', sectionIds.join(','));
+              formData.append('sections_url', window.location.pathname);
+            }
+
+            const cartAddUrl = window.Shopify?.routes?.root ? window.Shopify.routes.root + 'cart/add.js' : '/cart/add.js';
+            const res = await fetch(cartAddUrl, {
+              method: 'POST',
+              body: formData,
+              headers: {
+                'Accept': 'application/javascript',
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            });
+
+            const cart = await res.json();
+            if (cart.status) throw new Error(cart.description || 'Add to cart failed');
+
+            document.dispatchEvent(
+              new CustomEvent('cart:add', {
+                bubbles: true,
+                detail: { 
+                  data: cart,
+                  resource: cart 
+                }
+              })
+            );
+            document.dispatchEvent(
+              new CustomEvent('cart:update', {
+                bubbles: true,
+                detail: { 
+                  data: cart,
+                  resource: cart, 
+                  metadata: { itemCount: cart.item_count } 
+                }
+              })
+            );
+            
+          } catch (err) {
+            console.error(err);
+            form.submit();
+          } finally {
+            if (btn) btn.disabled = false;
+          }
+        };
+
+        if (form) {
+          form.addEventListener('submit', (e) => {
+            handleAddToCart(e, e.submitter || form.querySelector('[type="submit"]'));
+          });
+        }
+        
+        if (stickyButton && form) {
+          stickyButton.addEventListener('click', (e) => {
+            handleAddToCart(e, stickyButton);
+          });
+        }
+
+
+        minus?.addEventListener('click', () => {
+          if (!qtyInput) return;
+          const current = Number(qtyInput.value || 1);
+          qtyInput.value = String(Math.max(1, current - 1));
+        });
+
+        plus?.addEventListener('click', () => {
+          if (!qtyInput) return;
+          const current = Number(qtyInput.value || 1);
+          qtyInput.value = String(current + 1);
+        });
+
+        const pulseCount = (node) => {
+          node.classList.add('is-updated');
+          window.setTimeout(() => node.classList.remove('is-updated'), 180);
+        };
+
+        const setupFloatingCount = (
+          node,
+          { minDelta, maxDelta, floorOffset, ceilOffset }
+        ) => {
+          const base = Number(node.dataset.socialBase || node.textContent.trim() || 0);
+          const floor = Math.max(1, base - floorOffset);
+          const ceil = base + ceilOffset;
+          let value = base;
+          let timeoutId = null;
+          let active = true;
+
+          const render = (animate = true) => {
+            node.textContent = String(value);
+            if (animate) pulseCount(node);
+          };
+
+          const schedule = () => {
+            timeoutId = window.setTimeout(() => {
+              if (!active) return;
+
+              const delta = Math.floor(Math.random() * (maxDelta - minDelta + 1)) + minDelta;
+              let nextValue = value + delta;
+
+              if (nextValue < floor) nextValue = floor + Math.floor(Math.random() * 3);
+              if (nextValue > ceil) nextValue = ceil - Math.floor(Math.random() * 3);
+              if (nextValue === value) nextValue = Math.min(ceil, value + 1);
+
+              value = nextValue;
+              render();
+              schedule();
+            }, 3000 + Math.floor(Math.random() * 1000));
+          };
+
+          render(false);
+          schedule();
+
+          return () => {
+            active = false;
+            if (timeoutId) {
+              window.clearTimeout(timeoutId);
+            }
+          };
+        };
+
+        const stopFloatingCounts = socialCountNodes.map((node) => {
+          if (node.dataset.socialCount === 'viewing') {
+            return setupFloatingCount(node, { minDelta: -2, maxDelta: 3, floorOffset: 7, ceilOffset: 12 });
+          }
+
+          return setupFloatingCount(node, { minDelta: -1, maxDelta: 2, floorOffset: 4, ceilOffset: 8 });
+        });
+
+        const handleSectionUnload = (event) => {
+          if (event.target !== section) return;
+          stopFloatingCounts.forEach((stop) => stop());
+          document.removeEventListener('shopify:section:unload', handleSectionUnload);
+          window.removeEventListener('resize', updateTabArrowState);
+        };
+
+        document.addEventListener('shopify:section:unload', handleSectionUnload);
+      }
+
+      const initAll = (root = document) => {
+        root.querySelectorAll('[data-stagmenfashion-premium-product]').forEach(initSection);
+      };
+
+      document.addEventListener('DOMContentLoaded', () => initAll());
+      document.addEventListener('shopify:section:load', (event) => initAll(event.target));
+    })();
+  </script>
+{% elsif request.design_mode %}
+  <section class="section section--page-width" style="padding: 32px 20px;">
+    Select a product in the "stagmenfashion Premium Product" section settings.
+  </section>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Premium Product",
+  "tag": "section",
+  "class": "section-stagmenfashion-premium-product",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "viewing_count",
+      "label": "Viewing count",
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "default": 95
+    },
+    {
+      "type": "range",
+      "id": "recent_cart_count",
+      "label": "Recent cart count",
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "default": 41
+    },
+    {
+      "type": "range",
+      "id": "low_stock_threshold",
+      "label": "Low stock threshold",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "richtext",
+      "id": "intensity_content",
+      "label": "Intensity content"
+    },
+    {
+      "type": "richtext",
+      "id": "notes_content",
+      "label": "Notes & Composition content"
+    },
+    {
+      "type": "richtext",
+      "id": "personality_content",
+      "label": "Personality content"
+    },
+    {
+      "type": "url",
+      "id": "shipping_link",
+      "label": "Shipping info link"
+    },
+    {
+      "type": "text",
+      "id": "shipping_text",
+      "label": "Shipping text",
+      "default": "Shipping Info"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Premium Product"
+    }
+  ]
+}
+{% endschema %}

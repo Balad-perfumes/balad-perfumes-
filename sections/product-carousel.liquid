@@ -1,0 +1,493 @@
+{% liquid
+  assign source_collection = section.settings.collection | default: collections.all
+%}
+
+<link rel="stylesheet" href="{{ 'collection.css' | asset_url }}">
+<style>
+  .pf-carousel .pop-reveal { opacity: 1 !important; visibility: visible !important; }
+  /* Full-height cards */
+  .pf-carousel__card-wrapper { display: flex; flex-direction: column; }
+  .pf-carousel__card-wrapper .pop-card { flex: 1; }
+  /* Visible border + shadow to match shop page */
+  .pf-carousel .pop-card {
+    border: 1px solid rgba(17, 17, 17, 0.10);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .pf-carousel .pop-card:hover {
+    border-color: rgba(17, 17, 17, 0.18);
+  }
+  .pf-carousel .pop-card__media { border-radius: 0; }
+  .pf-carousel .pop-card__body {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
+</style>
+<section class="pf-carousel color-{{ section.settings.color_scheme }}{% if section.settings.mobile_only %} pf-carousel--mobile-only{% endif %}" data-pf-carousel style="--pop-image-ratio: 1 / 1; --pop-card-radius: 0px;">
+  <div class="section section--full-width">
+    <div class="pf-section-shell">
+      <div class="pf-carousel__header">
+        <div class="pf-section-head">
+          {% if section.settings.heading != blank %}<h2>{{ section.settings.heading }}</h2>{% endif %}
+        </div>
+        <div class="pf-carousel__controls">
+          <button type="button" data-prev aria-label="Previous">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <button type="button" data-next aria-label="Next">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {% if section.blocks.size > 0 %}
+        <div class="pf-carousel__tabs">
+          {% for block in section.blocks %}
+            {% liquid
+              assign tab_collection = collections[block.settings.collection]
+              assign tab_title = block.settings.title | default: tab_collection.title | default: 'Collection'
+            %}
+            <button
+              type="button"
+              class="pf-carousel__tab-btn{% if forloop.first %} is-active{% endif %}"
+              data-tab-index="{{ forloop.index0 }}"
+              {{ block.shopify_attributes }}
+            >
+              {{ tab_title }}
+            </button>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="pf-carousel__tabs">
+          <button
+            type="button"
+            class="pf-carousel__tab-btn is-active"
+            data-tab-index="0"
+          >
+            All Products
+          </button>
+          {% assign dynamic_tab_index = 1 %}
+          {% for col in collections %}
+            {% if col.handle != 'all' and col.handle != 'frontpage' %}
+              <button
+                type="button"
+                class="pf-carousel__tab-btn"
+                data-tab-index="{{ dynamic_tab_index }}"
+              >
+                {{ col.title }}
+              </button>
+              {% assign dynamic_tab_index = dynamic_tab_index | plus: 1 %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="pf-carousel__panes">
+        {% if section.blocks.size > 0 %}
+          {% for block in section.blocks %}
+            {% liquid
+              assign tab_collection = collections[block.settings.collection]
+            %}
+            <div
+              class="pf-carousel__pane{% if forloop.first %} is-active{% endif %}"
+              data-pane-index="{{ forloop.index0 }}"
+            >
+              {% if tab_collection != blank and tab_collection.products.size > 0 %}
+                <div class="pf-carousel__track" data-track>
+                  {% for product in tab_collection.products limit: section.settings.max_products %}
+                    <div class="pf-carousel__card-wrapper">
+                      {% render 'stagmenfashion-collection-card', product: product, section_id: section.id, hover_speed: 400, card_radius: 0 %}
+                    </div>
+                  {% endfor %}
+                </div>
+
+                <div class="pf-carousel__progress-bar-wrap">
+                  <div class="pf-carousel__progress-bar-track">
+                    <div class="pf-carousel__progress-bar-thumb" data-thumb></div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="pf-carousel__empty-message" style="text-align: center; padding: 48px 24px; color: #6b7280; font-family: var(--font-body--family); font-size: 15px;">
+                  No products found in this category.
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% else %}
+          {% assign all_collection = collections.all %}
+          <div
+            class="pf-carousel__pane is-active"
+            data-pane-index="0"
+          >
+            {% if all_collection != blank and all_collection.products.size > 0 %}
+              <div class="pf-carousel__track" data-track>
+                {% for product in all_collection.products limit: section.settings.max_products %}
+                  <div class="pf-carousel__card-wrapper">
+                    {% render 'stagmenfashion-collection-card', product: product, section_id: section.id, hover_speed: 400, card_radius: 0 %}
+                  </div>
+                {% endfor %}
+              </div>
+
+              <div class="pf-carousel__progress-bar-wrap">
+                <div class="pf-carousel__progress-bar-track">
+                  <div class="pf-carousel__progress-bar-thumb" data-thumb></div>
+                </div>
+              </div>
+            {% else %}
+              <div class="pf-carousel__empty-message" style="text-align: center; padding: 48px 24px; color: #6b7280; font-family: var(--font-body--family); font-size: 15px;">
+                No products found.
+              </div>
+            {% endif %}
+          </div>
+
+          {% assign dynamic_pane_index = 1 %}
+          {% for col in collections %}
+            {% if col.handle != 'all' and col.handle != 'frontpage' %}
+              <div
+                class="pf-carousel__pane"
+                data-pane-index="{{ dynamic_pane_index }}"
+              >
+                {% if col.products.size > 0 %}
+                  <div class="pf-carousel__track" data-track>
+                    {% for product in col.products limit: section.settings.max_products %}
+                      <div class="pf-carousel__card-wrapper">
+                        {% render 'stagmenfashion-collection-card', product: product, section_id: section.id, hover_speed: 400, card_radius: 0 %}
+                      </div>
+                    {% endfor %}
+                  </div>
+
+                  <div class="pf-carousel__progress-bar-wrap">
+                    <div class="pf-carousel__progress-bar-track">
+                      <div class="pf-carousel__progress-bar-thumb" data-thumb></div>
+                    </div>
+                  </div>
+                {% else %}
+                  <div class="pf-carousel__empty-message" style="text-align: center; padding: 48px 24px; color: #6b7280; font-family: var(--font-body--family); font-size: 15px;">
+                    No products found in this category.
+                  </div>
+                {% endif %}
+              </div>
+              {% assign dynamic_pane_index = dynamic_pane_index | plus: 1 %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .pf-carousel {
+    background: #fff;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 32px clamp(20px, 4vw, 42px) 16px;
+  }
+
+  .pf-carousel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    padding-bottom: 15px;
+    border-bottom: none;
+  }
+
+  .pf-carousel .pf-section-head h2 {
+    margin: 0;
+    color: #000000;
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
+    font-size: 32px;
+    line-height: 0.94;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+
+  .pf-carousel__controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .pf-carousel__controls button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1.5px solid rgb(17 17 17 / 0.14);
+    border-radius: 50%;
+    background: transparent;
+    color: currentColor;
+    cursor: pointer;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
+  }
+
+  .pf-carousel__controls button:hover {
+    background: #0800CF;
+    border-color: #0800CF;
+    color: #ffffff;
+    transform: scale(1.05);
+  }
+
+  .pf-carousel__controls button svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+  }
+
+  .pf-carousel__tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 12px;
+    margin-bottom: 0px;
+    padding-bottom: 12px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .pf-carousel__tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pf-carousel__tab-btn {
+    font-family: var(--font-body--family);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 24px;
+    border-radius: 6px;
+    border: 1px solid #0800CF;
+    background: transparent;
+    color: #0800CF;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-transform: capitalize;
+    flex-shrink: 0;
+  }
+
+  .pf-carousel__tab-btn:hover {
+    background: rgba(8, 0, 207, 0.08);
+  }
+
+  .pf-carousel__tab-btn.is-active {
+    background: #0800CF;
+    color: #ffffff;
+    border-color: #0800CF;
+  }
+
+  .pf-carousel__panes {
+    position: relative;
+  }
+
+  .pf-carousel__pane {
+    display: none;
+  }
+
+  .pf-carousel__pane.is-active {
+    display: block;
+  }
+
+  .pf-carousel__track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(220px, 1fr);
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 24px;
+  }
+
+  .pf-carousel__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pf-carousel__progress-bar-wrap {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .pf-carousel__progress-bar-track {
+    width: 120px;
+    height: 2px;
+    background: rgb(17 17 17 / 0.1);
+    position: relative;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .pf-carousel__progress-bar-thumb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30%;
+    height: 100%;
+    background: #0800CF;
+    border-radius: 99px;
+    transition: left 0.1s ease;
+  }
+
+  .pf-carousel__card-wrapper {
+    scroll-snap-align: start;
+    width: 100%;
+  }
+
+  @media screen and (min-width: 750px) {
+    .pf-carousel__track { grid-auto-columns: calc((100% - 48px) / 4); }
+  }
+
+  @media screen and (min-width: 990px) {
+    .pf-carousel__track { grid-auto-columns: calc((100% - 48px) / 4); }
+
+    .pf-section-shell {
+      padding-inline: 0;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .pf-carousel {
+      padding: 0;
+      margin: 0;
+    }
+
+    .pf-carousel .pf-section-shell {
+      padding: 24px 20px 12px;
+    }
+
+    .pf-carousel__header {
+      margin-bottom: 0px;
+      padding-bottom: 14px;
+    }
+
+    .pf-carousel__controls {
+      gap: 6px;
+    }
+
+    .pf-carousel__controls button {
+      width: 34px;
+      height: 34px;
+    }
+
+    .pf-carousel__controls button svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    .pf-carousel .pf-section-head h2 {
+      font-size: 24px;
+      line-height: 0.94;
+      letter-spacing: 0;
+      font-weight: 500;
+    }
+
+    .pf-carousel__track {
+      grid-auto-columns: clamp(180px, 52vw, 230px);
+      gap: 10px;
+      padding-inline-end: 16px;
+      padding-bottom: 20px;
+    }
+
+    .pf-card__body {
+      padding: 12px 14px 16px;
+    }
+
+    .pf-card__title {
+      font-size: 0.88rem;
+    }
+
+    .pf-card__price {
+      font-size: 0.8rem;
+    }
+  }
+</style>
+
+{% javascript %}
+  (() => {
+    document.querySelectorAll('[data-pf-carousel]').forEach((root) => {
+      if (root.dataset.ready === 'true') return;
+      root.dataset.ready = 'true';
+
+      const tabs = root.querySelectorAll('.pf-carousel__tab-btn');
+      const panes = root.querySelectorAll('.pf-carousel__pane');
+
+      // Progress bar logic
+      const updateProgressBar = (pane) => {
+        if (!pane) return;
+        const track = pane.querySelector('[data-track]');
+        const thumb = pane.querySelector('[data-thumb]');
+        if (!track || !thumb) return;
+
+        const update = () => {
+          const scrollLeft = track.scrollLeft;
+          const maxScroll = track.scrollWidth - track.clientWidth;
+          const percentage = maxScroll > 0 ? (scrollLeft / maxScroll) * 100 : 0;
+          thumb.style.left = `${percentage * 0.7}%`; // thumb width is 30%
+        };
+
+        track.addEventListener('scroll', update);
+        // Initial run
+        update();
+      };
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          const index = tab.dataset.tabIndex;
+
+          tabs.forEach((t) => t.classList.toggle('is-active', t === tab));
+          panes.forEach((p) => p.classList.toggle('is-active', p.dataset.paneIndex === index));
+          
+          const activePane = root.querySelector(`.pf-carousel__pane.is-active`);
+          updateProgressBar(activePane);
+        });
+      });
+
+      panes.forEach((pane) => {
+        updateProgressBar(pane);
+
+        const track = pane.querySelector('[data-track]');
+        const prev = root.querySelector('[data-prev]');
+        const next = root.querySelector('[data-next]');
+        if (track) {
+          const step = () => track.querySelector('.pop-card')?.getBoundingClientRect().width || 320;
+          prev?.addEventListener('click', () => track.scrollBy({ left: -step() * 2, behavior: 'smooth' }));
+          next?.addEventListener('click', () => track.scrollBy({ left: step() * 2, behavior: 'smooth' }));
+        }
+      });
+    });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Product carousel",
+  "settings": [
+    { "type": "collection", "id": "collection", "label": "Collection (Fallback)", "info": "Used if no blocks are added" },
+    { "type": "range", "id": "max_products", "label": "Products", "min": 2, "max": 12, "step": 1, "default": 8 },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shop by Category" },
+    { "type": "checkbox", "id": "mobile_only", "label": "Show on mobile only", "default": false },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" }
+  ],
+  "blocks": [
+    {
+      "type": "collection_tab",
+      "name": "Collection Tab",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "text", "id": "title", "label": "Tab Title", "info": "Defaults to collection title if empty" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Product carousel" }]
+}
+{% endschema %}

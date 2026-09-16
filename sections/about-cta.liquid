@@ -1,0 +1,47 @@
+<section
+  class="about-cta color-{{ section.settings.color_scheme }}"
+  {% if section.settings.enable_animations %}data-about-reveal{% endif %}
+>
+  <div class="about-shell about-cta__shell">
+    {% if section.settings.eyebrow != blank %}
+      <p class="about-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+    {% endif %}
+
+    <h2 class="about-cta__heading">{{ section.settings.heading | escape }}</h2>
+
+    {% if section.settings.text != blank %}
+      <div class="about-cta__text rte">{{ section.settings.text }}</div>
+    {% endif %}
+
+    <div class="about-cta__actions">
+      {% if section.settings.button_label != blank %}
+        <a class="about-button about-button--solid" href="{{ section.settings.button_link | default: routes.all_products_collection_url }}">
+          {{ section.settings.button_label | escape }}
+        </a>
+      {% endif %}
+      {% if section.settings.secondary_button_label != blank %}
+        <a class="about-button about-button--ghost" href="{{ section.settings.secondary_button_link | default: routes.contact_url }}">
+          {{ section.settings.secondary_button_label | escape }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About CTA",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Ready to explore?" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Elevate your daily style." },
+    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Browse the latest drop and find the signature fit that makes your outfit pop.</p>" },
+    { "type": "text", "id": "button_label", "label": "Primary button label", "default": "Shop the Collection" },
+    { "type": "url", "id": "button_link", "label": "Primary button link" },
+    { "type": "text", "id": "secondary_button_label", "label": "Secondary button label", "default": "Contact Us" },
+    { "type": "url", "id": "secondary_button_link", "label": "Secondary button link" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "checkbox", "id": "enable_animations", "label": "Enable animations", "default": true }
+  ],
+  "presets": [{ "name": "About CTA" }]
+}
+{% endschema %}

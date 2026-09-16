@@ -1,0 +1,94 @@
+{% if section.settings.image != blank or section.settings.video != blank or section.settings.text != blank %}
+<section
+  id="{{ section.id }}"
+  class="about-story about-media-split color-{{ section.settings.color_scheme }}"
+  {% if section.settings.enable_animations %}data-about-reveal{% endif %}
+>
+  <div class="about-shell">
+    <div class="about-story__overlap-container {% if section.settings.reverse_layout %}about-story__overlap-container--reverse{% endif %}">
+      
+      <div class="about-story__image-container about-reveal-item" data-about-reveal>
+        {% if section.settings.video != blank %}
+          {% render 'video',
+            video: section.settings.video,
+            video_class: 'about-media-split__video',
+            video_autoplay: true,
+            video_loop: true,
+            disable_controls: true
+          %}
+        {% elsif section.settings.image != blank %}
+          {{
+            section.settings.image
+            | image_url: width: 1600
+            | image_tag:
+              class: 'about-story__main-image',
+              loading: 'lazy',
+              alt: section.settings.heading
+          }}
+        {% else %}
+          <div class="about-story__placeholder-container" aria-hidden="true"></div>
+        {% endif %}
+      </div>
+
+      <div class="about-story__content-card about-reveal-item" data-about-reveal>
+        {% if section.settings.section_label != blank and section.settings.section_label != section.settings.content_heading and section.settings.section_label != section.settings.heading %}
+          <p class="about-eyebrow">{{ section.settings.section_label | escape }}</p>
+        {% endif %}
+
+        {% if section.settings.content_heading != blank %}
+          <h2 class="about-story__card-heading">{{ section.settings.content_heading | escape }}</h2>
+        {% endif %}
+
+        {% if section.settings.text != blank %}
+          <div class="about-story__card-text rte">{{ section.settings.text }}</div>
+        {% endif %}
+
+        {% if section.settings.button_label != blank %}
+          <div class="about-story__card-actions">
+            <a class="about-button about-button--ghost" href="{{ section.settings.button_link | default: routes.all_products_collection_url }}">
+              {{ section.settings.button_label | escape }}
+            </a>
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<style>
+  .about-media-split .about-media-split__video {
+    width: 100%;
+    height: 100%;
+  }
+
+  .about-media-split .about-media-split__video video,
+  .about-media-split .about-media-split__video iframe,
+  .about-media-split .about-media-split__video img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "About media split",
+  "settings": [
+    { "type": "text", "id": "section_label", "label": "Section label", "default": "The Stag Men Fashion Story" },
+    { "type": "text", "id": "heading", "label": "Media heading", "default": "We Don’t Follow Trends. We Follow Feeling." },
+    { "type": "text", "id": "content_heading", "label": "Content heading", "default": "Why settle for ordinary streetwear?" },
+    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>We looked around and saw fast fashion filled with forgettable, ill-fitting cuts. So we created Stag Men Fashion, a homegrown fashion label for modern men with one simple belief: every fit should bring effortless confidence.</p>" },
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "video", "id": "video", "label": "Video" },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Shop New Drops" },
+    { "type": "url", "id": "button_link", "label": "Button link" },
+    { "type": "checkbox", "id": "reverse_layout", "label": "Reverse layout", "default": false },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "checkbox", "id": "enable_animations", "label": "Enable animations", "default": true }
+  ],
+  "presets": [{ "name": "About media split" }]
+}
+{% endschema %}

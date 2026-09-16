@@ -1,0 +1,571 @@
+{% liquid
+  assign footer_logo = section.settings.logo | default: settings.logo
+  assign brand_name = section.settings.brand_name | default: settings.brand_name | default: shop.name
+  assign brand_text = section.settings.brand_text | default: "Contemporary streetwear designed for everyday confidence and individuality."
+  assign year_now = 'now' | date: '%Y'
+
+  assign menu_1_handle = section.settings.menu_1
+  assign menu_1_title = section.settings.menu_title_1 | default: 'Shop'
+
+  assign menu_2_handle = section.settings.menu_2
+  assign menu_2_title = section.settings.menu_title_2 | default: 'Info & Legal'
+
+  assign instagram_url = section.settings.instagram_url | default: settings.social_instagram_link | default: 'https://instagram.com/'
+  assign whatsapp_url = section.settings.whatsapp_url | default: 'https://wa.me/'
+  assign tiktok_url = section.settings.tiktok_url | default: settings.social_tiktok_link
+  assign facebook_url = section.settings.facebook_url | default: settings.social_facebook_link
+  assign youtube_url = section.settings.youtube_url | default: settings.social_youtube_link
+
+  assign contact_email = section.settings.contact_email | default: 'support@stagmenfashion.com'
+  assign contact_whatsapp_text = section.settings.contact_whatsapp_text | default: '+91 98765 43210'
+%}
+
+<footer class="stagmenfashion-footer color-{{ section.settings.color_scheme }}" id="stagmenfashion-site-footer">
+  <div class="stagmenfashion-footer__wrap">
+    <div class="stagmenfashion-footer__grid">
+      <!-- Col 1: Brand & Tagline -->
+      <div class="stagmenfashion-footer__brand-col">
+        {% if footer_logo != blank %}
+          <a href="{{ routes.root_url }}" class="stagmenfashion-footer__logo-link">
+            {{
+              footer_logo
+              | image_url: width: 260
+              | image_tag:
+                class: 'stagmenfashion-footer__logo-img',
+                widths: '130, 200, 260',
+                loading: 'lazy',
+                alt: brand_name
+            }}
+          </a>
+        {% else %}
+          <a href="{{ routes.root_url }}" class="stagmenfashion-footer__brand-name">{{ brand_name }}</a>
+        {% endif %}
+
+        <p class="stagmenfashion-footer__brand-text">{{ brand_text }}</p>
+
+        <div class="stagmenfashion-footer__contact-links">
+          {% if contact_email != blank %}
+            <a href="mailto:{{ contact_email }}" class="stagmenfashion-footer__contact-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              <span>{{ contact_email }}</span>
+            </a>
+          {% endif %}
+
+          {% if whatsapp_url != blank and contact_whatsapp_text != blank %}
+            <a href="{{ whatsapp_url }}" target="_blank" rel="noopener" class="stagmenfashion-footer__contact-item">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.05 4.91A9.816 9.816 0 0 0 12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01zm-7.01 15.24c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c.02 4.54-3.68 8.23-8.22 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.79.98-.14.17-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43s.17-.25.25-.41c.08-.17.04-.31-.02-.43s-.56-1.34-.76-1.84c-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.84-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg>
+              <span>{{ contact_whatsapp_text }}</span>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Col 2: Shop / Navigation Menu -->
+      <div class="stagmenfashion-footer__nav-col stagmenfashion-footer__nav-col--shop">
+        <h3 class="stagmenfashion-footer__heading">{{ menu_1_title }}</h3>
+        <ul class="stagmenfashion-footer__menu">
+          {% if menu_1_handle != blank and linklists[menu_1_handle].links.size > 0 %}
+            {% for link in linklists[menu_1_handle].links %}
+              <li><a href="{{ link.url }}" class="stagmenfashion-footer__link">{{ link.title }}</a></li>
+            {% endfor %}
+          {% else %}
+            <li><a href="/collections/all" class="stagmenfashion-footer__link">New In</a></li>
+            <li><a href="/collections" class="stagmenfashion-footer__link">Oversized Tees</a></li>
+            <li><a href="/collections" class="stagmenfashion-footer__link">Co-ord Sets</a></li>
+            <li><a href="/collections" class="stagmenfashion-footer__link">Streetwear Tops</a></li>
+            <li><a href="/collections" class="stagmenfashion-footer__link">Best Sellers</a></li>
+          {% endif %}
+        </ul>
+      </div>
+
+      <!-- Col 3: Boring Stuff / Legal Menu -->
+      <div class="stagmenfashion-footer__nav-col stagmenfashion-footer__nav-col--legal">
+        <h3 class="stagmenfashion-footer__heading">{{ menu_2_title }}</h3>
+        <ul class="stagmenfashion-footer__menu">
+          {% if menu_2_handle != blank and linklists[menu_2_handle].links.size > 0 %}
+            {% for link in linklists[menu_2_handle].links %}
+              <li><a href="{{ link.url }}" class="stagmenfashion-footer__link">{{ link.title }}</a></li>
+            {% endfor %}
+          {% else %}
+            <li><a href="/pages/contact" class="stagmenfashion-footer__link">Track Order & Shipping</a></li>
+            <li><a href="/policies/refund-policy" class="stagmenfashion-footer__link">Returns & Exchanges</a></li>
+            <li><a href="/policies/privacy-policy" class="stagmenfashion-footer__link">Privacy Policy</a></li>
+            <li><a href="/policies/terms-of-service" class="stagmenfashion-footer__link">Terms of Service</a></li>
+          {% endif %}
+        </ul>
+      </div>
+
+      <!-- Col 4: Connect & Socials -->
+      <div class="stagmenfashion-footer__nav-col stagmenfashion-footer__nav-col--connect">
+        <h3 class="stagmenfashion-footer__heading">Connect</h3>
+        <div class="stagmenfashion-footer__social-list">
+          {% if instagram_url != blank %}
+            <a href="{{ instagram_url }}" target="_blank" rel="noopener noreferrer" class="stagmenfashion-footer__social-link" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+              <span>Instagram</span>
+            </a>
+          {% endif %}
+
+          {% if whatsapp_url != blank %}
+            <a href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="stagmenfashion-footer__social-link" aria-label="WhatsApp">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.05 4.91A9.816 9.816 0 0 0 12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01zm-7.01 15.24c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c.02 4.54-3.68 8.23-8.22 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.79.98-.14.17-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43s.17-.25.25-.41c.08-.17.04-.31-.02-.43s-.56-1.34-.76-1.84c-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.84-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg>
+              <span>WhatsApp</span>
+            </a>
+          {% endif %}
+
+          {% if tiktok_url != blank %}
+            <a href="{{ tiktok_url }}" target="_blank" rel="noopener noreferrer" class="stagmenfashion-footer__social-link" aria-label="TikTok">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path></svg>
+              <span>TikTok</span>
+            </a>
+          {% endif %}
+
+          {% if facebook_url != blank %}
+            <a href="{{ facebook_url }}" target="_blank" rel="noopener noreferrer" class="stagmenfashion-footer__social-link" aria-label="Facebook">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+              <span>Facebook</span>
+            </a>
+          {% endif %}
+
+          {% if youtube_url != blank %}
+            <a href="{{ youtube_url }}" target="_blank" rel="noopener noreferrer" class="stagmenfashion-footer__social-link" aria-label="YouTube">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+              <span>YouTube</span>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Clean Bottom Bar -->
+    <div class="stagmenfashion-footer__bottom">
+      <p class="stagmenfashion-footer__copyright">
+        © {{ year_now }} {{ brand_name }}. All rights reserved.
+      </p>
+
+      {% if section.settings.show_payment_icons %}
+        <div class="stagmenfashion-footer__payments">
+          <span class="stagmenfashion-footer__payment-badge" title="Visa">
+            <svg viewBox="0 0 38 24" width="34" height="20" fill="none"><rect width="38" height="24" rx="3" fill="#141414" stroke="#222222" stroke-width="1"/><path d="M15.5 16.5h-2.3l1.4-9h2.3l-1.4 9zm9.7-8.8c-.5-.2-1.2-.4-2.1-.4-2.3 0-3.9 1.2-3.9 3 0 1.3 1.2 2 2.1 2.4.9.4 1.2.7 1.2 1.1 0 .6-.7.9-1.4.9-1 0-1.5-.1-2.3-.5l-.3-.2-.3 2c.6.3 1.6.5 2.7.5 2.5 0 4.1-1.2 4.1-3.1 0-1-.6-1.8-2-2.5-.8-.4-1.3-.7-1.3-1.1 0-.4.4-.8 1.3-.8.7 0 1.3.1 1.7.3l.2.1.3-1.8zm6.3 0h-1.8c-.6 0-1 .2-1.3.8l-3.6 8.2h2.4l.5-1.3h3l.3 1.3h2.1l-1.6-9zm-3.2 5.9l1.3-3.6.7 3.6h-2zm-17.7-5.9l-2.2 6.1-.2-1.2c-.4-1.4-1.6-2.9-3-3.6l1.9 7.7h2.4l3.6-9h-2.5z" fill="#fff"/></svg>
+          </span>
+          <span class="stagmenfashion-footer__payment-badge" title="Mastercard">
+            <svg viewBox="0 0 38 24" width="34" height="20" fill="none"><rect width="38" height="24" rx="3" fill="#141414" stroke="#222222" stroke-width="1"/><circle cx="15" cy="12" r="6" fill="#eb001b"/><circle cx="23" cy="12" r="6" fill="#f79e1b" fill-opacity="0.85"/></svg>
+          </span>
+          <span class="stagmenfashion-footer__payment-badge" title="Apple Pay">
+            <svg viewBox="0 0 38 24" width="34" height="20" fill="none"><rect width="38" height="24" rx="3" fill="#141414" stroke="#222222" stroke-width="1"/><path d="M14.2 11.2c0-1.7 1.4-2.6 1.5-2.7-.8-1.2-2.1-1.3-2.5-1.4-1.1-.1-2.1.6-2.6.6-.6 0-1.4-.6-2.3-.6-1.2 0-2.3.7-2.9 1.8-1.3 2.2-.3 5.4.9 7.2.6.9 1.3 1.8 2.2 1.8.9 0 1.2-.6 2.3-.6 1.1 0 1.4.6 2.3.6.9 0 1.6-.9 2.2-1.7.7-1 1-2 1-2.1-.1 0-2-.8-2-3zm-1.6-5c.5-.6.8-1.4.7-2.2-.7 0-1.6.5-2.1 1.1-.4.5-.8 1.4-.7 2.2.8.1 1.6-.4 2.1-1.1zm5.1 1.9h2.3v8.5h-2.3V8.1zm6 0h2.2v1.2c.5-.9 1.4-1.4 2.4-1.4 1.8 0 3.1 1.4 3.1 3.3s-1.3 3.3-3.1 3.3c-1 0-1.9-.5-2.4-1.4v3.4h-2.2V8.1zm2.2 3.1c0 1 .7 1.7 1.7 1.7s1.7-.7 1.7-1.7-.7-1.7-1.7-1.7-1.7.7-1.7 1.7z" fill="#fff"/></svg>
+          </span>
+          <span class="stagmenfashion-footer__payment-badge" title="Google Pay">
+            <svg viewBox="0 0 38 24" width="34" height="20" fill="none"><rect width="38" height="24" rx="3" fill="#141414" stroke="#222222" stroke-width="1"/><path d="M17.4 12.3c0-.3 0-.6-.1-.8h-4.3v1.6h2.5c-.1.6-.4 1.1-.9 1.5v1.2h1.5c.9-.8 1.3-2 1.3-3.5z" fill="#4285F4"/><path d="M13 16.7c1.3 0 2.3-.4 3.1-1.1l-1.5-1.2c-.4.3-1 .5-1.6.5-1.2 0-2.3-.8-2.6-2h-1.5v1.2c.8 1.6 2.4 2.6 4.1 2.6z" fill="#34A853"/><path d="M10.4 12.9c-.1-.3-.1-.7-.1-1s0-.7.1-1V9.7H8.9c-.3.7-.5 1.4-.5 2.2 0 .8.2 1.5.5 2.2l1.5-1.2z" fill="#FBBC05"/><path d="M13 8.9c.7 0 1.3.2 1.8.7l1.3-1.3C15.3 7.5 14.2 7 13 7 11.3 7 9.7 8 8.9 9.7l1.5 1.2c.3-1.2 1.4-2 2.6-2z" fill="#EA4335"/><path d="M22 10.3h-1.5v5.5H22c1.4 0 2.4-1 2.4-2.8 0-1.6-1-2.7-2.4-2.7zm0 4.1h-.4v-2.8h.4c.7 0 1.2.5 1.2 1.4 0 .9-.5 1.4-1.2 1.4zm6.6-2.5c-.8 0-1.4.6-1.4 1.4 0 .8.6 1.4 1.4 1.4.8 0 1.4-.6 1.4-1.4 0-.8-.6-1.4-1.4-1.4zm0 4.1c-1.5 0-2.7-1.1-2.7-2.7s1.2-2.7 2.7-2.7 2.7 1.1 2.7 2.7-1.2 2.7-2.7 2.7z" fill="#fff"/></svg>
+          </span>
+          <span class="stagmenfashion-footer__payment-badge" title="UPI">
+            <svg viewBox="0 0 38 24" width="34" height="20" fill="none"><rect width="38" height="24" rx="3" fill="#141414" stroke="#222222" stroke-width="1"/><text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle" fill="#00baf2" font-size="8" font-family="sans-serif" font-weight="700">UPI</text></svg>
+          </span>
+          <span class="stagmenfashion-footer__payment-badge" title="Cash on Delivery">
+            <svg viewBox="0 0 38 24" width="34" height="20" fill="none"><rect width="38" height="24" rx="3" fill="#141414" stroke="#222222" stroke-width="1"/><text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-size="7.5" font-family="sans-serif" font-weight="700">COD</text></svg>
+          </span>
+        </div>
+      {% endif %}
+
+      {% if section.settings.show_back_to_top %}
+        <button type="button" class="stagmenfashion-footer__top-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'});" aria-label="Back to top">
+          <span>Back to top</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+        </button>
+      {% endif %}
+    </div>
+  </div>
+</footer>
+
+<style>
+  .stagmenfashion-footer {
+    background: #0800CF;
+    color: #ffffff;
+    font-family: var(--font-body--family), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .stagmenfashion-footer__wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 56px 28px 28px;
+  }
+
+  .stagmenfashion-footer__grid {
+    display: grid;
+    grid-template-columns: 2.2fr 1.2fr 1.4fr 1.2fr;
+    gap: clamp(32px, 5vw, 64px);
+    margin-bottom: 48px;
+  }
+
+  /* Brand Column */
+  .stagmenfashion-footer__brand-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stagmenfashion-footer__logo-link {
+    display: inline-block;
+    margin-bottom: 14px;
+    text-decoration: none;
+  }
+
+  .stagmenfashion-footer__logo-img {
+    display: block;
+    max-width: 140px;
+    height: auto;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  .stagmenfashion-footer__brand-name {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #ffffff;
+    text-decoration: none;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .stagmenfashion-footer__brand-text {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.88);
+    margin: 0 0 20px 0;
+    max-width: 340px;
+  }
+
+  .stagmenfashion-footer__contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .stagmenfashion-footer__contact-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.88);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s ease;
+  }
+
+  .stagmenfashion-footer__contact-item svg {
+    width: 14px;
+    height: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    flex-shrink: 0;
+  }
+
+  .stagmenfashion-footer__contact-item:hover {
+    color: #ffffff;
+  }
+
+  /* Navigation Columns */
+  .stagmenfashion-footer__nav-col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stagmenfashion-footer__heading {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #ffffff;
+    opacity: 0.95;
+    margin: 0 0 18px 0;
+  }
+
+  .stagmenfashion-footer__menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .stagmenfashion-footer__link {
+    color: rgba(255, 255, 255, 0.88);
+    text-decoration: none;
+    font-size: 13.5px;
+    line-height: 1.4;
+    transition: color 0.2s ease, opacity 0.2s ease;
+  }
+
+  .stagmenfashion-footer__link:hover {
+    color: #ffffff;
+    opacity: 1;
+  }
+
+  /* Social Links */
+  .stagmenfashion-footer__social-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .stagmenfashion-footer__social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(255, 255, 255, 0.88);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: color 0.2s ease;
+  }
+
+  .stagmenfashion-footer__social-link svg {
+    width: 15px;
+    height: 15px;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.2s ease;
+  }
+
+  .stagmenfashion-footer__social-link:hover {
+    color: #ffffff;
+  }
+
+  .stagmenfashion-footer__social-link:hover svg {
+    color: #ffffff;
+  }
+
+  /* Bottom Bar */
+  .stagmenfashion-footer__bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .stagmenfashion-footer__copyright {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+
+  .stagmenfashion-footer__payments {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .stagmenfashion-footer__payment-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .stagmenfashion-footer__top-btn {
+    appearance: none;
+    background: transparent;
+    border: none;
+    padding: 4px 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s ease;
+  }
+
+  .stagmenfashion-footer__top-btn svg {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.2s ease;
+  }
+
+  .stagmenfashion-footer__top-btn:hover {
+    color: #ffffff;
+  }
+
+  .stagmenfashion-footer__top-btn:hover svg {
+    transform: translateY(-2px);
+  }
+
+  /* Responsive Breakpoints */
+  @media screen and (max-width: 989px) {
+    .stagmenfashion-footer__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 36px;
+    }
+
+    .stagmenfashion-footer__brand-col {
+      grid-column: 1 / -1;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .stagmenfashion-footer__wrap {
+      padding: 36px 20px 24px;
+    }
+
+    .stagmenfashion-footer__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 32px 20px;
+      margin-bottom: 32px;
+    }
+
+    .stagmenfashion-footer__brand-col {
+      grid-column: 1 / -1;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .stagmenfashion-footer__brand-text {
+      max-width: 100%;
+    }
+
+    .stagmenfashion-footer__nav-col--connect {
+      grid-column: 1 / -1;
+    }
+
+    .stagmenfashion-footer__bottom {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .stagmenfashion-footer__payments {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Brand Information"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "text",
+      "id": "brand_name",
+      "label": "Brand Name",
+      "default": "Stag Men Fashion"
+    },
+    {
+      "type": "textarea",
+      "id": "brand_text",
+      "label": "Brand Tagline",
+      "default": "Contemporary streetwear designed for everyday confidence and individuality."
+    },
+    {
+      "type": "text",
+      "id": "contact_email",
+      "label": "Contact Email",
+      "default": "support@stagmenfashion.com"
+    },
+    {
+      "type": "text",
+      "id": "contact_whatsapp_text",
+      "label": "WhatsApp Display Text",
+      "default": "+91 98765 43210"
+    },
+    {
+      "type": "header",
+      "content": "Navigation Menus"
+    },
+    {
+      "type": "text",
+      "id": "menu_title_1",
+      "label": "Menu 1 Title",
+      "default": "Shop"
+    },
+    {
+      "type": "link_list",
+      "id": "menu_1",
+      "label": "Menu 1 (Link List)"
+    },
+    {
+      "type": "text",
+      "id": "menu_title_2",
+      "label": "Menu 2 Title",
+      "default": "Info & Legal"
+    },
+    {
+      "type": "link_list",
+      "id": "menu_2",
+      "label": "Menu 2 (Link List)"
+    },
+    {
+      "type": "header",
+      "content": "Social Links"
+    },
+    {
+      "type": "url",
+      "id": "instagram_url",
+      "label": "Instagram URL"
+    },
+    {
+      "type": "url",
+      "id": "whatsapp_url",
+      "label": "WhatsApp URL"
+    },
+    {
+      "type": "url",
+      "id": "tiktok_url",
+      "label": "TikTok URL"
+    },
+    {
+      "type": "url",
+      "id": "facebook_url",
+      "label": "Facebook URL"
+    },
+    {
+      "type": "url",
+      "id": "youtube_url",
+      "label": "YouTube URL"
+    },
+    {
+      "type": "header",
+      "content": "Footer Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_icons",
+      "label": "Show Payment Badges",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_back_to_top",
+      "label": "Show Back to Top Button",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Footer"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,59 @@
+{
+  "sections": {
+    "all_stores": {
+      "type": "stagmenfashion-our-stores",
+      "blocks": {
+        "store_1": {
+          "type": "store",
+          "settings": {
+            "image": "shopify://shop_images/stag-2.webp",
+            "store_name": "Calicut",
+            "directions_label": "Get Direction",
+            "directions_url": "",
+            "address": "1st floor,\n4th Gate, Taisha Arcade,\nPT Usha Rd, vellayil,\nkozhikode, kerala 673032",
+            "phone": "+91 7736444674"
+          }
+        },
+        "store_2": {
+          "type": "store",
+          "settings": {
+            "image": "shopify://shop_images/stag-kdy.webp",
+            "store_name": "Kondotty",
+            "directions_label": "Get Direction",
+            "directions_url": "",
+            "address": "5X25+3QH, Kondotty Bypass Rd, Kondotty, Kerala 673638",
+            "phone": "+91 7736444674"
+          }
+        },
+        "store_3": {
+          "type": "store",
+          "settings": {
+            "store_name": "Kannur",
+            "directions_label": "Get Direction",
+            "directions_url": "",
+            "address": "V9FF+GGC, Thavakkara, Kannur, Kerala 670012",
+            "phone": "+91 7736444674"
+          }
+        }
+      },
+      "block_order": [
+        "store_1",
+        "store_2",
+        "store_3"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "header_alignment": "center",
+        "heading": "Our Stores",
+        "subheading": "Visit our retail locations across Kerala.",
+        "discover_more_label": "",
+        "discover_more_link": "",
+        "padding_top": 36,
+        "padding_bottom": 48
+      }
+    }
+  },
+  "order": [
+    "all_stores"
+  ]
+}

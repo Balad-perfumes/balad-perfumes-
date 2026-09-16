@@ -1,0 +1,110 @@
+<section class="about-showcase color-{{ section.settings.color_scheme }}" {% if section.settings.enable_animations %}data-about-reveal{% endif %}>
+  <div class="about-shell">
+    <div class="about-showcase__header text-center">
+      {% if section.settings.eyebrow != blank %}
+        <p class="about-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {% endif %}
+      {% if section.settings.heading != blank %}
+        <h2 class="about-showcase__heading">{{ section.settings.heading | escape }}</h2>
+      {% endif %}
+      {% if section.settings.text != blank %}
+        <div class="about-showcase__intro-text rte">{{ section.settings.text }}</div>
+      {% endif %}
+    </div>
+
+    <div class="about-showcase__asymmetric-layout">
+      {% if section.blocks.size > 0 %}
+        {% assign hero_block = section.blocks[0] %}
+        <div class="about-showcase__card about-showcase__card--hero about-reveal-item" {{ hero_block.shopify_attributes }} data-about-reveal>
+          <div class="about-showcase__image-wrapper">
+            {% if hero_block.settings.image != blank %}
+              {{ hero_block.settings.image 
+                | image_url: width: 1200 
+                | image_tag: 
+                  class: 'about-showcase__image', 
+                  loading: 'lazy', 
+                  alt: hero_block.settings.title 
+              }}
+            {% else %}
+              <div class="about-showcase__placeholder" aria-hidden="true"></div>
+            {% endif %}
+          </div>
+          <div class="about-showcase__content">
+            <h3 class="about-showcase__title">{{ hero_block.settings.title | escape }}</h3>
+            {% if hero_block.settings.button_label != blank and hero_block.settings.link != blank %}
+              <a class="about-showcase__link about-button about-button--solid" href="{{ hero_block.settings.link }}">
+                {{ hero_block.settings.button_label | escape }}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      {% if section.blocks.size > 1 %}
+        <div class="about-showcase__side-grid">
+          {% for block in section.blocks offset: 1 %}
+            <div class="about-showcase__card about-reveal-item" {{ block.shopify_attributes }} data-about-reveal>
+              <div class="about-showcase__image-wrapper">
+                {% if block.settings.image != blank %}
+                  {{ block.settings.image 
+                    | image_url: width: 800 
+                    | image_tag: 
+                      class: 'about-showcase__image', 
+                      loading: 'lazy', 
+                      alt: block.settings.title 
+                  }}
+                {% else %}
+                  <div class="about-showcase__placeholder" aria-hidden="true"></div>
+                {% endif %}
+              </div>
+              <div class="about-showcase__content">
+                <h3 class="about-showcase__title">{{ block.settings.title | escape }}</h3>
+                {% if block.settings.button_label != blank and block.settings.link != blank %}
+                  <a class="about-showcase__link about-button about-button--solid" href="{{ block.settings.link }}">
+                    {{ block.settings.button_label | escape }}
+                  </a>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About showcase",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Curated for You" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Explore Our Collections" },
+    { "type": "richtext", "id": "text", "label": "Intro text", "default": "<p>Discover the pieces that transform your daily rotation into effortless statement fits.</p>" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "checkbox", "id": "enable_animations", "label": "Enable animations", "default": true }
+  ],
+  "blocks": [
+    {
+      "type": "collection_card",
+      "name": "Collection Card",
+      "limit": 4,
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Card Image" },
+        { "type": "text", "id": "title", "label": "Collection Title", "default": "Oversized Tees" },
+        { "type": "text", "id": "button_label", "label": "Button Label", "default": "Shop Category" },
+        { "type": "url", "id": "link", "label": "Button Link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "About showcase",
+      "blocks": [
+        { "type": "collection_card", "settings": { "title": "Oversized Tees", "button_label": "Shop Tees" } },
+        { "type": "collection_card", "settings": { "title": "Co-ord Sets", "button_label": "Shop Co-ords" } },
+        { "type": "collection_card", "settings": { "title": "Signature Hoodies", "button_label": "Shop Hoodies" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

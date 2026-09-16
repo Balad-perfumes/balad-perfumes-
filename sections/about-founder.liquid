@@ -1,0 +1,91 @@
+<section
+  class="about-founder color-{{ section.settings.color_scheme }}"
+  {% if section.settings.enable_animations %}data-about-reveal{% endif %}
+>
+  <div class="about-shell">
+    <div class="about-founder__intro">
+      {% if section.settings.eyebrow != blank %}
+        <p class="about-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {% endif %}
+      <h2 class="about-founder__heading">{{ section.settings.heading | escape }}</h2>
+      {% if section.settings.text != blank %}
+        <div class="about-founder__text rte">{{ section.settings.text }}</div>
+      {% endif %}
+    </div>
+
+    <div class="about-founder__grid">
+      {% for block in section.blocks %}
+        <article class="about-founder__card about-reveal-item" {{ block.shopify_attributes }} data-about-reveal>
+          <div class="about-founder__media">
+            {% if block.settings.image != blank %}
+              {{
+                block.settings.image
+                | image_url: width: 1200
+                | image_tag:
+                  class: 'about-founder__image',
+                  loading: 'lazy',
+                  widths: '320, 480, 640, 800, 1000, 1200',
+                  alt: block.settings.name
+              }}
+            {% else %}
+              <div class="about-founder__placeholder" aria-hidden="true"></div>
+            {% endif %}
+          </div>
+
+          <div class="about-founder__content">
+            {% if block.settings.eyebrow != blank %}
+              <p class="about-founder__eyebrow">{{ block.settings.eyebrow | escape }}</p>
+            {% endif %}
+            <h3 class="about-founder__name">{{ block.settings.name | escape }}</h3>
+            {% if block.settings.role != blank %}
+              <p class="about-founder__role">{{ block.settings.role | escape }}</p>
+            {% endif %}
+            {% if block.settings.text != blank %}
+              <div class="about-founder__bio rte">{{ block.settings.text }}</div>
+            {% endif %}
+            {% if block.settings.link_label != blank and block.settings.link != blank %}
+              <a class="about-founder__link" href="{{ block.settings.link }}">{{ block.settings.link_label | escape }}</a>
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About founder",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The Minds Behind the Magic" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Every Fit an Expression." },
+    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Together, the Stag Men Fashion team creates signature streetwear cuts and styling experiences that feel bold, premium, and beautifully effortless.</p>" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "checkbox", "id": "enable_animations", "label": "Enable animations", "default": true }
+  ],
+  "blocks": [
+    {
+      "type": "founder",
+      "name": "Founder",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Founder" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Sachhit Khera" },
+        { "type": "text", "id": "role", "label": "Role", "default": "Creative Director" },
+        { "type": "richtext", "id": "text", "label": "Text", "default": "<p>A fashion designer and creative visionary with deep experience in luxury streetwear, premium fabrics, and contemporary silhouettes tailored for modern men.</p>" },
+        { "type": "text", "id": "link_label", "label": "Link label" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "About founder",
+      "blocks": [
+        { "type": "founder" },
+        { "type": "founder" }
+      ]
+    }
+  ]
+}
+{% endschema %}

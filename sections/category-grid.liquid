@@ -1,0 +1,400 @@
+{% liquid
+  assign upcoming_collection = section.settings.collection | default: 'all'
+  if collections[upcoming_collection] == blank
+    assign upcoming_collection = 'all'
+  endif
+
+  assign upcoming_id = 'pf-upcoming-' | append: section.id
+  assign has_upcoming_products = false
+%}
+
+{% paginate collections[upcoming_collection].products by 250 %}
+  {% liquid
+    for product in collections[upcoming_collection].products
+      for tag in product.tags
+        assign downcase_tag = tag | downcase
+        if downcase_tag contains 'upcoming' or downcase_tag contains 'upcomming'
+          assign has_upcoming_products = true
+          break
+        endif
+      endfor
+      if has_upcoming_products
+        break
+      endif
+    endfor
+  %}
+
+  <link rel="stylesheet" href="{{ 'collection.css' | asset_url }}">
+  <style>
+    .pf-upcoming .pop-reveal { opacity: 1 !important; visibility: visible !important; }
+    /* Full-height cards */
+    .pf-upcoming__rail > div { display: flex; flex-direction: column; }
+    .pf-upcoming__rail > div .pop-card { flex: 1; }
+    /* Visible border + shadow to match shop page */
+    .pf-upcoming .pop-card {
+      border: 1px solid rgba(17, 17, 17, 0.10);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .pf-upcoming .pop-card:hover {
+      border-color: rgba(17, 17, 17, 0.18);
+    }
+    .pf-upcoming .pop-card__media { border-radius: 0; }
+    .pf-upcoming .pop-card__body {
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
+  </style>
+  {% if has_upcoming_products %}
+    <section
+      class="pf-upcoming color-{{ section.settings.color_scheme }}"
+      data-upcoming-drops="{{ section.id }}"
+      style="
+        --pf-upcoming-bg: {{ section.settings.background }};
+        --pf-upcoming-text: {{ section.settings.text_color }};
+        --pf-upcoming-muted: {{ section.settings.muted_text_color }};
+        --pf-upcoming-accent: var(--color-primary-button-background);
+        --pf-upcoming-accent-text: var(--color-primary-button-text);
+        --pf-upcoming-card-radius: {{ section.settings.card_radius }}px;
+        --pf-upcoming-card-gap: {{ section.settings.card_gap }}px;
+        --pop-image-ratio: 1 / 1;
+        --pop-card-radius: 0px;
+      "
+    >
+      <div class="pf-upcoming__shell">
+        <div class="pf-upcoming__head">
+          {% if section.settings.heading != blank %}
+            <h2 class="pf-upcoming__heading">{{ section.settings.heading }}</h2>
+          {% endif %}
+          <div class="pf-upcoming__navigation">
+            <button
+              type="button"
+              class="pf-upcoming__nav-btn"
+              aria-label="Scroll left"
+              data-upcoming-scroll-prev
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="pf-upcoming__nav-btn"
+              aria-label="Scroll right"
+              data-upcoming-scroll-next
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="pf-upcoming__panels">
+          <div
+            id="{{ upcoming_id }}-panel"
+            class="pf-upcoming__panel is-active"
+            role="region"
+            aria-label="Upcoming products"
+            data-upcoming-panel
+          >
+            <div class="pf-upcoming__rail" data-upcoming-rail>
+              {% for item_product in collections[upcoming_collection].products %}
+                {% liquid
+                  assign is_upcoming = false
+                  for tag in item_product.tags
+                    assign downcase_tag = tag | downcase
+                    if downcase_tag contains 'upcoming' or downcase_tag contains 'upcomming'
+                      assign is_upcoming = true
+                      break
+                    endif
+                  endfor
+
+                  if is_upcoming == false
+                    continue
+                  endif
+
+                  assign item_image = item_product.featured_image | default: item_product.images.first
+                  assign item_title = item_product.title
+                  assign item_price = item_product.price | money
+                  assign item_link = item_product.url
+                  assign button_label = section.settings.button_label | default: 'View Product'
+                %}
+
+                <div style="scroll-snap-align: start;">
+                  {% render 'stagmenfashion-collection-card', product: item_product, section_id: section.id, hover_speed: 400, card_radius: 0 %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  {% endif %}
+{% endpaginate %}
+
+<style>
+  .pf-upcoming {
+    background: var(--pf-upcoming-bg);
+    color: var(--pf-upcoming-text);
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 32px clamp(20px, 4vw, 42px) 16px;
+  }
+
+  .pf-upcoming__shell {
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  .pf-upcoming__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgb(17 17 17 / 0.1);
+  }
+
+  .pf-upcoming__heading {
+    margin: 0;
+    color: #000000;
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
+    font-size: 32px;
+    line-height: 0.94;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+
+  .pf-upcoming__navigation {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .pf-upcoming__nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1.5px solid rgb(17 17 17 / 0.14);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--pf-upcoming-text);
+    cursor: pointer;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
+  }
+
+  .pf-upcoming__nav-btn:hover {
+    background: #0800CF;
+    border-color: #0800CF;
+    color: #ffffff;
+    transform: scale(1.05);
+  }
+
+  .pf-upcoming__nav-btn svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+  }
+
+  .pf-upcoming__panels {
+    position: relative;
+  }
+
+  .pf-upcoming__panel {
+    position: relative;
+  }
+
+  .pf-upcoming__rail {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(220px, 1fr);
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 24px;
+  }
+
+  .pf-upcoming__rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media screen and (min-width: 750px) {
+    .pf-upcoming__shell {
+      padding-inline: 0;
+    }
+
+    .pf-upcoming__rail {
+      grid-auto-columns: calc((100% - 48px) / 4);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .pf-upcoming {
+      padding: 0;
+      margin: 0;
+    }
+
+    .pf-upcoming .pf-upcoming__shell {
+      padding: 24px 20px 12px;
+    }
+
+    .pf-upcoming__head {
+      margin-bottom: 0px;
+      padding-bottom: 14px;
+    }
+
+    .pf-upcoming__navigation {
+      gap: 6px;
+    }
+
+    .pf-upcoming__nav-btn {
+      width: 34px;
+      height: 34px;
+    }
+
+    .pf-upcoming__nav-btn svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    .pf-upcoming__rail {
+      grid-auto-columns: clamp(180px, 52vw, 230px);
+      gap: 10px;
+      padding-inline-end: 16px;
+      padding-bottom: 20px;
+    }
+
+    .pf-card__body {
+      padding: 12px 14px 16px;
+    }
+
+    .pf-card__title {
+      font-size: 0.88rem;
+    }
+
+    .pf-card__price {
+      font-size: 0.8rem;
+    }
+
+    .pf-upcoming__heading {
+      font-size: 24px;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    const section = document.querySelector('[data-upcoming-drops="{{ section.id }}"]');
+    if (!section) return;
+
+    const scrollActivePanel = (direction) => {
+      const rail = section.querySelector('[data-upcoming-rail]');
+      if (!rail) return;
+      
+      const card = rail.querySelector('.pop-card');
+      const cardWidth = card ? card.clientWidth : 280;
+      const gap = parseInt(getComputedStyle(rail).gap) || 16;
+      const amount = (cardWidth + gap) * 1.5;
+
+      rail.scrollBy({
+        left: direction === 'next' ? amount : -amount,
+        behavior: 'smooth'
+      });
+    };
+
+    const prevBtn = section.querySelector('[data-upcoming-scroll-prev]');
+    const nextBtn = section.querySelector('[data-upcoming-scroll-next]');
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => scrollActivePanel('prev'));
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => scrollActivePanel('next'));
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Upcoming Drops",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Upcoming Drops"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection",
+      "info": "Filter upcoming products from this collection. Defaults to all products if empty."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "View Product"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Card radius",
+      "min": 0,
+      "max": 28,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Card gap",
+      "min": 8,
+      "max": 28,
+      "step": 1,
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "muted_text_color",
+      "label": "Muted text color",
+      "default": "#6b7280"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#0800CF"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Upcoming Drops"
+    }
+  ]
+}
+{% endschema %}

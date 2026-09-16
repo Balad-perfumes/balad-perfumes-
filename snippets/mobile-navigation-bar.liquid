@@ -1,0 +1,661 @@
+{% liquid
+  assign enable_mobile_nav = section.settings.enable_mobile_nav | default: true
+  assign nav_style = section.settings.mobile_nav_style | default: 'modern_glass'
+  assign show_home = section.settings.mobile_nav_show_home | default: true
+  assign show_collections = section.settings.mobile_nav_show_collections | default: true
+  assign show_story = section.settings.show_story_badge | default: true
+  assign show_about = section.settings.mobile_nav_show_about | default: true
+  assign show_account = section.settings.mobile_nav_show_account | default: true
+
+  assign brand_name = brand_name | default: section.settings.brand_name | default: settings.brand_name | default: shop.name
+  assign header_logo = header_logo | default: section.settings.logo | default: settings.logo
+  assign custom_story_avatar = section.settings.custom_story_avatar
+
+  assign home_url = routes.root_url
+  assign collections_url = section.settings.mobile_nav_collections_url | default: routes.collections_url
+  assign about_url = section.settings.mobile_nav_about_url | default: '/pages/about'
+  if customer
+    assign account_url = routes.account_url
+  else
+    assign account_url = routes.account_login_url
+  endif
+
+  assign current_path = request.path | downcase
+  assign is_home_active = false
+  assign is_col_active = false
+  assign is_about_active = false
+  assign is_account_active = false
+
+  if template.name == 'index'
+    assign is_home_active = true
+  elsif template.name == 'collection' or template.name == 'list-collections' or current_path contains '/collections'
+    assign is_col_active = true
+  elsif current_path contains '/pages/about' or template.suffix == 'about'
+    assign is_about_active = true
+  elsif template.name contains 'account' or template.name contains 'order' or template.name contains 'login' or template.name contains 'register' or current_path contains '/account'
+    assign is_account_active = true
+  endif
+%}
+
+{% if enable_mobile_nav %}
+  <nav
+    class="stagmenfashion-mobile-nav stagmenfashion-mobile-nav--{{ nav_style }}"
+    id="stagmenfashion-mobile-nav"
+    aria-label="Mobile Navigation"
+    data-stagmenfashion-mobile-nav
+  >
+    <div class="stagmenfashion-mobile-nav__bar">
+      <!-- 1. Home -->
+      {% if show_home %}
+        <a
+          href="{{ home_url }}"
+          class="stagmenfashion-mobile-nav__tab{% if is_home_active %} is-active{% endif %}"
+          aria-label="{{ 'general.home' | t | default: 'Home' }}"
+          {% if is_home_active %}aria-current="page"{% endif %}
+        >
+          <span class="stagmenfashion-mobile-nav__top-indicator" aria-hidden="true"></span>
+          <span class="stagmenfashion-mobile-nav__icon-wrap">
+            <svg class="stagmenfashion-mobile-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-4.5v-6a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v6H4.5A1.5 1.5 0 0 1 3 20V9.5z"/>
+            </svg>
+          </span>
+          <span class="stagmenfashion-mobile-nav__title">{{ section.settings.mobile_nav_home_label | default: 'Home' }}</span>
+        </a>
+      {% endif %}
+
+      <!-- 2. Collections / Shop -->
+      {% if show_collections %}
+        <a
+          href="{{ collections_url }}"
+          class="stagmenfashion-mobile-nav__tab{% if is_col_active %} is-active{% endif %}"
+          aria-label="Collections"
+          {% if is_col_active %}aria-current="page"{% endif %}
+        >
+          <span class="stagmenfashion-mobile-nav__top-indicator" aria-hidden="true"></span>
+          <span class="stagmenfashion-mobile-nav__icon-wrap">
+            <svg class="stagmenfashion-mobile-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/>
+              <rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/>
+              <rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/>
+              <rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/>
+            </svg>
+          </span>
+          <span class="stagmenfashion-mobile-nav__title">{{ section.settings.mobile_nav_collections_label | default: 'Shop' }}</span>
+        </a>
+      {% endif %}
+
+      <!-- 3. Stories (Story Badge) -->
+      {% if show_story %}
+        <button
+          type="button"
+          class="stagmenfashion-mobile-nav__tab stagmenfashion-mobile-nav__tab--story"
+          data-open-story-modal
+          aria-label="View Stories"
+          title="View Stories"
+        >
+          <span class="stagmenfashion-mobile-nav__top-indicator" aria-hidden="true"></span>
+          <span class="stagmenfashion-mobile-nav__icon-wrap">
+            <span class="stagmenfashion-mobile-nav__story-badge">
+              <span class="stagmenfashion-mobile-nav__story-ring">
+                {% if custom_story_avatar != blank %}
+                  {{
+                    custom_story_avatar
+                    | image_url: width: 60
+                    | image_tag: class: 'stagmenfashion-mobile-nav__story-logo', loading: 'eager', alt: 'Story'
+                  }}
+                {% elsif header_logo != blank %}
+                  {{
+                    header_logo
+                    | image_url: width: 60
+                    | image_tag: class: 'stagmenfashion-mobile-nav__story-logo', loading: 'eager', alt: brand_name
+                  }}
+                {% else %}
+                  <span class="stagmenfashion-mobile-nav__story-text-logo">{{ brand_name | slice: 0, 2 | upcase }}</span>
+                {% endif %}
+              </span>
+            </span>
+          </span>
+        </button>
+      {% endif %}
+
+      <!-- 4. About -->
+      {% if show_about %}
+        <a
+          href="{{ about_url }}"
+          class="stagmenfashion-mobile-nav__tab{% if is_about_active %} is-active{% endif %}"
+          aria-label="About"
+          {% if is_about_active %}aria-current="page"{% endif %}
+        >
+          <span class="stagmenfashion-mobile-nav__top-indicator" aria-hidden="true"></span>
+          <span class="stagmenfashion-mobile-nav__icon-wrap">
+            <svg class="stagmenfashion-mobile-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2l2.4 6.8 6.8 2.4-6.8 2.4L12 20.4l-2.4-6.8L2.8 11.2l6.8-2.4L12 2z"/>
+              <circle cx="19" cy="4" r="1.5" fill="currentColor" stroke="none"/>
+            </svg>
+          </span>
+          <span class="stagmenfashion-mobile-nav__title">{{ section.settings.mobile_nav_about_label | default: 'About' }}</span>
+        </a>
+      {% endif %}
+
+      <!-- 5. Account -->
+      {% if show_account %}
+        <a
+          href="{{ account_url }}"
+          class="stagmenfashion-mobile-nav__tab{% if is_account_active %} is-active{% endif %}"
+          aria-label="Account"
+          {% if is_account_active %}aria-current="page"{% endif %}
+        >
+          <span class="stagmenfashion-mobile-nav__top-indicator" aria-hidden="true"></span>
+          <span class="stagmenfashion-mobile-nav__icon-wrap">
+            <svg class="stagmenfashion-mobile-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="7.5" r="4"/>
+              <path d="M4.5 20c0-4 3.5-6.5 7.5-6.5s7.5 2.5 7.5 6.5"/>
+            </svg>
+          </span>
+          <span class="stagmenfashion-mobile-nav__title">{{ section.settings.mobile_nav_account_label | default: 'Account' }}</span>
+        </a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <style>
+    /* ==========================================================================
+       STAGMENFASHION FLOATING GLASS ISLAND WITH ELEVATED STORY CAPSULE
+       ========================================================================== */
+    .stagmenfashion-mobile-nav {
+      display: none;
+      position: fixed !important;
+      left: 50% !important;
+      right: auto !important;
+      bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+      top: auto !important;
+      transform: translateX(-50%);
+      width: calc(100vw - 28px);
+      max-width: 410px;
+      z-index: 999999 !important;
+      user-select: none;
+      -webkit-user-select: none;
+      pointer-events: none;
+      opacity: 1;
+      transition: transform 0.44s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.38s ease;
+      will-change: transform, opacity;
+    }
+
+    /* Scroll Hide State - Smoothly Slides Down into Screen Edge */
+    .stagmenfashion-mobile-nav[data-hidden="true"] {
+      transform: translate(-50%, calc(100% + 40px)) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    /* Instant Complete Hide when Drawer / Story Modal is Open */
+    body.pf-drawer-open .stagmenfashion-mobile-nav,
+    body.story-modal-open .stagmenfashion-mobile-nav,
+    .pf-header__drawer:not([hidden]) ~ .stagmenfashion-mobile-nav,
+    html:has(.pf-header__drawer:not([hidden])) .stagmenfashion-mobile-nav {
+      display: none !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      visibility: hidden !important;
+    }
+
+    /* -------------------------------------------------------------
+       1. Style: modern_glass (Floating Frosted Glass Island - Default)
+       ------------------------------------------------------------- */
+    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__bar {
+      pointer-events: auto;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      align-items: center;
+      justify-items: center;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(36px) saturate(210%) contrast(96%);
+      -webkit-backdrop-filter: blur(36px) saturate(210%) contrast(96%);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 5px;
+      box-shadow: 
+        0 18px 45px -8px rgba(0, 0, 0, 0.16),
+        0 4px 16px rgba(0, 0, 0, 0.05),
+        inset 0 1px 2px rgba(255, 255, 255, 1);
+      padding: 6px 8px;
+      min-height: 56px;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__tab {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      justify-self: center;
+      gap: 2px;
+      padding: 5px 6px 4px;
+      border-radius: 4px;
+      color: #666666;
+      text-decoration: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, transform 0.15s ease;
+      min-width: 0;
+      width: 100%;
+      text-align: center;
+    }
+
+    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__tab:not(.stagmenfashion-mobile-nav__tab--story):active {
+      transform: scale(0.92);
+      background: rgba(8, 0, 207, 0.05);
+    }
+
+    /* Top Highlight Pill Indicator */
+    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__top-indicator {
+      display: none;
+    }
+
+    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__icon-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      margin: 0 auto;
+    }
+
+    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__svg {
+      width: 20px;
+      height: 20px;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.2s ease, stroke-width 0.2s ease;
+    }
+
+    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__title {
+      font-size: 10px;
+      font-weight: 550;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      text-align: center;
+      transition: color 0.2s ease, font-weight 0.2s ease;
+    }
+
+    /* Active Tab */
+    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__tab.is-active {
+      color: #0800CF;
+    }
+
+    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__tab.is-active .stagmenfashion-mobile-nav__svg {
+      transform: translateY(-1px);
+      stroke-width: 2.2;
+    }
+
+    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__tab.is-active .stagmenfashion-mobile-nav__title {
+      font-weight: 700;
+      color: #0800CF;
+    }
+
+    /* -------------------------------------------------------------
+       Elevated Center Story Ring
+       ------------------------------------------------------------- */
+    @keyframes pf-story-spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .stagmenfashion-mobile-nav__tab--story {
+      background: transparent;
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      justify-self: center;
+      align-self: center;
+      padding: 0 !important;
+      position: relative;
+      margin: -28px auto 0 auto;
+      width: 100%;
+      z-index: 5;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .stagmenfashion-mobile-nav__tab--story .stagmenfashion-mobile-nav__top-indicator {
+      display: none !important;
+    }
+
+    .stagmenfashion-mobile-nav__tab--story .stagmenfashion-mobile-nav__icon-wrap {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      margin: 0 auto;
+      box-sizing: border-box;
+      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .stagmenfashion-mobile-nav__tab--story:active .stagmenfashion-mobile-nav__icon-wrap {
+      transform: scale(0.92);
+    }
+
+    .stagmenfashion-mobile-nav__story-badge {
+      position: relative;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: transparent;
+      padding: 2.8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      overflow: hidden;
+      flex-shrink: 0;
+      margin: 0 auto;
+      box-shadow: 
+        0 12px 28px -2px rgba(8, 0, 207, 0.40),
+        0 4px 12px rgba(0, 0, 0, 0.14);
+    }
+
+    .stagmenfashion-mobile-nav__story-badge::before {
+      content: '';
+      position: absolute;
+      inset: -55%;
+      background: conic-gradient(from 0deg, #dbeafe 0%, #3b82f6 28%, #0800CF 55%, #3b82f6 82%, #dbeafe 100%);
+      animation: pf-story-spin 8s linear infinite;
+      border-radius: 50%;
+      z-index: 0;
+    }
+
+    .stagmenfashion-mobile-nav__story-ring {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000000;
+      padding: 3.5px;
+      box-sizing: border-box;
+      margin: 0 auto;
+    }
+
+    .stagmenfashion-mobile-nav__story-logo {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      filter: brightness(0) invert(1);
+    }
+
+    .stagmenfashion-mobile-nav__story-text-logo {
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.04em;
+    }
+
+    /* -------------------------------------------------------------
+       2. Style: dark_luxury (Floating Dark Glass Island Capsule)
+       ------------------------------------------------------------- */
+    .stagmenfashion-mobile-nav--dark_luxury {
+      bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+      left: 50% !important;
+      transform: translateX(-50%);
+      width: calc(100vw - 28px);
+      max-width: 410px;
+    }
+
+    .stagmenfashion-mobile-nav--dark_luxury[data-hidden="true"] {
+      transform: translate(-50%, calc(100% + 40px)) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__bar {
+      pointer-events: auto;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      align-items: center;
+      justify-items: center;
+      padding: 6px 8px;
+      border-radius: 9999px;
+      background: rgba(18, 18, 18, 0.92);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 
+        0 18px 45px -10px rgba(0, 0, 0, 0.55),
+        0 6px 16px rgba(0, 0, 0, 0.35),
+        inset 0 1px 1px rgba(255, 255, 255, 0.25);
+    }
+
+    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__top-indicator {
+      display: none;
+    }
+
+    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__tab {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      justify-self: center;
+      gap: 2px;
+      padding: 5px 6px 4px;
+      border-radius: 999px;
+      color: rgba(255, 255, 255, 0.65);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      min-width: 0;
+      width: 100%;
+      text-align: center;
+    }
+
+    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__title {
+      font-size: 10px;
+      font-weight: 550;
+      color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__tab.is-active {
+      color: #ffffff;
+    }
+
+    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__tab.is-active .stagmenfashion-mobile-nav__title {
+      color: #38bdf8;
+      font-weight: 700;
+    }
+
+    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__tab.is-active .stagmenfashion-mobile-nav__svg {
+      color: #38bdf8;
+    }
+
+    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__tab--story .stagmenfashion-mobile-nav__icon-wrap {
+      background: rgba(24, 24, 24, 0.96);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 12px 28px -3px rgba(56, 189, 248, 0.35);
+    }
+
+    /* -------------------------------------------------------------
+       3. Style: floating_light (Floating Light Frosted Capsule)
+       ------------------------------------------------------------- */
+    .stagmenfashion-mobile-nav--floating_light {
+      bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+      left: 50% !important;
+      transform: translateX(-50%);
+      width: calc(100vw - 28px);
+      max-width: 410px;
+    }
+
+    .stagmenfashion-mobile-nav--floating_light[data-hidden="true"] {
+      transform: translate(-50%, calc(100% + 40px)) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    .stagmenfashion-mobile-nav--floating_light .stagmenfashion-mobile-nav__bar {
+      pointer-events: auto;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      align-items: center;
+      justify-items: center;
+      padding: 6px 8px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(36px) saturate(210%) contrast(96%);
+      -webkit-backdrop-filter: blur(36px) saturate(210%) contrast(96%);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 
+        0 18px 45px -10px rgba(0, 0, 0, 0.15),
+        0 6px 16px rgba(0, 0, 0, 0.05),
+        inset 0 1px 2px rgba(255, 255, 255, 1);
+    }
+
+    .stagmenfashion-mobile-nav--floating_light .stagmenfashion-mobile-nav__top-indicator {
+      display: none;
+    }
+
+    .stagmenfashion-mobile-nav--floating_light .stagmenfashion-mobile-nav__tab {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      justify-self: center;
+      gap: 2px;
+      padding: 5px 6px 4px;
+      border-radius: 999px;
+      color: rgba(17, 17, 17, 0.65);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      min-width: 0;
+      width: 100%;
+      text-align: center;
+    }
+
+    .stagmenfashion-mobile-nav--floating_light .stagmenfashion-mobile-nav__svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    .stagmenfashion-mobile-nav--floating_light .stagmenfashion-mobile-nav__title {
+      font-size: 10px;
+      font-weight: 550;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .stagmenfashion-mobile-nav--floating_light .stagmenfashion-mobile-nav__tab.is-active {
+      color: #0800CF;
+    }
+
+    .stagmenfashion-mobile-nav--floating_light .stagmenfashion-mobile-nav__tab.is-active .stagmenfashion-mobile-nav__title {
+      font-weight: 700;
+      color: #0800CF;
+    }
+
+    /* -------------------------------------------------------------
+       RESPONSIVE RULES (Mobile & Tablet: screens <= 1024px)
+       ------------------------------------------------------------- */
+    @media screen and (max-width: 1024px) {
+      .stagmenfashion-mobile-nav {
+        display: block;
+      }
+    }
+
+    /* Tablet Screen Specifics (768px - 1024px) */
+    @media screen and (min-width: 768px) and (max-width: 1024px) {
+      .stagmenfashion-mobile-nav {
+        max-width: 460px;
+      }
+    }
+
+    /* Floating WhatsApp Button Clearance */
+    @media screen and (max-width: 1024px) {
+      .floating-whatsapp-button {
+        bottom: calc(var(--floating-whatsapp-bottom, 16px) + 78px + env(safe-area-inset-bottom, 0px)) !important;
+      }
+    }
+  </style>
+
+  <script>
+    (() => {
+      const nav = document.getElementById('stagmenfashion-mobile-nav');
+      if (!nav) return;
+
+      // Teleport nav directly to document.body so that header/parent backdrop-filter or transform cannot trap it at the top
+      if (nav.parentElement !== document.body) {
+        document.body.appendChild(nav);
+      }
+
+      let lastScrollY = window.scrollY;
+      let ticking = false;
+      const scrollThreshold = 10;
+
+      const setNavHidden = (hidden) => {
+        if (hidden) {
+          nav.setAttribute('data-hidden', 'true');
+          document.body.setAttribute('data-mobile-nav-hidden', 'true');
+          window.dispatchEvent(new CustomEvent('mobilenav:toggle', { detail: { hidden: true } }));
+        } else {
+          nav.removeAttribute('data-hidden');
+          document.body.removeAttribute('data-mobile-nav-hidden');
+          window.dispatchEvent(new CustomEvent('mobilenav:toggle', { detail: { hidden: false } }));
+        }
+      };
+
+      const onScroll = () => {
+        const currentScrollY = window.scrollY;
+        const delta = currentScrollY - lastScrollY;
+
+        // Smoothly hide when scrolling down past 90px with steady delta, restore when scrolling up
+        if (delta > scrollThreshold && currentScrollY > 90) {
+          setNavHidden(true);
+        } else if (delta < -6 || currentScrollY <= 40) {
+          setNavHidden(false);
+        }
+
+        lastScrollY = currentScrollY;
+        ticking = false;
+      };
+
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          window.requestAnimationFrame(onScroll);
+          ticking = true;
+        }
+      }, { passive: true });
+    })();
+  </script>
+{% endif %}

@@ -1,0 +1,279 @@
+{% liquid
+  assign autoplay_ms = section.settings.autoplay_speed | times: 1000
+%}
+
+<section class="pf-hero" data-pf-hero data-autoplay="{{ autoplay_ms }}">
+  <div class="pf-hero__viewport">
+    <div class="pf-hero__track" data-track>
+      {% for block in section.blocks %}
+        <article class="pf-hero__slide{% if forloop.first %} is-active{% endif %}" data-slide aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}" {{ block.shopify_attributes }}>
+          {% if block.settings.link != blank %}
+            <a class="pf-hero__link" href="{{ block.settings.link }}">
+          {% endif %}
+              <picture class="pf-hero__media">
+                {% if block.settings.mobile_image != blank %}
+                  <source media="(max-width: 749px)" srcset="{{ block.settings.mobile_image | image_url: width: 900 }}">
+                {% endif %}
+                {% if block.settings.image != blank %}
+                  {{
+                    block.settings.image
+                    | image_url: width: 2000
+                    | image_tag: class: 'pf-hero__image', loading: 'eager', fetchpriority: 'high', alt: block.settings.image.alt | default: block.settings.heading
+                  }}
+                {% endif %}
+              </picture>
+
+              <div class="pf-hero__overlay">
+                <div class="pf-hero__content">
+                  {% if block.settings.eyebrow != blank %}<p class="pf-hero__eyebrow">{{ block.settings.eyebrow }}</p>{% endif %}
+                  {% if block.settings.heading != blank %}<h2 class="pf-hero__heading">{{ block.settings.heading }}</h2>{% endif %}
+                  {% if block.settings.text != blank %}<p class="pf-hero__text">{{ block.settings.text }}</p>{% endif %}
+                  <div class="pf-hero__actions">
+                    {% if block.settings.primary_label != blank and block.settings.primary_link != blank %}
+                      <a class="pf-hero__button pf-hero__button--primary" href="{{ block.settings.primary_link }}">{{ block.settings.primary_label }}</a>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+          {% if block.settings.link != blank %}
+            </a>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </div>
+
+    {% if section.blocks.size > 1 %}
+      <button class="pf-hero__arrow pf-hero__arrow--prev" type="button" data-prev aria-label="Previous slide">‹</button>
+      <button class="pf-hero__arrow pf-hero__arrow--next" type="button" data-next aria-label="Next slide">›</button>
+      <div class="pf-hero__dots" aria-label="Hero slides">
+        {% for block in section.blocks %}
+          <button class="pf-hero__dot{% if forloop.first %} is-active{% endif %}" type="button" data-dot="{{ forloop.index0 }}" aria-label="Go to slide {{ forloop.index }}"></button>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+  .pf-hero {
+    position: relative;
+    color: #fff;
+    background: #fff;
+  }
+
+  .pf-hero__viewport {
+    position: relative;
+    min-height: 100svh;
+    overflow: hidden;
+    background: #111;
+  }
+
+  .pf-hero__track {
+    display: flex;
+    height: 100svh;
+    transition: transform 0.9s ease;
+  }
+
+  .pf-hero__slide {
+    position: relative;
+    flex: 0 0 100%;
+    min-width: 0;
+  }
+
+  .pf-hero__link,
+  .pf-hero__media,
+  .pf-hero__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .pf-hero__image {
+    object-fit: cover;
+  }
+
+  .pf-hero__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    background: linear-gradient(180deg, rgb(0 0 0 / 0.04) 0%, rgb(0 0 0 / 0.3) 100%);
+  }
+
+  .pf-hero__content {
+    width: min(100%, 1600px);
+    margin: 0 auto;
+    padding: clamp(24px, 5vw, 72px);
+  }
+
+  .pf-hero__eyebrow {
+    margin: 0 0 10px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  .pf-hero__heading {
+    margin: 0;
+    max-width: 12ch;
+    font-size: clamp(2.8rem, 7vw, 6.6rem);
+    line-height: 0.92;
+    letter-spacing: -0.07em;
+  }
+
+  .pf-hero__text {
+    max-width: 42ch;
+    margin: 16px 0 0;
+    font-size: clamp(1rem, 1.2vw, 1.15rem);
+    line-height: 1.7;
+  }
+
+  .pf-hero__actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+  }
+
+  .pf-hero__button {
+    min-height: 48px;
+    padding: 0 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .pf-hero__button--primary {
+    background: #fff;
+    color: #111;
+  }
+
+  .pf-hero__button--secondary {
+    border: 1px solid rgb(255 255 255 / 0.55);
+    color: #fff;
+  }
+
+  .pf-hero__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.86);
+    color: #111;
+    font-size: 2rem;
+    z-index: 2;
+  }
+
+  .pf-hero__arrow--prev { left: 20px; }
+  .pf-hero__arrow--next { right: 20px; }
+
+  .pf-hero__dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 22px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    z-index: 2;
+  }
+
+  .pf-hero__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    border: 0;
+    background: rgb(255 255 255 / 0.45);
+  }
+
+  .pf-hero__dot.is-active {
+    background: #fff;
+    width: 28px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .pf-hero__content {
+      padding: 22px 16px 56px;
+    }
+
+    .pf-hero__arrow {
+      width: 40px;
+      height: 40px;
+      font-size: 1.7rem;
+    }
+
+    .pf-hero__arrow--prev { left: 12px; }
+    .pf-hero__arrow--next { right: 12px; }
+  }
+</style>
+
+{% javascript %}
+  (() => {
+    document.querySelectorAll('[data-pf-hero]').forEach((root) => {
+      if (root.dataset.ready === 'true') return;
+      root.dataset.ready = 'true';
+
+      const slides = Array.from(root.querySelectorAll('[data-slide]'));
+      const track = root.querySelector('[data-track]');
+      const prev = root.querySelector('[data-prev]');
+      const next = root.querySelector('[data-next]');
+      const dots = Array.from(root.querySelectorAll('[data-dot]'));
+      const autoplay = Number(root.dataset.autoplay || 0);
+      let index = 0;
+      let timer;
+
+      const activate = (nextIndex) => {
+        index = (nextIndex + slides.length) % slides.length;
+        track.style.transform = `translateX(-${index * 100}%)`;
+        slides.forEach((slide, slideIndex) => slide.classList.toggle('is-active', slideIndex === index));
+        dots.forEach((dot, dotIndex) => dot.classList.toggle('is-active', dotIndex === index));
+      };
+
+      prev?.addEventListener('click', () => activate(index - 1));
+      next?.addEventListener('click', () => activate(index + 1));
+      dots.forEach((dot) => dot.addEventListener('click', () => activate(Number(dot.dataset.dot))));
+
+      if (autoplay > 0 && slides.length > 1) {
+        timer = window.setInterval(() => activate(index + 1), autoplay);
+        root.addEventListener('mouseenter', () => window.clearInterval(timer));
+        root.addEventListener('mouseleave', () => { timer = window.setInterval(() => activate(index + 1), autoplay); });
+      }
+    });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Hero banner",
+  "settings": [
+    { "type": "range", "id": "autoplay_speed", "label": "Autoplay speed", "min": 0, "max": 10, "step": 1, "unit": "s", "default": 5 }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Desktop image" },
+        { "type": "image_picker", "id": "mobile_image", "label": "Mobile image" },
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "New arrivals" },
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Streetwear that pops" },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "Bold cuts, premium heavyweight cottons, and fits tailored for modern men." },
+        { "type": "text", "id": "primary_label", "label": "Button label", "default": "Shop now" },
+        { "type": "url", "id": "primary_link", "label": "Button link" },
+        { "type": "url", "id": "link", "label": "Slide link" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Hero banner", "blocks": { "slide": { "type": "slide" } } }]
+}
+{% endschema %}

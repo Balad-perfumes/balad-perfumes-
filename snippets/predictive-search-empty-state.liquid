@@ -1,0 +1,46 @@
+{% doc %}
+  Renders the predictive search empty state with popular products grid.
+
+  @param {number} shadow_opacity - shadow opacity for the empty state container shadow
+  @param {string} products_test_id - a playwright test id, used to differentiate empty state from 'real' search results
+  @param {boolean} [load_empty_state] - Load the empty state or not
+{% enddoc %}
+
+<div
+  id="predictive-search-results"
+  class="predictive-search-dropdown"
+  role="listbox"
+  aria-expanded="true"
+  style="--color-shadow: rgb(var(--color-foreground-rgb) / {{ shadow_opacity | default: 0.1 }});"
+>
+  {% if load_empty_state %}
+    <div class="predictive-search-results__inner search-modal__layout">
+      <!-- Popular Products Grid (Full Width) -->
+      <div class="search-modal__products-section">
+        <h4 class="search-modal__section-heading">Popular Products</h4>
+        <div class="search-modal__products-grid">
+          {% assign popular_collection = settings.empty_state_collection | default: collections.all %}
+          {% for product in popular_collection.products limit: 10 %}
+            <a href="{{ product.url }}" class="search-modal__product-card">
+              <div class="search-modal__product-media">
+                {% if product.featured_image != blank %}
+                  {{
+                    product.featured_image
+                    | image_url: width: 360
+                    | image_tag: loading: 'lazy', alt: product.title, class: 'search-modal__product-img'
+                  }}
+                {% else %}
+                  <div class="search-modal__product-img-placeholder"></div>
+                {% endif %}
+              </div>
+              <div class="search-modal__product-info">
+                <span class="search-modal__product-title">{{ product.title }}</span>
+                <span class="search-modal__product-price">{{ product.price | money }}</span>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>

@@ -1,0 +1,143 @@
+{% liquid
+  assign card_variant = product.selected_or_first_available_variant
+  assign has_sale = false
+  if product.compare_at_price_max > product.price_min
+    assign has_sale = true
+  endif
+  assign is_sold_out = false
+  if card_variant.available == false or product.available == false
+    assign is_sold_out = true
+  endif
+  assign rating_value = product.metafields.reviews.rating.value.rating | plus: 0
+  assign rating_count = product.metafields.reviews.rating_count.value | plus: 0
+  assign show_rating_row = false
+  if rating_value > 0 and rating_count > 0
+    assign show_rating_row = true
+  endif
+
+  assign discount_percentage = 0
+  if has_sale and card_variant.compare_at_price > card_variant.price
+    assign discount_percentage = card_variant.compare_at_price | minus: card_variant.price | times: 100 | divided_by: card_variant.compare_at_price
+  endif
+%}
+
+<product-card
+  class="pop-card pop-reveal"
+  data-pop-card
+  data-product-id="{{ product.id }}"
+  data-product-url="{{ product.url }}"
+  data-product-variants='{{ product.variants | json | escape }}'
+  style="--pop-card-radius: {{ card_radius }}px; --pop-hover-speed: {{ hover_speed }}ms;"
+>
+  <a class="product-card__link visually-hidden" href="{{ product.url }}" ref="productCardLink" aria-label="{{ product.title | escape }}"></a>
+
+  <div class="pop-card__media-wrap">
+    {% render 'product-hover-image', product: product, discount_percentage: discount_percentage %}
+
+    {% liquid
+      assign card_sizes = ''
+      for opt in product.options_with_values
+        assign opt_name_down = opt.name | downcase
+        if opt_name_down contains 'size' or opt.name == 'Size'
+          assign card_sizes = opt.values | join: ','
+        endif
+      endfor
+      if card_sizes == ''
+        assign sizes_check = '|'
+        for v in product.variants
+          assign sz = v.option1 | strip
+          unless sz == blank or sz == 'Default Title'
+            assign check_sz = '|' | append: sz | append: '|'
+            unless sizes_check contains check_sz
+              assign sizes_check = sizes_check | append: check_sz
+              if card_sizes != ''
+                assign card_sizes = card_sizes | append: ','
+              endif
+              assign card_sizes = card_sizes | append: sz
+            endunless
+          endunless
+        endfor
+      endif
+    %}
+    <button
+      type="button"
+      class="pop-card__wishlist"
+      aria-label="Add to wishlist"
+      title="Add to wishlist"
+      data-wishlist-button
+      data-product-handle="{{ product.handle }}"
+      data-product-id="{{ product.id }}"
+      data-product-variant-id="{{ card_variant.id | default: product.first_available_variant.id }}"
+      data-product-title="{{ product.title | escape }}"
+      data-product-image="{{ product.featured_media.preview_image | image_url: width: 360 }}"
+      data-product-price="{{ product.price | money | strip_html | escape }}"
+      data-product-sizes="{{ card_sizes }}"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+      </svg>
+    </button>
+
+    <div class="pop-card__corner-action">
+      <product-form-component class="pop-card__form" data-section-id="{{ section_id }}" data-product-id="{{ product.id }}" on:submit="/handleSubmit">
+        <div class="visually-hidden" aria-live="assertive" role="status" aria-atomic="true" ref="liveRegion"></div>
+
+        {%- form 'product', product, class: 'shopify-product-form', data-type: 'add-to-cart-form', novalidate: 'novalidate' -%}
+          <input type="hidden" name="id" ref="variantId" value="{{ card_variant.id }}">
+          <input type="hidden" name="quantity" value="1">
+
+          {% render 'add-to-cart-button',
+            add_to_cart_text: 'Add to cart',
+            class: 'pop-card__cta add-to-cart-button',
+            can_add_to_cart: card_variant.available,
+            icon_only_on_mobile: true,
+            product: product,
+            data_testid: 'collection-quick-add'
+          %}
+        {%- endform -%}
+      </product-form-component>
+    </div>
+  </div>
+
+  <div class="pop-card__body">
+    {% liquid
+      assign card_collection_titles = ''
+      for c in product.collections
+        if c.handle != 'all' and c.handle != 'frontpage'
+          if card_collection_titles != blank
+            assign card_collection_titles = card_collection_titles | append: ', '
+          endif
+          assign card_collection_titles = card_collection_titles | append: c.title
+        endif
+      endfor
+    %}
+    {% if card_collection_titles != blank %}
+      <span class="pop-card__vendor">{{ card_collection_titles }}</span>
+    {% elsif product.vendor != blank %}
+      <span class="pop-card__vendor">{{ product.vendor }}</span>
+    {% endif %}
+    <a class="pop-card__title" href="{{ product.url }}">{{ product.title }}</a>
+
+    <div class="pop-card__price-row">
+      <span class="pop-card__price" data-pop-price>{{ card_variant.price | money }}</span>
+      {% if has_sale and card_variant.compare_at_price > card_variant.price %}
+        <s class="pop-card__compare" data-pop-compare>{{ card_variant.compare_at_price | money }}</s>
+      {% endif %}
+    </div>
+
+    {% if show_rating_row and show_rating %}
+      <div class="pop-card__rating">
+        <span class="pop-card__stars" aria-hidden="true">
+          {% for i in (1..5) %}
+            {% if i <= rating_value %}
+              <span class="pop-card__star is-filled">★</span>
+            {% else %}
+              <span class="pop-card__star">☆</span>
+            {% endif %}
+          {% endfor %}
+        </span>
+        <span class="pop-card__rating-count">({{ rating_value | round: 1 }})</span>
+      </div>
+    {% endif %}
+  </div>
+</product-card>

@@ -1,0 +1,1021 @@
+{% liquid
+  assign section_id = 'banner-slider-' | append: section.id
+  assign autoplay_speed = section.settings.autoplay_speed | default: 5
+  assign autoplay_ms = autoplay_speed | times: 1000
+  assign slide_count = section.blocks.size
+  assign desktop_height = section.settings.desktop_height | default: '600px'
+  assign mobile_height = section.settings.mobile_height | default: '480px'
+  assign overlay_opacity = section.settings.overlay_opacity | divided_by: 100.0
+%}
+
+<section
+  id="{{ section_id }}"
+  class="smf-banner-slider smf-banner-slider--{{ section.settings.layout_mode | default: 'full_bleed' }} smf-heading-size--{{ section.settings.heading_size | default: 'compact' }} color-{{ section.settings.color_scheme }}"
+  data-smf-banner-slider
+  data-autoplay="{{ autoplay_ms }}"
+  data-slide-count="{{ slide_count }}"
+  style="
+    --smf-bs-desktop-height: {{ desktop_height }};
+    --smf-bs-mobile-height: {{ mobile_height }};
+    --smf-bs-overlay-color: {{ section.settings.overlay_color | default: '#000000' }};
+    --smf-bs-overlay-opacity: {{ overlay_opacity }};
+    --smf-bs-radius: {{ section.settings.border_radius | default: 0 }}px;
+    --smf-bs-pt: {{ section.settings.padding_top | default: 0 }}px;
+    --smf-bs-pb: {{ section.settings.padding_bottom | default: 0 }}px;
+  "
+>
+  <div class="smf-banner-slider__container">
+    <div class="smf-banner-slider__viewport" data-viewport>
+      <div class="smf-banner-slider__track" data-track>
+        {% for block in section.blocks %}
+          {% liquid
+            assign is_first = forloop.first
+            assign coll = block.settings.collection
+
+            assign heading = block.settings.heading
+            if heading == blank and coll != blank
+              assign heading = coll.title
+            endif
+            if heading == blank
+              assign heading = 'STAG MEN ESSENTIALS'
+            endif
+
+            assign button_label = block.settings.button_label | default: 'SHOP NOW'
+
+            assign button_link = block.settings.button_link
+            if button_link == blank and coll != blank
+              assign button_link = coll.url
+            endif
+            if button_link == blank
+              assign button_link = routes.all_products_collection_url
+            endif
+
+            assign slide_img = block.settings.image
+            if slide_img == blank and coll != blank
+              assign slide_img = coll.featured_image | default: coll.image
+            endif
+
+            assign text_alignment = block.settings.text_alignment | default: 'center'
+            assign content_position = block.settings.content_position | default: 'bottom-center'
+          %}
+
+          <article
+            class="smf-banner-slider__slide{% if is_first %} is-active{% endif %}"
+            data-slide
+            data-index="{{ forloop.index0 }}"
+            aria-hidden="{% if is_first %}false{% else %}true{% endif %}"
+            {{ block.shopify_attributes }}
+          >
+            {% if button_link != blank and button_label == blank %}
+              <a href="{{ button_link }}" class="smf-banner-slider__full-link" aria-label="{{ heading | default: 'Banner slide' }}"></a>
+            {% endif %}
+
+            <div class="smf-banner-slider__media">
+              {% if slide_img != blank %}
+                <picture class="smf-banner-slider__picture">
+                  {% if block.settings.mobile_image != blank %}
+                    <source
+                      media="(max-width: 749px)"
+                      srcset="{{ block.settings.mobile_image | image_url: width: 400 }} 400w, {{ block.settings.mobile_image | image_url: width: 750 }} 750w, {{ block.settings.mobile_image | image_url: width: 1000 }} 1000w"
+                      sizes="100vw"
+                    >
+                  {% endif %}
+                  {{
+                    slide_img
+                    | image_url: width: 2200
+                    | image_tag:
+                      class: 'smf-banner-slider__image',
+                      loading: 'lazy',
+                      widths: '600, 900, 1200, 1600, 2000, 2400',
+                      sizes: '100vw',
+                      alt: slide_img.alt | default: heading | default: 'Banner'
+                  }}
+                </picture>
+              {% else %}
+                <div class="smf-banner-slider__placeholder">
+                  <div class="smf-banner-slider__placeholder-bg">
+                    <span>{{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}</span>
+                  </div>
+                </div>
+              {% endif %}
+
+              <div class="smf-banner-slider__overlay"></div>
+            </div>
+
+            <div class="smf-banner-slider__content-wrap smf-pos--{{ content_position }} smf-align--{{ text_alignment }}">
+              <div class="smf-banner-slider__content">
+                {% if block.settings.subheading != blank %}
+                  <span class="smf-banner-slider__eyebrow">{{ block.settings.subheading | escape }}</span>
+                {% endif %}
+
+                {% if heading != blank %}
+                  <h2 class="smf-banner-slider__heading">{{ heading | escape }}</h2>
+                {% endif %}
+
+                {% if button_label != blank %}
+                  <div class="smf-banner-slider__action">
+                    <a
+                      href="{{ button_link | default: '#' }}"
+                      class="smf-banner-slider__btn smf-banner-slider__btn--{{ block.settings.button_style | default: 'underline' }}"
+                    >
+                      <span>{{ button_label | escape }}</span>
+                      {% if block.settings.button_style == 'arrow' %}
+                        <svg class="smf-banner-slider__btn-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                      {% endif %}
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+
+      {% if slide_count > 1 and section.settings.show_arrows %}
+        <button type="button" class="smf-banner-slider__nav smf-banner-slider__nav--prev" data-prev aria-label="Previous slide">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <button type="button" class="smf-banner-slider__nav smf-banner-slider__nav--next" data-next aria-label="Next slide">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      {% endif %}
+
+      {% if slide_count > 1 and section.settings.show_pagination %}
+        <div class="smf-banner-slider__pagination" data-pagination aria-label="Banner slider pagination">
+          {% for block in section.blocks %}
+            <button
+              type="button"
+              class="smf-banner-slider__dot{% if forloop.first %} is-active{% endif %}"
+              data-dot="{{ forloop.index0 }}"
+              aria-label="Go to slide {{ forloop.index }}"
+            ></button>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<style>
+  #{{ section_id }} {
+    position: relative;
+    width: 100%;
+    padding-top: var(--smf-bs-pt);
+    padding-bottom: var(--smf-bs-pb);
+    overflow: hidden;
+  }
+
+  #{{ section_id }}.smf-banner-slider--contained {
+    max-width: 1540px;
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  #{{ section_id }}.smf-banner-slider--contained .smf-banner-slider__viewport {
+    border-radius: var(--smf-bs-radius, 12px);
+  }
+
+  .smf-banner-slider__viewport {
+    position: relative;
+    width: 100%;
+    height: var(--smf-bs-desktop-height);
+    overflow: hidden;
+    background-color: #0b0f19;
+    touch-action: pan-y;
+  }
+
+  .smf-banner-slider__track {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .smf-banner-slider__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .smf-banner-slider__slide {
+    position: relative;
+    flex: 0 0 100%;
+    width: 100%;
+    min-width: 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    overflow: hidden;
+  }
+
+  .smf-banner-slider__full-link {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+  }
+
+  .smf-banner-slider__media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .smf-banner-slider__picture,
+  .smf-banner-slider__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .smf-banner-slider__placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #101626 0%, #1e293b 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .smf-banner-slider__placeholder-bg {
+    width: 100%;
+    height: 100%;
+    opacity: 0.15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .smf-banner-slider__placeholder-bg svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .smf-banner-slider__overlay {
+    position: absolute;
+    inset: 0;
+    background-color: var(--smf-bs-overlay-color);
+    opacity: var(--smf-bs-overlay-opacity);
+    pointer-events: none;
+    background-image: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.15) 50%,
+      rgba(0, 0, 0, 0.6) 100%
+    );
+  }
+
+  /* Content Overlay */
+  .smf-banner-slider__content-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    padding: clamp(20px, 3.5vw, 40px);
+    pointer-events: none;
+  }
+
+  /* Positions */
+  .smf-banner-slider__content-wrap.smf-pos--bottom-center {
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: clamp(38px, 4.8vw, 52px);
+  }
+  .smf-banner-slider__content-wrap.smf-pos--bottom-left {
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding-bottom: clamp(38px, 4.8vw, 52px);
+  }
+  .smf-banner-slider__content-wrap.smf-pos--bottom-right {
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding-bottom: clamp(38px, 4.8vw, 52px);
+  }
+  .smf-banner-slider__content-wrap.smf-pos--middle-center {
+    align-items: center;
+    justify-content: center;
+  }
+  .smf-banner-slider__content-wrap.smf-pos--middle-left {
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .smf-banner-slider__content-wrap.smf-pos--middle-right {
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  /* Text alignments */
+  .smf-banner-slider__content-wrap.smf-align--center {
+    text-align: center;
+  }
+  .smf-banner-slider__content-wrap.smf-align--left {
+    text-align: left;
+  }
+  .smf-banner-slider__content-wrap.smf-align--right {
+    text-align: right;
+  }
+
+  .smf-banner-slider__content {
+    max-width: 540px;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    animation: smfContentFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .smf-align--center .smf-banner-slider__content {
+    align-items: center;
+  }
+  .smf-align--left .smf-banner-slider__content {
+    align-items: flex-start;
+  }
+  .smf-align--right .smf-banner-slider__content {
+    align-items: flex-end;
+  }
+
+  .smf-banner-slider__eyebrow {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+  }
+
+  .smf-banner-slider__heading {
+    margin: 0;
+    color: #ffffff;
+    font-size: clamp(0.95rem, 1.4vw, 1.25rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
+  }
+
+  .smf-heading-size--small .smf-banner-slider__heading {
+    font-size: clamp(1.1rem, 1.8vw, 1.45rem);
+  }
+
+  .smf-heading-size--medium .smf-banner-slider__heading {
+    font-size: clamp(1.3rem, 2.3vw, 1.8rem);
+  }
+
+  .smf-banner-slider__action {
+    margin-top: 2px;
+    display: inline-flex;
+  }
+
+  /* Button Styles */
+  .smf-banner-slider__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .smf-banner-slider__btn--underline {
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding-bottom: 2px;
+    border-bottom: 1.2px solid rgba(255, 255, 255, 0.85);
+  }
+
+  .smf-banner-slider__btn--underline:hover {
+    opacity: 0.8;
+    border-bottom-color: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  .smf-banner-slider__btn--solid {
+    background: #ffffff;
+    color: #111111;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border-radius: 999px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .smf-banner-slider__btn--solid:hover {
+    background: #f1f5f9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  }
+
+  .smf-banner-slider__btn--outline {
+    background: transparent;
+    color: #ffffff;
+    border: 1.2px solid rgba(255, 255, 255, 0.85);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 7px 16px;
+    border-radius: 999px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .smf-banner-slider__btn--outline:hover {
+    background: #ffffff;
+    color: #111111;
+    border-color: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  .smf-banner-slider__btn-icon {
+    transition: transform 0.2s ease;
+  }
+  .smf-banner-slider__btn:hover .smf-banner-slider__btn-icon {
+    transform: translateX(3px);
+  }
+
+  /* Navigation Arrows */
+  .smf-banner-slider__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    opacity: 0;
+  }
+
+  .smf-banner-slider__viewport:hover .smf-banner-slider__nav {
+    opacity: 1;
+  }
+
+  .smf-banner-slider__nav:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateY(-50%) scale(1.06);
+  }
+
+  .smf-banner-slider__nav--prev {
+    left: 18px;
+  }
+
+  .smf-banner-slider__nav--next {
+    right: 18px;
+  }
+
+  /* Pagination Dots & Pill Indicator */
+  .smf-banner-slider__pagination {
+    position: absolute;
+    bottom: 14px;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    pointer-events: auto;
+  }
+
+  .smf-banner-slider__dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    border: none;
+    background: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .smf-banner-slider__dot:hover {
+    background: rgba(255, 255, 255, 0.75);
+  }
+
+  .smf-banner-slider__dot.is-active {
+    width: 18px;
+    height: 5px;
+    background: #ffffff;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
+  }
+
+  @keyframes smfContentFade {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .smf-banner-slider__viewport {
+      height: var(--smf-bs-mobile-height);
+    }
+
+    .smf-banner-slider__content-wrap {
+      padding: 16px 14px;
+    }
+
+    .smf-banner-slider__content-wrap.smf-pos--bottom-center,
+    .smf-banner-slider__content-wrap.smf-pos--bottom-left,
+    .smf-banner-slider__content-wrap.smf-pos--bottom-right {
+      padding-bottom: 30px;
+    }
+
+    .smf-banner-slider__content {
+      gap: 3px;
+    }
+
+    .smf-banner-slider__heading {
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+    }
+
+    .smf-banner-slider__btn--underline {
+      font-size: 0.68rem;
+      letter-spacing: 0.16em;
+    }
+
+    .smf-banner-slider__pagination {
+      bottom: 10px;
+      gap: 4px;
+    }
+
+    .smf-banner-slider__dot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .smf-banner-slider__dot.is-active {
+      width: 14px;
+      height: 4px;
+    }
+
+    .smf-banner-slider__nav {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    function initBannerSliders() {
+      document.querySelectorAll('[data-smf-banner-slider]').forEach((slider) => {
+        if (slider.dataset.initialized === 'true') return;
+        slider.dataset.initialized = 'true';
+
+        const track = slider.querySelector('[data-track]');
+        const slides = Array.from(slider.querySelectorAll('[data-slide]'));
+        const dots = Array.from(slider.querySelectorAll('[data-dot]'));
+        const prevBtn = slider.querySelector('[data-prev]');
+        const nextBtn = slider.querySelector('[data-next]');
+        const autoplayMs = parseInt(slider.dataset.autoplay, 10) || 0;
+
+        if (slides.length <= 1) return;
+
+        let currentIndex = 0;
+        let autoplayTimer = null;
+        let isUserInteracting = false;
+        let resumeTimer = null;
+
+        function updateActiveState(index) {
+          currentIndex = index;
+          slides.forEach((slide, i) => {
+            slide.classList.toggle('is-active', i === currentIndex);
+            slide.setAttribute('aria-hidden', i === currentIndex ? 'false' : 'true');
+          });
+
+          dots.forEach((dot, i) => {
+            dot.classList.toggle('is-active', i === currentIndex);
+          });
+        }
+
+        function scrollToSlide(index, smooth = true) {
+          currentIndex = (index + slides.length) % slides.length;
+          const slide = slides[currentIndex];
+          if (slide) {
+            track.scrollTo({
+              left: slide.offsetLeft,
+              behavior: smooth ? 'smooth' : 'auto'
+            });
+          }
+          updateActiveState(currentIndex);
+        }
+
+        function nextSlide() {
+          scrollToSlide(currentIndex + 1);
+        }
+
+        function prevSlide() {
+          scrollToSlide(currentIndex - 1);
+        }
+
+        function startAutoplay() {
+          if (autoplayMs <= 0 || slides.length <= 1 || isUserInteracting) return;
+          stopAutoplay();
+          autoplayTimer = setInterval(() => {
+            const nextIdx = (currentIndex + 1) % slides.length;
+            scrollToSlide(nextIdx, true);
+          }, autoplayMs);
+        }
+
+        function stopAutoplay() {
+          if (autoplayTimer) {
+            clearInterval(autoplayTimer);
+            autoplayTimer = null;
+          }
+        }
+
+        // Real-time scroll listener for active slide & dot updates
+        let scrollTicking = false;
+        function onScroll() {
+          if (!scrollTicking) {
+            window.requestAnimationFrame(() => {
+              const scrollLeft = track.scrollLeft;
+              const width = track.offsetWidth || 1;
+              const newIndex = Math.round(scrollLeft / width);
+              if (newIndex >= 0 && newIndex < slides.length && newIndex !== currentIndex) {
+                updateActiveState(newIndex);
+              }
+              scrollTicking = false;
+            });
+            scrollTicking = true;
+          }
+        }
+
+        track.addEventListener('scroll', onScroll, { passive: true });
+
+        // Touch & interaction handling
+        track.addEventListener('touchstart', () => {
+          isUserInteracting = true;
+          stopAutoplay();
+          if (resumeTimer) clearTimeout(resumeTimer);
+        }, { passive: true });
+
+        track.addEventListener('touchend', () => {
+          if (resumeTimer) clearTimeout(resumeTimer);
+          resumeTimer = setTimeout(() => {
+            isUserInteracting = false;
+            startAutoplay();
+          }, 3000);
+        }, { passive: true });
+
+        track.addEventListener('mousedown', () => {
+          isUserInteracting = true;
+          stopAutoplay();
+        });
+
+        window.addEventListener('mouseup', () => {
+          if (isUserInteracting) {
+            if (resumeTimer) clearTimeout(resumeTimer);
+            resumeTimer = setTimeout(() => {
+              isUserInteracting = false;
+              startAutoplay();
+            }, 3000);
+          }
+        });
+
+        // Hover pause on desktop
+        slider.addEventListener('mouseenter', stopAutoplay);
+        slider.addEventListener('mouseleave', () => {
+          if (!isUserInteracting) startAutoplay();
+        });
+
+        // Arrow Controls
+        if (prevBtn) prevBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          prevSlide();
+          startAutoplay();
+        });
+
+        if (nextBtn) nextBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          nextSlide();
+          startAutoplay();
+        });
+
+        // Dot Controls
+        dots.forEach((dot) => {
+          dot.addEventListener('click', (e) => {
+            e.preventDefault();
+            const idx = parseInt(e.currentTarget.dataset.dot, 10);
+            scrollToSlide(idx, true);
+            startAutoplay();
+          });
+        });
+
+        // Resize handling
+        window.addEventListener('resize', () => {
+          const slide = slides[currentIndex];
+          if (slide) {
+            track.scrollTo({
+              left: slide.offsetLeft,
+              behavior: 'auto'
+            });
+          }
+        });
+
+        // Shopify Theme Editor Integration
+        if (window.Shopify && window.Shopify.designMode) {
+          slider.addEventListener('shopify:block:select', (event) => {
+            const targetSlide = event.target.closest('[data-slide]');
+            if (targetSlide) {
+              const idx = parseInt(targetSlide.dataset.index, 10);
+              stopAutoplay();
+              scrollToSlide(idx, false);
+            }
+          });
+
+          slider.addEventListener('shopify:block:deselect', () => {
+            startAutoplay();
+          });
+        }
+
+        updateActiveState(0);
+        startAutoplay();
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initBannerSliders);
+    } else {
+      initBannerSliders();
+    }
+
+    document.addEventListener('shopify:section:load', initBannerSliders);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Banner Slider",
+  "tag": "section",
+  "class": "section-banner-slider",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout_mode",
+      "label": "Layout style",
+      "options": [
+        { "value": "full_bleed", "label": "Full width bleed" },
+        { "value": "contained", "label": "Contained with padding" }
+      ],
+      "default": "full_bleed"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Corner radius (when contained)",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "desktop_height",
+      "label": "Desktop height",
+      "options": [
+        { "value": "450px", "label": "Compact (450px)" },
+        { "value": "550px", "label": "Medium (550px)" },
+        { "value": "650px", "label": "Large (650px)" },
+        { "value": "750px", "label": "Extra Large (750px)" },
+        { "value": "85vh", "label": "85% of screen height" },
+        { "value": "100vh", "label": "Full Screen (100vh)" }
+      ],
+      "default": "650px"
+    },
+    {
+      "type": "select",
+      "id": "mobile_height",
+      "label": "Mobile height",
+      "options": [
+        { "value": "360px", "label": "Compact (360px)" },
+        { "value": "450px", "label": "Medium (450px)" },
+        { "value": "520px", "label": "Large (520px)" },
+        { "value": "70vh", "label": "70% of screen height" },
+        { "value": "85vh", "label": "85% of screen height" }
+      ],
+      "default": "450px"
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Autoplay speed (seconds)",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "s",
+      "default": 5,
+      "info": "Set to 0 to disable autoplay"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination",
+      "label": "Show pagination dots",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show navigation arrows on hover",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Overlay & Styling"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading text size",
+      "options": [
+        { "value": "compact", "label": "Compact (Minimal - Recommended)" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" }
+      ],
+      "default": "compact"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay tint color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Banner Slide",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Product Category / Collection"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Custom desktop image (optional if collection selected)"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Custom mobile image (optional)"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading / Eyebrow"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading (optional override)",
+          "default": "CO-ORDS & SETS"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button / Link label",
+          "default": "SHOP NOW"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Link destination"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            { "value": "underline", "label": "Minimal Underline Link" },
+            { "value": "solid", "label": "Solid Pill Button" },
+            { "value": "outline", "label": "Outline Pill Button" },
+            { "value": "arrow", "label": "Text with Arrow" }
+          ],
+          "default": "underline"
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Content position",
+          "options": [
+            { "value": "bottom-center", "label": "Bottom Center" },
+            { "value": "bottom-left", "label": "Bottom Left" },
+            { "value": "bottom-right", "label": "Bottom Right" },
+            { "value": "middle-center", "label": "Middle Center" },
+            { "value": "middle-left", "label": "Middle Left" },
+            { "value": "middle-right", "label": "Middle Right" }
+          ],
+          "default": "bottom-center"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text alignment",
+          "options": [
+            { "value": "center", "label": "Center" },
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "center"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Banner Slider",
+      "blocks": [
+        {
+          "type": "slide"
+        },
+        {
+          "type": "slide"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

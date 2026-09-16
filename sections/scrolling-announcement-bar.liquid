@@ -1,0 +1,238 @@
+{% liquid
+  assign message = section.settings.text | strip
+  if message == blank
+    assign message = 'stagmenfashion - Elevated streetwear, premium heavyweight cottons & signature fits tailored for men'
+  endif
+  assign hide_on_home = section.settings.hide_on_home
+%}
+
+{% unless template.name == 'index' and hide_on_home %}
+<aside
+  class="scrolling-announcement-bar"
+  style="
+    --announcement-bg: {{ section.settings.background_color }};
+    --announcement-text: {{ section.settings.text_color }};
+    --announcement-speed: {{ section.settings.speed }}s;
+    --announcement-gap: {{ section.settings.item_gap }}px;
+    --announcement-font-size: {{ section.settings.font_size }}px;
+    --announcement-letter-spacing: {{ section.settings.letter_spacing | times: 0.01 }}em;
+    --announcement-padding-y: {{ section.settings.padding_y }}px;
+  "
+  aria-label="{{ section.settings.accessibility_label | escape }}"
+>
+  <div class="scrolling-announcement-bar__viewport">
+    <div class="scrolling-announcement-bar__track">
+      {% for i in (1..2) %}
+        <div class="scrolling-announcement-bar__group" aria-hidden="{% if i == 2 %}true{% else %}false{% endif %}">
+          {% for repeat in (1..6) %}
+            <span class="scrolling-announcement-bar__item">
+              <span class="scrolling-announcement-bar__badge" aria-hidden="true">P</span>
+              <span class="scrolling-announcement-bar__text">{{ message | escape }}</span>
+            </span>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</aside>
+
+<style>
+  .scrolling-announcement-bar {
+    width: 100%;
+    background: var(--announcement-bg);
+    color: var(--announcement-text);
+    overflow: hidden;
+  }
+
+  .scrolling-announcement-bar__viewport {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .scrolling-announcement-bar__track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+    animation: scrolling-announcement-marquee var(--announcement-speed) linear infinite;
+  }
+
+  .scrolling-announcement-bar:hover .scrolling-announcement-bar__track {
+    animation-play-state: paused;
+  }
+
+  .scrolling-announcement-bar__group {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--announcement-gap);
+    min-width: max-content;
+  }
+
+  .scrolling-announcement-bar__item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding-block: var(--announcement-padding-y);
+    padding-inline: calc(var(--announcement-gap) / 2);
+    white-space: nowrap;
+  }
+
+  .scrolling-announcement-bar__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.14);
+    color: currentColor;
+    font-family: var(--font-body--family);
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .scrolling-announcement-bar__text {
+    display: inline-block;
+    font-family: var(--font-body--family);
+    font-size: var(--announcement-font-size);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: var(--announcement-letter-spacing);
+    text-transform: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  @keyframes scrolling-announcement-marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .scrolling-announcement-bar {
+      --announcement-gap: max(24px, calc({{ section.settings.item_gap }}px * 0.65));
+    }
+
+    .scrolling-announcement-bar__badge {
+      width: 28px;
+      height: 28px;
+      font-size: 0.92rem;
+    }
+
+    .scrolling-announcement-bar__text {
+      font-size: max(12px, calc(var(--announcement-font-size) - 1px));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scrolling-announcement-bar__track {
+      animation-duration: 1ms;
+      animation-iteration-count: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+</style>
+{% endunless %}
+
+{% schema %}
+{
+  "name": "Scrolling announcement",
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Announcement text",
+      "default": "stagmenfashion - Elevated streetwear, premium heavyweight cottons & signature fits tailored for men"
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Scroll speed",
+      "min": 8,
+      "max": 80,
+      "step": 1,
+      "unit": "s",
+      "default": 70
+    },
+    {
+      "type": "range",
+      "id": "item_gap",
+      "label": "Space between repeats",
+      "min": 24,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Text size",
+      "min": 12,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Letter spacing",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "%",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "label": "Bar height",
+      "min": 8,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "text",
+      "id": "accessibility_label",
+      "label": "Accessibility label",
+      "default": "Scrolling announcement bar"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_on_home",
+      "label": "Hide on home page",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scrolling announcement"
+    }
+  ]
+}
+{% endschema %}

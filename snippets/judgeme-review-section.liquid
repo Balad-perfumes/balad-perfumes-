@@ -1,0 +1,35 @@
+{% liquid
+  assign reviews_heading = reviews_heading | default: 'Customer Reviews'
+  assign reviews_note = reviews_note | default: blank
+%}
+
+<div class="pf-product-template__reviews">
+  <div class="pf-product-template__reviews-head">
+    <h2 class="pf-product-template__reviews-heading">{{ reviews_heading }}</h2>
+    <button type="button" class="pf-product-template__reviews-action" data-pf-reviews-open>
+      Write a review
+    </button>
+  </div>
+
+  {% if selected_product.metafields.judgeme.widget != blank %}
+    <div id="judgeme_product_reviews" class="pf-product-template__reviews-widget">
+      {{ selected_product.metafields.judgeme.widget }}
+    </div>
+  {% else %}
+    <div
+      id="judgeme_product_reviews"
+      class="jdgm-widget jdgm-review-widget pf-product-template__reviews-widget"
+    >
+      <div class="pf-product-template__reviews-placeholder">
+        <span class="pf-product-template__reviews-placeholder-icon">★</span>
+        <span>Judge.me review widget will load here after installation.</span>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if reviews_note != blank %}
+    <div class="pf-product-template__reviews-note rte">
+      {{ reviews_note }}
+    </div>
+  {% endif %}
+</div>

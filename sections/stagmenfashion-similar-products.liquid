@@ -1,0 +1,799 @@
+{% liquid
+  assign current_prod = product
+  assign active_collection = blank
+
+  # Check if custom collection is explicitly chosen in settings
+  if section.settings.collection != blank
+    assign active_collection = section.settings.collection
+  endif
+
+  # If not set, find current product's main collection (excluding 'all' or 'frontpage' if possible)
+  if active_collection == blank and current_prod != blank and current_prod.collections.size > 0
+    for col in current_prod.collections
+      if col.handle != 'all' and col.handle != 'frontpage' and col.products_count > 1
+        assign active_collection = col
+        break
+      endif
+    endfor
+    if active_collection == blank
+      for col in current_prod.collections
+        if col.handle != 'all' and col.handle != 'frontpage'
+          assign active_collection = col
+          break
+        endif
+      endfor
+    endif
+    if active_collection == blank
+      assign active_collection = current_prod.collections.first
+    endif
+  endif
+
+  # Count eligible similar products from this collection (excluding current product)
+  assign eligible_similar_count = 0
+  if active_collection != blank and active_collection.products.size > 0
+    for prod in active_collection.products
+      if current_prod == blank or prod.id != current_prod.id
+        assign eligible_similar_count = eligible_similar_count | plus: 1
+      endif
+    endfor
+  endif
+
+  assign limit_count = section.settings.products_to_show | default: 12
+  assign heading_text = section.settings.heading | default: 'Similar Products'
+  assign discover_url = section.settings.discover_more_link
+  if discover_url == blank and active_collection != blank
+    assign discover_url = active_collection.url
+  endif
+%}
+
+{% if eligible_similar_count > 0 %}
+<section
+  class="stagmenfashion-similar color-{{ section.settings.color_scheme }}"
+  data-section-id="{{ section.id }}"
+>
+  <div class="stagmenfashion-similar__shell">
+    <div class="stagmenfashion-similar__head">
+      <div class="stagmenfashion-similar__heading-wrap">
+        <h2 class="stagmenfashion-similar__heading">{{ heading_text }}</h2>
+        {% if section.settings.subheading != blank %}
+          <p class="stagmenfashion-similar__subheading">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </div>
+
+      {% if section.settings.discover_more_label != blank and discover_url != blank %}
+        <a href="{{ discover_url }}" class="stagmenfashion-similar__discover-more">
+          {{ section.settings.discover_more_label }}
+        </a>
+      {% endif %}
+    </div>
+
+    <div class="stagmenfashion-similar-grid">
+      {% assign rendered_count = 0 %}
+      {% for prod in active_collection.products %}
+        {% if current_prod != blank and prod.id == current_prod.id %}
+          {% continue %}
+        {% endif %}
+        {% if rendered_count >= limit_count %}
+          {% break %}
+        {% endif %}
+        {% assign rendered_count = rendered_count | plus: 1 %}
+
+        {% liquid
+          assign images = prod.images
+          assign image_count = images.size
+          assign first_image = prod.featured_image | default: images.first
+          assign sizes_list = ''
+          for opt in prod.options_with_values
+            assign opt_name_down = opt.name | downcase
+            if opt_name_down contains 'size' or opt.name == 'Size'
+              assign sizes_list = opt.values | join: ','
+            endif
+          endfor
+          if sizes_list == ''
+            assign sizes_check = '|'
+            for v in prod.variants
+              assign sz = v.option1 | strip
+              unless sz == blank or sz == 'Default Title'
+                assign check_sz = '|' | append: sz | append: '|'
+                unless sizes_check contains check_sz
+                  assign sizes_check = sizes_check | append: check_sz
+                  if sizes_list != ''
+                    assign sizes_list = sizes_list | append: ','
+                  endif
+                  assign sizes_list = sizes_list | append: sz
+                endunless
+              endunless
+            endfor
+          endif
+        %}
+
+        <div class="stagmenfashion-similar-grid__card" data-product-card>
+          <a href="{{ prod.url }}" class="stagmenfashion-similar-grid__media" data-carousel>
+            {% if image_count > 0 %}
+              {% for image in images limit: 6 %}
+                <img
+                  class="stagmenfashion-similar-grid__image{% if forloop.first %} is-active{% endif %}"
+                  src="{{ image | image_url: width: 600 }}"
+                  alt="{{ image.alt | default: prod.title }}"
+                  width="600"
+                  height="750"
+                  loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                  data-carousel-slide
+                >
+              {% endfor %}
+            {% else %}
+              {{ 'product-1' | placeholder_svg_tag: 'stagmenfashion-similar-grid__placeholder' }}
+            {% endif %}
+
+            <!-- Bookmark / Heart Button -->
+            <button
+              type="button"
+              class="stagmenfashion-similar-grid__heart"
+              data-wishlist-heart
+              data-product-id="{{ prod.id }}"
+              data-product-title="{{ prod.title | escape }}"
+              data-product-price="{{ prod.price | money_without_currency | remove: ',' }}"
+              data-product-compare-price="{{ prod.compare_at_price | money_without_currency | remove: ',' }}"
+              data-product-url="{{ prod.url }}"
+              data-product-image="{{ first_image | image_url: width: 400 }}"
+              data-product-sizes="{{ sizes_list | split: ',' | join: ',' }}"
+              data-product-available="{{ prod.available }}"
+              aria-label="Add {{ prod.title | escape }} to wishlist"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+              </svg>
+            </button>
+
+            {% if image_count > 1 %}
+              <div class="stagmenfashion-similar-grid__dots" data-carousel-dots>
+                {% for image in images limit: 6 %}
+                  <span class="stagmenfashion-similar-grid__dot{% if forloop.first %} is-active{% endif %}" data-carousel-dot data-index="{{ forloop.index0 }}"></span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </a>
+
+          <div class="stagmenfashion-similar-grid__info">
+            <div class="stagmenfashion-similar-grid__details">
+              <a href="{{ prod.url }}" class="stagmenfashion-similar-grid__title-link">
+                <h3 class="stagmenfashion-similar-grid__title">{{ prod.title }}</h3>
+              </a>
+              <span class="stagmenfashion-similar-grid__price">RS. {{ prod.price | money_without_currency | remove: ',' }}</span>
+            </div>
+            <button
+              type="button"
+              class="stagmenfashion-similar-grid__plus-btn"
+              data-quick-add
+              data-qa-title="{{ prod.title | escape }}"
+              data-qa-price="{{ prod.price | money_without_currency | remove: ',' }}"
+              data-qa-url="{{ prod.url }}"
+              data-qa-id="{{ prod.id }}"
+              data-qa-image="{{ first_image | image_url: width: 400 }}"
+              data-qa-sizes="{{ sizes_list | split: ',' | join: ',' }}"
+              data-qa-first-variant="{{ prod.selected_or_first_available_variant.id }}"
+              data-qa-variants="{% for v in prod.variants %}{% unless v.option1 == 'Default Title' %}{{ v.option1 }}:{{ v.id }},{% endunless %}{% endfor %}"
+              data-qa-available="{{ prod.available }}"
+              data-qa-variant-availability="{% for v in prod.variants %}{% unless v.option1 == 'Default Title' %}{{ v.option1 }}:{{ v.available }},{% endunless %}{% endfor %}"
+              aria-label="Quick add {{ prod.title | escape }}"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const initSectionSimilar = (scope = document) => {
+      // Carousels inside section
+      scope.querySelectorAll('[data-carousel]').forEach((carousel) => {
+        if (carousel.dataset.readySimilar === 'true') return;
+        carousel.dataset.readySimilar = 'true';
+
+        const slides = [...carousel.querySelectorAll('[data-carousel-slide]')];
+        const dots = [...carousel.querySelectorAll('[data-carousel-dot]')];
+        if (slides.length <= 1) return;
+
+        let currentIndex = 0;
+
+        const updateSlides = (newIndex) => {
+          if (!slides.length) return;
+          slides[currentIndex]?.classList.remove('is-active');
+          dots[currentIndex]?.classList.remove('is-active');
+          currentIndex = (newIndex + slides.length) % slides.length;
+          slides[currentIndex]?.classList.add('is-active');
+          dots[currentIndex]?.classList.add('is-active');
+        };
+
+        // Desktop Hover: Show next image on hover, restore first image on leave
+        const cardEl = carousel.closest('[data-product-card]') || carousel;
+        cardEl.addEventListener('mouseenter', () => {
+          if (slides.length > 1) {
+            updateSlides(1);
+          }
+        });
+
+        cardEl.addEventListener('mouseleave', () => {
+          if (slides.length > 1) {
+            updateSlides(0);
+          }
+        });
+
+        dots.forEach((dot) => {
+          dot.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            updateSlides(parseInt(dot.dataset.index, 10));
+          });
+        });
+
+        // Touch & Swipe Support
+        // Touch & Pointer Swipe Support
+        carousel.addEventListener('dragstart', (e) => e.preventDefault());
+
+        let startX = 0;
+        let startY = 0;
+        let diffX = 0;
+        let diffY = 0;
+        let isPointerActive = false;
+        let wasSwiped = false;
+        let swipeCooldown = null;
+        let lastSwipeTime = 0;
+
+        const triggerSwipe = (direction) => {
+          const now = Date.now();
+          if (now - lastSwipeTime < 250) return;
+          lastSwipeTime = now;
+          wasSwiped = true;
+          if (swipeCooldown) clearTimeout(swipeCooldown);
+          swipeCooldown = setTimeout(() => {
+            wasSwiped = false;
+          }, 350);
+
+          if (direction === 'next') {
+            updateSlides(currentIndex + 1);
+          } else {
+            updateSlides(currentIndex - 1);
+          }
+        };
+
+        const onPointerDown = (e) => {
+          if (e.target.closest('button')) return;
+          if (e.pointerType === 'mouse' && e.button !== 0) return;
+          startX = e.clientX;
+          startY = e.clientY;
+          diffX = 0;
+          diffY = 0;
+          isPointerActive = true;
+          try {
+            carousel.setPointerCapture(e.pointerId);
+          } catch (_) {}
+        };
+
+        const onPointerMove = (e) => {
+          if (!isPointerActive) return;
+          diffX = e.clientX - startX;
+          diffY = e.clientY - startY;
+        };
+
+        const onPointerUp = (e) => {
+          if (!isPointerActive) return;
+          isPointerActive = false;
+          try {
+            carousel.releasePointerCapture(e.pointerId);
+          } catch (_) {}
+
+          if (e.clientX !== undefined) {
+            diffX = e.clientX - startX;
+            diffY = e.clientY - startY;
+          }
+
+          const threshold = 20;
+          if (Math.abs(diffX) >= threshold && Math.abs(diffX) > Math.abs(diffY)) {
+            triggerSwipe(diffX < 0 ? 'next' : 'prev');
+          }
+        };
+
+        const onPointerCancel = (e) => {
+          isPointerActive = false;
+          try {
+            carousel.releasePointerCapture(e.pointerId);
+          } catch (_) {}
+        };
+
+        carousel.addEventListener('pointerdown', onPointerDown);
+        carousel.addEventListener('pointermove', onPointerMove);
+        carousel.addEventListener('pointerup', onPointerUp);
+        carousel.addEventListener('pointercancel', onPointerCancel);
+
+        // Touch events fallback for older mobile browsers / WebViews
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        carousel.addEventListener('touchstart', (e) => {
+          if (e.target.closest('button')) return;
+          if (e.touches && e.touches[0]) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            touchEndX = touchStartX;
+            touchEndY = touchStartY;
+          }
+        }, { passive: true });
+
+        carousel.addEventListener('touchmove', (e) => {
+          if (e.touches && e.touches[0]) {
+            touchEndX = e.touches[0].clientX;
+            touchEndY = e.touches[0].clientY;
+          }
+        }, { passive: true });
+
+        carousel.addEventListener('touchend', (e) => {
+          if (e.changedTouches && e.changedTouches[0]) {
+            touchEndX = e.changedTouches[0].clientX;
+            touchEndY = e.changedTouches[0].clientY;
+          }
+          const tDiffX = touchEndX - touchStartX;
+          const tDiffY = touchEndY - touchStartY;
+          const threshold = 20;
+
+          if (Math.abs(tDiffX) >= threshold && Math.abs(tDiffX) > Math.abs(tDiffY)) {
+            triggerSwipe(tDiffX < 0 ? 'next' : 'prev');
+          }
+        }, { passive: true });
+
+        // Prevent product link navigation when a swipe occurs
+        carousel.addEventListener('click', (e) => {
+          if (e.target.closest('button')) return;
+          if (wasSwiped) {
+            e.preventDefault();
+            e.stopPropagation();
+            wasSwiped = false;
+          }
+        });
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => initSectionSimilar());
+    document.addEventListener('shopify:section:load', (e) => initSectionSimilar(e.target));
+  })();
+</script>
+
+<style>
+  .stagmenfashion-similar {
+    background: #ffffff;
+    padding-top: 0;
+    padding-bottom: clamp(16px, 3.5vw, 24px);
+  }
+
+  .stagmenfashion-similar__shell {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 36px;
+    padding-top: clamp(16px, 3.5vw, 10px);
+  }
+
+  .stagmenfashion-similar__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: clamp(14px, 2.5vw, 22px);
+  }
+
+  .stagmenfashion-similar__heading-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stagmenfashion-similar__heading {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--color-foreground-heading, #111111);
+  }
+
+  .stagmenfashion-similar__subheading {
+    margin: 0;
+    font-size: 13px;
+    color: #666666;
+  }
+
+  .stagmenfashion-similar__discover-more {
+    display: inline-flex;
+    align-items: center;
+    background: transparent;
+    color: #111111;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 0;
+    border: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.25s ease;
+  }
+
+  .stagmenfashion-similar__discover-more:hover {
+    color: var(--color-primary, #000000);
+  }
+
+  /* ── Product Grid ────────────────────────────────────────────── */
+  .stagmenfashion-similar-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+  }
+
+  .stagmenfashion-similar-grid__card {
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    border-radius: 0;
+    overflow: hidden;
+    border: none;
+    box-shadow: none;
+  }
+
+  /* ── Media / Carousel ────────────────────────────────────────── */
+  .stagmenfashion-similar-grid__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    border-radius: 4px;
+    background: #f4f5fa;
+    text-decoration: none;
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    cursor: pointer;
+  }
+
+  .stagmenfashion-similar-grid__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-drag: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .stagmenfashion-similar-grid__image.is-active {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .stagmenfashion-similar-grid__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #fafafa;
+  }
+
+  /* ── Clean Minimal Bookmark Button ───────────────────────────── */
+  .stagmenfashion-similar-grid__heart {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 5;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #111111;
+    opacity: 0.8;
+    cursor: pointer;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.95)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.12));
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, color 0.2s ease;
+  }
+
+  .stagmenfashion-similar-grid__heart:hover {
+    opacity: 1;
+    transform: scale(1.15);
+    color: #0800CF;
+  }
+
+  .stagmenfashion-similar-grid__heart svg {
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+    display: block;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    fill: none;
+    transition: fill 0.2s ease, stroke 0.2s ease;
+  }
+
+  .stagmenfashion-similar-grid__heart.is-saved,
+  .stagmenfashion-similar-grid__heart.is-active,
+  .stagmenfashion-similar-grid__heart[aria-pressed="true"] {
+    opacity: 1;
+    color: #111111;
+  }
+
+  .stagmenfashion-similar-grid__heart.is-saved svg,
+  .stagmenfashion-similar-grid__heart.is-active svg,
+  .stagmenfashion-similar-grid__heart[aria-pressed="true"] svg,
+  .stagmenfashion-similar-grid__heart.is-saved svg path,
+  .stagmenfashion-similar-grid__heart.is-active svg path,
+  .stagmenfashion-similar-grid__heart[aria-pressed="true"] svg path {
+    fill: #111111 !important;
+    stroke: #111111 !important;
+  }
+
+  /* ── Dot Indicators ──────────────────────────────────────────── */
+  .stagmenfashion-similar-grid__dots {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 6px;
+    background: rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-radius: 999px;
+  }
+
+  .stagmenfashion-similar-grid__dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .stagmenfashion-similar-grid__dot:hover {
+    background: rgba(255, 255, 255, 0.85);
+  }
+
+  .stagmenfashion-similar-grid__dot.is-active {
+    background: #ffffff;
+    width: 10px;
+    border-radius: 999px;
+  }
+
+  /* ── Card Info ───────────────────────────────────────────────── */
+  .stagmenfashion-similar-grid__info {
+    padding: 8px 0 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .stagmenfashion-similar-grid__details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .stagmenfashion-similar-grid__title-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+    position: relative;
+    line-height: 1;
+  }
+
+  .stagmenfashion-similar-grid__title {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-foreground, #111111);
+    letter-spacing: -0.01em;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    position: relative;
+  }
+
+  .stagmenfashion-similar-grid__title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1.5px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left bottom;
+    transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .stagmenfashion-similar-grid__title-link:hover .stagmenfashion-similar-grid__title::after {
+    transform: scaleX(1);
+  }
+
+  .stagmenfashion-similar-grid__price {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgb(var(--color-foreground-rgb, 17 17 17) / 0.7);
+    letter-spacing: 0.01em;
+  }
+
+  .stagmenfashion-similar-grid__plus-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #111111;
+    opacity: 0.55;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    text-decoration: none;
+  }
+
+  .stagmenfashion-similar-grid__plus-btn:hover { opacity: 1; transform: scale(1.15); }
+  .stagmenfashion-similar-grid__plus-btn svg { width: 18px; height: 18px; }
+
+  /* ── Tablet ─────────────────────────────────────────────────── */
+  @media screen and (max-width: 1200px) {
+    .stagmenfashion-similar-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+  }
+
+  @media screen and (max-width: 989px) {
+    .stagmenfashion-similar__shell {
+      padding: 0 24px;
+      padding-top: clamp(16px, 3.5vw, 24px);
+    }
+
+    .stagmenfashion-similar-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+  }
+
+  /* ── Mobile ─────────────────────────────────────────────────── */
+  @media screen and (max-width: 749px) {
+    .stagmenfashion-similar {
+      padding-top: 0;
+      padding-bottom: 12px;
+    }
+
+    .stagmenfashion-similar__shell {
+      padding: 0 12px;
+      padding-top: 12px;
+    }
+
+    .stagmenfashion-similar__head {
+      margin-bottom: 12px;
+    }
+
+    .stagmenfashion-similar__heading {
+      font-size: 13px;
+    }
+
+    .stagmenfashion-similar__subheading {
+      font-size: 12px;
+    }
+
+    .stagmenfashion-similar__discover-more {
+      font-size: 10px;
+    }
+
+    .stagmenfashion-similar-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .stagmenfashion-similar-grid__heart {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      min-height: 32px;
+      top: 4px;
+      right: 4px;
+      padding: 0;
+    }
+
+    .stagmenfashion-similar-grid__heart svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+</style>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Similar Category Products",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Similar Products"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Explore more styles from this category"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Specific Collection (Optional)",
+      "info": "Leave empty to automatically pull products from the current product's category."
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Products to show",
+      "min": 6,
+      "max": 24,
+      "step": 6,
+      "default": 12
+    },
+    {
+      "type": "text",
+      "id": "discover_more_label",
+      "label": "Discover More Label",
+      "default": "Discover more"
+    },
+    {
+      "type": "url",
+      "id": "discover_more_link",
+      "label": "Discover More Link (Optional)"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Similar Category Products"
+    }
+  ]
+}
+{% endschema %}

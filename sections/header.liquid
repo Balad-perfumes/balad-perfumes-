@@ -1,0 +1,2828 @@
+{% liquid
+  assign header_logo = settings.logo
+  assign logo_height = settings.logo_height | default: 32
+  assign logo_height_mobile = settings.logo_height_mobile | default: 24
+
+  if header_logo != blank
+    assign logo_width = logo_height | times: header_logo.aspect_ratio | ceil
+    assign logo_width_mobile = logo_height_mobile | times: header_logo.aspect_ratio | ceil
+  else
+    assign logo_width = 'auto'
+    assign logo_width_mobile = 'auto'
+  endif
+
+  if settings.logo_inverse != blank
+    assign inverse_logo_width = logo_height | times: settings.logo_inverse.aspect_ratio | ceil
+    assign inverse_logo_width_mobile = logo_height_mobile | times: settings.logo_inverse.aspect_ratio | ceil
+  else
+    assign inverse_logo_width = logo_width
+    assign inverse_logo_width_mobile = logo_width_mobile
+  endif
+
+  assign menu_handle = section.settings.menu | default: 'main-menu'
+  assign menu = linklists[menu_handle]
+  assign brand_name = section.settings.brand_name | default: settings.brand_name | default: shop.name
+  assign instagram_link = settings.social_instagram_link
+  assign logo_alt = brand_name
+  assign has_about_link = false
+  assign is_about_page = false
+
+  if header_logo != blank and header_logo.alt != blank
+    assign logo_alt = header_logo.alt
+  endif
+
+  if template.name == 'page' and template.suffix == 'about'
+    assign is_about_page = true
+  elsif request.path contains '/pages/about'
+    assign is_about_page = true
+  endif
+
+  if menu != blank and menu.links.size > 0
+    for link in menu.links
+      assign link_url = link.url | downcase
+      assign link_title = link.title | downcase
+      if link_url contains '/pages/about' or link_title contains 'about'
+        assign has_about_link = true
+        break
+      endif
+    endfor
+  endif
+%}
+
+<header
+  class="pf-header{% if section.settings.transparent_on_home and template.name == 'index' %} pf-header--home pf-header--transparent{% endif %}"
+  data-pf-header
+  data-scrolled="false"
+  style="--pf-header-bg: {{ section.settings.header_background | default: '#ffffff' }}; --pf-header-fg: {{ section.settings.header_text_color | default: '#111111' }};"
+>
+  <div class="pf-header__inner">
+    <!-- Left Column: Desktop Navigation -->
+    <div class="pf-header__col-left">
+
+      <!-- Desktop Navigation Links -->
+      <nav class="pf-header__nav" aria-label="Primary">
+        {% if menu != blank and menu.links.size > 0 %}
+          <ul class="pf-header__nav-list" role="list">
+            {% for link in menu.links %}
+              <li class="pf-header__nav-item{% if link.links != blank %} has-children{% endif %}">
+                {% if link.links != blank %}
+                  <details class="pf-header__menu">
+                    <summary class="pf-header__nav-link{% if link.current or link.child_active %} is-active{% endif %}">
+                      <span>{{ link.title | escape }}</span>
+                      <span class="pf-header__caret" aria-hidden="true"></span>
+                    </summary>
+                    <div class="pf-header__dropdown">
+                      <div class="pf-header__dropdown-grid">
+                        {% for child in link.links %}
+                          <a class="pf-header__dropdown-link{% if child.current %} is-current{% endif %}" href="{{ child.url }}">
+                            <span class="pf-header__dropdown-title">{{ child.title | escape }}</span>
+                          </a>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </details>
+                {% else %}
+                  <a class="pf-header__nav-link{% if link.current %} is-active{% endif %}" href="{{ link.url }}">
+                    <span>{{ link.title | escape }}</span>
+                  </a>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <ul class="pf-header__nav-list" role="list">
+            <li class="pf-header__nav-item">
+              <a class="pf-header__nav-link" href="{{ routes.all_products_collection_url }}">
+                <span>New in</span>
+              </a>
+            </li>
+            <li class="pf-header__nav-item">
+              <a class="pf-header__nav-link" href="{{ routes.collections_url }}">
+                <span>Collections</span>
+              </a>
+            </li>
+          </ul>
+        {% endif %}
+      </nav>
+    </div>
+
+    <!-- Center Column: Brand Logo -->
+    <div class="pf-header__col-center">
+      <a class="pf-header__brand" href="{{ routes.root_url }}" aria-label="{{ brand_name | escape }}">
+        {% if header_logo != blank %}
+          {% capture logo_style %}--logo-height: {{ logo_height }}px; --logo-width: {{ logo_width }}px; --logo-height-mobile: {{ logo_height_mobile }}px; --logo-width-mobile: {{ logo_width_mobile }}px;{% endcapture %}
+          {{
+            header_logo
+            | image_url: width: 420
+            | image_tag: class: 'pf-header__logo pf-header__logo--default', loading: 'eager', widths: '120, 180, 240, 320, 420', alt: logo_alt, style: logo_style
+          }}
+          {% if settings.logo_inverse != blank %}
+            {% capture inverse_logo_style %}--logo-height: {{ logo_height }}px; --logo-width: {{ inverse_logo_width }}px; --logo-height-mobile: {{ logo_height_mobile }}px; --logo-width-mobile: {{ inverse_logo_width_mobile }}px;{% endcapture %}
+            {{
+              settings.logo_inverse
+              | image_url: width: 420
+              | image_tag: class: 'pf-header__logo pf-header__logo--inverse', loading: 'eager', widths: '120, 180, 240, 320, 420', alt: logo_alt, style: inverse_logo_style
+            }}
+          {% endif %}
+        {% else %}
+          <span class="pf-header__brand-text">{{ brand_name }}</span>
+        {% endif %}
+      </a>
+    </div>
+
+    <!-- Right Column: Action Icons -->
+    <div class="pf-header__col-right pf-header__actions">
+      <!-- 1. Desktop Story Badge -->
+      {% if section.settings.show_story_badge %}
+        <button
+          type="button"
+          class="pf-header__story-badge pf-header__story-badge--desktop"
+          data-open-story-modal
+          aria-label="View Store Stories"
+          title="View Stories"
+        >
+          <span class="pf-header__story-ring">
+            {% if section.settings.custom_story_avatar != blank %}
+              {{
+                section.settings.custom_story_avatar
+                | image_url: width: 80
+                | image_tag: class: 'pf-header__story-logo', loading: 'eager', alt: 'Story'
+              }}
+            {% elsif header_logo != blank %}
+              {{
+                header_logo
+                | image_url: width: 80
+                | image_tag: class: 'pf-header__story-logo', loading: 'eager', alt: brand_name
+              }}
+            {% else %}
+              <span class="pf-header__story-text-logo">{{ brand_name | slice: 0, 2 | upcase }}</span>
+            {% endif %}
+          </span>
+        </button>
+      {% endif %}
+
+      <!-- 2. Store / Location Pin (Desktop) -->
+      {% if section.settings.show_location %}
+        <a
+          href="{{ section.settings.location_link | default: '/pages/our-stores' }}"
+          class="pf-header__icon-button pf-header__location-btn pf-header__hide-mobile"
+          aria-label="Stores & Location"
+          title="Find Store"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 21c-4.5-5.5-7-8.5-7-12a7 7 0 1 1 14 0c0 3.5-2.5 6.5-7 12z"/>
+            <circle cx="12" cy="9" r="2.5"/>
+          </svg>
+        </a>
+      {% endif %}
+
+      <!-- 3. Search Icon -->
+      {% if section.settings.show_search %}
+        <button
+          class="pf-header__icon-button pf-header__search-btn"
+          type="button"
+          on:click="#search-modal/showDialog"
+          aria-label="Search"
+          title="Search"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+          </svg>
+        </button>
+      {% endif %}
+
+      <!-- 4. Account Icon (Desktop) -->
+      {% if section.settings.show_account %}
+        <a
+          class="pf-header__icon-button pf-header__account-btn pf-header__hide-mobile"
+          href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
+          aria-label="{%- if customer -%}Account{%- else -%}Log in{%- endif -%}"
+          title="{%- if customer -%}Account{%- else -%}Log in{%- endif -%}"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="7.5" r="4"/>
+            <path d="M4.5 20c0-4 3.5-6.5 7.5-6.5s7.5 2.5 7.5 6.5"/>
+          </svg>
+        </a>
+      {% endif %}
+
+      <!-- 5. Bookmark / Wishlist Icon -->
+      {% if section.settings.show_wishlist %}
+        <wishlist-icon>
+          <button
+            type="button"
+            class="pf-header__icon-button pf-header__wishlist-button"
+            aria-label="Wishlist"
+            title="Wishlist"
+            onclick="if(window.openWishlistDrawer){window.openWishlistDrawer()}else{document.dispatchEvent(new CustomEvent('wishlist-drawer:open'))}"
+          >
+            {% if section.settings.custom_wishlist_icon != blank %}
+              {{
+                section.settings.custom_wishlist_icon
+                | image_url: width: 60
+                | image_tag: class: 'pf-header__custom-icon', loading: 'lazy', alt: 'Wishlist'
+              }}
+            {% else %}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/>
+              </svg>
+            {% endif %}
+            <div
+              data-wishlist-bubble
+              class="pf-header__wishlist-bubble"
+              style="display:none"
+            >
+              <span class="pf-header__wishlist-count" data-wishlist-count>0</span>
+            </div>
+          </button>
+        </wishlist-icon>
+      {% endif %}
+
+      <!-- 6. Shopping Bag / Cart Icon -->
+      <button
+        class="pf-header__icon-button pf-header__cart-button"
+        type="button"
+        on:click="#cart-drawer/open"
+        aria-label="Cart"
+        title="Cart"
+      >
+        {% if section.settings.custom_cart_icon != blank %}
+          {{
+            section.settings.custom_cart_icon
+            | image_url: width: 60
+            | image_tag: class: 'pf-header__custom-icon', loading: 'lazy', alt: 'Cart'
+          }}
+        {% else %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 6h12v14a1.5 1.5 0 0 1-1.5 1.5H7.5A1.5 1.5 0 0 1 6 20V6z"/>
+            <path d="M9 6V4.5a3 3 0 0 1 6 0V6"/>
+            <path d="M10 10.5h4"/>
+          </svg>
+        {% endif %}
+        <span class="pf-header__cart-count" {% if cart == empty %}hidden aria-hidden="true"{% endif %}>
+          {{- cart.items.size -}}
+        </span>
+      </button>
+
+      <!-- 7. Hamburger Menu Button (3 lines) -->
+      <button
+        class="pf-header__menu-pill"
+        type="button"
+        data-pf-header-menu
+        aria-label="Open menu"
+        title="Menu"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="4" y1="6" x2="20" y2="6"/>
+          <line x1="4" y1="12" x2="20" y2="12"/>
+          <line x1="4" y1="18" x2="20" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- High-End Clean Structured Story Viewer Modal -->
+  <style>
+    .pf-story-modal, .pf-story-modal * {
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+      -webkit-touch-callout: none !important;
+    }
+    @media (max-width: 767px) {
+      .pf-story-modal__backdrop {
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        display: none !important;
+      }
+      .pf-story-modal__scrim,
+      .pf-story-modal__scrim--top,
+      .pf-story-modal__scrim--bottom {
+        display: none !important;
+        background: transparent !important;
+        opacity: 0 !important;
+      }
+      .pf-story-modal__tap,
+      .pf-story-modal__tap--left,
+      .pf-story-modal__tap--right {
+        background: transparent !important;
+        background-color: transparent !important;
+        outline: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+      }
+    }
+  </style>
+  <div class="pf-story-modal" id="pf-story-modal" aria-hidden="true" hidden>
+    <div class="pf-story-modal__backdrop" data-story-close></div>
+
+    <div class="pf-story-modal__wrapper">
+      <!-- Side Nav Prev Button -->
+      <button class="pf-story-modal__nav-arrow pf-story-modal__nav-arrow--prev" type="button" data-story-prev aria-label="Previous story">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+
+      <!-- Center Portrait Story Card -->
+      <div class="pf-story-modal__card" data-story-card>
+        <!-- Story Card Header (Progress Bar & Meta Controls) -->
+        <div class="pf-story-modal__card-header">
+          <!-- Progress segments -->
+          <div class="pf-story-modal__progress-bar" data-story-progress-container></div>
+
+          <div class="pf-story-modal__card-meta">
+            <div class="pf-story-modal__brand-badge">
+              <div class="pf-story-modal__avatar">
+                {% if section.settings.custom_story_avatar != blank %}
+                  {{
+                    section.settings.custom_story_avatar
+                    | image_url: width: 80
+                    | image_tag: class: 'pf-story-modal__avatar-img', loading: 'eager', alt: 'Story'
+                  }}
+                {% elsif header_logo != blank %}
+                  {{
+                    header_logo
+                    | image_url: width: 80
+                    | image_tag: class: 'pf-story-modal__avatar-img', loading: 'eager', alt: brand_name
+                  }}
+                {% else %}
+                  <span class="pf-story-modal__avatar-text">{{ brand_name | slice: 0, 2 | upcase }}</span>
+                {% endif %}
+              </div>
+              <div class="pf-story-modal__brand-info">
+                <span class="pf-story-modal__brand-name">{{ brand_name }}</span>
+                <span class="pf-story-modal__story-tag" data-story-tag>Polo Season</span>
+              </div>
+            </div>
+
+            <div class="pf-story-modal__controls">
+              <!-- Minimal Pause / Play Button -->
+              <button class="pf-story-modal__icon-btn" type="button" data-story-pause aria-label="Pause / Play">
+                <svg class="pf-story-modal__pause-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                  <rect x="6" y="4" width="3.5" height="16" rx="1.5"/>
+                  <rect x="14.5" y="4" width="3.5" height="16" rx="1.5"/>
+                </svg>
+                <svg class="pf-story-modal__play-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="display: none;">
+                  <polygon points="6 4 20 12 6 20"/>
+                </svg>
+              </button>
+
+              <!-- Close Button -->
+              <button class="pf-story-modal__icon-btn" type="button" data-story-close aria-label="Close story">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Story Media Container & Skeleton Loader -->
+        <div class="pf-story-modal__media-stage">
+          <div class="pf-story-modal__loader" data-story-loader>
+            <div class="pf-story-modal__spinner"></div>
+          </div>
+          <img class="pf-story-modal__image" data-story-image src="" alt="Story media" />
+        </div>
+
+        <!-- Sleek Scrim Overlays -->
+        <div class="pf-story-modal__scrim pf-story-modal__scrim--top"></div>
+        <div class="pf-story-modal__scrim pf-story-modal__scrim--bottom"></div>
+
+        <!-- Story Card Bottom CTA Section -->
+        <div class="pf-story-modal__card-footer">
+          <a class="pf-story-modal__cta-btn" data-story-cta href="#">
+            <span data-story-btn-text>Shop Now</span>
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="13 6 19 12 13 18"></polyline>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Tap Navigation Zones (Left 40% = Prev, Right 60% = Next) -->
+        <div class="pf-story-modal__tap pf-story-modal__tap--left" data-story-tap-prev aria-label="Previous story" role="button" tabindex="-1"></div>
+        <div class="pf-story-modal__tap pf-story-modal__tap--right" data-story-tap-next aria-label="Next story" role="button" tabindex="-1"></div>
+      </div>
+
+      <!-- Side Nav Next Button -->
+      <button class="pf-story-modal__nav-arrow pf-story-modal__nav-arrow--next" type="button" data-story-next aria-label="Next story">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    {%- liquid
+      assign story_items_raw = ''
+      assign story_count = 0
+
+      # 1. Custom story blocks configured in theme editor
+      for block in section.blocks
+        if block.type == 'story_slide'
+          assign s_img = ''
+          if block.settings.image != blank
+            assign s_img = block.settings.image | image_url: width: 1200
+          elsif block.settings.collection != blank
+            if block.settings.collection.image != blank
+              assign s_img = block.settings.collection.image | image_url: width: 1200
+            elsif block.settings.collection.featured_image != blank
+              assign s_img = block.settings.collection.featured_image | image_url: width: 1200
+            endif
+          endif
+
+          if s_img == blank
+            assign s_img = 'https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?auto=format&fit=crop&w=1200&q=80'
+          endif
+
+          assign s_tag = block.settings.tag
+          if s_tag == blank and block.settings.collection != blank
+            assign s_tag = block.settings.collection.title
+          endif
+          if s_tag == blank
+            assign s_tag = brand_name | default: 'Featured'
+          endif
+
+          assign s_link = block.settings.link
+          if s_link == blank and block.settings.collection != blank
+            assign s_link = block.settings.collection.url
+          endif
+          if s_link == blank
+            assign s_link = routes.all_products_collection_url
+          endif
+
+          assign s_btn = block.settings.button_text | default: 'Shop Now'
+
+          assign s_img_json = s_img | json
+          assign s_tag_json = s_tag | json
+          assign s_link_json = s_link | json
+          assign s_btn_json = s_btn | json
+
+          capture current_item
+            echo '{"image":'
+            echo s_img_json
+            echo ',"tag":'
+            echo s_tag_json
+            echo ',"link":'
+            echo s_link_json
+            echo ',"btn_text":'
+            echo s_btn_json
+            echo '}'
+          endcapture
+
+          if story_items_raw == ''
+            assign story_items_raw = current_item
+          else
+            assign story_items_raw = story_items_raw | append: ',' | append: current_item
+          endif
+          assign story_count = story_count | plus: 1
+        endif
+      endfor
+
+      # 2. If no story blocks, populate dynamically from collections that have images
+      if story_count == 0 and collections.size > 0
+        assign coll_added = 0
+        for col in collections
+          if col.all_products_count == 0 and collections.size > 1
+            continue
+          endif
+
+          assign c_img = ''
+          if col.image != blank
+            assign c_img = col.image | image_url: width: 1200
+          elsif col.featured_image != blank
+            assign c_img = col.featured_image | image_url: width: 1200
+          endif
+
+          if c_img != blank
+            assign c_tag = col.title
+            assign c_link = col.url
+            assign c_img_json = c_img | json
+            assign c_tag_json = c_tag | json
+            assign c_link_json = c_link | json
+
+            capture current_item
+              echo '{"image":'
+              echo c_img_json
+              echo ',"tag":'
+              echo c_tag_json
+              echo ',"link":'
+              echo c_link_json
+              echo ',"btn_text":"Shop Now"}'
+            endcapture
+
+            if story_items_raw == ''
+              assign story_items_raw = current_item
+            else
+              assign story_items_raw = story_items_raw | append: ',' | append: current_item
+            endif
+            assign coll_added = coll_added | plus: 1
+            if coll_added >= 4
+              break
+            endif
+          endif
+        endfor
+      endif
+    -%}
+
+    <!-- JSON Story Data -->
+    <script type="application/json" id="pf-story-data">
+      [
+        {%- if story_items_raw != blank -%}
+          {{ story_items_raw }}
+        {%- else -%}
+          {
+            "image": "https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?auto=format&fit=crop&w=1200&q=80",
+            "tag": "New Arrivals",
+            "link": "{{ routes.all_products_collection_url }}",
+            "btn_text": "Shop Now"
+          },
+          {
+            "image": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1200&q=80",
+            "tag": "Winter Drop",
+            "link": "{{ routes.all_products_collection_url }}",
+            "btn_text": "Shop Now"
+          },
+          {
+            "image": "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1200&q=80",
+            "tag": "Polo Season",
+            "link": "{{ routes.all_products_collection_url }}",
+            "btn_text": "Shop Now"
+          }
+        {%- endif -%}
+      ]
+    </script>
+  </div>
+</header>
+
+<!-- Slide-out Menu Drawer -->
+<div class="pf-header__drawer" data-pf-header-drawer hidden>
+  <button class="pf-header__drawer-backdrop" type="button" data-pf-header-close aria-label="Close menu"></button>
+  <div class="pf-header__drawer-panel">
+    <div class="pf-header__drawer-top">
+      <div class="pf-header__drawer-start">
+        <button class="pf-header__drawer-icon" type="button" data-pf-header-close aria-label="Close menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6 18 18M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+
+        {% if section.settings.show_search %}
+          <button class="pf-header__drawer-icon pf-header__search-btn" type="button" on:click="#search-modal/showDialog" aria-label="Search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          </button>
+        {% endif %}
+      </div>
+
+      <a class="pf-header__drawer-brand-link" href="{{ routes.root_url }}" aria-label="{{ brand_name | escape }}">
+        {% if header_logo != blank %}
+          {{
+            header_logo
+            | image_url: width: 420
+            | image_tag: class: 'pf-header__drawer-logo', loading: 'eager', widths: '120, 180, 240, 320, 420', alt: logo_alt
+          }}
+        {% else %}
+          <span class="pf-header__drawer-brand">{{ brand_name }}</span>
+        {% endif %}
+      </a>
+
+      <div class="pf-header__drawer-actions">
+        {% if section.settings.show_wishlist %}
+          <wishlist-icon>
+            <button
+              type="button"
+              class="pf-header__drawer-icon pf-header__wishlist-button"
+              aria-label="Wishlist"
+              onclick="if(window.openWishlistDrawer){window.openWishlistDrawer()}else{document.dispatchEvent(new CustomEvent('wishlist-drawer:open'))}"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/>
+              </svg>
+              <div
+                data-wishlist-bubble
+                class="pf-header__wishlist-bubble"
+                style="display:none"
+              >
+                <span class="pf-header__wishlist-count" data-wishlist-count>0</span>
+              </div>
+            </button>
+          </wishlist-icon>
+        {% endif %}
+
+        <button class="pf-header__drawer-icon pf-header__cart-button" type="button" on:click="#cart-drawer/open" aria-label="Cart">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 6h12v14a1.5 1.5 0 0 1-1.5 1.5H7.5A1.5 1.5 0 0 1 6 20V6z"/>
+            <path d="M9 6V4.5a3 3 0 0 1 6 0V6"/>
+            <path d="M10 10.5h4"/>
+          </svg>
+          <span class="pf-header__cart-count" {% if cart == empty %}hidden aria-hidden="true"{% endif %}>
+            {{- cart.items.size -}}
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <div class="pf-header__drawer-links">
+      {% if menu != blank and menu.links.size > 0 %}
+        {% for link in menu.links %}
+          <div class="pf-header__drawer-group">
+            <a class="pf-header__drawer-link" href="{{ link.url }}">{{ link.title | escape }}</a>
+            {% if link.links != blank %}
+              <div class="pf-header__drawer-subgrid">
+                {% for child in link.links %}
+                  <a class="pf-header__drawer-sublink" href="{{ child.url }}">{{ child.title | escape }}</a>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="pf-header__drawer-group">
+          <a class="pf-header__drawer-link" href="{{ routes.all_products_collection_url }}">New in</a>
+        </div>
+        <div class="pf-header__drawer-group">
+          <a class="pf-header__drawer-link" href="{{ routes.collections_url }}">Collections</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="pf-header__drawer-footer">
+      {% if section.settings.show_location %}
+        <a class="pf-header__drawer-item" href="{{ section.settings.location_link | default: '/pages/our-stores' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 21c-4.5-5.5-7-8.5-7-12a7 7 0 1 1 14 0c0 3.5-2.5 6.5-7 12z"/>
+            <circle cx="12" cy="9" r="2.5"/>
+          </svg>
+          <span>Our Stores</span>
+        </a>
+      {% endif %}
+
+      {% if section.settings.show_account %}
+        <a class="pf-header__drawer-item" href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="7.5" r="4"/>
+            <path d="M4.5 20c0-4 3.5-6.5 7.5-6.5s7.5 2.5 7.5 6.5"/>
+          </svg>
+          <span>Account</span>
+        </a>
+      {% endif %}
+
+      {% if instagram_link != blank %}
+        <a class="pf-header__drawer-item" href="{{ instagram_link }}" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4.5" y="4.5" width="15" height="15" rx="4"/><circle cx="12" cy="12" r="3.3"/><circle cx="17" cy="6.8" r="0.9" fill="currentColor"/></svg>
+          <span>Instagram</span>
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% render 'mobile-navigation-bar', section: section, header_logo: header_logo, brand_name: brand_name %}
+
+<style>
+  .pf-header {
+    --pf-header-border: rgba(0, 0, 0, 0.06);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    color: var(--pf-header-fg, #111111);
+    background: var(--pf-header-bg, #ffffff);
+    border-bottom: 1px solid var(--pf-header-border);
+    transition:
+      background 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      backdrop-filter 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      -webkit-backdrop-filter 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: inherit;
+    width: 100%;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* =============================================================
+     Scrolled State: Ultra-Modern Frosted Glass Header
+     ============================================================= */
+  .pf-header[data-scrolled='true'],
+  .pf-header--home[data-scrolled='true'],
+  .pf-header--transparent[data-scrolled='true'] {
+    position: sticky;
+    top: 0;
+    z-index: 100 !important;
+    background: rgba(255, 255, 255, 0.84) !important;
+    background-color: rgba(255, 255, 255, 0.84) !important;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.78) 100%) !important;
+    backdrop-filter: blur(28px) saturate(200%) contrast(96%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(200%) contrast(96%) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+    color: #111111 !important;
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .pf-header[data-scrolled='true'] .pf-header__brand-text,
+  .pf-header[data-scrolled='true'] .pf-header__nav-link:not(.is-active):not([aria-current="page"]):not(.is-current),
+  .pf-header[data-scrolled='true'] .pf-header__icon-button {
+    color: #111111 !important;
+    text-shadow: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+  }
+
+  .pf-header[data-scrolled='true'] .pf-header__icon-button svg,
+  .pf-header[data-scrolled='true'] .pf-header__caret {
+    color: #111111 !important;
+    stroke: #111111 !important;
+    border-color: #111111 !important;
+  }
+
+  .pf-header[data-scrolled='true'] .pf-header__logo--default {
+    display: block !important;
+    filter: none !important;
+  }
+
+  .pf-header[data-scrolled='true'] .pf-header__logo--inverse {
+    display: none !important;
+  }
+
+  .pf-header[data-scrolled='true'] .pf-header__logo:only-child {
+    display: block !important;
+    filter: none !important;
+  }
+
+  .pf-header[data-scrolled='true'] .pf-header__menu-pill {
+    background: transparent !important;
+    border: none !important;
+    color: #111111 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+
+  .pf-header[data-scrolled='true'] .pf-header__menu-pill svg {
+    color: #111111 !important;
+    stroke: currentColor !important;
+  }
+
+  .pf-header[data-scrolled='true'] .pf-header__story-badge {
+    box-shadow: none !important;
+  }
+
+  .pf-header[data-scrolled='true'] .pf-header__story-logo {
+    filter: brightness(0) invert(1) !important;
+  }
+
+  /* =============================================================
+     Home Page Glassy Header (Unscrolled State)
+     Seamless, crystal-glass overlay matching the hero banner
+     - Borderless, low-blur, zero harsh shadows
+     ============================================================= */
+  .pf-header--home:not([data-scrolled='true']),
+  .pf-header--transparent:not([data-scrolled='true']),
+  .pf-header--home[data-scrolled='false'],
+  .pf-header--transparent[data-scrolled='false'] {
+    position: sticky;
+    top: 0;
+    inset-inline: 0;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.1) 60%, rgba(0, 0, 0, 0) 100%) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    border: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
+  }
+
+  /* Seamless overlay of Home Page first section (hero) under transparent header */
+  body.template-index .content-for-layout > .shopify-section:first-child,
+  body:has(.pf-header--home) .content-for-layout > .shopify-section:first-child,
+  body:has(.pf-header--transparent) .content-for-layout > .shopify-section:first-child {
+    margin-top: calc(var(--header-height, 66px) * -1);
+  }
+
+  .pf-header--home:not([data-scrolled='true']) .pf-header__brand-text,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__brand-text {
+    color: #ffffff !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .pf-header--home:not([data-scrolled='true']) .pf-header__logo--default,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__logo--default {
+    display: none !important;
+  }
+
+  .pf-header--home:not([data-scrolled='true']) .pf-header__logo--inverse,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__logo--inverse {
+    display: block !important;
+  }
+
+  .pf-header--home:not([data-scrolled='true']) .pf-header__logo:only-child,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__logo:only-child {
+    display: block !important;
+    filter: brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+  }
+
+  .pf-header--home:not([data-scrolled='true']) .pf-header__nav-link,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__nav-link {
+    color: #ffffff !important;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+  }
+
+  .pf-header--home:not([data-scrolled='true']) .pf-header__nav-link:hover,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__nav-link:hover {
+    color: #ffffff !important;
+    opacity: 0.85;
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+  }
+
+  .pf-header--home:not([data-scrolled='true']) .pf-header__caret,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__caret {
+    border-color: #ffffff !important;
+  }
+
+  .pf-header--home:not([data-scrolled='true']) .pf-header__icon-button,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__icon-button {
+    color: #ffffff !important;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.45));
+  }
+
+  .pf-header--home:not([data-scrolled='true']) .pf-header__icon-button svg,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__icon-button svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+
+  .pf-header--home:not([data-scrolled='true']) .pf-header__story-badge,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__story-badge,
+  .pf-header--home[data-scrolled='false'] .pf-header__story-badge,
+  .pf-header--transparent[data-scrolled='false'] .pf-header__story-badge {
+    box-shadow: none !important;
+  }
+
+  .pf-header--home:not([data-scrolled='true']) .pf-header__story-logo,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__story-logo,
+  .pf-header--home[data-scrolled='false'] .pf-header__story-logo,
+  .pf-header--transparent[data-scrolled='false'] .pf-header__story-logo {
+    filter: brightness(0) invert(1) !important;
+  }
+
+  .pf-header--home:not([data-scrolled='true']) .pf-header__menu-pill,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__menu-pill {
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.45));
+  }
+
+  .pf-header--home:not([data-scrolled='true']) .pf-header__menu-pill:hover,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__menu-pill:hover {
+    background: transparent !important;
+    border: none !important;
+    opacity: 0.8;
+  }
+
+  .pf-header--home:not([data-scrolled='true']) .pf-header__menu-pill svg,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__menu-pill svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+
+  .pf-header--home:not([data-scrolled='true']) .pf-header__cart-count,
+  .pf-header--home:not([data-scrolled='true']) .pf-header__wishlist-bubble,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__cart-count,
+  .pf-header--transparent:not([data-scrolled='true']) .pf-header__wishlist-bubble {
+    background: #0800CF !important;
+    color: #ffffff !important;
+    border: 1.5px solid #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  }
+
+  /* 3-Column Solid Grid Structure (Never Overlaps) */
+  .pf-header__inner {
+    height: 66px;
+    min-height: 66px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    box-sizing: border-box;
+    gap: 16px;
+  }
+
+  .pf-header__col-left {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  .pf-header__col-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .pf-header__col-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
+  /* Left Navigation Links */
+  .pf-header__nav {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .pf-header__nav-list {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    white-space: nowrap;
+  }
+
+  .pf-header__nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: inherit;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    text-transform: capitalize;
+    transition: opacity 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    border-bottom: 2px solid transparent;
+    padding-bottom: 2px;
+  }
+
+  .pf-header__nav-link:hover {
+    color: var(--color-primary, #0800CF) !important;
+    opacity: 1;
+  }
+
+  .pf-header__nav-link.is-active,
+  .pf-header__nav-link[aria-current="page"],
+  .pf-header__nav-link.is-current {
+    color: var(--color-primary, #0800CF) !important;
+    font-weight: 600;
+    border-bottom-color: var(--color-primary, #0800CF) !important;
+  }
+
+  .pf-header[data-scrolled='true'] .pf-header__nav-link.is-active,
+  .pf-header[data-scrolled='true'] .pf-header__nav-link[aria-current="page"],
+  .pf-header[data-scrolled='true'] .pf-header__nav-link.is-current {
+    color: var(--color-primary, #0800CF) !important;
+    border-bottom-color: var(--color-primary, #0800CF) !important;
+  }
+
+  .pf-header[data-scrolled='true'] .pf-header__nav-link:hover {
+    color: var(--color-primary, #0800CF) !important;
+  }
+
+  .pf-header__caret {
+    width: 6px;
+    height: 6px;
+    border-right: 1.4px solid currentColor;
+    border-bottom: 1.4px solid currentColor;
+    transform: rotate(45deg);
+    margin-top: -3px;
+    transition: transform 0.2s ease;
+  }
+
+  .pf-header__menu {
+    position: relative;
+  }
+
+  .pf-header__menu[open] .pf-header__caret {
+    transform: rotate(-135deg);
+    margin-top: 2px;
+  }
+
+  .pf-header__dropdown {
+    position: absolute;
+    top: calc(100% + 14px);
+    left: 0;
+    min-width: 200px;
+    padding: 14px 18px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    z-index: 100;
+  }
+
+  .pf-header__menu[open] .pf-header__dropdown,
+  .pf-header__menu:hover .pf-header__dropdown,
+  .pf-header__menu:focus-within .pf-header__dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .pf-header__dropdown-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .pf-header__dropdown-link {
+    color: #111111;
+    text-decoration: none;
+    font-size: 12.5px;
+    font-weight: 500;
+    transition: color 0.2s ease, opacity 0.2s ease;
+  }
+
+  .pf-header__dropdown-link:hover,
+  .pf-header__dropdown-link.is-current {
+    color: #0800CF;
+    opacity: 1;
+  }
+
+  /* Center Brand Logo */
+  .pf-header__brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    text-decoration: none;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .pf-header__brand-text {
+    font-size: 1.45rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: inherit;
+  }
+
+  .pf-header__logo {
+    display: block;
+    height: var(--logo-height-mobile, 24px);
+    width: var(--logo-width-mobile, auto);
+    max-width: 140px;
+    object-fit: contain;
+    transition: height 0.2s ease, width 0.2s ease;
+
+    @media screen and (min-width: 750px) {
+      height: var(--logo-height, 32px);
+      width: var(--logo-width, auto);
+      max-width: 170px;
+    }
+  }
+
+  .pf-header__logo--default {
+    display: block;
+  }
+
+  .pf-header__logo--inverse {
+    display: none;
+  }
+
+  /* Right Actions */
+  .pf-header__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    white-space: nowrap;
+  }
+
+  /* 1. Store Story Button (With Store Logo & Spinning White-to-Blue Gradient Ring) */
+  @keyframes pf-story-spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .pf-header__story-badge {
+    position: relative;
+    width: 39px;
+    height: 39px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    padding: 2.2px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    overflow: hidden;
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    flex-shrink: 0;
+    box-shadow: none;
+  }
+
+  .pf-header__story-badge::before {
+    content: '';
+    position: absolute;
+    inset: -55%;
+    background: conic-gradient(from 0deg, #dbeafe 0%, #3b82f6 28%, #0800CF 55%, #3b82f6 82%, #dbeafe 100%);
+    animation: pf-story-spin 8s linear infinite;
+    border-radius: 50%;
+    z-index: 0;
+  }
+
+  .pf-header__story-badge:hover {
+    transform: scale(1.08);
+    box-shadow: none;
+  }
+
+  .pf-header__story-badge:hover::before {
+    animation-duration: 4s;
+  }
+
+  .pf-header__story-ring {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000000;
+    padding: 2.5px;
+    box-sizing: border-box;
+  }
+
+  .pf-header__story-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    filter: brightness(0) invert(1);
+    transition: filter 0.2s ease, transform 0.2s ease;
+  }
+
+  .pf-header__story-text-logo {
+    font-size: 11px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+  }
+
+  .pf-header__story-badge--mobile {
+    display: none;
+  }
+
+  .pf-header__story-badge--desktop {
+    display: inline-flex;
+  }
+
+  /* General Icon Buttons */
+  .pf-header__icon-button {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 0;
+    position: relative;
+    transition: transform 0.15s ease, opacity 0.2s ease, color 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .pf-header__icon-button:hover {
+    color: #0800CF;
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  .pf-header__icon-button svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .pf-header__custom-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+  }
+
+  /* 7. Hamburger Menu Button */
+  .pf-header__menu-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 0;
+    color: #111111;
+    cursor: pointer;
+    padding: 0;
+    position: relative;
+    transition: transform 0.15s ease, opacity 0.2s ease, color 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .pf-header__menu-pill:hover {
+    background: transparent;
+    color: #0800CF;
+    transform: translateY(-1px);
+  }
+
+  .pf-header__menu-pill svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Badges (Cart & Wishlist) */
+  .pf-header__cart-count,
+  .pf-header__wishlist-bubble {
+    position: absolute;
+    top: -3px;
+    right: -5px;
+    min-width: 15px;
+    height: 15px;
+    border-radius: 999px;
+    background: #0800CF;
+    color: #ffffff;
+    font-size: 9.5px;
+    font-weight: 700;
+    line-height: 15px;
+    text-align: center;
+    padding-inline: 3px;
+    box-sizing: border-box;
+  }
+
+  /* ==========================================================================
+     CLEAN STRUCTURED STORY MODAL VIEWER
+     ========================================================================== */
+  .pf-story-modal,
+  .pf-story-modal *,
+  .pf-story-modal *:focus,
+  .pf-story-modal *:active {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+    -webkit-touch-callout: none !important;
+  }
+
+  .pf-story-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483647 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.28s;
+    user-select: none;
+    -webkit-user-select: none;
+    box-sizing: border-box;
+  }
+
+  .pf-story-modal[hidden] {
+    display: none !important;
+  }
+
+  .pf-story-modal.is-active {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  body.story-modal-open {
+    overflow: hidden !important;
+  }
+
+  body.story-modal-open .stagmenfashion-mobile-nav {
+    display: none !important;
+  }
+
+  .pf-story-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    cursor: pointer;
+    z-index: 1;
+  }
+
+  .pf-story-modal__wrapper {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    width: 100%;
+    height: 100%;
+    max-height: 100dvh;
+    padding: 20px 16px;
+    box-sizing: border-box;
+  }
+
+  /* Main Portrait Story Card */
+  .pf-story-modal__card {
+    position: relative;
+    width: 100%;
+    max-width: 410px;
+    height: 100%;
+    max-height: min(720px, calc(100dvh - 36px));
+    aspect-ratio: 9 / 16;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #0d0d0f;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.12);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    transform: scale(0.96);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .pf-story-modal.is-active .pf-story-modal__card {
+    transform: scale(1);
+  }
+
+  /* Story Media Stage & Preloader */
+  .pf-story-modal__media-stage {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: #121214;
+    overflow: hidden;
+  }
+
+  .pf-story-modal__loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #141418;
+    z-index: 2;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+  }
+
+  .pf-story-modal__loader.is-active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .pf-story-modal__spinner {
+    width: 34px;
+    height: 34px;
+    border: 2.5px solid rgba(255, 255, 255, 0.18);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: pfStorySpin 0.75s linear infinite;
+  }
+
+  @keyframes pfStorySpin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .pf-story-modal__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0;
+    transform: scale(1.02);
+    transition: opacity 0.28s ease, transform 0.4s ease;
+  }
+
+  .pf-story-modal__image.is-loaded {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Scrim Gradients */
+  .pf-story-modal__scrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .pf-story-modal__scrim--top {
+    top: 0;
+    height: 110px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.08) 60%, transparent 100%);
+  }
+
+  .pf-story-modal__scrim--bottom {
+    bottom: 0;
+    height: 90px;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.08) 60%, transparent 100%);
+  }
+
+  /* Card Header: Progress Bar & Brand Controls */
+  .pf-story-modal__card-header {
+    position: relative;
+    z-index: 6;
+    padding: 14px 16px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pf-story-modal__progress-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .pf-story-modal__progress-segment {
+    flex: 1;
+    height: 2.5px;
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .pf-story-modal__progress-fill {
+    position: absolute;
+    inset: 0;
+    background: #ffffff;
+    width: 0%;
+    border-radius: 999px;
+  }
+
+  .pf-story-modal__progress-fill.is-finished {
+    width: 100%;
+  }
+
+  .pf-story-modal__card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .pf-story-modal__brand-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .pf-story-modal__avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #000000;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+
+  .pf-story-modal__avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .pf-story-modal__avatar-text {
+    font-size: 11px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+  }
+
+  .pf-story-modal__brand-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .pf-story-modal__brand-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .pf-story-modal__story-tag {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.78);
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+  }
+
+  .pf-story-modal__controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pf-story-modal__icon-btn {
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+  }
+
+  .pf-story-modal__icon-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.08);
+  }
+
+  /* Card Bottom Footer */
+  .pf-story-modal__card-footer {
+    position: relative;
+    z-index: 6;
+    padding: 8px 16px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .pf-story-modal__cta-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: auto;
+    background: #ffffff;
+    color: #111111;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 4px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .pf-story-modal__cta-btn:hover {
+    background: #f4f4f7;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  .pf-story-modal__cta-btn svg {
+    transition: transform 0.15s ease;
+  }
+
+  .pf-story-modal__cta-btn:hover svg {
+    transform: translateX(2px);
+  }
+
+  /* Desktop Nav Arrows */
+  .pf-story-modal__nav-arrow {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+    padding: 0;
+    flex-shrink: 0;
+  }
+
+  .pf-story-modal__nav-arrow:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.08);
+  }
+
+  .pf-story-modal__nav-arrow svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Tap Zones for Quick Navigation */
+  .pf-story-modal__tap {
+    position: absolute;
+    top: 70px;
+    bottom: 90px;
+    z-index: 5;
+    cursor: pointer;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+    -webkit-touch-callout: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+
+  .pf-story-modal__tap:focus,
+  .pf-story-modal__tap:active,
+  .pf-story-modal__tap:focus-visible,
+  .pf-story-modal__tap:hover {
+    outline: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+  }
+
+  .pf-story-modal__tap--left {
+    left: 0;
+    width: 40%;
+  }
+
+  .pf-story-modal__tap--right {
+    right: 0;
+    width: 60%;
+  }
+
+  @media (max-width: 767px) {
+    .pf-story-modal__backdrop {
+      background: transparent !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      display: none !important;
+    }
+
+    .pf-story-modal__scrim,
+    .pf-story-modal__scrim--top,
+    .pf-story-modal__scrim--bottom {
+      display: none !important;
+      background: transparent !important;
+    }
+
+    .pf-story-modal__wrapper {
+      padding: 0 !important;
+      width: 100vw !important;
+      height: 100dvh !important;
+      max-height: 100dvh !important;
+    }
+
+    .pf-story-modal__nav-arrow {
+      display: none !important;
+    }
+
+    .pf-story-modal__card {
+      max-width: 100% !important;
+      width: 100% !important;
+      height: 100dvh !important;
+      max-height: 100dvh !important;
+      aspect-ratio: auto !important;
+      border-radius: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    .pf-story-modal__card-header {
+      padding-top: max(16px, env(safe-area-inset-top)) !important;
+      padding-left: 14px !important;
+      padding-right: 14px !important;
+    }
+
+    .pf-story-modal__card-footer {
+      padding-bottom: max(28px, env(safe-area-inset-bottom)) !important;
+      padding-left: 14px !important;
+      padding-right: 14px !important;
+    }
+  }
+
+  /* Slide-out Menu Drawer Styles */
+  .pf-header__drawer {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 1000000 !important;
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+  }
+
+  /* Completely hide mobile bottom nav bar when drawer is open */
+  body.pf-drawer-open .stagmenfashion-mobile-nav,
+  body.pf-drawer-open .stagmenfashion-mobile-tabs,
+  .pf-header__drawer:not([hidden]) ~ .stagmenfashion-mobile-nav,
+  .pf-header__drawer:not([hidden]) ~ .stagmenfashion-mobile-tabs,
+  html:has(.pf-header__drawer:not([hidden])) .stagmenfashion-mobile-nav,
+  html:has(.pf-header__drawer:not([hidden])) .stagmenfashion-mobile-tabs {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(105%) !important;
+    visibility: hidden !important;
+  }
+
+  .pf-header__drawer[hidden] {
+    display: none !important;
+  }
+
+  .pf-header__drawer-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    border: 0 !important;
+    background: rgba(0, 0, 0, 0.45) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    cursor: pointer !important;
+    z-index: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    animation: pfDrawerFadeIn 0.25s ease;
+  }
+
+  @keyframes pfDrawerFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .pf-header__drawer-panel {
+    position: relative !important;
+    z-index: 2 !important;
+    background: #ffffff !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 16px 0 50px rgba(0, 0, 0, 0.18) !important;
+    padding: 20px 22px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    color: #111111 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 380px !important;
+    max-width: calc(100vw - 44px) !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    box-sizing: border-box !important;
+    animation: pfDrawerSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes pfDrawerSlideIn {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  .pf-header__drawer-top {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    margin-bottom: 16px;
+  }
+
+  .pf-header__drawer-start {
+    grid-column: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pf-header__drawer-brand-link {
+    grid-column: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .pf-header__drawer-brand {
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .pf-header__drawer-logo {
+    max-width: 100px;
+    max-height: 32px;
+    object-fit: contain;
+  }
+
+  .pf-header__drawer-actions {
+    grid-column: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-self: end;
+    gap: 6px;
+  }
+
+  .pf-header__drawer-icon {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 999px;
+    color: inherit;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    text-decoration: none;
+  }
+
+  .pf-header__drawer-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .pf-header__drawer-links {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pf-header__drawer-link {
+    display: block;
+    color: #111111;
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    transition: opacity 0.2s, color 0.2s;
+  }
+
+  .pf-header__drawer-link:hover,
+  .pf-header__drawer-link.is-current {
+    color: #0800CF;
+    opacity: 1;
+  }
+
+  .pf-header__drawer-subgrid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 12px;
+    margin-top: 6px;
+  }
+
+  .pf-header__drawer-sublink {
+    color: rgba(17, 17, 17, 0.65);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .pf-header__drawer-sublink:hover,
+  .pf-header__drawer-sublink.is-current {
+    color: #0800CF;
+  }
+
+  .pf-header__drawer-footer {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .pf-header__drawer-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #111111;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    transition: opacity 0.2s, color 0.2s;
+  }
+
+  .pf-header__drawer-item:hover {
+    color: #0800CF;
+    opacity: 1;
+  }
+
+  .pf-header__drawer-item svg {
+    width: 17px;
+    height: 17px;
+  }
+
+
+
+  /* Responsive Rules for Mobile */
+  @media screen and (max-width: 989px) {
+    .pf-header__inner {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding: 0 14px !important;
+      height: 56px !important;
+      min-height: 56px !important;
+      gap: 10px !important;
+    }
+
+    body.template-index .content-for-layout > .shopify-section:first-child,
+    body:has(.pf-header--home) .content-for-layout > .shopify-section:first-child,
+    body:has(.pf-header--transparent) .content-for-layout > .shopify-section:first-child {
+      margin-top: calc(var(--header-height-mobile, 56px) * -1);
+    }
+
+    .pf-header__col-left {
+      display: none !important;
+    }
+
+    .pf-header__col-center {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      min-width: 0 !important;
+      overflow: visible !important;
+    }
+
+    .pf-header__col-right {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      flex: 0 0 auto !important;
+      margin-left: auto;
+    }
+
+    .pf-header__nav {
+      display: none !important;
+    }
+
+    .pf-header__hide-mobile {
+      display: none !important;
+    }
+
+    .pf-header__story-badge--desktop,
+    .pf-header__story-badge--mobile,
+    .pf-header__story-badge {
+      display: none !important;
+    }
+
+    .pf-header__brand {
+      max-width: 100%;
+    }
+
+    .pf-header__logo {
+      height: var(--logo-height-mobile, 24px) !important;
+      max-width: 120px !important;
+    }
+
+    .pf-header__brand-text {
+      font-size: 1.15rem !important;
+      letter-spacing: 0.08em !important;
+    }
+
+    .pf-header__actions {
+      gap: 8px !important;
+    }
+
+    .pf-header__icon-button {
+      width: 28px;
+      height: 28px;
+    }
+
+    .pf-header__icon-button svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .pf-header__menu-pill {
+      width: 28px;
+      height: 28px;
+    }
+
+    .pf-header__menu-pill svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .pf-header__drawer-panel {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      border-right: none !important;
+      padding: 16px 18px !important;
+    }
+  }
+
+  @media screen and (prefers-reduced-motion: reduce) {
+    .pf-header__dropdown,
+    .pf-header__nav-link,
+    .pf-header__icon-button,
+    .pf-header__menu-pill,
+    .pf-story-modal {
+      transition: none;
+    }
+  }
+</style>
+
+{% javascript %}
+  (() => {
+    // -------------------------------------------------------------
+    // Header & Drawer Logic
+    // -------------------------------------------------------------
+    const header = document.querySelector('[data-pf-header]');
+    const drawer = document.querySelector('[data-pf-header-drawer]');
+    const openButtons = document.querySelectorAll('[data-pf-header-menu]');
+    const closeButtons = document.querySelectorAll('[data-pf-header-close]');
+
+    if (drawer && drawer.parentElement !== document.body) {
+      document.body.appendChild(drawer);
+    }
+
+    const setScrollState = () => {
+      if (!header) return;
+      const isScrolled = window.scrollY > 10;
+      header.dataset.scrolled = isScrolled ? 'true' : 'false';
+      header.setAttribute('data-scrolled', isScrolled ? 'true' : 'false');
+      const h = header.offsetHeight;
+      if (h > 0) {
+        document.documentElement.style.setProperty('--header-height', `${h}px`);
+        document.documentElement.style.setProperty('--header-height-mobile', `${h}px`);
+        document.documentElement.style.setProperty('--header-group-height', `${h}px`);
+      }
+    };
+
+    const toggleMobileNav = (hide) => {
+      const mobileNavs = document.querySelectorAll('[data-stagmenfashion-mobile-nav], .stagmenfashion-mobile-nav, .stagmenfashion-mobile-tabs');
+      mobileNavs.forEach((nav) => {
+        if (hide) {
+          nav.setAttribute('data-hidden', 'true');
+          nav.style.setProperty('display', 'none', 'important');
+        } else {
+          nav.removeAttribute('data-hidden');
+          nav.style.removeProperty('display');
+        }
+      });
+    };
+
+    const openDrawer = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (!drawer) return;
+      drawer.hidden = false;
+      drawer.removeAttribute('hidden');
+      document.body.classList.add('pf-drawer-open');
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      toggleMobileNav(true);
+    };
+
+    const closeDrawer = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (!drawer) return;
+      drawer.hidden = true;
+      drawer.setAttribute('hidden', 'true');
+      document.body.classList.remove('pf-drawer-open');
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      toggleMobileNav(false);
+    };
+
+    openButtons.forEach((button) => button.addEventListener('click', openDrawer));
+    closeButtons.forEach((button) => button.addEventListener('click', closeDrawer));
+    drawer?.addEventListener('click', (event) => {
+      if (event.target === drawer) closeDrawer();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && drawer && !drawer.hidden) {
+        closeDrawer();
+      }
+    });
+
+    const updateCartCount = (count) => {
+      const countNodes = document.querySelectorAll('.pf-header__cart-count');
+      countNodes.forEach((countNode) => {
+        if (count > 0) {
+          countNode.textContent = count;
+          countNode.removeAttribute('hidden');
+          countNode.removeAttribute('aria-hidden');
+        } else {
+          countNode.textContent = '0';
+          countNode.setAttribute('hidden', 'true');
+          countNode.setAttribute('aria-hidden', 'true');
+        }
+      });
+    };
+
+    document.addEventListener('cart:update', (event) => {
+      let count = 0;
+      if (event.detail?.resource?.items !== undefined) {
+        count = event.detail.resource.items.length;
+      } else if (event.detail?.resource?.item_count !== undefined) {
+        count = event.detail.resource.items ? event.detail.resource.items.length : Number(event.detail.resource.item_count);
+      } else {
+        const comingFromProductForm = event.detail?.data?.source === 'product-form-component';
+        const currentCountNode = document.querySelector('.pf-header__cart-count');
+        const currentCount = currentCountNode ? Number(currentCountNode.textContent) : 0;
+        count = comingFromProductForm ? currentCount + Number(event.detail?.data?.itemCount ?? 0) : Number(event.detail?.data?.itemCount ?? 0);
+      }
+      updateCartCount(count);
+    });
+
+    setScrollState();
+    window.addEventListener('scroll', setScrollState, { passive: true });
+    window.addEventListener('resize', setScrollState, { passive: true });
+
+    // -------------------------------------------------------------
+    // Clean Structured Story Modal Logic & Instant Preload Fix
+    // -------------------------------------------------------------
+    const storyModal = document.getElementById('pf-story-modal');
+    const openStoryBtns = document.querySelectorAll('[data-open-story-modal]');
+    const closeStoryBtns = document.querySelectorAll('[data-story-close]');
+    const storyDataScript = document.getElementById('pf-story-data');
+
+    if (storyModal) {
+      // Ensure modal is moved to <body> so sticky header & backdrop-filter don't trap or clip it
+      if (storyModal.parentElement !== document.body) {
+        document.body.appendChild(storyModal);
+      }
+
+      let stories = [];
+      if (storyDataScript && storyDataScript.textContent.trim()) {
+        try {
+          const sanitized = storyDataScript.textContent.trim().replace(/,\s*([\]}])/g, '$1');
+          stories = JSON.parse(sanitized);
+        } catch (e) {
+          console.warn('Error parsing story data, using fallback stories', e);
+        }
+      }
+
+      // Hardened fallback: ensure stories array is never empty so modal ALWAYS opens
+      if (!Array.isArray(stories) || stories.length === 0) {
+        stories = [
+          {
+            image: "https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?auto=format&fit=crop&w=1200&q=80",
+            tag: "New Arrivals",
+            link: "/collections/all",
+            btn_text: "Shop Now"
+          },
+          {
+            image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1200&q=80",
+            tag: "Winter Drop",
+            link: "/collections/all",
+            btn_text: "Shop Now"
+          },
+          {
+            image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1200&q=80",
+            tag: "Polo Season",
+            link: "/collections/all",
+            btn_text: "Shop Now"
+          }
+        ];
+      }
+
+      const progressContainer = storyModal.querySelector('[data-story-progress-container]');
+      const storyImage = storyModal.querySelector('[data-story-image]');
+      const storyLoader = storyModal.querySelector('[data-story-loader]');
+      const storyTag = storyModal.querySelector('[data-story-tag]');
+      const storyFooterTag = storyModal.querySelector('[data-story-footer-tag]');
+      const storyCta = storyModal.querySelector('[data-story-cta]');
+      const storyBtnText = storyModal.querySelector('[data-story-btn-text]');
+      const prevBtns = storyModal.querySelectorAll('[data-story-prev], [data-story-tap-prev]');
+      const nextBtns = storyModal.querySelectorAll('[data-story-next], [data-story-tap-next]');
+      const pauseBtn = storyModal.querySelector('[data-story-pause]');
+      const pauseIcon = pauseBtn?.querySelector('.pf-story-modal__pause-icon');
+      const playIcon = pauseBtn?.querySelector('.pf-story-modal__play-icon');
+      const cardElement = storyModal.querySelector('[data-story-card]');
+
+      let currentIndex = 0;
+      let isPaused = false;
+      let isImageLoading = false;
+      let progressInterval = null;
+      const DURATION_MS = 5000;
+      const TICK_MS = 30;
+      let elapsedMs = 0;
+
+      // Image preload cache to ensure instantaneous transitions
+      const preloadedImages = new Map();
+
+      const preloadAllImages = () => {
+        stories.forEach((item) => {
+          if (item && item.image && !preloadedImages.has(item.image)) {
+            const img = new Image();
+            img.onload = () => {
+              preloadedImages.set(item.image, img);
+            };
+            img.src = item.image;
+          }
+        });
+      };
+      // Story images are preloaded when modal is opened to avoid network contention during initial page load
+
+      // Build Progress Segments
+      const buildProgressBars = () => {
+        if (!progressContainer) return;
+        progressContainer.innerHTML = '';
+        stories.forEach((_, idx) => {
+          const segment = document.createElement('div');
+          segment.className = 'pf-story-modal__progress-segment';
+          segment.innerHTML = '<div class="pf-story-modal__progress-fill"></div>';
+          segment.addEventListener('click', (e) => {
+            e.stopPropagation();
+            goToStory(idx);
+          });
+          progressContainer.appendChild(segment);
+        });
+      };
+
+      const updateProgressBars = () => {
+        const fills = progressContainer?.querySelectorAll('.pf-story-modal__progress-fill');
+        if (!fills) return;
+
+        fills.forEach((fill, idx) => {
+          if (idx < currentIndex) {
+            fill.style.width = '100%';
+            fill.classList.add('is-finished');
+          } else if (idx === currentIndex) {
+            const pct = Math.min((elapsedMs / DURATION_MS) * 100, 100);
+            fill.style.width = `${pct}%`;
+            fill.classList.remove('is-finished');
+          } else {
+            fill.style.width = '0%';
+            fill.classList.remove('is-finished');
+          }
+        });
+      };
+
+      let activeRenderToken = 0;
+
+      const renderStory = (index) => {
+        const item = stories[index];
+        if (!item) return;
+
+        const currentToken = ++activeRenderToken;
+
+        // Immediately hide current image to prevent showing old/first image while switching
+        if (storyImage) {
+          storyImage.classList.remove('is-loaded');
+        }
+
+        // Update Text & Link content immediately
+        if (storyTag) {
+          storyTag.textContent = item.tag || 'Featured';
+        }
+        if (storyFooterTag) {
+          storyFooterTag.textContent = item.tag || 'Featured';
+        }
+        if (storyCta) {
+          storyCta.href = item.link || '#';
+        }
+        if (storyBtnText) {
+          storyBtnText.textContent = item.btn_text || 'Shop Now';
+        }
+
+        elapsedMs = 0;
+        updateProgressBars();
+
+        // Check if image is already cached
+        const preloaded = preloadedImages.get(item.image);
+        const isAlreadyComplete = preloaded && preloaded.complete && preloaded.naturalWidth > 0;
+
+        if (isAlreadyComplete) {
+          if (storyLoader) storyLoader.classList.remove('is-active');
+          isImageLoading = false;
+          if (storyImage) {
+            storyImage.src = item.image;
+            storyImage.classList.add('is-loaded');
+          }
+        } else {
+          // Show loader and pause progress while downloading
+          if (storyLoader) storyLoader.classList.add('is-active');
+          isImageLoading = true;
+
+          const tempImg = new Image();
+          tempImg.onload = () => {
+            if (currentToken !== activeRenderToken) return;
+            preloadedImages.set(item.image, tempImg);
+            if (storyLoader) storyLoader.classList.remove('is-active');
+            isImageLoading = false;
+            if (storyImage) {
+              storyImage.src = item.image;
+              storyImage.classList.add('is-loaded');
+            }
+          };
+          tempImg.onerror = () => {
+            if (currentToken !== activeRenderToken) return;
+            if (storyLoader) storyLoader.classList.remove('is-active');
+            isImageLoading = false;
+            if (storyImage) {
+              const fallbackUrl = "https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?auto=format&fit=crop&w=1200&q=80";
+              storyImage.src = fallbackUrl;
+              storyImage.classList.add('is-loaded');
+            }
+          };
+          tempImg.src = item.image;
+        }
+      };
+
+      const startTimer = () => {
+        clearInterval(progressInterval);
+        progressInterval = setInterval(() => {
+          if (isPaused || isImageLoading) return;
+
+          elapsedMs += TICK_MS;
+          updateProgressBars();
+
+          if (elapsedMs >= DURATION_MS) {
+            if (currentIndex < stories.length - 1) {
+              currentIndex++;
+              renderStory(currentIndex);
+            } else {
+              closeStory();
+            }
+          }
+        }, TICK_MS);
+      };
+
+      const goToStory = (idx) => {
+        if (idx < 0) {
+          currentIndex = 0;
+        } else if (idx >= stories.length) {
+          closeStory();
+          return;
+        } else {
+          currentIndex = idx;
+        }
+        renderStory(currentIndex);
+      };
+
+      const openStory = () => {
+        if (storyModal.parentElement !== document.body) {
+          document.body.appendChild(storyModal);
+        }
+
+        storyModal.removeAttribute('hidden');
+        storyModal.hidden = false;
+        storyModal.setAttribute('aria-hidden', 'false');
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+        document.body.classList.add('story-modal-open');
+
+        preloadAllImages();
+        buildProgressBars();
+        currentIndex = 0;
+        isPaused = false;
+        renderStory(0);
+
+        requestAnimationFrame(() => {
+          storyModal.classList.add('is-active');
+        });
+
+        startTimer();
+      };
+
+      const closeStory = () => {
+        clearInterval(progressInterval);
+        storyModal.classList.remove('is-active');
+        storyModal.setAttribute('aria-hidden', 'true');
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+        document.body.classList.remove('story-modal-open');
+
+        setTimeout(() => {
+          storyModal.hidden = true;
+          storyModal.setAttribute('hidden', '');
+          if (storyImage) storyImage.classList.remove('is-loaded');
+        }, 280);
+      };
+
+      const togglePause = (forcePause) => {
+        if (typeof forcePause === 'boolean') {
+          isPaused = forcePause;
+        } else {
+          isPaused = !isPaused;
+        }
+
+        if (pauseIcon && playIcon) {
+          if (isPaused) {
+            pauseIcon.style.display = 'none';
+            playIcon.style.display = 'block';
+          } else {
+            pauseIcon.style.display = 'block';
+            playIcon.style.display = 'none';
+          }
+        }
+      };
+
+      // Press & Hold to Pause Feature (Instagram Style)
+      let holdTimer = null;
+      let isHolding = false;
+
+      if (cardElement) {
+        const handleHoldStart = (e) => {
+          if (e.target.closest('[data-story-close], [data-story-pause], [data-story-cta], .pf-story-modal__progress-segment')) {
+            return;
+          }
+          holdTimer = setTimeout(() => {
+            isHolding = true;
+            togglePause(true);
+          }, 180);
+        };
+
+        const handleHoldEnd = () => {
+          clearTimeout(holdTimer);
+          if (isHolding) {
+            isHolding = false;
+            togglePause(false);
+          }
+        };
+
+        cardElement.addEventListener('mousedown', handleHoldStart);
+        cardElement.addEventListener('mouseup', handleHoldEnd);
+        cardElement.addEventListener('mouseleave', handleHoldEnd);
+        cardElement.addEventListener('touchstart', handleHoldStart, { passive: true });
+        cardElement.addEventListener('touchend', handleHoldEnd, { passive: true });
+      }
+
+      openStoryBtns.forEach((btn) => btn.addEventListener('click', openStory));
+      closeStoryBtns.forEach((btn) => btn.addEventListener('click', closeStory));
+
+      // Document-level event delegation for opening & closing reliably from anywhere
+      document.addEventListener('click', (e) => {
+        const openBtn = e.target.closest('[data-open-story-modal]');
+        if (openBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          openStory();
+          return;
+        }
+
+        const closeBtn = e.target.closest('[data-story-close]');
+        if (closeBtn && !storyModal.hidden) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeStory();
+          return;
+        }
+      });
+
+      prevBtns.forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          goToStory(currentIndex - 1);
+        });
+      });
+
+      nextBtns.forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          goToStory(currentIndex + 1);
+        });
+      });
+
+      pauseBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        togglePause();
+      });
+
+      // Keyboard support
+      window.addEventListener('keydown', (e) => {
+        if (storyModal.hidden) return;
+        if (e.key === 'Escape') closeStory();
+        if (e.key === 'ArrowLeft') goToStory(currentIndex - 1);
+        if (e.key === 'ArrowRight') goToStory(currentIndex + 1);
+        if (e.key === ' ') {
+          e.preventDefault();
+          togglePause();
+        }
+      });
+    }
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "text",
+      "id": "brand_name",
+      "label": "Brand Name",
+      "default": "BLUORNƏ"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "header",
+      "content": "Story Badge (Logo with Blue Glow)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_story_badge",
+      "label": "Show Story Button",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "custom_story_avatar",
+      "label": "Story Avatar / Logo (optional)",
+      "info": "Used for both the header story ring and the story modal viewer avatar. Leave blank to automatically use your store logo."
+    },
+    {
+      "type": "header",
+      "content": "Other Action Icons"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_location",
+      "label": "Show Store / Location Pin Icon",
+      "default": true
+    },
+    {
+      "type": "url",
+      "id": "location_link",
+      "label": "Location / Store Link"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "Show Search Icon",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "label": "Show Account Icon",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_wishlist",
+      "label": "Show Wishlist Icon",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "custom_wishlist_icon",
+      "label": "Custom Wishlist Icon (optional)"
+    },
+    {
+      "type": "image_picker",
+      "id": "custom_cart_icon",
+      "label": "Custom Cart Icon (optional)"
+    },
+    {
+      "type": "header",
+      "content": "Colors & Layout"
+    },
+    {
+      "type": "color",
+      "id": "header_background",
+      "label": "Header background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "header_text_color",
+      "label": "Header text color",
+      "default": "#111111"
+    },
+    {
+      "type": "checkbox",
+      "id": "transparent_on_home",
+      "label": "Transparent on Home Page",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Mobile & Tablet Navigation Bar"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_mobile_nav",
+      "label": "Enable Mobile & Tablet Navigation Bar",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "mobile_nav_style",
+      "label": "Navigation Bar Aesthetic Style",
+      "options": [
+        {
+          "value": "modern_glass",
+          "label": "Modern Structured Glass Tab Bar (Clean & Docked)"
+        },
+        {
+          "value": "dark_luxury",
+          "label": "Dark Luxury Floating Island Capsule"
+        },
+        {
+          "value": "floating_light",
+          "label": "Light Clean Floating Island Capsule"
+        }
+      ],
+      "default": "modern_glass"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_nav_show_home",
+      "label": "Show Home Link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "mobile_nav_home_label",
+      "label": "Home Label",
+      "default": "Home"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_nav_show_collections",
+      "label": "Show Collections Link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "mobile_nav_collections_label",
+      "label": "Collections Label",
+      "default": "Collections"
+    },
+    {
+      "type": "url",
+      "id": "mobile_nav_collections_url",
+      "label": "Collections Custom URL (optional)"
+    },
+    {
+      "type": "text",
+      "id": "mobile_nav_story_label",
+      "label": "Stories Label",
+      "default": "Stories"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_nav_show_about",
+      "label": "Show About Link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "mobile_nav_about_label",
+      "label": "About Label",
+      "default": "About"
+    },
+    {
+      "type": "url",
+      "id": "mobile_nav_about_url",
+      "label": "About Page URL"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_nav_show_contact",
+      "label": "Show Contact Link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "mobile_nav_contact_label",
+      "label": "Contact Label",
+      "default": "Contact"
+    },
+    {
+      "type": "url",
+      "id": "mobile_nav_contact_url",
+      "label": "Contact Page URL"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_nav_show_account",
+      "label": "Show Account Link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "mobile_nav_account_label",
+      "label": "Account Label",
+      "default": "Account"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "story_slide",
+      "name": "Story Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Story Image / Banner"
+        },
+        {
+          "type": "text",
+          "id": "tag",
+          "label": "Story Tag",
+          "default": "Polo Season"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection (optional)"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Button Link (if not collection)"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button Text",
+          "default": "Shop Now"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Header"
+    }
+  ]
+}
+{% endschema %}

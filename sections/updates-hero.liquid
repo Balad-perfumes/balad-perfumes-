@@ -1,0 +1,131 @@
+<link rel="stylesheet" href="{{ 'updates.css' | asset_url }}">
+<script src="{{ 'updates.js' | asset_url }}" defer></script>
+
+<section
+  id="updates-hero-{{ section.id }}"
+  class="updates-hero color-{{ section.settings.color_scheme }}"
+  style="--color-background: {{ section.settings.bg_color | default: '#ffffff' }};"
+>
+  <div class="updates-shell">
+    <div class="updates-hero__container">
+      <div class="updates-hero__top-meta">
+        <div class="updates-hero__eyebrow-wrap">
+          {% if section.settings.eyebrow != blank %}
+            <p class="updates-hero__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+          {% endif %}
+        </div>
+
+        {% if section.settings.show_live_badge %}
+          <div class="updates-hero__live-badge">
+            <span class="updates-hero__pulse-dot" aria-hidden="true"></span>
+            <span>{{ section.settings.live_badge_text | default: 'Live Studio Feed • Kochi' }}</span>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="updates-hero__main">
+        <h1 class="updates-hero__heading">
+          {% if section.settings.heading != blank %}
+            {{ section.settings.heading | escape }}
+          {% else %}
+            {{ page.title | default: blog.title | default: 'Latest Updates & Drops' }}
+          {% endif %}
+        </h1>
+
+        {% if section.settings.subheading != blank %}
+          <p class="updates-hero__subheading">{{ section.settings.subheading | escape }}</p>
+        {% endif %}
+      </div>
+
+      {% if section.settings.show_filters %}
+        <div class="updates-filters" role="tablist" aria-label="Updates Categories">
+          <button
+            type="button"
+            class="updates-filter-btn is-active"
+            data-category="all"
+            role="tab"
+            aria-selected="true"
+          >
+            All Updates
+          </button>
+          {% assign filter_categories = section.settings.filter_categories | split: ',' %}
+          {% for category in filter_categories %}
+            {% assign clean_cat = category | strip %}
+            {% if clean_cat != blank %}
+              <button
+                type="button"
+                class="updates-filter-btn"
+                data-category="{{ clean_cat | downcase | escape }}"
+                role="tab"
+                aria-selected="false"
+              >
+                {{ clean_cat }}
+              </button>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Updates hero",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow tag",
+      "default": "Stag Men Fashion Journal & Drops"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Latest Updates & Drops"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Behind-the-scenes fittings, exclusive drop notes, fabric engineering insights, and daily streetwear stories from our studio."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_live_badge",
+      "label": "Show live studio indicator",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "live_badge_text",
+      "label": "Live badge text",
+      "default": "Live Studio Feed • Kochi"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_filters",
+      "label": "Show category filter tabs",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "filter_categories",
+      "label": "Filter categories (comma-separated)",
+      "default": "Drops, Styling, Behind The Scenes, Fabric Notes, Community"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Updates hero"
+    }
+  ]
+}
+{% endschema %}

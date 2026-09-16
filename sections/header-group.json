@@ -1,0 +1,51 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "type": "header",
+  "name": "Header",
+  "sections": {
+    "pf_header": {
+      "type": "header",
+      "settings": {
+        "brand_name": "Stag Men Fashion",
+        "menu": "main-menu",
+        "show_story_badge": true,
+        "custom_story_avatar": "shopify://shop_images/story-icon_8.png",
+        "show_location": true,
+        "location_link": "/pages/our-stores",
+        "show_search": true,
+        "show_account": true,
+        "show_wishlist": true,
+        "header_background": "#ffffff",
+        "header_text_color": "#111111",
+        "transparent_on_home": true,
+        "enable_mobile_nav": true,
+        "mobile_nav_style": "modern_glass",
+        "mobile_nav_show_home": true,
+        "mobile_nav_home_label": "Home",
+        "mobile_nav_show_collections": true,
+        "mobile_nav_collections_label": "Collections",
+        "mobile_nav_collections_url": "",
+        "mobile_nav_story_label": "Stories",
+        "mobile_nav_show_about": true,
+        "mobile_nav_about_label": "About",
+        "mobile_nav_about_url": "",
+        "mobile_nav_show_contact": true,
+        "mobile_nav_contact_label": "Contact",
+        "mobile_nav_contact_url": "",
+        "mobile_nav_show_account": true,
+        "mobile_nav_account_label": "Account"
+      }
+    }
+  },
+  "order": [
+    "pf_header"
+  ]
+}

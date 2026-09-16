@@ -1,0 +1,53 @@
+.pf-gift-card[data-loading='true'] .pf-gift-card__button {
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+.pf-gift-card__button.is-loading {
+  position: relative;
+}
+
+.pf-gift-card__button.is-loading::after {
+  content: '';
+  position: absolute;
+  right: 18px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid rgb(255 255 255 / 0.35);
+  border-top-color: #fff;
+  animation: pf-gift-card-spin 0.8s linear infinite;
+}
+
+.pf-gift-card__toast[hidden] {
+  display: none;
+}
+
+.pf-gift-card__toast.is-visible {
+  display: flex;
+  animation: pf-gift-card-toast-in 0.28s ease;
+}
+
+@keyframes pf-gift-card-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pf-gift-card-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .pf-gift-card__toast {
+    left: 16px;
+    right: 16px;
+  }
+}

@@ -1,0 +1,81 @@
+{% liquid
+  assign quote_words = section.settings.text | strip_html | split: ' '
+%}
+
+<section
+  class="about-quote-banner color-{{ section.settings.color_scheme }}"
+  {% if section.settings.enable_animations %}data-about-reveal{% endif %}
+>
+  <div class="about-quote-banner__shell">
+    <p class="about-quote-banner__text" data-quote-words>
+      {% for word in quote_words %}
+        <span class="about-quote-banner__word{% if forloop.first %} is-active{% endif %}" data-quote-word>
+          {{- word -}}
+        </span>
+      {% endfor %}
+    </p>
+  </div>
+</section>
+
+<style>
+  .about-quote-banner {
+    background: #0800CF;
+    color: #fff;
+    padding: clamp(140px, 18vw, 260px) 0;
+  }
+
+  .about-quote-banner__shell {
+    width: min(100%, 1460px);
+    margin: 0 auto;
+    padding-inline: clamp(20px, 4vw, 44px);
+  }
+
+  .about-quote-banner__text {
+    margin: 0 auto;
+    max-width: 20ch;
+    text-align: center;
+    font-size: clamp(2.1rem, 5vw, 4.85rem);
+    line-height: 0.98;
+    letter-spacing: -0.06em;
+    text-wrap: balance;
+    font-weight: 400;
+  }
+
+  .about-quote-banner__word {
+    display: inline-block;
+    opacity: 0.18;
+    transition: opacity 0.25s ease, transform 0.25s ease, color 0.25s ease;
+    transform: translateY(6px);
+  }
+
+  .about-quote-banner__word.is-active,
+  .about-quote-banner__word.is-highlight {
+    opacity: 1;
+    transform: translateY(0);
+    color: #fff;
+  }
+
+  @media screen and (max-width: 749px) {
+    .about-quote-banner {
+      padding: 110px 0;
+    }
+
+    .about-quote-banner__text {
+      max-width: 17ch;
+      font-size: clamp(1.7rem, 9.5vw, 3rem);
+      line-height: 0.96;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "About quote banner",
+  "settings": [
+    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>At Stag Men Fashion, we don’t follow fast trends. We craft statement menswear and streetwear. We believe your daily style should never feel templated — it should feel authentically you.</p>" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "checkbox", "id": "enable_animations", "label": "Enable animations", "default": true }
+  ],
+  "presets": [{ "name": "About quote banner" }]
+}
+{% endschema %}

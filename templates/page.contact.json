@@ -1,0 +1,245 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "contact_hero": {
+      "type": "contact-hero",
+      "settings": {
+        "eyebrow": "Get in touch",
+        "heading": "Let's start a conversation",
+        "subheading": "Have a question about sizing, our latest drops, order tracking, or styling advice? Our team is here to assist you every step of the way.",
+        "align": "center",
+        "color_scheme": "scheme-1",
+        "padding_top": 20,
+        "padding_bottom": 16
+      }
+    },
+    "contact_info": {
+      "type": "contact-info",
+      "blocks": {
+        "email": {
+          "type": "info",
+          "settings": {
+            "icon": "email",
+            "tag": "24h turnaround",
+            "label": "Email Concierge",
+            "text": "hello@stagmenfashion.com",
+            "subtext": "For order updates, sizing advice & support",
+            "link": "mailto:hello@stagmenfashion.com",
+            "link_label": "Send an email"
+          }
+        },
+        "phone": {
+          "type": "info",
+          "settings": {
+            "icon": "phone",
+            "tag": "Direct line",
+            "label": "Studio Phone",
+            "text": "+91 98765 43210",
+            "subtext": "Mon - Sat: 10:00 AM – 6:30 PM",
+            "link": "tel:+919876543210",
+            "link_label": "Call now"
+          }
+        },
+        "address": {
+          "type": "info",
+          "settings": {
+            "icon": "location",
+            "tag": "Flagship",
+            "label": "Fashion Studio",
+            "text": "Stag Men Fashion, Kochi, Kerala",
+            "subtext": "Store visits & tactile fabric styling sessions",
+            "link": "https://maps.google.com/?q=Kochi,Kerala",
+            "link_label": "Get directions"
+          }
+        },
+        "hours": {
+          "type": "info",
+          "settings": {
+            "icon": "clock",
+            "tag": "Active",
+            "label": "Studio Hours",
+            "text": "Mon–Sat, 10:00 AM – 6:30 PM",
+            "subtext": "Sunday by private appointment only",
+            "link": "#contact-form",
+            "link_label": "Book a styling session"
+          }
+        }
+      },
+      "block_order": [
+        "email",
+        "phone",
+        "address",
+        "hours"
+      ],
+      "settings": {
+        "eyebrow": "",
+        "heading": "",
+        "subheading": "",
+        "columns_desktop": "4",
+        "color_scheme": "scheme-1",
+        "padding_top": 0,
+        "padding_bottom": 24
+      }
+    },
+    "contact_form": {
+      "type": "contact-form",
+      "settings": {
+        "eyebrow": "Inquiries & Styling",
+        "heading": "Let's craft your next fit together",
+        "subheading": "Fill in the details below and our concierge team will get back to you with guidance and details within one business day.",
+        "feature_1_title": "Styling & Sizing Guidance",
+        "feature_1_desc": "Personal styling advice, fit recommendations, and drop alerts tailored to you.",
+        "feature_2_title": "Pan-India Express Delivery",
+        "feature_2_desc": "Secure, tracked shipping straight to your door with Cash on Delivery and easy 7-day exchanges.",
+        "feature_3_title": "Creator & Stylist Collabs",
+        "feature_3_desc": "Exclusive gifting, stylist loans, and partnership opportunities for creators.",
+        "direct_contact_note": "Prefer direct communication? Call us at +91 98765 43210 or email hello@stagmenfashion.com.",
+        "button_label": "Send Message",
+        "success_message": "Thank you for reaching out! We've received your inquiry and will be in touch shortly.",
+        "privacy_text": "We value your privacy and will never share your contact information with third parties.",
+        "color_scheme": "scheme-1",
+        "padding_top": 16,
+        "padding_bottom": 28
+      }
+    },
+    "contact_map": {
+      "type": "contact-map",
+      "settings": {
+        "eyebrow": "Flagship Studio",
+        "heading": "Visit our studio",
+        "subheading": "Experience our collection in person, feel the heavyweight fabrics, and get styled by our team.",
+        "iframe_code": "<iframe src=\"https://www.google.com/maps?q=Kochi&output=embed\" width=\"100%\" height=\"100%\" style=\"border:0;\" allowfullscreen loading=\"lazy\" referrerpolicy=\"no-referrer-when-downgrade\"></iframe>",
+        "show_location_card": true,
+        "studio_name": "Stag Men Fashion Studio",
+        "studio_address": "Kochi, Kerala, India",
+        "studio_hours": "Mon - Sat: 10:00 AM - 6:30 PM",
+        "directions_url": "https://maps.google.com/?q=Kochi,Kerala",
+        "directions_label": "Open in Google Maps",
+        "color_scheme": "scheme-1",
+        "padding_top": 16,
+        "padding_bottom": 28
+      }
+    },
+    "contact_faq": {
+      "type": "contact-faq",
+      "blocks": {
+        "faq_1": {
+          "type": "faq",
+          "settings": {
+            "question": "How quickly do you respond to inquiries?",
+            "answer": "<p>Our concierge team typically reviews and replies to all messages within 2 to 4 business hours during studio hours (Mon–Sat, 10 AM to 6:30 PM IST).</p>"
+          }
+        },
+        "faq_2": {
+          "type": "faq",
+          "settings": {
+            "question": "Do you offer Cash on Delivery and Pan-India shipping?",
+            "answer": "<p>Yes! We offer COD across most pincodes in India and express doorstep delivery with end-to-end tracking.</p>"
+          }
+        },
+        "faq_3": {
+          "type": "faq",
+          "settings": {
+            "question": "How do I choose the right size and fit?",
+            "answer": "<p>Our pieces feature contemporary relaxed, boxy, and tailored silhouettes for men. Check the size chart on each product page or reach out to our stylists for personalized size recommendations.</p>"
+          }
+        },
+        "faq_4": {
+          "type": "faq",
+          "settings": {
+            "question": "What is your return and exchange policy?",
+            "answer": "<p>We offer hassle-free 7-day exchanges on all unworn items with tags intact if you ever need a different size or fit.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "faq_1",
+        "faq_2",
+        "faq_3",
+        "faq_4"
+      ],
+      "settings": {
+        "eyebrow": "Common Questions",
+        "heading": "Frequently asked questions",
+        "subheading": "Quick answers to help guide your shopping and styling experience.",
+        "open_first": true,
+        "footer_note": "Have a question not listed here? Please send us a message above or email hello@stagmenfashion.com.",
+        "color_scheme": "scheme-1",
+        "padding_top": 16,
+        "padding_bottom": 28
+      }
+    },
+    "contact_social": {
+      "type": "contact-social",
+      "blocks": {
+        "instagram": {
+          "type": "social",
+          "settings": {
+            "platform": "instagram",
+            "label": "Instagram",
+            "handle": "@stagmenfashion.official",
+            "url": "https://www.instagram.com/"
+          }
+        },
+        "pinterest": {
+          "type": "social",
+          "settings": {
+            "platform": "pinterest",
+            "label": "Pinterest",
+            "handle": "stagmenfashion",
+            "url": "https://www.pinterest.com/"
+          }
+        },
+        "facebook": {
+          "type": "social",
+          "settings": {
+            "platform": "facebook",
+            "label": "Facebook",
+            "handle": "stagmenfashionofficial",
+            "url": "https://www.facebook.com/"
+          }
+        },
+        "linkedin": {
+          "type": "social",
+          "settings": {
+            "platform": "linkedin",
+            "label": "LinkedIn",
+            "handle": "stagmenfashion",
+            "url": "https://www.linkedin.com/"
+          }
+        }
+      },
+      "block_order": [
+        "instagram",
+        "pinterest",
+        "facebook",
+        "linkedin"
+      ],
+      "settings": {
+        "eyebrow": "Community & Stories",
+        "heading": "Connect across social",
+        "subheading": "Follow our styling guides, newly dropped collections, and daily outfit inspirations.",
+        "columns_desktop": "4",
+        "color_scheme": "scheme-1",
+        "padding_top": 16,
+        "padding_bottom": 32
+      }
+    }
+  },
+  "order": [
+    "contact_hero",
+    "contact_info",
+    "contact_form",
+    "contact_map",
+    "contact_faq",
+    "contact_social"
+  ]
+}

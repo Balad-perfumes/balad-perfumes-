@@ -1,0 +1,540 @@
+{% liquid
+  assign per_page = section.settings.collections_per_page | default: 36
+  assign columns_desktop = section.settings.columns_desktop | default: 6
+  assign columns_mobile = section.settings.columns_mobile | default: '2'
+  assign card_radius = section.settings.card_radius | default: 5
+%}
+
+<div
+  class="smf-collections-page color-{{ section.settings.color_scheme }}"
+  style="
+    --smf-colls-radius: {{ card_radius }}px;
+  "
+>
+  <div class="smf-colls-shell">
+    
+    <!-- Optional Theme Blocks (if any) -->
+    {%- if section.blocks.size > 0 -%}
+      <div class="smf-colls-blocks">
+        {%- content_for 'blocks' -%}
+      </div>
+    {%- endif -%}
+
+    <!-- ── Collections Grid ── -->
+    {% paginate collections by per_page %}
+      <div class="smf-colls-grid smf-colls-grid--d-{{ columns_desktop }} smf-colls-grid--m-{{ columns_mobile }}">
+        {% for coll in collections %}
+          {% liquid
+            if coll == blank or coll.title == blank
+              continue
+            endif
+
+            if section.settings.hide_empty_collections and coll.all_products_count == 0
+              continue
+            endif
+
+            assign card_title = coll.title
+
+            assign card_image = coll.image | default: coll.featured_image
+            if card_image == blank and coll.products.size > 0
+              assign first_prod = coll.products.first
+              assign card_image = first_prod.featured_image | default: first_prod.images.first
+            endif
+
+            assign card_link = coll.url
+            if card_link == blank
+              assign card_link = '#'
+            endif
+
+            assign product_count = coll.all_products_count | default: coll.products_count | default: 0
+          %}
+
+          <a href="{{ card_link }}" class="smf-cat-card">
+            <!-- Card Media / Portrait Box -->
+            <div class="smf-cat-card__media">
+              {% if card_image != blank %}
+                {{ card_image | image_url: width: 600 | image_tag:
+                  loading: 'lazy',
+                  decoding: 'async',
+                  class: 'smf-cat-card__img',
+                  widths: '240,360,480,600',
+                  sizes: '(max-width: 749px) 45vw, (max-width: 1024px) 30vw, 16vw',
+                  alt: card_title | escape
+                }}
+              {% else %}
+                <div class="smf-cat-card__placeholder">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                </div>
+              {% endif %}
+
+              <!-- Subtle Dark Vignette -->
+              <div class="smf-cat-card__vignette"></div>
+
+              <!-- Floating Frosted Glass Badge -->
+              <div class="smf-cat-card__badge">
+                <div class="smf-cat-card__badge-info">
+                  <span class="smf-cat-card__badge-title">{{ card_title }}</span>
+                  {% if section.settings.show_product_count != false %}
+                    <span class="smf-cat-card__badge-count">
+                      {% if product_count > 0 %}
+                        {{ product_count }} {{ product_count | pluralize: 'item', 'items' }}
+                      {% else %}
+                        Explore
+                      {% endif %}
+                    </span>
+                  {% endif %}
+                </div>
+                <div class="smf-cat-card__badge-action" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" fill="none" width="12" height="12">
+                    <path d="M4 12L12 4M12 4H6M12 4V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination (if more than per_page items) -->
+      {% if paginate.pages > 1 %}
+        <div class="smf-colls-pagination">
+          {% if paginate.previous %}
+            <a href="{{ paginate.previous.url }}" class="smf-colls-page-btn smf-colls-page-btn--prev" aria-label="Previous page">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+              <span>Previous</span>
+            </a>
+          {% endif %}
+
+          <div class="smf-colls-page-numbers">
+            {% for part in paginate.parts %}
+              {% if part.is_link %}
+                <a href="{{ part.url }}" class="smf-colls-page-num">{{ part.title }}</a>
+              {% else %}
+                {% if part.title == paginate.current_page %}
+                  <span class="smf-colls-page-num is-active">{{ part.title }}</span>
+                {% else %}
+                  <span class="smf-colls-page-num is-dots">{{ part.title }}</span>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          {% if paginate.next %}
+            <a href="{{ paginate.next.url }}" class="smf-colls-page-btn smf-colls-page-btn--next" aria-label="Next page">
+              <span>Next</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endpaginate %}
+
+  </div>
+</div>
+
+<style>
+  /* ════════════════════════════════════════════════════════════════
+     STAGMENFASHION COLLECTION LIST PAGE - MODERN EDITORIAL CARDS
+     Matching homepage section padding and layout
+     ════════════════════════════════════════════════════════════════ */
+  .smf-collections-page {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding-top: 0;
+    padding-bottom: clamp(12px, 3.5vw, 16px);
+    background: var(--color-background, #ffffff);
+    color: var(--color-foreground, #111111);
+  }
+
+  .smf-colls-shell {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 10px 36px clamp(10px, 3.5vw, 12px);
+    box-sizing: border-box;
+  }
+
+  /* ── Grid Layouts ── */
+  .smf-colls-grid {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .smf-colls-grid--d-6 {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .smf-colls-grid--d-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .smf-colls-grid--d-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .smf-colls-grid--d-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .smf-colls-grid--d-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* ── Editorial Card (Matching Homepage) ── */
+  .smf-cat-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--smf-colls-radius, 12px);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    background: #f4f4f6;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  }
+
+  .smf-cat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+  }
+
+  /* ── Card Media ── */
+  .smf-cat-card__media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    background: #eaeaea;
+    border-radius: var(--smf-colls-radius, 12px);
+  }
+
+  .smf-cat-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .smf-cat-card:hover .smf-cat-card__img {
+    transform: scale(1.06);
+  }
+
+  .smf-cat-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f2f2f4 0%, #e5e5e8 100%);
+    color: rgba(17, 17, 17, 0.3);
+  }
+
+  .smf-cat-card__placeholder svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .smf-cat-card__vignette {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.42) 0%,
+      rgba(0, 0, 0, 0.08) 50%,
+      rgba(0, 0, 0, 0) 100%
+    );
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .smf-cat-card:hover .smf-cat-card__vignette {
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.52) 0%,
+      rgba(0, 0, 0, 0.12) 50%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  }
+
+  /* ── Floating Frosted Glass Badge ── */
+  .smf-cat-card__badge {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    padding: 8px 10px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(14px) saturate(180%);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .smf-cat-card:hover .smf-cat-card__badge {
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.14);
+    transform: translateY(-2px);
+  }
+
+  .smf-cat-card__badge-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .smf-cat-card__badge-title {
+    font-family: var(--font-heading--family, sans-serif);
+    font-size: 13px;
+    font-weight: 700;
+    color: #111111;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .smf-cat-card__badge-count {
+    font-size: 9.5px;
+    color: #6b7280;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .smf-cat-card__badge-action {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #111111;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.25s ease, background-color 0.25s ease;
+  }
+
+  .smf-cat-card:hover .smf-cat-card__badge-action {
+    background: var(--color-primary, #0800cf);
+    transform: scale(1.08) rotate(45deg);
+  }
+
+  .smf-cat-card__badge-action svg {
+    transition: transform 0.25s ease;
+  }
+
+  /* ── Pagination ── */
+  .smf-colls-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(17, 17, 17, 0.08);
+  }
+
+  .smf-colls-page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .smf-colls-page-num,
+  .smf-colls-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #111111;
+    text-decoration: none;
+    background: #ffffff;
+    border: 1px solid rgba(17, 17, 17, 0.12);
+    transition: all 0.2s ease;
+  }
+
+  .smf-colls-page-num:hover,
+  .smf-colls-page-btn:hover {
+    background: #111111;
+    color: #ffffff;
+    border-color: #111111;
+  }
+
+  .smf-colls-page-num.is-active {
+    background: var(--color-primary, #0800cf);
+    color: #ffffff;
+    border-color: var(--color-primary, #0800cf);
+  }
+
+  .smf-colls-page-num.is-dots {
+    border: none;
+    background: transparent;
+    cursor: default;
+    color: #888888;
+  }
+
+  .smf-colls-page-btn {
+    gap: 6px;
+    padding: 0 14px;
+  }
+
+  /* ═══ Responsive ═══ */
+  @media screen and (min-width: 1025px) and (max-width: 1400px) {
+    .smf-colls-grid--d-6 {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .smf-colls-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 10px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .smf-collections-page {
+      padding-top: 0;
+      padding-bottom: 20px;
+    }
+
+    .smf-colls-shell {
+      padding: 10px 10px 20px;
+    }
+
+    .smf-colls-grid {
+      gap: 8px;
+    }
+
+    .smf-colls-grid--m-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .smf-colls-grid--m-1 {
+      grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    }
+
+    .smf-cat-card__badge {
+      bottom: 6px;
+      left: 6px;
+      right: 6px;
+      padding: 8px 10px;
+      border-radius: 8px;
+    }
+
+    .smf-cat-card__badge-title {
+      font-size: 10px;
+    }
+
+    .smf-cat-card__badge-count {
+      font-size: 8.5px;
+    }
+
+    .smf-cat-card__badge-action {
+      width: 18px;
+      height: 18px;
+    }
+
+    .smf-cat-card__badge-action svg {
+      width: 10px;
+      height: 10px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Collection list",
+  "class": "ui-test-collection-list",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 6
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Columns on mobile",
+      "options": [
+        {
+          "value": "1",
+          "label": "1 column"
+        },
+        {
+          "value": "2",
+          "label": "2 columns"
+        }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "range",
+      "id": "collections_per_page",
+      "label": "Collections per page",
+      "min": 12,
+      "max": 48,
+      "step": 6,
+      "default": 36
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_count",
+      "label": "Show product count",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_empty_collections",
+      "label": "Hide empty collections",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Card radius",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    }
+  ]
+}
+{% endschema %}

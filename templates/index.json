@@ -1,0 +1,790 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "hero_slider": {
+      "type": "stagmenfashion-minimal-hero",
+      "blocks": {
+        "slide_1": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/banner.png",
+            "mobile_image": "shopify://shop_images/ChatGPT_Image_Sep_9_2026_02_53_32_PM.png",
+            "eyebrow": "",
+            "heading": "",
+            "subheading": "",
+            "button_label": "Shop now",
+            "button_link": "shopify://collections/co-ords",
+            "button_style": "text_underline",
+            "content_position": "bottom-center",
+            "text_alignment": "center",
+            "featured_product": ""
+          }
+        }
+      },
+      "block_order": [
+        "slide_1"
+      ],
+      "settings": {
+        "layout_mode": "full_bleed",
+        "show_text": false,
+        "enable_container": false,
+        "corner_radius": 0,
+        "padding_bottom": 0,
+        "desktop_height": "100vh",
+        "mobile_height": "100vh",
+        "heading_size": "medium",
+        "enable_zoom": false,
+        "enable_overlay": false,
+        "enable_backdrop_blur": false,
+        "enable_content_backdrop": false,
+        "overlay_type": "solid",
+        "overlay_opacity": 0,
+        "autoplay_speed": 7,
+        "color_scheme": "scheme-1",
+        "custom_bg": "",
+        "custom_text": ""
+      }
+    },
+    "category_scroll": {
+      "type": "stagmenfashion-latest-items",
+      "settings": {
+        "heading": "New Arrivals",
+        "subheading": "Engineered essentials and new season cuts",
+        "collection": "new-in",
+        "discover_more_label": "Discover More",
+        "discover_more_link": "shopify://collections/new-in",
+        "background": "#f7f7f8",
+        "color_scheme": "scheme-1"
+      }
+    },
+    "category_products_scroll": {
+      "type": "stagmenfashion-category-products-scroll",
+      "settings": {
+        "heading": "Men's Fashion",
+        "subheading": "Curated modern cuts, contemporary silhouettes, and everyday essentials",
+        "collection": "all",
+        "products_to_show": 12,
+        "discover_more_label": "Discover More",
+        "discover_more_link": "shopify://collections/all",
+        "background": "#f0f1f4",
+        "color_scheme": "scheme-1"
+      }
+    },
+    "shop_by_category": {
+      "type": "stagmenfashion-category-scroll",
+      "settings": {
+        "heading": "Shop by Category",
+        "subheading": "Browse our curated collections",
+        "discover_more_label": "Discover More",
+        "discover_more_link": "shopify://collections",
+        "collection_list": [],
+        "show_product_count": true,
+        "hide_empty_collections": false,
+        "card_radius": 5,
+        "background": "#ffffff",
+        "text_color": "#111111",
+        "muted_text_color": "#6b7280",
+        "color_scheme": "scheme-1"
+      }
+    },
+    "real_life_images": {
+      "type": "real-life-images",
+      "blocks": {
+        "tile_1": {
+          "type": "image_tile",
+          "settings": {
+            "tile_position": "first",
+            "title": "Real life image",
+            "link": "shopify://collections/all",
+            "product": "",
+            "collection": ""
+          }
+        },
+        "tile_2": {
+          "type": "image_tile",
+          "settings": {
+            "tile_position": "middle-left",
+            "title": "Real life image",
+            "link": "shopify://collections/co-ords",
+            "product": "",
+            "collection": ""
+          }
+        },
+        "tile_3": {
+          "type": "image_tile",
+          "settings": {
+            "tile_position": "hero-right",
+            "title": "Real life image",
+            "link": "shopify://collections/new-in",
+            "product": "",
+            "collection": ""
+          }
+        },
+        "tile_4": {
+          "type": "image_tile",
+          "settings": {
+            "tile_position": "bottom-left",
+            "title": "Real life image",
+            "link": "shopify://collections/trending",
+            "product": "",
+            "collection": ""
+          }
+        },
+        "tile_5": {
+          "type": "image_tile",
+          "settings": {
+            "tile_position": "middle-right",
+            "title": "Real life image",
+            "link": "shopify://collections/all",
+            "product": "",
+            "collection": ""
+          }
+        },
+        "tile_6": {
+          "type": "image_tile",
+          "settings": {
+            "tile_position": "bottom-right",
+            "title": "Real life image",
+            "link": "shopify://collections/co-ords",
+            "product": "",
+            "collection": ""
+          }
+        }
+      },
+      "block_order": [
+        "tile_1",
+        "tile_2",
+        "tile_3",
+        "tile_4",
+        "tile_5",
+        "tile_6"
+      ],
+      "disabled": true,
+      "settings": {
+        "color_scheme": "",
+        "heading": "Club Stag Men Fashion / AS Seen in real life",
+        "subheading": "Curated fits and real styles from our community.",
+        "background": "#ffffff",
+        "text_color": "#111111",
+        "muted_text_color": "#6b7280",
+        "accent_color": "#0800cf",
+        "grid_gap": 12,
+        "card_radius": 4
+      }
+    },
+    "trending_now": {
+      "type": "stagmenfashion-trending-now",
+      "settings": {
+        "heading": "Trending Now",
+        "subheading": "Most popular picks added to the collection",
+        "collection": "trending",
+        "products_to_show": 12,
+        "discover_more_label": "Discover more",
+        "discover_more_link": "shopify://collections/trending",
+        "background": "#f7f7f8",
+        "color_scheme": "scheme-1"
+      }
+    },
+    "banner_slider": {
+      "type": "stagmenfashion-banner-slider",
+      "blocks": {
+        "slide_1": {
+          "type": "slide",
+          "settings": {
+            "collection": "co-ords",
+            "image": "shopify://shop_images/banner.png",
+            "mobile_image": "shopify://shop_images/ChatGPT_Image_Sep_9_2026_02_53_32_PM.png",
+            "subheading": "New Season",
+            "heading": "CO-ORDS & SETS",
+            "button_label": "SHOP NOW",
+            "button_link": "shopify://collections/co-ords",
+            "button_style": "underline",
+            "content_position": "bottom-center",
+            "text_alignment": "center"
+          }
+        },
+        "slide_2": {
+          "type": "slide",
+          "settings": {
+            "collection": "trending",
+            "image": "shopify://shop_images/banner.png",
+            "mobile_image": "shopify://shop_images/ChatGPT_Image_Sep_9_2026_02_53_32_PM.png",
+            "subheading": "Streetwear Cuts",
+            "heading": "TRENDING ESSENTIALS",
+            "button_label": "SHOP NOW",
+            "button_link": "shopify://collections/trending",
+            "button_style": "underline",
+            "content_position": "bottom-center",
+            "text_alignment": "center"
+          }
+        },
+        "slide_3": {
+          "type": "slide",
+          "settings": {
+            "collection": "new-in",
+            "image": "shopify://shop_images/banner.png",
+            "mobile_image": "shopify://shop_images/ChatGPT_Image_Sep_9_2026_02_53_32_PM.png",
+            "subheading": "Fresh Drop",
+            "heading": "NEW IN ARRIVALS",
+            "button_label": "SHOP NOW",
+            "button_link": "shopify://collections/new-in",
+            "button_style": "underline",
+            "content_position": "bottom-center",
+            "text_alignment": "center"
+          }
+        }
+      },
+      "block_order": [
+        "slide_1",
+        "slide_2",
+        "slide_3"
+      ],
+      "settings": {
+        "layout_mode": "full_bleed",
+        "border_radius": 0,
+        "desktop_height": "650px",
+        "mobile_height": "450px",
+        "heading_size": "compact",
+        "autoplay_speed": 5,
+        "show_pagination": true,
+        "show_arrows": false,
+        "color_scheme": "scheme-1",
+        "overlay_color": "#000000",
+        "overlay_opacity": 20,
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "promo_cards": {
+      "type": "stagmenfashion-promo-cards",
+      "blocks": {
+        "promo_1": {
+          "type": "promo_card",
+          "settings": {
+            "subheading": "Heavyweight French Terry",
+            "heading": "Premium Hoodies",
+            "description": "<p>Engineered cuts, drop shoulders, and heavy cotton fleece designed to hold shape.</p>",
+            "button_label": "Shop Collection",
+            "button_link": "shopify://collections/all",
+            "text_align": "left",
+            "content_position": "bottom-left",
+            "overlay_color": "#000000",
+            "overlay_opacity": 30
+          }
+        },
+        "promo_2": {
+          "type": "promo_card",
+          "settings": {
+            "subheading": "The Daily Uniform",
+            "heading": "Boxy Cut Tees",
+            "description": "<p>Heavyweight combed cotton and loose fit silhouette. Built for styling and layering.</p>",
+            "button_label": "Shop Tees",
+            "button_link": "shopify://collections/all",
+            "text_align": "left",
+            "content_position": "bottom-left",
+            "overlay_color": "#000000",
+            "overlay_opacity": 30
+          }
+        }
+      },
+      "block_order": [
+        "promo_1",
+        "promo_2"
+      ],
+      "disabled": true,
+      "settings": {
+        "heading": "",
+        "subheading": "",
+        "color_scheme": "scheme-1",
+        "gap": 20,
+        "padding_top": 40,
+        "padding_bottom": 40,
+        "height_desktop": 380,
+        "height_mobile": 280
+      }
+    },
+    "benefits": {
+      "type": "stagmenfashion-home-benefits",
+      "blocks": {
+        "benefit_1": {
+          "type": "benefit",
+          "settings": {
+            "icon": "returns",
+            "heading": "Conscious sourcing",
+            "text": "Made with organic cotton and ethically sourced fibers."
+          }
+        },
+        "benefit_2": {
+          "type": "benefit",
+          "settings": {
+            "icon": "shipping",
+            "heading": "Fast Shipping",
+            "text": "Quick, carbon-neutral delivery straight to your door."
+          }
+        },
+        "benefit_3": {
+          "type": "benefit",
+          "settings": {
+            "icon": "support",
+            "heading": "Made to Last",
+            "text": "Premium heavyweight cottons designed to hold structure through washes."
+          }
+        },
+        "benefit_4": {
+          "type": "benefit",
+          "settings": {
+            "icon": "discount",
+            "heading": "Cash on delivery",
+            "text": "Order now and pay at your door. Hassle-free shopping."
+          }
+        }
+      },
+      "block_order": [
+        "benefit_1",
+        "benefit_2",
+        "benefit_3",
+        "benefit_4"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "notice_label": "Bulk order note",
+        "notice_text": "For Bulk Orders — WhatsApp us at +123455 or email bulkorders@stagmenfashion.com",
+        "background": "#ffffff"
+      }
+    },
+    "spotlight": {
+      "type": "stagmenfashion-spotlight",
+      "disabled": true,
+      "settings": {
+        "collection_list": [],
+        "enable_trending": true,
+        "trending_collection": "",
+        "trending_limit": 8,
+        "products_per_collection": 8,
+        "filter_categories_label": "Categories",
+        "filter_price_label": "Price Range",
+        "sort_label": "Sort by",
+        "heading": "Capsule Spotlight",
+        "subtext": "<p>Explore our latest minimal drops, engineered cuts, and styling options.</p>",
+        "see_all_text": "See All",
+        "color_scheme": "scheme-1"
+      }
+    },
+    "testimonials": {
+      "type": "stagmenfashion-home-testimonials",
+      "blocks": {
+        "review_1": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "\"Absolutely love the fit and quality. The fabric feels premium, heavy, and sits perfectly. This has quickly become my go-to daily uniform.\"",
+            "name": "Jane C.",
+            "initials": "JC",
+            "role": "Verified Buyer"
+          }
+        },
+        "review_2": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "\"A perfect balance of contemporary streetwear cuts and premium tailoring. Stag Men Fashion brings a level of curation that is hard to find in fashion today.\"",
+            "name": "Darlene R.",
+            "initials": "DR",
+            "role": "Brand Stylist"
+          }
+        },
+        "review_3": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "\"Excellent eye for silhouette and detailing. The heavy cotton washes beautifully and holds its structure. Very impressed with the overall quality.\"",
+            "name": "Thomas G.",
+            "initials": "TG",
+            "role": "Creative Director"
+          }
+        }
+      },
+      "block_order": [
+        "review_1",
+        "review_2",
+        "review_3"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "eyebrow": "Community Voices",
+        "heading": "Why They Wear Us",
+        "subheading": "Real feedback on our premium fits, heavyweight cottons, and daily styles.",
+        "background": "#f7f7f8"
+      }
+    },
+    "our_stores": {
+      "type": "stagmenfashion-our-stores",
+      "blocks": {
+        "store_1": {
+          "type": "store",
+          "settings": {
+            "image": "shopify://shop_images/stag-2.webp",
+            "store_name": "Calicut",
+            "directions_label": "Get Direction",
+            "directions_url": "",
+            "address": "1st floor,\n4th Gate, Taisha Arcade,\nPT Usha Rd, vellayil,\nkozhikode, kerala 673032",
+            "phone": "+91 7736444674"
+          }
+        },
+        "store_3": {
+          "type": "store",
+          "settings": {
+            "image": "shopify://shop_images/stag-kdy.webp",
+            "store_name": "Kondotty",
+            "directions_label": "Get Direction",
+            "directions_url": "",
+            "address": "5X25+3QH, Kondotty Bypass Rd, Kondotty, Kerala 673638",
+            "phone": "+91 7736444674"
+          }
+        },
+        "store_2": {
+          "type": "store",
+          "settings": {
+            "store_name": "Kannur",
+            "directions_label": "Get Direction",
+            "directions_url": "",
+            "address": "V9FF+GGC, Thavakkara, Kannur, Kerala 670012",
+            "phone": "+91 7736444674"
+          }
+        }
+      },
+      "block_order": [
+        "store_1",
+        "store_3",
+        "store_2"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "header_alignment": "left",
+        "heading": "Our Stores",
+        "subheading": "Visit our retail locations across India.",
+        "discover_more_label": "Discover More",
+        "discover_more_link": "/pages/our-stores",
+        "background": "#ffffff",
+        "padding_top": 16,
+        "padding_bottom": 16
+      }
+    },
+    "section_zDXCaG": {
+      "type": "section",
+      "blocks": {
+        "text_mtdBJt": {
+          "type": "text",
+          "name": "t:names.heading",
+          "settings": {
+            "text": "<h2>Frequently asked questions</h2>",
+            "width": "fit-content",
+            "max_width": "narrow",
+            "alignment": "left",
+            "type_preset": "h2",
+            "font": "var(--font-heading--family)",
+            "font_size": "",
+            "line_height": "1.1",
+            "letter_spacing": "-0.03em",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground-heading)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "accordion_CcHQ6d": {
+          "type": "accordion",
+          "name": "t:names.accordion",
+          "settings": {
+            "icon": "caret",
+            "dividers": true,
+            "type_preset": "h5",
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {
+            "accordion_row_Vz3AW6": {
+              "type": "_accordion-row",
+              "settings": {
+                "heading": "What is the return policy?",
+                "open_by_default": false,
+                "icon": "none",
+                "width": 20
+              },
+              "blocks": {
+                "text_dYemGg": {
+                  "type": "text",
+                  "settings": {
+                    "text": "<p>Our goal is for every customer to be totally satisfied with their purchase. If this isn't the case, let us know and we'll do our best to work with you to make it right.</p>",
+                    "width": "100%",
+                    "max_width": "normal",
+                    "alignment": "left",
+                    "type_preset": "rte",
+                    "font": "var(--font-body--family)",
+                    "font_size": "",
+                    "line_height": "normal",
+                    "letter_spacing": "normal",
+                    "case": "none",
+                    "wrap": "pretty",
+                    "color": "var(--color-foreground)",
+                    "background": false,
+                    "background_color": "#00000026",
+                    "corner_radius": 0,
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": [
+                "text_dYemGg"
+              ]
+            },
+            "accordion_row_n64VYG": {
+              "type": "_accordion-row",
+              "settings": {
+                "heading": "Are any purchases final sale?",
+                "open_by_default": false,
+                "icon": "none",
+                "width": 20
+              },
+              "blocks": {
+                "text_z3ET3U": {
+                  "type": "text",
+                  "settings": {
+                    "text": "<p>We are unable to accept returns on certain items. These will be carefully marked before purchase.</p>",
+                    "width": "100%",
+                    "max_width": "normal",
+                    "alignment": "left",
+                    "type_preset": "rte",
+                    "font": "var(--font-body--family)",
+                    "font_size": "",
+                    "line_height": "normal",
+                    "letter_spacing": "normal",
+                    "case": "none",
+                    "wrap": "pretty",
+                    "color": "var(--color-foreground)",
+                    "background": false,
+                    "background_color": "#00000026",
+                    "corner_radius": 0,
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": [
+                "text_z3ET3U"
+              ]
+            },
+            "accordion_row_xGK3HL": {
+              "type": "_accordion-row",
+              "name": "t:names.accordion_row",
+              "settings": {
+                "heading": "When will I get my order?",
+                "open_by_default": false,
+                "icon": "none",
+                "width": 20
+              },
+              "blocks": {
+                "text_fawyiT": {
+                  "type": "text",
+                  "name": "t:names.text",
+                  "settings": {
+                    "text": "<p>We will work quickly to ship your order as soon as possible. Once your order has shipped, you will receive an email with further information. Delivery times vary depending on your location.</p>",
+                    "width": "100%",
+                    "max_width": "normal",
+                    "alignment": "left",
+                    "type_preset": "rte",
+                    "font": "var(--font-body--family)",
+                    "font_size": "",
+                    "line_height": "normal",
+                    "letter_spacing": "normal",
+                    "case": "none",
+                    "wrap": "pretty",
+                    "color": "var(--color-foreground)",
+                    "background": false,
+                    "background_color": "#00000026",
+                    "corner_radius": 0,
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": [
+                "text_fawyiT"
+              ]
+            },
+            "accordion_row_yDDmFm": {
+              "type": "_accordion-row",
+              "name": "t:names.accordion_row",
+              "settings": {
+                "heading": "Where are your products manufactured?",
+                "open_by_default": false,
+                "icon": "none",
+                "width": 20
+              },
+              "blocks": {
+                "text_3pEUdy": {
+                  "type": "text",
+                  "name": "t:names.text",
+                  "settings": {
+                    "text": "<p>Our products are manufactured both locally and globally. We carefully select our manufacturing partners to ensure our products are high quality and a fair value.</p>",
+                    "width": "100%",
+                    "max_width": "normal",
+                    "alignment": "left",
+                    "type_preset": "rte",
+                    "font": "var(--font-body--family)",
+                    "font_size": "",
+                    "line_height": "normal",
+                    "letter_spacing": "normal",
+                    "case": "none",
+                    "wrap": "pretty",
+                    "color": "var(--color-foreground)",
+                    "background": false,
+                    "background_color": "#00000026",
+                    "corner_radius": 0,
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": [
+                "text_3pEUdy"
+              ]
+            },
+            "accordion_row_MCnJVr": {
+              "type": "_accordion-row",
+              "name": "t:names.accordion_row",
+              "settings": {
+                "heading": "How much does shipping cost?",
+                "open_by_default": false,
+                "icon": "none",
+                "width": 20
+              },
+              "blocks": {
+                "text_tQDnq9": {
+                  "type": "text",
+                  "name": "t:names.text",
+                  "settings": {
+                    "text": "<p>Shipping is calculated based on your location and the items in your order. You will always know the shipping price before you purchase.</p>",
+                    "width": "100%",
+                    "max_width": "normal",
+                    "alignment": "left",
+                    "type_preset": "rte",
+                    "font": "var(--font-body--family)",
+                    "font_size": "",
+                    "line_height": "normal",
+                    "letter_spacing": "normal",
+                    "case": "none",
+                    "wrap": "pretty",
+                    "color": "var(--color-foreground)",
+                    "background": false,
+                    "background_color": "#00000026",
+                    "corner_radius": 0,
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": [
+                "text_tQDnq9"
+              ]
+            }
+          },
+          "block_order": [
+            "accordion_row_Vz3AW6",
+            "accordion_row_n64VYG",
+            "accordion_row_xGK3HL",
+            "accordion_row_yDDmFm",
+            "accordion_row_MCnJVr"
+          ]
+        }
+      },
+      "block_order": [
+        "text_mtdBJt",
+        "accordion_CcHQ6d"
+      ],
+      "disabled": true,
+      "name": "t:names.faq_section",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "flex-start",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 32,
+        "section_width": "page-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "color_scheme": "",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 48,
+        "padding-block-end": 48
+      }
+    }
+  },
+  "order": [
+    "hero_slider",
+    "shop_by_category",
+    "category_scroll",
+    "category_products_scroll",
+    "banner_slider",
+    "trending_now",
+    "our_stores",
+    "testimonials",
+    "benefits",
+    "real_life_images",
+    "promo_cards",
+    "spotlight",
+    "section_zDXCaG"
+  ]
+}

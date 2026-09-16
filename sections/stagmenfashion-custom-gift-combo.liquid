@@ -1,0 +1,1567 @@
+{% liquid
+  assign combo_occasion_count = 0
+  for block in section.blocks
+    if block.type == 'occasion' and block.settings.collection != blank
+      assign combo_occasion_count = combo_occasion_count | plus: 1
+    endif
+  endfor
+%}
+
+<section
+  class="stagmenfashion-gift-combo color-{{ section.settings.color_scheme }}"
+  data-stagmenfashion-gift-combo
+  data-cart-add-url="{{ routes.cart_add_url }}"
+  data-cart-url="{{ routes.cart_url }}"
+  data-discount-threshold="{{ section.settings.discount_threshold | times: 100 }}"
+  data-discount-percent="{{ section.settings.discount_percent }}"
+  data-currency="{{ cart.currency.iso_code | default: shop.currency }}"
+  data-locale="{{ localization.language.iso_code | default: 'en-IN' }}"
+>
+  <div class="stagmenfashion-gift-combo__shell section section--full-width">
+    <header class="stagmenfashion-gift-combo__header">
+      {% if section.settings.eyebrow != blank %}
+        <p class="stagmenfashion-gift-combo__eyebrow">{{ section.settings.eyebrow }}</p>
+      {% endif %}
+
+      {% if section.settings.heading != blank %}
+        <h2 class="stagmenfashion-gift-combo__heading">{{ section.settings.heading }}</h2>
+      {% endif %}
+
+      {% if section.settings.text != blank %}
+        <div class="stagmenfashion-gift-combo__text rte">{{ section.settings.text }}</div>
+      {% endif %}
+
+      <div class="stagmenfashion-gift-combo__offer-pill">
+        <span>Wardrobe combo unlock</span>
+        <strong>Spend ₹{{ section.settings.discount_threshold }} and save {{ section.settings.discount_percent }}%</strong>
+      </div>
+    </header>
+
+    {% if combo_occasion_count > 0 %}
+      <div class="stagmenfashion-gift-combo__layout">
+        <div class="stagmenfashion-gift-combo__editor">
+          <div class="stagmenfashion-gift-combo__tabs" role="tablist" aria-label="Style collections">
+            {% for block in section.blocks %}
+              {% if block.type == 'occasion' and block.settings.collection != blank %}
+                <button
+                  type="button"
+                  id="GiftComboTab-{{ block.id }}"
+                  class="stagmenfashion-gift-combo__tab{% if forloop.first %} is-active{% endif %}"
+                  data-gift-tab
+                  data-target="GiftComboPanel-{{ block.id }}"
+                  role="tab"
+                  aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                  aria-controls="GiftComboPanel-{{ block.id }}"
+                >
+                  <span class="stagmenfashion-gift-combo__tab-label">{{ block.settings.title | default: block.settings.collection.title | escape }}</span>
+                  {% if block.settings.badge != blank %}
+                    <span class="stagmenfashion-gift-combo__tab-badge">{{ block.settings.badge | escape }}</span>
+                  {% endif %}
+                </button>
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          {% for block in section.blocks %}
+            {% if block.type == 'occasion' and block.settings.collection != blank %}
+              {% assign combo_collection = block.settings.collection %}
+              <article
+                id="GiftComboPanel-{{ block.id }}"
+                class="stagmenfashion-gift-combo__panel{% if forloop.first %} is-active{% endif %}"
+                data-gift-panel
+                role="tabpanel"
+                aria-labelledby="GiftComboTab-{{ block.id }}"
+                {% unless forloop.first %}hidden{% endunless %}
+                {{ block.shopify_attributes }}
+              >
+                <div class="stagmenfashion-gift-combo__panel-head">
+                  <div>
+                    <p class="stagmenfashion-gift-combo__panel-kicker">{{ block.settings.title | default: combo_collection.title | escape }}</p>
+                    {% if block.settings.subtitle != blank %}
+                      <h3 class="stagmenfashion-gift-combo__panel-title">{{ block.settings.subtitle }}</h3>
+                    {% endif %}
+                  </div>
+
+                  <a class="stagmenfashion-gift-combo__panel-link" href="{{ combo_collection.url }}">
+                    Explore collection
+                  </a>
+                </div>
+
+                <div class="stagmenfashion-gift-combo__carousel" data-gift-carousel>
+                  {% for product in combo_collection.products limit: section.settings.products_per_collection %}
+                    {% liquid
+                      assign combo_variant = product.selected_or_first_available_variant
+                      assign combo_price = combo_variant.price
+                      assign combo_image = product.featured_image
+                      assign combo_image_secondary = blank
+                      if product.media.size > 1 and product.media[1].media_type == 'image'
+                        assign combo_image_secondary = product.media[1]
+                      endif
+                    %}
+                    <article
+                      class="stagmenfashion-gift-combo-card{% unless product.available %} is-soldout{% endunless %}"
+                      data-gift-card
+                      data-gift-id="{{ product.id }}-{{ combo_variant.id }}"
+                      data-product-id="{{ product.id }}"
+                      data-variant-id="{{ combo_variant.id }}"
+                      data-price="{{ combo_price }}"
+                      data-title="{{ product.title | escape }}"
+                      data-collection="{{ combo_collection.title | escape }}"
+                      data-available="{% if product.available %}true{% else %}false{% endif %}"
+                      role="button"
+                      tabindex="0"
+                      aria-pressed="false"
+                      {% unless product.available %}aria-disabled="true"{% endunless %}
+                    >
+                      <div class="stagmenfashion-gift-combo-card__media">
+                        {% if combo_image != blank %}
+                          {{
+                            combo_image
+                            | image_url: width: 900
+                            | image_tag:
+                              class: 'stagmenfashion-gift-combo-card__image',
+                              widths: '240, 360, 480, 680, 900',
+                              loading: 'lazy',
+                              alt: product.title
+                          }}
+                          {% if combo_image_secondary != blank %}
+                            {{
+                              combo_image_secondary
+                              | image_url: width: 900
+                              | image_tag:
+                                class: 'stagmenfashion-gift-combo-card__image stagmenfashion-gift-combo-card__image--secondary',
+                                widths: '240, 360, 480, 680, 900',
+                                loading: 'lazy',
+                                alt: product.title
+                            }}
+                          {% endif %}
+                        {% else %}
+                          <span class="stagmenfashion-gift-combo-card__placeholder">{{ product.title | slice: 0, 1 }}</span>
+                        {% endif %}
+
+                        <span class="stagmenfashion-gift-combo-card__selected-chip">Selected</span>
+                      </div>
+
+                      <div class="stagmenfashion-gift-combo-card__content">
+                        <div class="stagmenfashion-gift-combo-card__meta">
+                          <span class="stagmenfashion-gift-combo-card__collection">{{ combo_collection.title }}</span>
+                          {% if product.available == false %}
+                            <span class="stagmenfashion-gift-combo-card__stock">Sold out</span>
+                          {% endif %}
+                        </div>
+
+                        <h4 class="stagmenfashion-gift-combo-card__title">{{ product.title }}</h4>
+
+                        {% if product.description != blank %}
+                          <p class="stagmenfashion-gift-combo-card__excerpt">{{ product.description | strip_html | truncate: 82 }}</p>
+                        {% endif %}
+
+                        <div class="stagmenfashion-gift-combo-card__footer">
+                          <div class="stagmenfashion-gift-combo-card__price-wrap">
+                            <span class="stagmenfashion-gift-combo-card__price">{{ combo_price | money }}</span>
+                            {% if product.compare_at_price > combo_price %}
+                              <span class="stagmenfashion-gift-combo-card__compare">{{ product.compare_at_price | money }}</span>
+                            {% endif %}
+                          </div>
+                          <button type="button" class="stagmenfashion-gift-combo-card__toggle" data-gift-card-toggle>
+                            Pick
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  {% endfor %}
+                </div>
+              </article>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <aside class="stagmenfashion-gift-combo__summary" aria-live="polite">
+          <div class="stagmenfashion-gift-combo__summary-top">
+            <div>
+              <p class="stagmenfashion-gift-combo__summary-kicker">Your combo</p>
+              <h3 class="stagmenfashion-gift-combo__summary-title">Build it, review it, place it</h3>
+            </div>
+            <span class="stagmenfashion-gift-combo__summary-count" data-gift-count>0 selected</span>
+          </div>
+
+          <div class="stagmenfashion-gift-combo__progress">
+            <div class="stagmenfashion-gift-combo__progress-bar">
+              <span class="stagmenfashion-gift-combo__progress-fill" data-gift-progress></span>
+            </div>
+            <div class="stagmenfashion-gift-combo__progress-text">
+              <span>Spend ₹{{ section.settings.discount_threshold }} for {{ section.settings.discount_percent }}% off</span>
+              <strong data-gift-progress-copy>Start picking items</strong>
+            </div>
+          </div>
+
+          <div class="stagmenfashion-gift-combo__summary-list" data-gift-summary-list>
+            <p class="stagmenfashion-gift-combo__empty">Choose your favourite pieces from any style to build a thoughtful room-refresh combo.</p>
+          </div>
+
+          <div class="stagmenfashion-gift-combo__totals">
+            <div class="stagmenfashion-gift-combo__row">
+              <span>Subtotal</span>
+              <strong data-gift-subtotal>{{ 0 | money }}</strong>
+            </div>
+            <div class="stagmenfashion-gift-combo__row stagmenfashion-gift-combo__row--discount" data-gift-discount-row hidden>
+              <span>Estimated savings</span>
+              <strong data-gift-savings>{{ 0 | money }}</strong>
+            </div>
+            <div class="stagmenfashion-gift-combo__row stagmenfashion-gift-combo__row--total">
+              <span>Combo total</span>
+              <strong data-gift-total>{{ 0 | money }}</strong>
+            </div>
+          </div>
+
+          <div class="stagmenfashion-gift-combo__actions">
+            <button type="button" class="stagmenfashion-gift-combo__button stagmenfashion-gift-combo__button--ghost" data-gift-reset>
+              Start over
+            </button>
+            <button type="button" class="stagmenfashion-gift-combo__button" data-gift-add disabled>
+              <span data-gift-add-label>Pick items to continue</span>
+            </button>
+          </div>
+
+          <p class="stagmenfashion-gift-combo__note">{{ section.settings.note }}</p>
+        </aside>
+      </div>
+    {% else %}
+      <div class="stagmenfashion-gift-combo__empty-state">
+        <p class="stagmenfashion-gift-combo__empty-state-title">Add style collections in the theme editor</p>
+        <p class="stagmenfashion-gift-combo__empty-state-text">Add one or more collections like Entryway, Bedroom, or Laundry Corner, and this section will turn into a premium room-refresh builder.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+  .stagmenfashion-gift-combo {
+    --gift-ink: #111111;
+    --gift-muted: #6b7280;
+    --gift-line: rgb(var(--color-primary-rgb) / 0.12);
+    --gift-glow: rgb(var(--color-primary-rgb) / 0.08);
+    --gift-card: rgb(255 255 255 / 0.96);
+    background:
+      radial-gradient(circle at top left, rgb(8 0 207 / 0.06), transparent 38%),
+      radial-gradient(circle at top right, rgb(8 0 207 / 0.04), transparent 30%),
+      linear-gradient(180deg, #f8f9fd, #ffffff);
+    color: var(--gift-ink);
+    padding: clamp(36px, 6vw, 88px) 0;
+    overflow-x: clip;
+  }
+
+  .stagmenfashion-gift-combo__shell {
+    width: min(1240px, calc(100% - 32px));
+    margin: 0 auto;
+  }
+
+  .stagmenfashion-gift-combo__header {
+    max-width: 840px;
+    margin-bottom: clamp(20px, 3vw, 28px);
+  }
+
+  .stagmenfashion-gift-combo__eyebrow {
+    margin: 0 0 10px;
+    color: var(--color-primary);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .stagmenfashion-gift-combo__heading {
+    margin: 0;
+    font-size: clamp(2.2rem, 4.8vw, 4.4rem);
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+  }
+
+  .stagmenfashion-gift-combo__text {
+    margin-top: 14px;
+    max-width: 66ch;
+    color: var(--gift-muted);
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  .stagmenfashion-gift-combo__offer-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+    padding: 12px 16px;
+    border-radius: 999px;
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.14);
+    background: rgb(255 255 255 / 0.9);
+    box-shadow: 0 16px 34px rgb(var(--color-primary-rgb) / 0.08);
+    color: var(--gift-ink);
+    flex-wrap: wrap;
+  }
+
+  .stagmenfashion-gift-combo__offer-pill span {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
+  .stagmenfashion-gift-combo__offer-pill strong {
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .stagmenfashion-gift-combo__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.95fr);
+    gap: 22px;
+    align-items: start;
+  }
+
+  .stagmenfashion-gift-combo__editor,
+  .stagmenfashion-gift-combo__summary,
+  .stagmenfashion-gift-combo__panel {
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.1);
+    background: var(--gift-card);
+    box-shadow: 0 22px 60px rgb(var(--color-primary-rgb) / 0.08);
+    backdrop-filter: blur(10px);
+  }
+
+  .stagmenfashion-gift-combo__editor {
+    padding: 18px;
+    border-radius: 28px;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .stagmenfashion-gift-combo__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .stagmenfashion-gift-combo__tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 999px;
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.12);
+    background: rgb(255 255 255 / 0.82);
+    color: var(--gift-muted);
+    font-weight: 700;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    cursor: pointer;
+  }
+
+  .stagmenfashion-gift-combo__tab:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px rgb(var(--color-primary-rgb) / 0.08);
+  }
+
+  .stagmenfashion-gift-combo__tab.is-active {
+    background: var(--color-primary);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 18px 34px rgb(var(--color-primary-rgb) / 0.22);
+  }
+
+  .stagmenfashion-gift-combo__tab-label {
+    font-size: 0.96rem;
+  }
+
+  .stagmenfashion-gift-combo__tab-badge {
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.18);
+    font-size: 0.68rem;
+    font-weight: 800;
+  }
+
+  .stagmenfashion-gift-combo__panel {
+    padding: 18px;
+    border-radius: 26px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .stagmenfashion-gift-combo__panel + .stagmenfashion-gift-combo__panel {
+    margin-top: 16px;
+  }
+
+  .stagmenfashion-gift-combo__panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .stagmenfashion-gift-combo__panel-kicker,
+  .stagmenfashion-gift-combo__summary-kicker,
+  .stagmenfashion-gift-combo__note {
+    margin: 0;
+    color: var(--gift-muted);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .stagmenfashion-gift-combo__panel-title,
+  .stagmenfashion-gift-combo__summary-title {
+    margin: 4px 0 0;
+    font-size: 1.5rem;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .stagmenfashion-gift-combo__panel-link {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .stagmenfashion-gift-combo__carousel {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 4px;
+    overscroll-behavior-x: contain;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    scrollbar-width: none;
+  }
+
+  .stagmenfashion-gift-combo__carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .stagmenfashion-gift-combo-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 clamp(220px, 28vw, 280px);
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.1);
+    background: #fff;
+    box-shadow: 0 16px 36px rgb(var(--color-primary-rgb) / 0.08);
+    scroll-snap-align: start;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    cursor: pointer;
+  }
+
+  .stagmenfashion-gift-combo-card:hover,
+  .stagmenfashion-gift-combo-card.is-selected {
+    transform: translateY(-2px);
+    border-color: rgb(var(--color-primary-rgb) / 0.22);
+    box-shadow: 0 22px 44px rgb(var(--color-primary-rgb) / 0.14);
+  }
+
+  .stagmenfashion-gift-combo-card.is-soldout {
+    opacity: 0.58;
+    cursor: not-allowed;
+  }
+
+  .stagmenfashion-gift-combo-card__media {
+    position: relative;
+    aspect-ratio: 4 / 4.6;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgb(var(--color-primary-rgb) / 0.05), rgb(255 255 255));
+  }
+
+  .stagmenfashion-gift-combo-card__image,
+  .stagmenfashion-gift-combo-card__placeholder {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .stagmenfashion-gift-combo-card__image--secondary {
+    opacity: 0;
+    transition: opacity 0.32s ease;
+  }
+
+  .stagmenfashion-gift-combo-card:hover .stagmenfashion-gift-combo-card__image--secondary,
+  .stagmenfashion-gift-combo-card.is-selected .stagmenfashion-gift-combo-card__image--secondary {
+    opacity: 1;
+  }
+
+  .stagmenfashion-gift-combo-card__placeholder {
+    display: grid;
+    place-items: center;
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    background: linear-gradient(180deg, rgb(255 255 255), rgb(var(--color-primary-rgb) / 0.06));
+  }
+
+  .stagmenfashion-gift-combo-card__selected-chip {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.94);
+    color: var(--color-primary);
+    font-size: 0.7rem;
+    font-weight: 800;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .stagmenfashion-gift-combo-card.is-selected .stagmenfashion-gift-combo-card__selected-chip {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .stagmenfashion-gift-combo-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 14px 16px;
+  }
+
+  .stagmenfashion-gift-combo-card__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--gift-muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .stagmenfashion-gift-combo-card__stock {
+    color: #0800CF;
+  }
+
+  .stagmenfashion-gift-combo-card__title {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.4em;
+  }
+
+  .stagmenfashion-gift-combo-card__excerpt {
+    margin: 0;
+    color: var(--gift-muted);
+    font-size: 0.84rem;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.9em;
+  }
+
+  .stagmenfashion-gift-combo-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: auto;
+  }
+
+  .stagmenfashion-gift-combo-card__price-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .stagmenfashion-gift-combo-card__price {
+    font-size: 1.02rem;
+    font-weight: 800;
+  }
+
+  .stagmenfashion-gift-combo-card__compare {
+    color: rgb(84 62 76 / 0.45);
+    text-decoration: line-through;
+    font-size: 0.8rem;
+  }
+
+  .stagmenfashion-gift-combo-card__toggle {
+    min-height: 38px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    background: rgb(var(--color-primary-rgb) / 0.12);
+    color: var(--color-primary);
+    font-weight: 800;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+
+  .stagmenfashion-gift-combo-card.is-selected .stagmenfashion-gift-combo-card__toggle {
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .stagmenfashion-gift-combo-card__toggle:hover {
+    transform: translateY(-1px);
+  }
+
+  .stagmenfashion-gift-combo__summary {
+    position: sticky;
+    top: 18px;
+    border-radius: 28px;
+    padding: 20px;
+  }
+
+  .stagmenfashion-gift-combo__summary-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .stagmenfashion-gift-combo__summary-count {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgb(var(--color-primary-rgb) / 0.1);
+    color: var(--color-primary);
+    font-size: 0.78rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .stagmenfashion-gift-combo__progress {
+    margin-top: 18px;
+  }
+
+  .stagmenfashion-gift-combo__progress-bar {
+    height: 12px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgb(var(--color-primary-rgb) / 0.1);
+  }
+
+  .stagmenfashion-gift-combo__progress-fill {
+    display: block;
+    height: 100%;
+    width: 0%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--color-primary), rgb(var(--color-primary-rgb) / 0.72));
+    transition: width 0.25s ease;
+  }
+
+  .stagmenfashion-gift-combo__progress-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 10px;
+    color: var(--gift-muted);
+    font-size: 0.88rem;
+  }
+
+  .stagmenfashion-gift-combo__progress-text strong {
+    color: var(--gift-ink);
+    font-size: 0.98rem;
+  }
+
+  .stagmenfashion-gift-combo__summary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .stagmenfashion-gift-combo__empty {
+    margin: 0;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgb(var(--color-primary-rgb) / 0.04);
+    color: var(--gift-muted);
+    line-height: 1.6;
+  }
+
+  .stagmenfashion-gift-combo__summary-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgb(var(--color-primary-rgb) / 0.08);
+    font-size: 0.94rem;
+  }
+
+  .stagmenfashion-gift-combo__summary-item:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .stagmenfashion-gift-combo__summary-item button {
+    margin-left: 8px;
+    color: var(--color-primary);
+    font-weight: 800;
+  }
+
+  .stagmenfashion-gift-combo__totals {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid rgb(var(--color-primary-rgb) / 0.08);
+  }
+
+  .stagmenfashion-gift-combo__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    font-size: 0.95rem;
+  }
+
+  .stagmenfashion-gift-combo__row--total {
+    font-size: 1.08rem;
+  }
+
+  .stagmenfashion-gift-combo__row--total strong {
+    color: var(--color-primary);
+  }
+
+  .stagmenfashion-gift-combo__actions {
+    display: grid;
+    grid-template-columns: 1fr 1.25fr;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .stagmenfashion-gift-combo__button {
+    min-height: 48px;
+    padding: 0 18px;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    background: var(--color-primary);
+    color: #fff;
+    font-weight: 800;
+    box-shadow: 0 16px 34px rgb(var(--color-primary-rgb) / 0.18);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  }
+
+  .stagmenfashion-gift-combo__button--ghost {
+    background: rgb(255 255 255 / 0.92);
+    color: var(--gift-ink);
+    border-color: rgb(var(--color-primary-rgb) / 0.12);
+    box-shadow: none;
+  }
+
+  .stagmenfashion-gift-combo__button:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 20px 40px rgb(var(--color-primary-rgb) / 0.2);
+  }
+
+  .stagmenfashion-gift-combo__button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .stagmenfashion-gift-combo__note {
+    margin-top: 14px;
+    line-height: 1.55;
+  }
+
+  .stagmenfashion-gift-combo__empty-state {
+    padding: 28px;
+    border-radius: 28px;
+    border: 1px dashed rgb(var(--color-primary-rgb) / 0.16);
+    background: rgb(255 255 255 / 0.92);
+  }
+
+  .stagmenfashion-gift-combo__empty-state-title {
+    margin: 0 0 8px;
+    font-size: 1.15rem;
+    font-weight: 800;
+  }
+
+  .stagmenfashion-gift-combo__empty-state-text {
+    margin: 0;
+    color: var(--gift-muted);
+    line-height: 1.6;
+  }
+
+  .stagmenfashion-gift-combo__toast {
+    position: fixed;
+    left: 50%;
+    bottom: 120px;
+    z-index: 70;
+    max-width: min(92vw, 420px);
+    padding: 12px 16px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.96);
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.14);
+    box-shadow: 0 18px 40px rgb(var(--color-primary-rgb) / 0.16);
+    color: var(--gift-ink);
+    font-size: 0.92rem;
+    font-weight: 700;
+    transform: translate(-50%, 16px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.24s ease, opacity 0.24s ease;
+  }
+
+  .stagmenfashion-gift-combo__toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  @media screen and (max-width: 989px) {
+    .stagmenfashion-gift-combo {
+      padding: 18px 0 24px;
+    }
+
+    .stagmenfashion-gift-combo__shell {
+      width: min(100%, calc(100% - 12px));
+    }
+
+    .stagmenfashion-gift-combo__layout {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .stagmenfashion-gift-combo__editor,
+    .stagmenfashion-gift-combo__summary {
+      border-radius: 22px;
+    }
+
+    .stagmenfashion-gift-combo__editor {
+      padding: 12px;
+    }
+
+    .stagmenfashion-gift-combo__tabs {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-right: -14px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .stagmenfashion-gift-combo__offer-pill {
+      width: 100%;
+    }
+
+    .stagmenfashion-gift-combo__tab {
+      flex: 0 0 auto;
+      padding: 11px 14px;
+    }
+
+    .stagmenfashion-gift-combo__tab-label {
+      white-space: nowrap;
+    }
+
+    .stagmenfashion-gift-combo__carousel {
+      gap: 8px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 3px;
+      margin-inline: -4px;
+      scroll-snap-type: x proximity;
+      scroll-padding-inline: 6px;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .stagmenfashion-gift-combo-card {
+      flex-basis: clamp(126px, 36vw, 156px);
+      border-radius: 16px;
+    }
+
+    .stagmenfashion-gift-combo-card__media {
+      aspect-ratio: 1 / 1.02;
+    }
+
+    .stagmenfashion-gift-combo-card__content {
+      padding: 8px 8px 9px;
+      gap: 5px;
+    }
+
+    .stagmenfashion-gift-combo-card__meta {
+      font-size: 0.62rem;
+      gap: 6px;
+    }
+
+    .stagmenfashion-gift-combo-card__title {
+      font-size: 0.82rem;
+      min-height: 2em;
+    }
+
+    .stagmenfashion-gift-combo-card__excerpt {
+      font-size: 0.68rem;
+      min-height: 1.95em;
+    }
+
+    .stagmenfashion-gift-combo-card__price {
+      font-size: 0.8rem;
+    }
+
+    .stagmenfashion-gift-combo-card__toggle {
+      min-height: 30px;
+      padding: 0 9px;
+      border-radius: 8px;
+      font-size: 0.7rem;
+    }
+
+    .stagmenfashion-gift-combo__panel-head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .stagmenfashion-gift-combo__summary {
+      position: relative;
+      top: auto;
+      padding: 10px;
+      border-radius: 14px;
+    }
+
+    .stagmenfashion-gift-combo__actions {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .stagmenfashion-gift-combo__summary-top {
+      gap: 8px;
+      align-items: center;
+    }
+
+    .stagmenfashion-gift-combo__summary-kicker {
+      font-size: 0.62rem;
+    }
+
+    .stagmenfashion-gift-combo__summary-title {
+      font-size: 0.94rem;
+      line-height: 1.08;
+    }
+
+    .stagmenfashion-gift-combo__summary-count {
+      padding: 6px 9px;
+      font-size: 0.68rem;
+    }
+
+    .stagmenfashion-gift-combo__progress {
+      margin-top: 10px;
+    }
+
+    .stagmenfashion-gift-combo__progress-bar {
+      height: 7px;
+    }
+
+    .stagmenfashion-gift-combo__progress-text {
+      margin-top: 7px;
+      font-size: 0.72rem;
+      gap: 2px;
+    }
+
+    .stagmenfashion-gift-combo__progress-text strong {
+      font-size: 0.8rem;
+    }
+
+    .stagmenfashion-gift-combo__summary-list {
+      margin-top: 10px;
+      gap: 5px;
+    }
+
+    .stagmenfashion-gift-combo__empty {
+      padding: 8px 10px;
+      border-radius: 11px;
+      font-size: 0.74rem;
+      line-height: 1.35;
+    }
+
+    .stagmenfashion-gift-combo__summary-item {
+      padding: 7px 0;
+      font-size: 0.76rem;
+    }
+
+    .stagmenfashion-gift-combo__totals {
+      margin-top: 10px;
+      padding-top: 8px;
+      gap: 6px;
+    }
+
+    .stagmenfashion-gift-combo__row {
+      font-size: 0.8rem;
+    }
+
+    .stagmenfashion-gift-combo__row--total {
+      font-size: 0.9rem;
+    }
+
+    .stagmenfashion-gift-combo__button {
+      min-height: 36px;
+      padding: 0 11px;
+      border-radius: 9px;
+      font-size: 0.76rem;
+    }
+
+    .stagmenfashion-gift-combo__note {
+      margin-top: 8px;
+      font-size: 0.58rem;
+      line-height: 1.32;
+    }
+
+    .stagmenfashion-gift-combo__offer-pill {
+      width: 100%;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 12px;
+    }
+
+    .stagmenfashion-gift-combo__offer-pill strong {
+      font-size: 0.72rem;
+      line-height: 1.22;
+    }
+
+    .stagmenfashion-gift-combo__panel {
+      padding: 10px;
+      border-radius: 14px;
+    }
+
+    .stagmenfashion-gift-combo__panel-head {
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .stagmenfashion-gift-combo__panel-kicker {
+      font-size: 0.58rem;
+    }
+
+    .stagmenfashion-gift-combo__panel-title {
+      font-size: 0.92rem;
+      line-height: 1.05;
+    }
+
+    .stagmenfashion-gift-combo__panel-link {
+      font-size: 0.72rem;
+    }
+  }
+</style>
+
+{% javascript %}
+  (() => {
+    const formatMoney = (cents, locale, currency) => {
+      try {
+        return new Intl.NumberFormat(locale, {
+          style: 'currency',
+          currency,
+          maximumFractionDigits: 2,
+        }).format((Number(cents) || 0) / 100);
+      } catch (error) {
+        return (currency === 'INR' ? '₹' : '$') + ((Number(cents) || 0) / 100).toFixed(2);
+      }
+    };
+
+    const showToast = (section, message) => {
+      let toast = section.querySelector('[data-gift-toast]');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'stagmenfashion-gift-combo__toast';
+        toast.dataset.giftToast = 'true';
+        section.appendChild(toast);
+      }
+
+      toast.textContent = message;
+      toast.classList.add('is-visible');
+      window.clearTimeout(toast._hideTimer);
+      toast._hideTimer = window.setTimeout(() => {
+        toast.classList.remove('is-visible');
+      }, 2400);
+    };
+
+    const escapeHtml = (value) =>
+      String(value ?? '').replace(/[&<>"']/g, (character) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }[character]));
+
+    const syncHeaderCartCount = (itemCount) => {
+      const count = Number(itemCount) || 0;
+      const cartTrigger =
+        document.querySelector('[data-testid="cart-drawer-trigger"]') ||
+        document.querySelector('.stagmenfashion-header__right a[href*="/cart"]') ||
+        document.querySelector('.stagmenfashion-mobile-tabs a[href*="/cart"]');
+
+      if (!cartTrigger) return;
+
+      const countNode =
+        cartTrigger.querySelector('.stagmenfashion-header__cart-count') ||
+        cartTrigger.querySelector('.stagmenfashion-mobile-tabs__badge');
+
+      if (countNode) countNode.textContent = String(count);
+    };
+
+    const openCartDrawer = () => {
+      const trigger = document.querySelector('[data-testid="cart-drawer-trigger"]');
+      if (trigger) {
+        trigger.click();
+        return;
+      }
+
+      const cartLink = document.querySelector('.stagmenfashion-mobile-tabs a[href*="/cart"]');
+      if (cartLink) {
+        window.location.href = cartLink.href;
+      }
+    };
+
+    const setupLoopCarousel = (carousel) => {
+      if (!(carousel instanceof HTMLElement) || carousel.dataset.loopReady === 'true') return;
+      const originals = Array.from(carousel.children).filter(
+        (child) => child instanceof HTMLElement && child.hasAttribute('data-gift-card')
+      );
+
+      if (originals.length < 3) return;
+
+      carousel.dataset.loopReady = 'true';
+
+      const cloneCards = (cards) =>
+        cards.map((card) => {
+          const clone = card.cloneNode(true);
+          if (clone instanceof HTMLElement) {
+            clone.removeAttribute('data-gift-card');
+            clone.dataset.giftCardClone = 'true';
+            clone.setAttribute('aria-hidden', 'true');
+            clone.setAttribute('tabindex', '-1');
+            clone.setAttribute('role', 'presentation');
+          }
+          return clone;
+        });
+
+      const prepend = document.createDocumentFragment();
+      const append = document.createDocumentFragment();
+
+      cloneCards(originals).reverse().forEach((clone) => prepend.appendChild(clone));
+      cloneCards(originals).forEach((clone) => append.appendChild(clone));
+
+      carousel.prepend(prepend);
+      carousel.append(append);
+
+      const measureLoopWidth = () => {
+        const cardWidth = originals[0].getBoundingClientRect().width;
+        const styles = getComputedStyle(carousel);
+        const gap = parseFloat(styles.columnGap || styles.gap || '0') || 0;
+        return (cardWidth + gap) * originals.length;
+      };
+
+      const resetToMiddle = () => {
+        const width = measureLoopWidth();
+        carousel.scrollLeft = width;
+      };
+
+      requestAnimationFrame(resetToMiddle);
+
+      let rafId = 0;
+      const normalizeScroll = () => {
+        window.cancelAnimationFrame(rafId);
+        rafId = window.requestAnimationFrame(() => {
+          const width = measureLoopWidth();
+          const total = carousel.scrollWidth;
+          const leftEdge = width * 0.45;
+          const rightEdge = total - carousel.clientWidth - width * 0.45;
+
+          if (carousel.scrollLeft <= leftEdge) {
+            carousel.scrollLeft += width;
+          } else if (carousel.scrollLeft >= rightEdge) {
+            carousel.scrollLeft -= width;
+          }
+        });
+      };
+
+      carousel.addEventListener('scroll', normalizeScroll, { passive: true });
+      window.addEventListener('resize', resetToMiddle, { passive: true });
+    };
+
+    const initGiftCombo = (section) => {
+      if (!section || section.dataset.ready === 'true') return;
+      section.dataset.ready = 'true';
+
+      const tabs = Array.from(section.querySelectorAll('[data-gift-tab]'));
+      const panels = Array.from(section.querySelectorAll('[data-gift-panel]'));
+      const cards = Array.from(section.querySelectorAll('.stagmenfashion-gift-combo__carousel > [data-gift-card]'));
+      const selectedIds = [];
+
+      const locale = section.dataset.locale || document.documentElement.lang || navigator.language || 'en-IN';
+      const currency = section.dataset.currency || 'INR';
+      const cartAddUrl = section.dataset.cartAddUrl || '/cart/add';
+      const discountThreshold = Number(section.dataset.discountThreshold || 99900);
+      const discountPercent = Number(section.dataset.discountPercent || 5);
+
+      const summaryList = section.querySelector('[data-gift-summary-list]');
+      const subtotalNode = section.querySelector('[data-gift-subtotal]');
+      const savingsNode = section.querySelector('[data-gift-savings]');
+      const totalNode = section.querySelector('[data-gift-total]');
+      const discountRow = section.querySelector('[data-gift-discount-row]');
+      const progressFill = section.querySelector('[data-gift-progress]');
+      const progressCopy = section.querySelector('[data-gift-progress-copy]');
+      const countNode = section.querySelector('[data-gift-count]');
+      const addButton = section.querySelector('[data-gift-add]');
+      const addLabel = section.querySelector('[data-gift-add-label]');
+      const resetButton = section.querySelector('[data-gift-reset]');
+
+      const cardsById = new Map(cards.map((card) => [card.dataset.giftId, card]));
+      const carousel = section.querySelector('[data-gift-carousel]');
+      if (carousel) {
+        setupLoopCarousel(carousel);
+      }
+
+      const selectedCards = () => selectedIds.map((id) => cardsById.get(id)).filter(Boolean);
+
+      const updateCardState = () => {
+        cards.forEach((card) => {
+          const isSelected = selectedIds.includes(card.dataset.giftId);
+          card.classList.toggle('is-selected', isSelected);
+          card.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+        });
+      };
+
+      const renderSummary = () => {
+        const items = selectedCards();
+        const subtotal = items.reduce((sum, card) => sum + Number(card.dataset.price || 0), 0);
+        const thresholdReached = subtotal >= discountThreshold;
+        const savings = thresholdReached ? Math.round((subtotal * discountPercent) / 100) : 0;
+        const total = subtotal - savings;
+        const progress = discountThreshold > 0 ? Math.min((subtotal / discountThreshold) * 100, 100) : 0;
+
+        if (countNode) countNode.textContent = `${items.length} selected`;
+        if (subtotalNode) subtotalNode.textContent = formatMoney(subtotal, locale, currency);
+        if (savingsNode) savingsNode.textContent = formatMoney(savings, locale, currency);
+        if (totalNode) totalNode.textContent = formatMoney(total, locale, currency);
+        if (progressFill) progressFill.style.width = `${progress}%`;
+        if (discountRow) discountRow.hidden = !thresholdReached || savings <= 0;
+
+        if (progressCopy) {
+          if (!items.length) {
+            progressCopy.textContent = 'Start selecting products';
+          } else if (thresholdReached) {
+            progressCopy.textContent = `${discountPercent}% savings unlocked`;
+          } else {
+            const remaining = Math.max(discountThreshold - subtotal, 0);
+            progressCopy.textContent = `${formatMoney(remaining, locale, currency)} left to unlock ${discountPercent}% off`;
+          }
+        }
+
+        if (summaryList) {
+          if (!items.length) {
+            summaryList.innerHTML =
+              '<p class="stagmenfashion-gift-combo__empty">Choose products from one or more occasion tabs. The combo stays in sync as you add or remove items.</p>';
+          } else {
+              summaryList.innerHTML = items
+              .map((card) => {
+                const title = card.dataset.title || 'Product';
+                const price = card.dataset.price || 0;
+                return `
+                  <p class="stagmenfashion-gift-combo__summary-item" data-selected-item="${card.dataset.giftId}">
+                    <span>
+                      ${escapeHtml(title)}
+                      <small>${escapeHtml(card.dataset.collection || '')}</small>
+                    </span>
+                    <strong>
+                      ${formatMoney(price, locale, currency)}
+                      <button type="button" data-remove-gift-id="${card.dataset.giftId}" aria-label="Remove ${escapeHtml(title)}">Remove</button>
+                    </strong>
+                  </p>
+                `;
+              })
+              .join('');
+          }
+        }
+
+        if (addButton) {
+          addButton.disabled = items.length === 0;
+        }
+        if (addLabel) {
+          if (!items.length) {
+            addLabel.textContent = 'Pick items to continue';
+          } else {
+          addLabel.textContent = thresholdReached ? 'Add combo with savings' : 'Add room combo';
+          }
+        }
+
+        updateCardState();
+      };
+
+      const activatePanel = (targetId) => {
+        tabs.forEach((tab) => {
+          const isActive = tab.dataset.target === targetId;
+          tab.classList.toggle('is-active', isActive);
+          tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+
+        panels.forEach((panel) => {
+          const isActive = panel.id === targetId;
+          panel.classList.toggle('is-active', isActive);
+          panel.hidden = !isActive;
+        });
+      };
+
+      const addCard = (card) => {
+        if (card.dataset.available === 'false') {
+          showToast(section, 'This product is sold out.');
+          return;
+        }
+
+        if (selectedIds.includes(card.dataset.giftId)) return;
+
+        selectedIds.push(card.dataset.giftId);
+        renderSummary();
+      };
+
+      const removeCard = (giftId) => {
+        const index = selectedIds.indexOf(giftId);
+        if (index === -1) return;
+        selectedIds.splice(index, 1);
+        renderSummary();
+      };
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => activatePanel(tab.dataset.target));
+      });
+
+      section.addEventListener('click', (event) => {
+        const removeButton = event.target.closest('[data-remove-gift-id]');
+        if (removeButton) {
+          event.preventDefault();
+          removeCard(removeButton.dataset.removeGiftId);
+          return;
+        }
+
+        const toggleButton = event.target.closest('[data-gift-card-toggle]');
+        if (toggleButton) {
+          const card = toggleButton.closest('[data-gift-card]');
+          if (!card) return;
+          event.preventDefault();
+          if (selectedIds.includes(card.dataset.giftId)) {
+            removeCard(card.dataset.giftId);
+          } else {
+            addCard(card);
+          }
+          return;
+        }
+
+        const card = event.target.closest('[data-gift-card]');
+        if (!card) return;
+
+        event.preventDefault();
+        if (selectedIds.includes(card.dataset.giftId)) {
+          removeCard(card.dataset.giftId);
+        } else {
+          addCard(card);
+        }
+      });
+
+      section.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        const card = event.target.closest('[data-gift-card]');
+        if (!card) return;
+        event.preventDefault();
+        if (selectedIds.includes(card.dataset.giftId)) {
+          removeCard(card.dataset.giftId);
+        } else {
+          addCard(card);
+        }
+      });
+
+      addButton?.addEventListener('click', async () => {
+        const items = selectedCards().map((card) => ({
+          id: Number(card.dataset.variantId),
+          quantity: 1,
+        }));
+
+        addButton.disabled = true;
+        addButton.dataset.loading = 'true';
+
+        try {
+          const response = await fetch(`${cartAddUrl}.js`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+            },
+            body: JSON.stringify({ items }),
+          });
+
+          const cart = await response.json();
+          if (!response.ok || cart?.status) {
+            throw new Error(cart?.description || cart?.message || 'Add to cart failed');
+          }
+
+          document.dispatchEvent(
+            new CustomEvent('cart:update', {
+              bubbles: true,
+              detail: {
+                resource: cart,
+                data: {
+                  source: 'stagmenfashion-gift-combo',
+                  itemCount: cart.item_count,
+                },
+              },
+            })
+          );
+
+          syncHeaderCartCount(cart.item_count);
+          showToast(section, 'Your room combo was added to cart.');
+          openCartDrawer();
+        } catch (error) {
+          console.error(error);
+          showToast(section, 'We could not add the combo. Please try again.');
+        } finally {
+          addButton.disabled = selectedIds.length === 0;
+          addButton.dataset.loading = 'false';
+          renderSummary();
+        }
+      });
+
+      resetButton?.addEventListener('click', () => {
+        selectedIds.length = 0;
+        renderSummary();
+      });
+
+      const initialTab = tabs.find((tab) => tab.classList.contains('is-active')) || tabs[0];
+      if (initialTab?.dataset.target) {
+        activatePanel(initialTab.dataset.target);
+      }
+
+      renderSummary();
+    };
+
+    const initAll = (root = document) => {
+      root.querySelectorAll('[data-stagmenfashion-gift-combo]').forEach(initGiftCombo);
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => initAll());
+    } else {
+      initAll();
+    }
+
+    document.addEventListener('shopify:section:load', (event) => initAll(event.target));
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Stag Outfit Combo",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Wardrobe combo"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Build your signature outfit combo"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Description",
+      "default": "<p>Pick your favourite streetwear essentials, co-ords, or oversized tees, review your combo in one smooth panel, and unlock exclusive styling bundle savings for your wardrobe.</p>"
+    },
+    {
+      "type": "range",
+      "id": "discount_threshold",
+      "label": "Discount threshold",
+      "min": 500,
+      "max": 5000,
+      "step": 50,
+      "default": 1000
+    },
+    {
+      "type": "range",
+      "id": "discount_percent",
+      "label": "Discount percent",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "products_per_collection",
+      "label": "Products per collection",
+      "min": 4,
+      "max": 100,
+      "step": 1,
+      "default": 100
+    },
+    {
+      "type": "text",
+      "id": "note",
+      "label": "Note",
+      "default": "This section keeps the selection smooth and visual. If you want the 5% offer to apply automatically at checkout, we can connect an admin discount code or automatic discount next."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "occasion",
+      "name": "Style collection",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Co-ord Sets"
+        },
+        {
+          "type": "text",
+          "id": "badge",
+          "label": "Badge",
+          "default": "Style set"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "A relaxed, elevated edit for effortless streetwear styling."
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Stag Outfit Combo",
+      "blocks": []
+    }
+  ]
+}
+{% endschema %}

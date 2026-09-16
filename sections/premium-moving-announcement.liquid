@@ -1,0 +1,192 @@
+{% liquid
+  assign message = section.settings.text | strip
+  if message == blank
+    assign message = 'We make things that work better and last longer.'
+  endif
+%}
+
+<section
+  class="premium-moving-announcement color-{{ section.settings.color_scheme }}"
+  style="
+    --premium-announcement-bg: {{ section.settings.background_color }};
+    --premium-announcement-text: {{ section.settings.text_color }};
+    --premium-announcement-speed: {{ section.settings.speed }}s;
+    --premium-announcement-gap: {{ section.settings.gap }}px;
+    --premium-announcement-font-size: {{ section.settings.font_size }}px;
+    --premium-announcement-letter-spacing: {{ section.settings.letter_spacing | times: 0.01 }}em;
+    --premium-announcement-padding-y: {{ section.settings.padding_y }}px;
+  "
+>
+  <div class="premium-moving-announcement__viewport">
+    <div class="premium-moving-announcement__track">
+      {% for group in (1..2) %}
+        <div class="premium-moving-announcement__group" {% if group == 2 %}aria-hidden="true"{% endif %}>
+          {% for item in (1..6) %}
+            <span class="premium-moving-announcement__item">{{ message | escape }}</span>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+  .premium-moving-announcement {
+    width: 100%;
+    overflow: hidden;
+    background: var(--premium-announcement-bg);
+    color: var(--premium-announcement-text);
+  }
+
+  .premium-moving-announcement__viewport {
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .premium-moving-announcement__track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+    animation: premium-moving-announcement-scroll var(--premium-announcement-speed) linear infinite;
+  }
+
+  .premium-moving-announcement:hover .premium-moving-announcement__track {
+    animation-play-state: paused;
+  }
+
+  .premium-moving-announcement__group {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: var(--premium-announcement-gap);
+    min-width: max-content;
+  }
+
+  .premium-moving-announcement__item {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    padding-block: var(--premium-announcement-padding-y);
+    padding-inline: calc(var(--premium-announcement-gap) / 2);
+    font-family: var(--font-body--family);
+    font-size: var(--premium-announcement-font-size);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: var(--premium-announcement-letter-spacing);
+    text-transform: uppercase;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  @keyframes premium-moving-announcement-scroll {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .premium-moving-announcement__item {
+      font-size: max(12px, calc(var(--premium-announcement-font-size) - 1px));
+      letter-spacing: max(0.04em, calc(var(--premium-announcement-letter-spacing) * 0.85));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .premium-moving-announcement__track {
+      animation: none;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Premium announcement",
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "We make things that work better and last longer."
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Speed",
+      "min": 12,
+      "max": 45,
+      "step": 1,
+      "unit": "s",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Spacing",
+      "min": 24,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 52
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Text size",
+      "min": 12,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Letter spacing",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "%",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "label": "Bar height",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-4"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Premium announcement",
+      "category": "Text"
+    }
+  ]
+}
+{% endschema %}

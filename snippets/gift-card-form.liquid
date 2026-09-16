@@ -1,0 +1,67 @@
+{% liquid
+  assign form_id = 'GiftCardForm-' | append: section.id | append: '-' | append: product.id
+  assign variants = product.variants | sort: 'price'
+  assign recipient_block_id = section.id | append: '-gift-card'
+  assign button_text = section.settings.button_label | default: 'Add to cart'
+%}
+
+<product-form-component
+  class="pf-gift-card__form-component"
+  data-section-id="{{ section.id }}"
+  data-product-id="{{ product.id }}"
+  on:submit="/handleSubmit"
+>
+  <div class="visually-hidden" aria-live="assertive" role="status" aria-atomic="true" ref="liveRegion"></div>
+
+  {%- form 'product', product, id: form_id, class: 'shopify-product-form pf-gift-card__native-form', data-type: 'add-to-cart-form' -%}
+    <input type="hidden" name="quantity" value="1">
+    <input type="hidden" name="properties[__gift_card_page]" value="true">
+
+    <div class="pf-gift-card__amounts" role="radiogroup" aria-label="Gift card amounts">
+      {% for variant in variants limit: 5 %}
+        {% liquid
+          assign amount_label = blank
+          case forloop.index
+            when 1
+              assign amount_label = section.settings.amount_label_1
+            when 2
+              assign amount_label = section.settings.amount_label_2
+            when 3
+              assign amount_label = section.settings.amount_label_3
+            when 4
+              assign amount_label = section.settings.amount_label_4
+            when 5
+              assign amount_label = section.settings.amount_label_5
+          endcase
+          if amount_label == blank
+            assign amount_label = variant.price | money
+          endif
+        %}
+        <label class="pf-gift-card__amount{% if variant.id == product.selected_or_first_available_variant.id %} is-active{% endif %}">
+          <input
+            type="radio"
+            name="id"
+            value="{{ variant.id }}"
+            {% if variant.id == product.selected_or_first_available_variant.id %}checked{% endif %}
+          >
+          <span>{{ amount_label }}</span>
+        </label>
+      {% endfor %}
+    </div>
+
+    <div class="pf-gift-card__recipient-shell">
+      {% render 'gift-card-recipient-form', product: product, form: form, section: section, block: section %}
+    </div>
+
+    <div class="pf-gift-card__actions">
+      {% render 'add-to-cart-button',
+        add_to_cart_text: button_text,
+        class: 'pf-gift-card__button add-to-cart-button',
+        can_add_to_cart: product.selected_or_first_available_variant.available,
+        icon_only_on_mobile: false,
+        product: product,
+        data_testid: 'gift-card-add-to-cart'
+      %}
+    </div>
+  {%- endform -%}
+</product-form-component>

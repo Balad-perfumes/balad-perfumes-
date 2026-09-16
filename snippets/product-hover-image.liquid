@@ -1,0 +1,38 @@
+{% liquid
+  assign primary_image = product.featured_image
+  assign hover_image = product.images[1]
+  if product.selected_or_first_available_variant.featured_media != blank
+    assign primary_image = product.selected_or_first_available_variant.featured_media.preview_image | default: product.featured_image
+  endif
+%}
+
+<a class="pop-card__media" href="{{ product.url }}" aria-label="{{ product.title | escape }}">
+  <span class="pop-card__media-stack">
+    {% if primary_image != blank %}
+      {{
+        primary_image
+        | image_url: width: 1200
+        | image_tag:
+          class: 'pop-card__image pop-card__image--primary',
+          loading: 'lazy',
+          widths: '360, 540, 720, 900, 1200',
+          alt: product.title
+      }}
+    {% endif %}
+
+    {% if hover_image != blank %}
+      {{
+        hover_image
+        | image_url: width: 1200
+        | image_tag:
+          class: 'pop-card__image pop-card__image--hover',
+          loading: 'lazy',
+          widths: '360, 540, 720, 900, 1200',
+          alt: product.title
+      }}
+    {% endif %}
+  </span>
+  {% if discount_percentage > 0 %}
+    <span class="pop-card__badge pop-card__badge--sale">-{{ discount_percentage }}%</span>
+  {% endif %}
+</a>

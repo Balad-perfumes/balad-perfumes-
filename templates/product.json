@@ -1,0 +1,36 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "product-template",
+      "settings": {
+        "color_scheme": "scheme-1",
+        "default_description": "<p>Premium 100% Combed Heavyweight Cotton. Relaxed oversized drape with reinforced ribbed collar, drop shoulders, and anti-pilling finish. Designed for everyday comfort, enduring style, and all-day versatility.</p>",
+        "product_care": "<p>Machine wash cold inside out with like colours. Do not bleach. Tumble dry low or line dry to preserve fabric softness and fit.</p>",
+        "delivery_returns": "<p>Fast express dispatch, secure packaging, and easy 7-day size exchanges as per store policy.</p>"
+      }
+    },
+    "similar_products": {
+      "type": "stagmenfashion-similar-products",
+      "settings": {
+        "heading": "Similar Products",
+        "subheading": "Explore more styles from this category",
+        "products_to_show": 12,
+        "discover_more_label": "Discover More",
+        "color_scheme": "scheme-1"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "similar_products"
+  ]
+}

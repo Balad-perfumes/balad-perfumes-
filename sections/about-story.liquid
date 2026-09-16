@@ -1,0 +1,61 @@
+<link rel="stylesheet" href="{{ 'about.css' | asset_url }}">
+<script src="{{ 'about.js' | asset_url }}" type="module" fetchpriority="low"></script>
+
+<section
+  id="about-story-{{ section.id }}"
+  class="about-story color-{{ section.settings.color_scheme }}"
+>
+  <div class="about-shell">
+    <div class="about-story__overlap-container {% if section.settings.reverse_layout %}about-story__overlap-container--reverse{% endif %}">
+      
+      <div class="about-story__image-container about-reveal-item" {% if section.settings.enable_animations %}data-about-reveal{% endif %}>
+        {% if section.settings.image != blank %}
+          {{
+            section.settings.image
+            | image_url: width: 1600
+            | image_tag:
+              class: 'about-story__main-image',
+              loading: 'lazy',
+              alt: section.settings.heading
+          }}
+        {% else %}
+          <div class="about-story__placeholder-container" aria-hidden="true"></div>
+        {% endif %}
+      </div>
+
+      <div class="about-story__content-card about-reveal-item" {% if section.settings.enable_animations %}data-about-reveal{% endif %}>
+        {% if section.settings.section_label != blank %}
+          <p class="about-eyebrow">{{ section.settings.section_label | escape }}</p>
+        {% endif %}
+
+        {% if section.settings.content_heading != blank %}
+          <h2 class="about-story__card-heading">{{ section.settings.content_heading | escape }}</h2>
+        {% elsif section.settings.heading != blank %}
+          <h2 class="about-story__card-heading">{{ section.settings.heading | escape }}</h2>
+        {% endif %}
+
+        {% if section.settings.text != blank %}
+          <div class="about-story__card-text rte">{{ section.settings.text }}</div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About story",
+  "settings": [
+    { "type": "text", "id": "section_label", "label": "Section label", "default": "The Stag Men Fashion Story" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Why Blend In, When You Can Pop?" },
+    { "type": "text", "id": "content_heading", "label": "Content heading", "default": "Why settle for ordinary streetwear?" },
+    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Stag Men Fashion started with a simple question: why settle for basic fast fashion? We looked around and saw racks filled with ordinary tees and bland cuts that lost shape after one wash.</p><p>So we created Stag Men Fashion, a homegrown fashion label crafted specially for modern men and streetwear enthusiasts with one simple belief: every fit should express your individuality and bring effortless confidence. We design and craft in-house with heavyweight fabrics, signature silhouettes, and bold palettes.</p>" },
+    { "type": "image_picker", "id": "image", "label": "Main image" },
+    { "type": "checkbox", "id": "reverse_layout", "label": "Reverse layout", "default": false },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "checkbox", "id": "enable_animations", "label": "Enable animations", "default": true }
+  ],
+  "presets": [{ "name": "About story" }]
+}
+{% endschema %}

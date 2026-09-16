@@ -1,0 +1,1887 @@
+{% liquid
+  assign spotlight_collections = section.settings.collection_list
+  if spotlight_collections == blank
+    assign spotlight_collections = collections
+  endif
+
+  assign active_collection = spotlight_collections | find: 'id', collection.id | default: spotlight_collections.first
+  if active_collection == blank
+    assign active_collection = collections.all
+  endif
+
+  assign spotlight_id = 'stagmenfashion-spotlight-' | append: section.id
+
+  assign enable_trending = section.settings.enable_trending
+  assign trending_collection = section.settings.trending_collection | default: collections.all
+  assign filter_categories_label = section.settings.filter_categories_label | default: 'Categories'
+  assign filter_price_label = section.settings.filter_price_label | default: 'Price Range'
+  assign sort_label = section.settings.sort_label | default: 'Sort by'
+%}
+
+{%- comment -%} Collect unique product types from all collections for category filters {%- endcomment -%}
+{% liquid
+  assign category_types = '' | split: ''
+  for spotlight_collection in spotlight_collections
+    for product in spotlight_collection.products
+      assign ptype = product.type
+      if ptype != blank
+        assign category_types = category_types | push: ptype
+      endif
+    endfor
+  endfor
+  assign category_types = category_types | uniq | sort
+%}
+
+{%- comment -%} Collect unique product tags from all collections for sub-category filters {%- endcomment -%}
+{% liquid
+  assign subcategory_tags = '' | split: ''
+  for spotlight_collection in spotlight_collections
+    for product in spotlight_collection.products
+      for tag in product.tags
+        unless tag contains 'badge:' or tag contains 'meta:'
+          assign subcategory_tags = subcategory_tags | push: tag
+        endunless
+      endfor
+    endfor
+  endfor
+  assign subcategory_tags = subcategory_tags | uniq | sort
+%}
+
+<section
+  class="stagmenfashion-spotlight color-{{ section.settings.color_scheme }}"
+  data-stagmenfashion-spotlight="{{ section.id }}"
+  data-cart-add-url="{{ routes.cart_add_url }}"
+>
+  <div class="section section--full-width stagmenfashion-spotlight__shell">
+
+    {%- comment -%} ---- HEADER ---- {%- endcomment -%}
+    <div class="stagmenfashion-spotlight__top">
+      <div class="stagmenfashion-spotlight__heading-wrap">
+        {% if section.settings.heading != blank %}
+          <h2 class="stagmenfashion-spotlight__heading">{{ section.settings.heading }}</h2>
+        {% endif %}
+        {% if section.settings.subtext != blank %}
+          <div class="stagmenfashion-spotlight__subtext rte">{{ section.settings.subtext }}</div>
+        {% endif %}
+      </div>
+
+      <div class="stagmenfashion-spotlight__header-actions">
+        <button
+          type="button"
+          class="stagmenfashion-spotlight__filter-trigger-btn"
+          aria-expanded="false"
+          aria-controls="{{ spotlight_id }}-drawer"
+          data-spotlight-drawer-trigger
+        >
+          <svg class="icon-filter" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line>
+            <line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
+          <span>Filters & Sort</span>
+          <span class="stagmenfashion-spotlight__filter-count-badge" data-spotlight-filter-badge style="display: none;">0</span>
+        </button>
+      </div>
+    </div>
+
+    {%- comment -%} Active filter tags / Clear {%- endcomment -%}
+    <div class="stagmenfashion-spotlight__active-filters" data-spotlight-active-filters style="display:none;">
+      <span class="stagmenfashion-spotlight__active-label">Active:</span>
+      <span class="stagmenfashion-spotlight__active-tag" data-spotlight-active-tag></span>
+      <button
+        type="button"
+        class="stagmenfashion-spotlight__clear-btn"
+        data-spotlight-clear-filters
+      >Clear All ✕</button>
+    </div>
+
+    {%- comment -%} ---- PANELS ---- {%- endcomment -%}
+    <div class="stagmenfashion-spotlight__panels">
+
+      {%- comment -%} Trending Panel {%- endcomment -%}
+      {% if enable_trending %}
+        <div
+          id="{{ spotlight_id }}-panel-trending"
+          class="stagmenfashion-spotlight__panel"
+          role="tabpanel"
+          data-spotlight-panel
+          data-spotlight-url="{{ trending_collection.url }}"
+          data-spotlight-panel-type="trending"
+          {% if spotlight_collections.size > 0 %}hidden{% endif %}
+        >
+          <div class="stagmenfashion-spotlight__carousel" aria-label="Trending Products">
+            {% for product in trending_collection.products limit: section.settings.trending_limit %}
+              {% liquid
+                assign product_price_raw = product.price
+                assign product_price = product.price | money
+                assign product_compare = blank
+                if product.compare_at_price > product.price
+                  assign product_compare = product.compare_at_price | money
+                endif
+                assign product_image = product.featured_image
+                assign product_hover_image = product.images[1]
+                assign product_rating = product.metafields.reviews.rating.value.rating
+                if product_rating == blank
+                  assign product_rating = 4.9
+                endif
+                assign product_review_count = product.metafields.reviews.rating_count
+                if product_review_count == blank or product_review_count == 0
+                  assign product_review_seed = product.id | modulo: 4
+                  case product_review_seed
+                    when 0
+                      assign product_review_count = 8
+                    when 1
+                      assign product_review_count = 20
+                    when 2
+                      assign product_review_count = 26
+                    else
+                      assign product_review_count = 33
+                  endcase
+                endif
+                assign product_description = product.description | strip_html | truncatewords: 12
+                assign product_type_handle = product.type | handleize
+              %}
+
+              <article
+                class="stagmenfashion-spotlight-card stagmenfashion-spotlight-card--carousel"
+                data-product-type="{{ product_type_handle }}"
+                data-product-price="{{ product_price_raw }}"
+                data-product-title="{{ product.title | escape }}"
+                data-product-tags="{% for tag in product.tags %}{{ tag | handleize }}{% unless forloop.last %},{% endunless %}{% endfor %}"
+                data-filtered="false"
+              >
+                <a class="stagmenfashion-spotlight-card__media-link" href="{{ product.url }}" aria-label="{{ product.title | escape }}">
+                  <div class="stagmenfashion-spotlight-card__media{% if product_hover_image != blank %} stagmenfashion-spotlight-card__media--hover{% endif %}">
+                    {% if product_image != blank %}
+                      {{
+                        product_image
+                        | image_url: width: 900
+                        | image_tag:
+                          class: 'stagmenfashion-spotlight-card__image stagmenfashion-spotlight-card__image--primary',
+                          widths: '300, 420, 560, 720, 900',
+                          loading: 'lazy',
+                          alt: product.title
+                      }}
+                    {% else %}
+                      {{ 'product-1' | placeholder_svg_tag: 'stagmenfashion-spotlight-card__image stagmenfashion-spotlight-card__image--placeholder' }}
+                    {% endif %}
+
+                    {% if product_hover_image != blank %}
+                      {{
+                        product_hover_image
+                        | image_url: width: 900
+                        | image_tag:
+                          class: 'stagmenfashion-spotlight-card__image stagmenfashion-spotlight-card__image--secondary',
+                          widths: '300, 420, 560, 720, 900',
+                          loading: 'lazy',
+                          alt: product.title
+                      }}
+                    {% endif %}
+
+                    <span class="stagmenfashion-spotlight-card__badge-trending">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      Trending
+                    </span>
+
+                    <span class="stagmenfashion-spotlight-card__review-chip">
+                      <span class="stagmenfashion-spotlight-card__stars" aria-hidden="true">
+                        {% for star in (1..5) %}
+                          <span class="{% if product_rating < star %}is-dim{% endif %}">★</span>
+                        {% endfor %}
+                      </span>
+                      <span class="stagmenfashion-spotlight-card__review-text">
+                        {{ product_review_count | default: 0 }} reviews
+                      </span>
+                    </span>
+                  </div>
+                </a>
+
+                <div class="stagmenfashion-spotlight-card__content">
+                  <a class="stagmenfashion-spotlight-card__title-link" href="{{ product.url }}">
+                    <h3 class="stagmenfashion-spotlight-card__title">{{ product.title }}</h3>
+                  </a>
+
+                  {% if product_description != blank %}
+                    <p class="stagmenfashion-spotlight-card__excerpt">{{ product_description }}</p>
+                  {% endif %}
+
+                  {% if product.type != blank %}
+                    <span class="stagmenfashion-spotlight-card__type-badge">{{ product.type }}</span>
+                  {% endif %}
+
+                  <div class="stagmenfashion-spotlight-card__separator"></div>
+
+                  <div class="stagmenfashion-spotlight-card__footer">
+                    <div class="stagmenfashion-spotlight-card__price-wrap">
+                      <span class="stagmenfashion-spotlight-card__price">{{ product_price }}</span>
+                      {% if product_compare != blank %}
+                        <span class="stagmenfashion-spotlight-card__compare">{{ product_compare }}</span>
+                      {% endif %}
+                    </div>
+
+                    {% form 'product', product, class: 'stagmenfashion-spotlight-card__form' %}
+                      <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                      <button type="submit" class="stagmenfashion-spotlight-card__cta" data-stagmenfashion-spotlight-add>Add to cart</button>
+                    {% endform %}
+                  </div>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      {%- comment -%} Collection Panels {%- endcomment -%}
+      {% for spotlight_collection in spotlight_collections %}
+        {% liquid
+          assign panel_active = false
+          if enable_trending == false and active_collection.id == spotlight_collection.id
+            assign panel_active = true
+          endif
+        %}
+        <div
+          id="{{ spotlight_id }}-panel-{{ forloop.index0 }}"
+          class="stagmenfashion-spotlight__panel{% if panel_active %} is-active{% endif %}"
+          role="tabpanel"
+          {% unless panel_active %}hidden{% endunless %}
+          data-spotlight-panel
+          data-spotlight-url="{{ spotlight_collection.url }}"
+          data-spotlight-panel-type="collection"
+        >
+          <div class="stagmenfashion-spotlight__carousel" aria-label="{{ spotlight_collection.title | escape }}">
+            {% for product in spotlight_collection.products limit: section.settings.products_per_collection %}
+              {% liquid
+                assign product_price_raw = product.price
+                assign product_price = product.price | money
+                assign product_compare = blank
+                if product.compare_at_price > product.price
+                  assign product_compare = product.compare_at_price | money
+                endif
+                assign product_image = product.featured_image
+                assign product_hover_image = product.images[1]
+                assign product_rating = product.metafields.reviews.rating.value.rating
+                if product_rating == blank
+                  assign product_rating = 4.9
+                endif
+                assign product_review_count = product.metafields.reviews.rating_count
+                if product_review_count == blank or product_review_count == 0
+                  assign product_review_seed = product.id | modulo: 4
+                  case product_review_seed
+                    when 0
+                      assign product_review_count = 8
+                    when 1
+                      assign product_review_count = 20
+                    when 2
+                      assign product_review_count = 26
+                    else
+                      assign product_review_count = 33
+                  endcase
+                endif
+                assign product_description = product.description | strip_html | truncatewords: 12
+                assign product_type_handle = product.type | handleize
+              %}
+
+              <article
+                class="stagmenfashion-spotlight-card stagmenfashion-spotlight-card--carousel"
+                data-product-type="{{ product_type_handle }}"
+                data-product-price="{{ product_price_raw }}"
+                data-product-title="{{ product.title | escape }}"
+                data-product-tags="{% for tag in product.tags %}{{ tag | handleize }}{% unless forloop.last %},{% endunless %}{% endfor %}"
+                data-filtered="false"
+              >
+                <a class="stagmenfashion-spotlight-card__media-link" href="{{ product.url }}" aria-label="{{ product.title | escape }}">
+                  <div class="stagmenfashion-spotlight-card__media{% if product_hover_image != blank %} stagmenfashion-spotlight-card__media--hover{% endif %}">
+                    {% if product_image != blank %}
+                      {{
+                        product_image
+                        | image_url: width: 900
+                        | image_tag:
+                          class: 'stagmenfashion-spotlight-card__image stagmenfashion-spotlight-card__image--primary',
+                          widths: '300, 420, 560, 720, 900',
+                          loading: 'lazy',
+                          alt: product.title
+                      }}
+                    {% else %}
+                      {{ 'product-1' | placeholder_svg_tag: 'stagmenfashion-spotlight-card__image stagmenfashion-spotlight-card__image--placeholder' }}
+                    {% endif %}
+
+                    {% if product_hover_image != blank %}
+                      {{
+                        product_hover_image
+                        | image_url: width: 900
+                        | image_tag:
+                          class: 'stagmenfashion-spotlight-card__image stagmenfashion-spotlight-card__image--secondary',
+                          widths: '300, 420, 560, 720, 900',
+                          loading: 'lazy',
+                          alt: product.title
+                      }}
+                    {% endif %}
+
+                    <span class="stagmenfashion-spotlight-card__review-chip">
+                      <span class="stagmenfashion-spotlight-card__stars" aria-hidden="true">
+                        {% for star in (1..5) %}
+                          <span class="{% if product_rating < star %}is-dim{% endif %}">★</span>
+                        {% endfor %}
+                      </span>
+                      <span class="stagmenfashion-spotlight-card__review-text">
+                        {{ product_review_count | default: 0 }} reviews
+                      </span>
+                    </span>
+                  </div>
+                </a>
+
+                <div class="stagmenfashion-spotlight-card__content">
+                  <a class="stagmenfashion-spotlight-card__title-link" href="{{ product.url }}">
+                    <h3 class="stagmenfashion-spotlight-card__title">{{ product.title }}</h3>
+                  </a>
+
+                  {% if product_description != blank %}
+                    <p class="stagmenfashion-spotlight-card__excerpt">{{ product_description }}</p>
+                  {% endif %}
+
+                  {% if product.type != blank %}
+                    <span class="stagmenfashion-spotlight-card__type-badge">{{ product.type }}</span>
+                  {% endif %}
+
+                  <div class="stagmenfashion-spotlight-card__separator"></div>
+
+                  <div class="stagmenfashion-spotlight-card__footer">
+                    <div class="stagmenfashion-spotlight-card__price-wrap">
+                      <span class="stagmenfashion-spotlight-card__price">{{ product_price }}</span>
+                      {% if product_compare != blank %}
+                        <span class="stagmenfashion-spotlight-card__compare">{{ product_compare }}</span>
+                      {% endif %}
+                    </div>
+
+                    {% form 'product', product, class: 'stagmenfashion-spotlight-card__form' %}
+                      <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                      <button type="submit" class="stagmenfashion-spotlight-card__cta" data-stagmenfashion-spotlight-add>Add to cart</button>
+                    {% endform %}
+                  </div>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="stagmenfashion-spotlight__bottom-row" data-spotlight-bottom-nav-row>
+      <button type="button" class="stagmenfashion-spotlight__nav-btn" data-spotlight-nav="prev" aria-label="Previous products">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      
+      {% if active_collection != blank %}
+        <a class="stagmenfashion-spotlight__see-all-bottom" href="{{ active_collection.url }}" data-spotlight-see-all-bottom>
+          {{ section.settings.see_all_text }}
+        </a>
+      {% endif %}
+
+      <button type="button" class="stagmenfashion-spotlight__nav-btn" data-spotlight-nav="next" aria-label="Next products">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
+
+    {%- comment -%} ---- NO RESULTS MESSAGE ---- {%- endcomment -%}
+    <div class="stagmenfashion-spotlight__no-results" data-spotlight-no-results style="display:none;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3;margin-bottom:16px;">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <p>No products match your filters. Try adjusting your selection.</p>
+    </div>
+  </div>
+
+  <!-- Filter Drawer -->
+  <div id="{{ spotlight_id }}-drawer" class="stagmenfashion-spotlight__drawer" aria-hidden="true" data-spotlight-drawer>
+    <div class="stagmenfashion-spotlight__drawer-overlay" data-spotlight-drawer-overlay></div>
+    <div class="stagmenfashion-spotlight__drawer-content">
+      <div class="stagmenfashion-spotlight__drawer-header">
+        <h3 class="stagmenfashion-spotlight__drawer-title">Filters & Sort</h3>
+        <button type="button" class="stagmenfashion-spotlight__drawer-close" aria-label="Close filters" data-spotlight-drawer-close>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="stagmenfashion-spotlight__drawer-body">
+        <!-- Collections Group -->
+        <div class="stagmenfashion-spotlight__drawer-section">
+          <h4 class="stagmenfashion-spotlight__drawer-section-title">Collections</h4>
+          <div class="stagmenfashion-spotlight__drawer-options" data-spotlight-collection-filters>
+            {% if enable_trending %}
+              <button
+                type="button"
+                class="stagmenfashion-spotlight__drawer-option is-active"
+                data-spotlight-collection-tab-ref="{{ spotlight_id }}-panel-trending"
+              >
+                <span class="indicator"></span>
+                <span>Trending</span>
+              </button>
+            {% endif %}
+            {% for spotlight_collection in spotlight_collections %}
+              <button
+                type="button"
+                class="stagmenfashion-spotlight__drawer-option{% if enable_trending == false and forloop.first %} is-active{% endif %}"
+                data-spotlight-collection-tab-ref="{{ spotlight_id }}-panel-{{ forloop.index0 }}"
+              >
+                <span class="indicator"></span>
+                <span>{{ spotlight_collection.title }}</span>
+              </button>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Category Group -->
+        {% if category_types.size > 0 %}
+          <div class="stagmenfashion-spotlight__drawer-section">
+            <h4 class="stagmenfashion-spotlight__drawer-section-title">Category</h4>
+            <div class="stagmenfashion-spotlight__drawer-options" data-spotlight-category-filters>
+              <button type="button" class="stagmenfashion-spotlight__drawer-option is-active" data-spotlight-category="all" data-spotlight-category-label="All">
+                <span class="indicator"></span>
+                <span>All Categories</span>
+              </button>
+              {% for cat_type in category_types %}
+                <button type="button" class="stagmenfashion-spotlight__drawer-option" data-spotlight-category="{{ cat_type | handleize }}" data-spotlight-category-label="{{ cat_type | escape }}">
+                  <span class="indicator"></span>
+                  <span>{{ cat_type }}</span>
+                </button>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- Sub-Category (Tags) Group -->
+        {% if subcategory_tags.size > 0 %}
+          <div class="stagmenfashion-spotlight__drawer-section">
+            <h4 class="stagmenfashion-spotlight__drawer-section-title">Sub-Category</h4>
+            <div class="stagmenfashion-spotlight__drawer-options" data-spotlight-subcategory-filters>
+              <button type="button" class="stagmenfashion-spotlight__drawer-option is-active" data-spotlight-subcategory="all" data-spotlight-subcategory-label="All">
+                <span class="indicator"></span>
+                <span>All Sub-Categories</span>
+              </button>
+              {% for tag in subcategory_tags %}
+                <button type="button" class="stagmenfashion-spotlight__drawer-option" data-spotlight-subcategory="{{ tag | handleize }}" data-spotlight-subcategory-label="{{ tag | escape }}">
+                  <span class="indicator"></span>
+                  <span>{{ tag }}</span>
+                </button>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- Price Range Group -->
+        <div class="stagmenfashion-spotlight__drawer-section">
+          <h4 class="stagmenfashion-spotlight__drawer-section-title">Price Range</h4>
+          <div class="stagmenfashion-spotlight__drawer-options" data-spotlight-price-filters>
+            <button type="button" class="stagmenfashion-spotlight__drawer-option is-active" data-spotlight-price="all" data-spotlight-price-label="All Prices">
+              <span class="indicator"></span>
+              <span>All Prices</span>
+            </button>
+            <button type="button" class="stagmenfashion-spotlight__drawer-option" data-spotlight-price="0-500" data-spotlight-price-label="₹0 – ₹500">
+              <span class="indicator"></span>
+              <span>₹0 – ₹500</span>
+            </button>
+            <button type="button" class="stagmenfashion-spotlight__drawer-option" data-spotlight-price="500-1000" data-spotlight-price-label="₹500 – ₹1,000">
+              <span class="indicator"></span>
+              <span>₹500 – ₹1,000</span>
+            </button>
+            <button type="button" class="stagmenfashion-spotlight__drawer-option" data-spotlight-price="1000-2000" data-spotlight-price-label="₹1,000 – ₹2,000">
+              <span class="indicator"></span>
+              <span>₹1,000 – ₹2,000</span>
+            </button>
+            <button type="button" class="stagmenfashion-spotlight__drawer-option" data-spotlight-price="2000-5000" data-spotlight-price-label="₹2,000 – ₹5,000">
+              <span class="indicator"></span>
+              <span>₹2,000 – ₹5,000</span>
+            </button>
+            <button type="button" class="stagmenfashion-spotlight__drawer-option" data-spotlight-price="5000-999999" data-spotlight-price-label="Above ₹5,000">
+              <span class="indicator"></span>
+              <span>Above ₹5,000</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sort Group -->
+        <div class="stagmenfashion-spotlight__drawer-section">
+          <h4 class="stagmenfashion-spotlight__drawer-section-title">Sort By</h4>
+          <div class="stagmenfashion-spotlight__drawer-options" data-spotlight-sort-options>
+            <button type="button" class="stagmenfashion-spotlight__drawer-option is-active" data-spotlight-sort-val="best-selling">
+              <span class="indicator"></span>
+              <span>Best Selling</span>
+            </button>
+            <button type="button" class="stagmenfashion-spotlight__drawer-option" data-spotlight-sort-val="title-ascending">
+              <span class="indicator"></span>
+              <span>Alphabetical: A – Z</span>
+            </button>
+            <button type="button" class="stagmenfashion-spotlight__drawer-option" data-spotlight-sort-val="title-descending">
+              <span class="indicator"></span>
+              <span>Alphabetical: Z – A</span>
+            </button>
+            <button type="button" class="stagmenfashion-spotlight__drawer-option" data-spotlight-sort-val="price-ascending">
+              <span class="indicator"></span>
+              <span>Price: Low → High</span>
+            </button>
+            <button type="button" class="stagmenfashion-spotlight__drawer-option" data-spotlight-sort-val="price-descending">
+              <span class="indicator"></span>
+              <span>Price: High → Low</span>
+            </button>
+            <button type="button" class="stagmenfashion-spotlight__drawer-option" data-spotlight-sort-val="created-descending">
+              <span class="indicator"></span>
+              <span>Newest</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stagmenfashion-spotlight__drawer-footer">
+        <button type="button" class="stagmenfashion-spotlight__drawer-clear" data-spotlight-clear-filters>Clear All</button>
+        <button type="button" class="stagmenfashion-spotlight__drawer-apply" data-spotlight-drawer-close>Apply</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .stagmenfashion-spotlight {
+    background: #ffffff;
+    color: #171717;
+    padding-top: 0;
+    padding-bottom: clamp(10px, 3.5vw, 12px);
+  }
+
+  .stagmenfashion-spotlight__shell {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 36px;
+  }
+
+  /* ---- HEADER ---- */
+  .stagmenfashion-spotlight__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+    min-width: 0;
+  }
+
+  .stagmenfashion-spotlight__heading-wrap {
+    max-width: 62rem;
+    min-width: 0;
+  }
+
+  .stagmenfashion-spotlight__heading {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: clamp(1.5rem, 1.25rem + 1vw, 2.25rem);
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--color-foreground-heading);
+  }
+
+  .stagmenfashion-spotlight__subtext {
+    max-width: 48rem;
+    margin-top: 8px;
+    font-size: clamp(0.95rem, 0.9rem + 0.2vw, 1.05rem);
+    line-height: 1.5;
+    color: rgba(17, 17, 17, 0.6);
+  }
+
+  @media screen and (max-width: 749px) {
+    .stagmenfashion-spotlight__heading {
+      font-size: 14px !important;
+    }
+    .stagmenfashion-spotlight__subtext {
+      font-size: 10px !important;
+    }
+  }
+
+  .stagmenfashion-spotlight__subtext > * { margin: 0; }
+
+  .stagmenfashion-spotlight__header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .stagmenfashion-spotlight__see-all {
+    color: #111111;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .stagmenfashion-spotlight__see-all:hover {
+    color: var(--color-primary);
+  }
+
+  /* ---- FILTER TRIGGER BUTTON ---- */
+  .stagmenfashion-spotlight__filter-trigger-btn {
+    appearance: none;
+    border: 1px solid rgba(17, 17, 17, 0.15);
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 10px 20px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #111111;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  }
+
+  .stagmenfashion-spotlight__filter-trigger-btn:hover {
+    border-color: rgba(17, 17, 17, 0.35);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  .stagmenfashion-spotlight__filter-trigger-btn[aria-expanded="true"] {
+    background: #0800CF;
+    color: #ffffff;
+    border-color: #0800CF;
+  }
+
+  .stagmenfashion-spotlight__filter-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 800;
+    height: 18px;
+    min-width: 18px;
+    padding: 0 5px;
+    border-radius: 99px;
+    line-height: 1;
+    transition: all 0.2s ease;
+  }
+
+  .stagmenfashion-spotlight__filter-trigger-btn[aria-expanded="true"] .stagmenfashion-spotlight__filter-count-badge {
+    background: #ffffff;
+    color: #111111;
+  }
+
+  /* ---- ACTIVE FILTERS ---- */
+  .stagmenfashion-spotlight__active-filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    padding: 8px 12px;
+    background: rgba(17, 17, 17, 0.02);
+    border-radius: 8px;
+    flex-wrap: wrap;
+    animation: stagSpotlightFade 0.25s ease;
+  }
+
+  .stagmenfashion-spotlight__active-label {
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: rgba(17, 17, 17, 0.45);
+  }
+
+  .stagmenfashion-spotlight__active-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 99px;
+    background: #ffffff;
+    border: 1px solid rgba(17, 17, 17, 0.08);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #111111;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  }
+
+  .stagmenfashion-spotlight__clear-btn {
+    appearance: none;
+    border: 0;
+    background: none;
+    padding: 4px 8px;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .stagmenfashion-spotlight__clear-btn:hover { opacity: 0.8; text-decoration: underline; }
+
+  /* ---- FILTER DRAWER ---- */
+  .stagmenfashion-spotlight__drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .stagmenfashion-spotlight__drawer[aria-hidden="false"] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .stagmenfashion-spotlight__drawer-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: opacity 0.3s ease;
+  }
+
+  .stagmenfashion-spotlight__drawer-content {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 440px;
+    background: #ffffff;
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .stagmenfashion-spotlight__drawer[aria-hidden="false"] .stagmenfashion-spotlight__drawer-content {
+    transform: translateX(0);
+  }
+
+  .stagmenfashion-spotlight__drawer-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(17, 17, 17, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .stagmenfashion-spotlight__drawer-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #111111;
+  }
+
+  .stagmenfashion-spotlight__drawer-close {
+    appearance: none;
+    border: 0;
+    background: none;
+    color: #111111;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+  }
+
+  .stagmenfashion-spotlight__drawer-close:hover {
+    background: rgba(17, 17, 17, 0.05);
+    opacity: 1;
+    transform: rotate(90deg);
+  }
+
+  .stagmenfashion-spotlight__drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .stagmenfashion-spotlight__drawer-section-title {
+    margin: 0 0 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(17, 17, 17, 0.5);
+  }
+
+  .stagmenfashion-spotlight__drawer-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .stagmenfashion-spotlight__drawer-option {
+    appearance: none;
+    border: 1px solid rgba(17, 17, 17, 0.08);
+    border-radius: 10px;
+    background: transparent;
+    padding: 12px 16px;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: rgba(17, 17, 17, 0.75);
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .stagmenfashion-spotlight__drawer-option:hover {
+    border-color: rgba(17, 17, 17, 0.2);
+    background: rgba(17, 17, 17, 0.02);
+    color: #111111;
+  }
+
+  .stagmenfashion-spotlight__drawer-option.is-active {
+    border-color: var(--color-primary);
+    background: rgba(17, 17, 17, 0.01);
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+
+  .stagmenfashion-spotlight__drawer-option .indicator {
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid rgba(17, 17, 17, 0.25);
+    border-radius: 50%;
+    display: inline-block;
+    position: relative;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .stagmenfashion-spotlight__drawer-option.is-active .indicator {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+  }
+
+  .stagmenfashion-spotlight__drawer-option.is-active .indicator::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px;
+    height: 6px;
+    background: #ffffff;
+    border-radius: 50%;
+  }
+
+  .stagmenfashion-spotlight__drawer-footer {
+    padding: 20px 24px;
+    border-top: 1px solid rgba(17, 17, 17, 0.08);
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 12px;
+    background: #ffffff;
+  }
+
+  .stagmenfashion-spotlight__drawer-clear {
+    appearance: none;
+    border: 1px solid rgba(17, 17, 17, 0.15);
+    border-radius: 12px;
+    background: transparent;
+    padding: 14px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #111111;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+
+  .stagmenfashion-spotlight__drawer-clear:hover {
+    background: rgba(17, 17, 17, 0.04);
+    border-color: rgba(17, 17, 17, 0.3);
+  }
+
+  .stagmenfashion-spotlight__drawer-apply {
+    appearance: none;
+    border: 0;
+    border-radius: 12px;
+    background: var(--color-primary);
+    color: #ffffff;
+    padding: 14px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(17, 17, 17, 0.15);
+  }
+
+  .stagmenfashion-spotlight__drawer-apply:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(17, 17, 17, 0.22);
+  }
+
+  /* ---- RESULTS COUNT ---- */
+  .stagmenfashion-spotlight__results-count {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: rgba(17, 17, 17, 0.45);
+  }
+
+  /* ---- PANELS & CAROUSEL ---- */
+  .stagmenfashion-spotlight__panels {
+    margin-top: 12px;
+  }
+
+  .stagmenfashion-spotlight__panel {
+    animation: stagSpotlightFade 0.35s ease;
+  }
+
+  .stagmenfashion-spotlight__carousel {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  .stagmenfashion-spotlight__carousel::-webkit-scrollbar { display: none; }
+
+  /* ---- NO RESULTS ---- */
+  .stagmenfashion-spotlight__no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: rgb(17 17 17 / 0.45);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .stagmenfashion-spotlight__no-results svg {
+    display: block;
+    margin: 0 auto 16px;
+  }
+
+  /* ---- CARD ---- */
+  .stagmenfashion-spotlight-card {
+    flex: 0 0 calc((100% - 60px) / 4);
+    min-width: 240px;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid rgb(17 17 17 / 0.08);
+    box-shadow: 0 10px 24px rgb(17 17 17 / 0.05);
+    scroll-snap-align: start;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+  }
+
+  .stagmenfashion-spotlight-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgb(17 17 17 / 0.1);
+  }
+
+  .stagmenfashion-spotlight-card[data-filtered="true"] {
+    display: none !important;
+  }
+
+  /* ---- BOTTOM NAVIGATION ---- */
+  .stagmenfashion-spotlight__bottom-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 36px;
+  }
+
+  .stagmenfashion-spotlight__nav-btn {
+    appearance: none;
+    border: 1px solid rgba(17, 17, 17, 0.15);
+    border-radius: 50%;
+    background: #ffffff;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #111111;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  }
+
+  .stagmenfashion-spotlight__nav-btn:hover {
+    border-color: rgba(17, 17, 17, 0.35);
+    background: rgba(17, 17, 17, 0.02);
+    transform: scale(1.05);
+  }
+
+  .stagmenfashion-spotlight__see-all-bottom {
+    appearance: none;
+    display: inline-block;
+    border: 1px solid #111111;
+    background: transparent;
+    padding: 12px 32px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #111111;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    min-width: 140px;
+  }
+
+  .stagmenfashion-spotlight__see-all-bottom:hover {
+    background: #0800CF;
+    color: #ffffff;
+    border-color: #0800CF;
+    box-shadow: 0 4px 14px rgba(8, 0, 207, 0.25);
+  }
+
+  .stagmenfashion-spotlight-card__media-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .stagmenfashion-spotlight-card__media {
+    position: relative;
+    aspect-ratio: 0.88;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgb(255 255 255 / 1), rgb(248 248 248 / 1));
+  }
+
+  .stagmenfashion-spotlight-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.4s ease, transform 0.6s ease;
+  }
+
+  .stagmenfashion-spotlight-card__image--secondary {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1.04);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .stagmenfashion-spotlight-card__media--hover:hover .stagmenfashion-spotlight-card__image--primary,
+    .stagmenfashion-spotlight-card__media--hover:focus-within .stagmenfashion-spotlight-card__image--primary {
+      opacity: 0;
+      transform: scale(1.03);
+    }
+    .stagmenfashion-spotlight-card__media--hover:hover .stagmenfashion-spotlight-card__image--secondary,
+    .stagmenfashion-spotlight-card__media--hover:focus-within .stagmenfashion-spotlight-card__image--secondary {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .stagmenfashion-spotlight-card__review-chip {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgb(255 255 255 / 0.96);
+    box-shadow: 0 6px 16px rgb(30 30 30 / 0.12);
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #111111;
+  }
+
+  .stagmenfashion-spotlight-card__stars {
+    display: inline-flex;
+    gap: 1px;
+    color: var(--color-primary);
+    line-height: 1;
+  }
+
+  .stagmenfashion-spotlight-card__stars .is-dim { opacity: 0.22; }
+
+  .stagmenfashion-spotlight-card__badge-trending {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .stagmenfashion-spotlight-card__badge-trending svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .stagmenfashion-spotlight-card__content {
+    padding: 16px 16px 18px;
+  }
+
+  .stagmenfashion-spotlight-card__title-link {
+    color: inherit;
+    text-decoration: none;
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+    position: relative;
+  }
+
+  .stagmenfashion-spotlight-card__title {
+    margin: 0;
+    font-size: 1.04rem;
+    line-height: 1.18;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: #161616;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    white-space: normal;
+    position: relative;
+  }
+
+  .stagmenfashion-spotlight-card__title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1.5px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left bottom;
+    transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .stagmenfashion-spotlight-card__title-link:hover .stagmenfashion-spotlight-card__title::after {
+    transform: scaleX(1);
+  }
+
+  .stagmenfashion-spotlight-card__excerpt {
+    margin: 8px 0 0;
+    min-height: 2.9em;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: rgb(17 17 17 / 0.58);
+  }
+
+  .stagmenfashion-spotlight-card__type-badge {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgb(0 0 0 / 0.04);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: rgb(17 17 17 / 0.55);
+  }
+
+  .stagmenfashion-spotlight-card__separator {
+    margin-top: 14px;
+    border-top: 1px solid rgb(17 17 17 / 0.12);
+  }
+
+  .stagmenfashion-spotlight-card__footer {
+    margin-top: 14px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .stagmenfashion-spotlight-card__price-wrap {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stagmenfashion-spotlight-card__price {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1c1c1c;
+  }
+
+  .stagmenfashion-spotlight-card__compare {
+    font-size: 0.84rem;
+    color: rgb(17 17 17 / 0.42);
+    text-decoration: line-through;
+  }
+
+  .stagmenfashion-spotlight-card__form { margin: 0; flex: 0 0 auto; }
+
+  .stagmenfashion-spotlight-card__cta {
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    min-width: 76px;
+    min-height: 42px;
+    padding: 0 18px;
+    border-radius: 10px;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-size: 0.98rem;
+    font-weight: 800;
+    box-shadow: 0 10px 18px rgb(17 17 17 / 0.16);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .stagmenfashion-spotlight-card__cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 24px rgb(17 17 17 / 0.2);
+  }
+
+  @keyframes stagSpotlightFade {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- RESPONSIVE ---- */
+  @media screen and (min-width: 750px) {
+    .stagmenfashion-spotlight__tabs {
+      display: flex;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+  }
+
+  @media screen and (max-width: 1200px) {
+    .stagmenfashion-spotlight__carousel { gap: 16px; }
+    .stagmenfashion-spotlight-card { flex-basis: calc((100% - 48px) / 4); }
+  }
+
+  @media screen and (max-width: 900px) {
+    .stagmenfashion-spotlight-card { flex-basis: calc((100% - 32px) / 3); }
+  }
+
+  @media screen and (max-width: 749px) {
+    .stagmenfashion-spotlight__shell {
+      padding: 10px 10px 10px;
+    }
+
+    .stagmenfashion-spotlight__top {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .stagmenfashion-spotlight__see-all {
+      font-size: 1.15rem;
+      margin-top: 0;
+    }
+
+    .stagmenfashion-spotlight__tabs-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .stagmenfashion-spotlight__tabs {
+      display: flex;
+      overflow-x: auto;
+      gap: 0;
+      width: 100%;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 4px;
+    }
+
+    .stagmenfashion-spotlight__tabs::-webkit-scrollbar { display: none; }
+
+    .stagmenfashion-spotlight__tab {
+      padding: 8px 14px;
+      font-size: 0.92rem;
+    }
+
+    .stagmenfashion-spotlight__sort-wrap {
+      width: 100%;
+    }
+
+    .stagmenfashion-spotlight__sort-select {
+      flex: 1;
+      width: 100%;
+    }
+
+    .stagmenfashion-spotlight__filters {
+      padding: 14px 14px;
+      gap: 10px;
+      border-radius: 12px;
+    }
+
+    .stagmenfashion-spotlight__filter-group {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .stagmenfashion-spotlight__filter-label {
+      min-width: auto;
+    }
+
+    .stagmenfashion-spotlight__filter-chips {
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      width: 100%;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+
+    .stagmenfashion-spotlight__filter-chips::-webkit-scrollbar { display: none; }
+
+    .stagmenfashion-spotlight__chip {
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      flex-shrink: 0;
+    }
+
+    .stagmenfashion-spotlight__carousel {
+      gap: 10px;
+    }
+
+    .stagmenfashion-spotlight-card {
+      border-radius: 14px;
+      flex-basis: calc((100% - 10px) / 2);
+      min-width: calc((100% - 10px) / 2);
+    }
+
+    .stagmenfashion-spotlight-card__content { padding: 12px; }
+    .stagmenfashion-spotlight-card__title { font-size: 0.96rem; }
+
+    .stagmenfashion-spotlight-card__excerpt {
+      margin-top: 6px;
+      font-size: 0.74rem;
+      min-height: 2.4em;
+    }
+
+    .stagmenfashion-spotlight-card__footer {
+      margin-top: 10px;
+      align-items: center;
+    }
+
+    .stagmenfashion-spotlight-card__price { font-size: 0.84rem; }
+
+    .stagmenfashion-spotlight-card__cta {
+      min-width: 58px;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+    }
+
+    .stagmenfashion-spotlight-card__review-chip {
+      left: 10px;
+      bottom: 10px;
+      padding: 5px 8px;
+      font-size: 0.7rem;
+    }
+
+    .stagmenfashion-spotlight-card__badge-trending {
+      top: 10px;
+      right: 10px;
+      padding: 4px 8px;
+      font-size: 0.62rem;
+    }
+
+    .stagmenfashion-spotlight-card__type-badge {
+      font-size: 0.65rem;
+    }
+  }
+</style>
+
+{% javascript %}
+  (() => {
+    const initDrawerSpotlight = (scope = document) => {
+      scope.querySelectorAll('[data-stagmenfashion-spotlight]').forEach((section) => {
+        if (section.dataset.ready === 'true') return;
+        section.dataset.ready = 'true';
+
+        const panels = Array.from(section.querySelectorAll('[data-spotlight-panel]'));
+        const seeAllBottom = section.querySelector('[data-spotlight-see-all-bottom]');
+        const prevBtn = section.querySelector('[data-spotlight-nav="prev"]');
+        const nextBtn = section.querySelector('[data-spotlight-nav="next"]');
+        const bottomRowEl = section.querySelector('[data-spotlight-bottom-nav-row]');
+        const cartAddUrl = section.dataset.cartAddUrl || '/cart/add';
+        const noResults = section.querySelector('[data-spotlight-no-results]');
+        const activeFiltersEl = section.querySelector('[data-spotlight-active-filters]');
+        const activeTagEl = section.querySelector('[data-spotlight-active-tag]');
+        const resultsCountEl = section.querySelector('[data-spotlight-results-count]');
+
+        // Drawer elements
+        const drawer = section.querySelector('[data-spotlight-drawer]');
+        const drawerOverlay = section.querySelector('[data-spotlight-drawer-overlay]');
+        const drawerTrigger = section.querySelector('[data-spotlight-drawer-trigger]');
+        const drawerCloseBtns = Array.from(section.querySelectorAll('[data-spotlight-drawer-close]'));
+        const filterBadge = section.querySelector('[data-spotlight-filter-badge]');
+
+        // ---- State ----
+        let activeCollectionPanelId = null;
+        let activeCategory = 'all';
+        let activeSubcategory = 'all';
+        let activePrice = 'all';
+        let activeSort = 'best-selling';
+
+        // ---- Drawer Actions ----
+        const openDrawer = () => {
+          if (!drawer) return;
+          drawer.setAttribute('aria-hidden', 'false');
+          document.body.style.overflow = 'hidden'; // prevent scrolling underneath
+        };
+
+        const closeDrawer = () => {
+          if (!drawer) return;
+          drawer.setAttribute('aria-hidden', 'true');
+          document.body.style.overflow = '';
+        };
+
+        if (drawerTrigger) {
+          drawerTrigger.addEventListener('click', openDrawer);
+        }
+
+        if (drawerOverlay) {
+          drawerOverlay.addEventListener('click', closeDrawer);
+        }
+
+        drawerCloseBtns.forEach((btn) => btn.addEventListener('click', closeDrawer));
+
+        // ESC key to close
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && drawer && drawer.getAttribute('aria-hidden') === 'false') {
+            closeDrawer();
+          }
+        });
+
+        // ---- Collection switching ----
+        const activateCollection = (targetId) => {
+          activeCollectionPanelId = targetId;
+
+          // Toggle drawer option UI
+          section.querySelectorAll('[data-spotlight-collection-tab-ref]').forEach((btn) => {
+            const isActive = btn.dataset.spotlightCollectionTabRef === targetId;
+            btn.classList.toggle('is-active', isActive);
+          });
+
+          // Toggle panel views
+          panels.forEach((panel) => {
+            const isActive = panel.id === targetId;
+            panel.classList.toggle('is-active', isActive);
+            panel.hidden = !isActive;
+
+            if (isActive && seeAllBottom && panel.dataset.spotlightUrl) {
+              seeAllBottom.href = panel.dataset.spotlightUrl;
+            }
+          });
+
+          applyFilters();
+        };
+
+        section.querySelectorAll('[data-spotlight-collection-filters]').forEach((group) => {
+          group.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-spotlight-collection-tab-ref]');
+            if (!btn) return;
+            activateCollection(btn.dataset.spotlightCollectionTabRef);
+          });
+        });
+
+        // ---- Category filter ----
+        section.querySelectorAll('[data-spotlight-category-filters]').forEach((group) => {
+          group.addEventListener('click', (e) => {
+            const item = e.target.closest('[data-spotlight-category]');
+            if (!item) return;
+            group.querySelectorAll('[data-spotlight-category]').forEach((c) => c.classList.remove('is-active'));
+            item.classList.add('is-active');
+            activeCategory = item.dataset.spotlightCategory;
+            applyFilters();
+          });
+        });
+
+        // ---- Sub-category filter ----
+        section.querySelectorAll('[data-spotlight-subcategory-filters]').forEach((group) => {
+          group.addEventListener('click', (e) => {
+            const item = e.target.closest('[data-spotlight-subcategory]');
+            if (!item) return;
+            group.querySelectorAll('[data-spotlight-subcategory]').forEach((c) => c.classList.remove('is-active'));
+            item.classList.add('is-active');
+            activeSubcategory = item.dataset.spotlightSubcategory;
+            applyFilters();
+          });
+        });
+
+        // ---- Price filter ----
+        section.querySelectorAll('[data-spotlight-price-filters]').forEach((group) => {
+          group.addEventListener('click', (e) => {
+            const item = e.target.closest('[data-spotlight-price]');
+            if (!item) return;
+            group.querySelectorAll('[data-spotlight-price]').forEach((c) => c.classList.remove('is-active'));
+            item.classList.add('is-active');
+            activePrice = item.dataset.spotlightPrice;
+            applyFilters();
+          });
+        });
+
+        // ---- Sort options ----
+        section.querySelectorAll('[data-spotlight-sort-options]').forEach((group) => {
+          group.addEventListener('click', (e) => {
+            const item = e.target.closest('[data-spotlight-sort-val]');
+            if (!item) return;
+            group.querySelectorAll('[data-spotlight-sort-val]').forEach((c) => c.classList.remove('is-active'));
+            item.classList.add('is-active');
+            activeSort = item.dataset.spotlightSortVal;
+            applyFilters();
+          });
+        });
+
+        // ---- Clear filters ----
+        const clearFilters = () => {
+          activeCategory = 'all';
+          activeSubcategory = 'all';
+          activePrice = 'all';
+          activeSort = 'best-selling';
+
+          section.querySelectorAll('[data-spotlight-category]').forEach((c) => {
+            c.classList.toggle('is-active', c.dataset.spotlightCategory === 'all');
+          });
+          section.querySelectorAll('[data-spotlight-subcategory]').forEach((c) => {
+            c.classList.toggle('is-active', c.dataset.spotlightSubcategory === 'all');
+          });
+          section.querySelectorAll('[data-spotlight-price]').forEach((c) => {
+            c.classList.toggle('is-active', c.dataset.spotlightPrice === 'all');
+          });
+          section.querySelectorAll('[data-spotlight-sort-val]').forEach((c) => {
+            c.classList.toggle('is-active', c.dataset.spotlightSortVal === 'best-selling');
+          });
+
+          applyFilters();
+        };
+
+        const clearBtn = section.querySelector('[data-spotlight-clear-filters]');
+        if (clearBtn) {
+          clearBtn.addEventListener('click', clearFilters);
+        }
+
+        // ---- Filtering + Sorting ----
+        const applyFilters = () => {
+          const currentPanel = panels.find((p) => p.id === activeCollectionPanelId);
+          if (!currentPanel) return;
+
+          const carousel = currentPanel.querySelector('.stagmenfashion-spotlight__carousel');
+          if (!carousel) return;
+
+          const cards = Array.from(carousel.querySelectorAll('.stagmenfashion-spotlight-card'));
+          let visibleCount = 0;
+
+          cards.forEach((card) => {
+            const cardType = (card.dataset.productType || '').toLowerCase();
+            const cardPrice = parseInt(card.dataset.productPrice || '0', 10) / 100;
+            const cardTags = (card.dataset.productTags || '').split(',');
+
+            let showByCategory = activeCategory === 'all' || cardType === activeCategory;
+            let showBySubcategory = activeSubcategory === 'all' || cardTags.includes(activeSubcategory);
+            let showByPrice = true;
+
+            if (activePrice !== 'all') {
+              const parts = activePrice.split('-');
+              const min = parseInt(parts[0], 10);
+              const max = parseInt(parts[1], 10);
+              showByPrice = cardPrice >= min && cardPrice <= max;
+            }
+
+            const visible = showByCategory && showBySubcategory && showByPrice;
+            card.dataset.filtered = visible ? 'false' : 'true';
+            if (visible) visibleCount++;
+          });
+
+          // Sort visible cards
+          const visibleCards = cards.filter((c) => c.dataset.filtered !== 'true');
+          const priceAsc = (a, b) => parseInt(a.dataset.productPrice || '0') - parseInt(b.dataset.productPrice || '0');
+          const priceDesc = (a, b) => parseInt(b.dataset.productPrice || '0') - parseInt(a.dataset.productPrice || '0');
+          const titleAsc = (a, b) => (a.dataset.productTitle || '').localeCompare(b.dataset.productTitle || '');
+          const titleDesc = (a, b) => (b.dataset.productTitle || '').localeCompare(a.dataset.productTitle || '');
+
+          const sortMap = {
+            'best-selling': null,
+            'price-ascending': priceAsc,
+            'price-descending': priceDesc,
+            'title-ascending': titleAsc,
+            'title-descending': titleDesc,
+          };
+
+          const sortFn = sortMap[activeSort];
+          if (sortFn) {
+            visibleCards.sort(sortFn);
+            visibleCards.forEach((card) => carousel.appendChild(card));
+          }
+
+          // Update active filters badge count
+          let activeCount = 0;
+          if (activeCategory !== 'all') activeCount++;
+          if (activeSubcategory !== 'all') activeCount++;
+          if (activePrice !== 'all') activeCount++;
+          if (activeSort !== 'best-selling') activeCount++;
+          if (filterBadge) {
+            filterBadge.textContent = activeCount;
+            filterBadge.style.display = activeCount > 0 ? 'inline-flex' : 'none';
+          }
+
+          // Update active filter tags banner on homepage
+          if (activeFiltersEl) {
+            const tags = [];
+            if (activeCategory !== 'all') {
+              const catItem = section.querySelector(`[data-spotlight-category="${activeCategory}"]`);
+              tags.push(catItem?.dataset.spotlightCategoryLabel || activeCategory);
+            }
+            if (activeSubcategory !== 'all') {
+              const subItem = section.querySelector(`[data-spotlight-subcategory="${activeSubcategory}"]`);
+              tags.push(subItem?.dataset.spotlightSubcategoryLabel || activeSubcategory);
+            }
+            if (activePrice !== 'all') {
+              const priceItem = section.querySelector(`[data-spotlight-price="${activePrice}"]`);
+              tags.push(priceItem?.dataset.spotlightPriceLabel || activePrice);
+            }
+
+            if (tags.length > 0) {
+              activeFiltersEl.style.display = 'flex';
+              activeTagEl.textContent = tags.join(' · ');
+            } else {
+              activeFiltersEl.style.display = 'none';
+            }
+          }
+
+          // Results count
+          if (resultsCountEl) {
+            resultsCountEl.textContent = `${visibleCount} product${visibleCount !== 1 ? 's' : ''} found`;
+          }
+
+          // No results
+          if (noResults) {
+            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+          }
+
+          // Hide bottom row if no results matching filters
+          if (bottomRowEl) {
+            bottomRowEl.style.display = visibleCount === 0 ? 'none' : 'flex';
+          }
+        };
+
+        // ---- Add to Cart ----
+        section.querySelectorAll('[data-stagmenfashion-spotlight-add]').forEach((button) => {
+          button.addEventListener('click', async (event) => {
+            event.preventDefault();
+            const form = button.closest('form');
+            const variantId = form?.querySelector('input[name="id"]')?.value;
+            if (!variantId) return;
+
+            button.disabled = true;
+            button.dataset.loading = 'true';
+
+            try {
+              const response = await fetch(`${cartAddUrl}.js`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({ id: Number(variantId), quantity: 1 }),
+              });
+
+              const cart = await response.json();
+              if (!response.ok || cart?.status) {
+                throw new Error(cart?.description || cart?.message || 'Add to cart failed');
+              }
+
+              document.dispatchEvent(
+                new CustomEvent('cart:update', {
+                  bubbles: true,
+                  detail: {
+                    resource: cart,
+                    data: { source: 'stagmenfashion-spotlight', itemCount: cart.item_count },
+                  },
+                })
+              );
+
+              document.querySelector('[data-testid="cart-drawer-trigger"]')?.click();
+            } catch (error) {
+              console.error(error);
+            } finally {
+              button.disabled = false;
+              button.dataset.loading = 'false';
+            }
+          });
+        });
+
+        // ---- Navigation Scrolling ----
+        const getActiveCarousel = () => {
+          const currentPanel = panels.find((p) => p.id === activeCollectionPanelId);
+          return currentPanel?.querySelector('.stagmenfashion-spotlight__carousel');
+        };
+
+        if (prevBtn) {
+          prevBtn.addEventListener('click', () => {
+            const carousel = getActiveCarousel();
+            if (carousel) {
+              const card = carousel.querySelector('.stagmenfashion-spotlight-card');
+              const scrollVal = card ? card.offsetWidth + 20 : 320;
+              carousel.scrollBy({ left: -scrollVal, behavior: 'smooth' });
+            }
+          });
+        }
+
+        if (nextBtn) {
+          nextBtn.addEventListener('click', () => {
+            const carousel = getActiveCarousel();
+            if (carousel) {
+              const card = carousel.querySelector('.stagmenfashion-spotlight-card');
+              const scrollVal = card ? card.offsetWidth + 20 : 320;
+              carousel.scrollBy({ left: scrollVal, behavior: 'smooth' });
+            }
+          });
+        }
+
+        // ---- Init ----
+        const initialOption = section.querySelector('[data-spotlight-collection-tab-ref].is-active') || section.querySelector('[data-spotlight-collection-tab-ref]');
+        const initialTargetId = initialOption?.dataset.spotlightCollectionTabRef;
+        if (initialTargetId) {
+          activateCollection(initialTargetId);
+        } else {
+          applyFilters();
+        }
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => initDrawerSpotlight());
+    document.addEventListener('shopify:section:load', (event) => initDrawerSpotlight(event.target));
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Stag Spotlight",
+  "settings": [
+    {
+      "type": "collection_list",
+      "id": "collection_list",
+      "label": "Spotlight collections"
+    },
+    {
+      "type": "header",
+      "content": "Trending"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_trending",
+      "label": "Show Trending tab",
+      "default": true
+    },
+    {
+      "type": "collection",
+      "id": "trending_collection",
+      "label": "Trending collection (defaults to All Products)",
+      "info": "Leave blank to use all products sorted by best selling"
+    },
+    {
+      "type": "range",
+      "id": "trending_limit",
+      "label": "Trending products limit",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "products_per_collection",
+      "label": "Products per collection tab",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Filters"
+    },
+    {
+      "type": "text",
+      "id": "filter_categories_label",
+      "label": "Category filter label",
+      "default": "Categories"
+    },
+    {
+      "type": "text",
+      "id": "filter_price_label",
+      "label": "Price filter label",
+      "default": "Price Range"
+    },
+    {
+      "type": "text",
+      "id": "sort_label",
+      "label": "Sort label",
+      "default": "Sort by"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "stagmenfashion Spotlight"
+    },
+    {
+      "type": "richtext",
+      "id": "subtext",
+      "label": "Subtext",
+      "default": "<p>Curated home organization collections with a clean, Pinteresty feel.</p>"
+    },
+    {
+      "type": "text",
+      "id": "see_all_text",
+      "label": "See all text",
+      "default": "See All"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Stag Spotlight"
+    }
+  ]
+}
+{% endschema %}

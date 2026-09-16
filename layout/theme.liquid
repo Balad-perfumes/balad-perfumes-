@@ -1,0 +1,211 @@
+<!doctype html>
+<html
+  {% if request.design_mode %}
+    class="shopify-design-mode"
+  {% endif %}
+  lang="{{ request.locale.iso_code }}"
+>
+  <head>
+    {%- if settings.favicon != blank -%}
+      <link
+        rel="icon"
+        type="image/png"
+        href="{{ settings.favicon | image_url: width: 32, height: 32 }}"
+      >
+    {%- endif -%}
+
+    {% # theme-check-disable RemoteAsset %}
+    {% comment %} This a way to wait for main content to load when navigating to a new page so that the view transitions can work consistently {% endcomment %}
+    {% if settings.transition_to_main_product or settings.page_transition_enabled %}
+      <link
+        rel="expect"
+        href="#MainContent"
+        blocking="render"
+        id="view-transition-render-blocker"
+      >
+    {% endif %}
+
+    {%- render 'meta-tags' -%}
+
+    {%- render 'stylesheets' -%}
+    {%- render 'fonts' -%}
+    {%- render 'scripts' -%}
+    {%- render 'theme-styles-variables' -%}
+    {%- render 'color-schemes' -%}
+
+    {% comment %} Lenis Smooth Scroll Inline CSS (Zero Render Blocking) {% endcomment %}
+    <style>
+      html.lenis, html.lenis body { height: auto; }
+      .lenis.lenis-smooth { scroll-behavior: auto !important; }
+      .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+      .lenis.lenis-stopped { overflow: hidden; }
+      .lenis.lenis-smooth iframe { pointer-events: none; }
+    </style>
+
+    {% if request.design_mode %}
+      {%- render 'theme-editor' -%}
+    {% endif %}
+
+    {{ content_for_header }}
+    {% # theme-check-enable RemoteAsset %}
+  </head>
+
+  <body
+    class="
+      page-width-{{ settings.page_width }}
+      card-hover-effect-{{ settings.card_hover_effect }}
+      {% if request.page_type == 'collection' or request.page_type == 'search' %}hide-mobile-tabs{% endif %}
+      template-{{ template.name | default: 'index' }}
+    "
+  >
+    {% if settings.loader_enable %}
+      {% render 'logo-loader' %}
+    {% endif %}
+    {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
+    <div id="header-group">
+      {% sections 'header-group' %}
+    </div>
+
+    <script>
+      (function() {
+        const deferFn = window.requestIdleCallback || ((cb) => setTimeout(cb, 100));
+        deferFn(() => {
+          const header = document.querySelector('header-component, [data-pf-header]');
+          const headerGroup = document.querySelector('#header-group');
+          const hasHeaderSection = headerGroup?.querySelector('.header-section, [data-pf-header]');
+
+          if (header && headerGroup) {
+            // Batch all DOM reads first to avoid forced reflow
+            const headerTopRow = header.querySelector('.header__row--top');
+            const headerHeight = header.offsetHeight;
+            const headerTopRowHeight = headerTopRow ? headerTopRow.offsetHeight : 0;
+
+            let headerGroupHeight = 0;
+            const children = headerGroup.children;
+            for (let i = 0; i < children.length; i++) {
+              const element = children[i];
+              if (element === header || !(element instanceof HTMLElement)) continue;
+              headerGroupHeight += element.offsetHeight;
+            }
+
+            const isTransparent = header.hasAttribute('transparent');
+            if (isTransparent && header.parentElement?.nextElementSibling) {
+              headerGroupHeight += headerHeight;
+            }
+
+            const hasImmediateSection = hasHeaderSection?.nextElementSibling?.classList.contains('shopify-section');
+            const shouldApplyOffset = (!hasHeaderSection || !isTransparent) ? '0' : (!hasImmediateSection ? '1' : '0');
+
+            // Batch all DOM writes in a single animation frame
+            requestAnimationFrame(() => {
+              document.body.style.setProperty('--header-height', `${headerHeight}px`);
+              document.body.style.setProperty('--header-group-height', `${headerGroupHeight}px`);
+              if (headerTopRowHeight > 0) {
+                document.body.style.setProperty('--top-row-height', `${headerTopRowHeight}px`);
+              }
+              document.body.style.setProperty('--transparent-header-offset-boolean', shouldApplyOffset);
+            });
+          }
+
+          const headerComponent = document.querySelector('#header-component');
+          if (headerComponent) {
+            const isTouchDevice = 'ontouchstart' in window && navigator.maxTouchPoints > 0;
+            const overflowList = headerComponent?.querySelector('overflow-list');
+            const hasReachedMinimum = overflowList && overflowList.hasAttribute('minimum-reached');
+            headerComponent.dataset.menuStyle = isTouchDevice || hasReachedMinimum ? 'drawer' : 'menu';
+          }
+        });
+      })();
+    </script>
+
+    <main
+      id="MainContent"
+      class="content-for-layout"
+      role="main"
+      data-page-transition-enabled="{{ settings.page_transition_enabled }}"
+      data-product-transition="{{ settings.transition_to_main_product }}"
+      data-template="{{ template }}"
+    >
+      {{ content_for_layout }}
+    </main>
+
+    <footer>
+      {% sections 'footer-group' %}
+    </footer>
+
+    {% section 'cart-drawer' %}
+    {% section 'wishlist-drawer' %}
+    {% render 'search-modal' %}
+
+    {% if settings.quick_add or settings.mobile_quick_add or request.page_type == 'collection' or request.page_type == 'search' %}
+      {% render 'quick-add-modal' %}
+    {% endif %}
+
+    {% comment %} Lenis Smooth Scroll - Butter smooth scrolling (Deferred) {% endcomment %}
+    {% unless request.design_mode %}
+    <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" defer></script>
+    <script>
+      (function() {
+        function initLenis() {
+          if (typeof Lenis === 'undefined') {
+            window.addEventListener('load', initLenis, { once: true });
+            return;
+          }
+          // Skip on mobile/touch devices for better native scroll
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+            || (navigator.maxTouchPoints > 0 && window.innerWidth < 768);
+          if (isMobile) return;
+
+          const lenis = new Lenis({
+            duration: 1.8,
+            easing: function(t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
+            orientation: 'vertical',
+            gestureOrientation: 'vertical',
+            smoothWheel: true,
+            wheelMultiplier: 0.8,
+            touchMultiplier: 2,
+            infinite: false,
+          });
+
+          // Store globally so other scripts can access it
+          window.__lenis = lenis;
+
+          function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+          }
+          requestAnimationFrame(raf);
+
+          // Pause Lenis when modals/drawers are open
+          const observer = new MutationObserver(function() {
+            const hasOpenOverlay = document.querySelector(
+              '[open][is="cart-drawer"], [open][is="wishlist-drawer"], dialog[open], .shopify-section-header-sticky'
+            );
+            const bodyOverflow = getComputedStyle(document.body).overflow;
+            if (hasOpenOverlay || bodyOverflow === 'hidden') {
+              lenis.stop();
+            } else {
+              lenis.start();
+            }
+          });
+          observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['open', 'style', 'class'] });
+        }
+
+        function start() {
+          if (typeof window.requestIdleCallback === 'function') {
+            window.requestIdleCallback(initLenis);
+          } else {
+            initLenis();
+          }
+        }
+
+        if (document.readyState === 'complete') {
+          start();
+        } else {
+          window.addEventListener('load', start, { once: true });
+        }
+      })();
+    </script>
+    {% endunless %}
+  </body>
+</html>

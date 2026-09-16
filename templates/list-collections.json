@@ -1,0 +1,28 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "collection_list_Wfgh3m": {
+      "type": "main-collection-list",
+      "settings": {
+        "columns_desktop": 6,
+        "columns_mobile": "2",
+        "collections_per_page": 36,
+        "show_product_count": true,
+        "hide_empty_collections": false,
+        "card_radius": 5,
+        "color_scheme": "scheme-1"
+      }
+    }
+  },
+  "order": [
+    "collection_list_Wfgh3m"
+  ]
+}

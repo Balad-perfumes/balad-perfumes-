@@ -1,0 +1,644 @@
+{% liquid
+  assign collection_image = collection.image | default: collection.products.first.featured_image
+  assign current_sort = collection.sort_by | default: collection.default_sort_by
+%}
+
+<section class="pf-collection color-{{ section.settings.color_scheme }}">
+  <div class="pf-collection__hero">
+    <div class="pf-collection__hero-copy">
+      {% if section.settings.eyebrow != blank %}<p class="pf-collection__eyebrow">{{ section.settings.eyebrow }}</p>{% endif %}
+      <h1 class="pf-collection__title">{{ collection.title }}</h1>
+      {% if collection.description != blank %}
+        <div class="pf-collection__description rte">{{ collection.description }}</div>
+      {% endif %}
+      <div class="pf-collection__meta">
+        <span>{{ collection.products_count }} products</span>
+        {% if section.settings.subheading != blank %}<span>{{ section.settings.subheading }}</span>{% endif %}
+      </div>
+    </div>
+
+    {% if collection_image != blank %}
+      <div class="pf-collection__hero-media">
+        {{ collection_image | image_url: width: 1800 | image_tag: class: 'pf-collection__hero-image', loading: 'lazy', widths: '640, 960, 1200, 1600, 1800', alt: collection.title }}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="pf-collection__toolbar">
+    <button class="pf-collection__filter-toggle" type="button" data-filter-toggle>
+      Filters
+    </button>
+
+    <form class="pf-collection__sort" method="get">
+      <label class="visually-hidden" for="SortBy">Sort by</label>
+      <select id="SortBy" name="sort_by" onchange="this.form.submit()">
+        {% for option in collection.sort_options %}
+          <option value="{{ option.value }}" {% if option.value == current_sort %}selected{% endif %}>
+            {{ option.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+
+  <div class="pf-collection__body">
+    <aside class="pf-collection__filters" data-filter-panel>
+      <form method="get" class="pf-collection__filter-form">
+        <input type="hidden" name="sort_by" value="{{ current_sort }}">
+
+        {% for filter in collection.filters %}
+          <details class="pf-collection__filter-group" {% if forloop.first %}open{% endif %}>
+            <summary>{{ filter.label }}</summary>
+
+            {% case filter.type %}
+              {% when 'list' %}
+                <div class="pf-collection__filter-values">
+                  {% for value in filter.values %}
+                    <label class="pf-collection__filter-value">
+                      <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value }}" {% if value.active %}checked{% endif %}>
+                      <span>{{ value.label }} <small>({{ value.count }})</small></span>
+                    </label>
+                  {% endfor %}
+                </div>
+              {% when 'price_range' %}
+                <div class="pf-collection__price-fields">
+                  <label>
+                    <span>Min</span>
+                    <input type="number" name="{{ filter.min_value.param_name }}" value="{{ filter.min_value.value | default: '' }}" placeholder="0">
+                  </label>
+                  <label>
+                    <span>Max</span>
+                    <input type="number" name="{{ filter.max_value.param_name }}" value="{{ filter.max_value.value | default: '' }}" placeholder="9999">
+                  </label>
+                </div>
+            {% endcase %}
+          </details>
+        {% endfor %}
+
+        <div class="pf-collection__filter-actions">
+          <button type="submit" class="pf-collection__apply">Apply</button>
+          <a href="{{ collection.url }}" class="pf-collection__clear">Clear</a>
+        </div>
+      </form>
+    </aside>
+
+    <div class="pf-collection__grid-wrap">
+      {% paginate collection.products by section.settings.products_per_page %}
+        <div class="pf-collection__grid">
+          {% for product in collection.products %}
+            {% liquid
+              assign card_variant = product.selected_or_first_available_variant
+              assign form_id = 'pf-card-form-' | append: section.id | append: '-' | append: product.id
+              assign has_sale = false
+              if product.compare_at_price_max > product.price_min
+                assign has_sale = true
+              endif
+              assign card_rating = product.metafields.reviews.rating.value.rating
+              if card_rating == blank
+                assign card_rating = 4.8
+              endif
+            %}
+            <article class="pf-product-card">
+              <a class="pf-product-card__media" href="{{ product.url }}">
+                {% if product.featured_image != blank %}
+                  {{ product.featured_image | image_url: width: 1200 | image_tag: class: 'pf-product-card__image', loading: 'lazy', widths: '360, 540, 720, 900, 1200', alt: product.title }}
+                {% endif %}
+                {% if product.images[1] != blank %}
+                  {{ product.images[1] | image_url: width: 1200 | image_tag: class: 'pf-product-card__image pf-product-card__image--hover', loading: 'lazy', widths: '360, 540, 720, 900, 1200', alt: product.title }}
+                {% endif %}
+                {% if has_sale %}
+                  <span class="pf-product-card__badge">Sale</span>
+                {% endif %}
+              </a>
+
+              {% liquid
+                assign card_sizes = ''
+                for opt in product.options_with_values
+                  assign opt_name_down = opt.name | downcase
+                  if opt_name_down contains 'size' or opt.name == 'Size'
+                    assign card_sizes = opt.values | join: ','
+                  endif
+                endfor
+                if card_sizes == ''
+                  assign sizes_check = '|'
+                  for v in product.variants
+                    assign sz = v.option1 | strip
+                    unless sz == blank or sz == 'Default Title'
+                      assign check_sz = '|' | append: sz | append: '|'
+                      unless sizes_check contains check_sz
+                        assign sizes_check = sizes_check | append: check_sz
+                        if card_sizes != ''
+                          assign card_sizes = card_sizes | append: ','
+                        endif
+                        assign card_sizes = card_sizes | append: sz
+                      endunless
+                    endunless
+                  endfor
+                endif
+              %}
+              <button
+                class="pf-product-card__wishlist"
+                type="button"
+                aria-label="Add to wishlist"
+                data-wishlist-button
+                data-product-handle="{{ product.handle }}"
+                data-product-id="{{ product.id }}"
+                data-product-title="{{ product.title | escape }}"
+                data-product-image="{{ product.featured_media.preview_image | image_url: width: 360 }}"
+                data-product-price="{{ product.price | money | strip_html | escape }}"
+                data-product-sizes="{{ card_sizes }}"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              </button>
+
+              <div class="pf-product-card__body">
+                <div class="pf-product-card__topline">
+                  {% if product.vendor != blank %}<span class="pf-product-card__vendor">{{ product.vendor }}</span>{% endif %}
+                  <span class="pf-product-card__rating">★ {{ card_rating }}</span>
+                </div>
+                <a class="pf-product-card__title" href="{{ product.url }}">{{ product.title }}</a>
+                <div class="pf-product-card__price-row">
+                  <span class="pf-product-card__price">{{ product.price | money }}</span>
+                  {% if has_sale %}
+                    <s class="pf-product-card__compare">{{ product.compare_at_price | money }}</s>
+                  {% endif %}
+                </div>
+
+                <product-form-component class="pf-product-card__form" data-section-id="{{ section.id }}" data-product-id="{{ product.id }}" on:submit="/handleSubmit">
+                  <div class="visually-hidden" aria-live="assertive" role="status" aria-atomic="true" ref="liveRegion"></div>
+                  {%- form 'product', product, id: form_id, class: 'shopify-product-form', data-type: 'add-to-cart-form' -%}
+                    <input type="hidden" name="id" ref="variantId" value="{{ card_variant.id }}">
+                    <input type="hidden" name="quantity" value="1">
+                    {% render 'add-to-cart-button',
+                      add_to_cart_text: 'Quick add',
+                      class: 'pf-product-card__add',
+                      can_add_to_cart: card_variant.available,
+                      icon_only_on_mobile: false,
+                      product: product,
+                      data_testid: 'collection-quick-add'
+                    %}
+                  {%- endform -%}
+                </product-form-component>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+
+        {% if paginate.pages > 1 %}
+          <div class="pf-collection__pagination">
+            {{ paginate | default_pagination }}
+          </div>
+        {% endif %}
+      {% endpaginate %}
+    </div>
+  </div>
+</section>
+
+<style>
+  .pf-collection {
+    background: #fff;
+    color: #111;
+  }
+
+  .pf-collection__hero {
+    width: min(100%, 1600px);
+    margin: 0 auto;
+    padding: clamp(24px, 4vw, 56px) 24px clamp(18px, 3vw, 28px);
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 22px;
+    align-items: stretch;
+  }
+
+  .pf-collection__hero-copy {
+    border-radius: 28px;
+    padding: clamp(26px, 4vw, 52px);
+    background: linear-gradient(135deg, #fff7f0, #f6fbff);
+  }
+
+  .pf-collection__eyebrow {
+    margin: 0 0 10px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .pf-collection__title {
+    margin: 0;
+    font-size: clamp(2.5rem, 6vw, 6rem);
+    line-height: 0.9;
+    letter-spacing: -0.08em;
+  }
+
+  .pf-collection__description {
+    margin-top: 16px;
+    font-size: 1.02rem;
+    line-height: 1.8;
+    color: rgb(17 17 17 / 0.72);
+    max-width: 52ch;
+  }
+
+  .pf-collection__meta {
+    display: flex;
+    gap: 14px 20px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    color: rgb(17 17 17 / 0.62);
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .pf-collection__hero-media {
+    border-radius: 28px;
+    overflow: hidden;
+    min-height: 280px;
+  }
+
+  .pf-collection__hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    min-height: 280px;
+  }
+
+  .pf-collection__toolbar {
+    width: min(100%, 1600px);
+    margin: 0 auto;
+    padding: 0 24px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  .pf-collection__filter-toggle,
+  .pf-collection__apply {
+    min-height: 46px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 999px;
+    background: #111;
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .pf-collection__sort select {
+    min-height: 46px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid rgb(17 17 17 / 0.12);
+    background: #fff;
+  }
+
+  .pf-collection__body {
+    width: min(100%, 1600px);
+    margin: 0 auto;
+    padding: 0 24px 56px;
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 22px;
+  }
+
+  .pf-collection__filters {
+    position: sticky;
+    top: 92px;
+    align-self: start;
+    padding: 18px;
+    border-radius: 24px;
+    border: 1px solid rgb(17 17 17 / 0.08);
+    background: #fff;
+  }
+
+  .pf-collection__filter-group {
+    padding: 12px 0;
+    border-bottom: 1px solid rgb(17 17 17 / 0.08);
+  }
+
+  .pf-collection__filter-group:last-child {
+    border-bottom: 0;
+  }
+
+  .pf-collection__filter-group summary {
+    cursor: pointer;
+    font-size: 0.86rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .pf-collection__filter-values,
+  .pf-collection__price-fields {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .pf-collection__filter-value {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.92rem;
+  }
+
+  .pf-collection__price-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pf-collection__price-fields label {
+    display: grid;
+    gap: 6px;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .pf-collection__price-fields input {
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 14px;
+    border: 1px solid rgb(17 17 17 / 0.12);
+  }
+
+  .pf-collection__filter-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .pf-collection__clear {
+    min-height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 18px;
+    border-radius: 999px;
+    border: 1px solid rgb(17 17 17 / 0.12);
+    color: #111;
+    text-decoration: none;
+  }
+
+  .pf-collection__grid-wrap {
+    min-width: 0;
+  }
+
+  .pf-collection__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .pf-product-card {
+    position: relative;
+    border-radius: 24px;
+    border: 1px solid rgb(17 17 17 / 0.08);
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 10px 24px rgb(0 0 0 / 0.04);
+  }
+
+  .pf-product-card__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+  }
+
+  .pf-product-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease, opacity 0.35s ease;
+  }
+
+  .pf-product-card__image--hover {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+
+  .pf-product-card:hover .pf-product-card__image:not(.pf-product-card__image--hover) {
+    transform: scale(1.04);
+  }
+
+  .pf-product-card:hover .pf-product-card__image--hover {
+    opacity: 1;
+  }
+
+  .pf-product-card__badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: #111;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    z-index: 2;
+  }
+
+  .pf-product-card__wishlist {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.88);
+    color: #111;
+    z-index: 2;
+    cursor: pointer;
+  }
+
+  .pf-product-card__wishlist:hover {
+    background: #fff;
+  }
+
+  .pf-product-card__wishlist[aria-pressed="true"] {
+    color: #000000;
+  }
+
+  .pf-product-card__wishlist[aria-pressed="true"] svg path {
+    fill: currentColor;
+  }
+
+  .pf-product-card__wishlist svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .pf-product-card__info {
+    display: grid;
+    gap: 4px;
+    padding: 14px 16px;
+  }
+
+  .pf-product-card__topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    color: rgb(17 17 17 / 0.62);
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .pf-product-card__title {
+    color: #111;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+    position: relative;
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .pf-product-card__title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 1.5px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left bottom;
+    transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .pf-product-card__title:hover::after {
+    transform: scaleX(1);
+  }
+
+  .pf-product-card__price-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pf-product-card__price {
+    font-weight: 800;
+  }
+
+  .pf-product-card__compare {
+    color: rgb(17 17 17 / 0.42);
+  }
+
+  .pf-product-card__form {
+    margin-top: 4px;
+  }
+
+  .pf-product-card__form .button {
+    width: 100%;
+  }
+
+  .pf-collection__pagination {
+    margin-top: 28px;
+  }
+
+  .pf-collection__pagination .pagination {
+    justify-content: center;
+  }
+
+  @media screen and (max-width: 989px) {
+    .pf-collection__hero,
+    .pf-collection__body {
+      grid-template-columns: 1fr;
+    }
+
+    .pf-collection__filters {
+      position: static;
+    }
+
+    .pf-collection__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .pf-collection__hero,
+    .pf-collection__toolbar,
+    .pf-collection__body {
+      padding-inline: 16px;
+    }
+
+    .pf-collection__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .pf-collection__toolbar {
+      flex-wrap: wrap;
+    }
+
+    .pf-collection__filters {
+      display: none;
+    }
+
+    .pf-collection__filters.is-open {
+      display: block;
+    }
+  }
+</style>
+
+{% javascript %}
+  (() => {
+    const toggle = document.querySelector('[data-filter-toggle]');
+    const panel = document.querySelector('[data-filter-panel]');
+    toggle?.addEventListener('click', () => {
+      panel?.classList.toggle('is-open');
+    });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Collection template",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Shop all"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Curated streetwear and daily fashion essentials with a bold premium vibe."
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products per page",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "default": 24
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection template"
+    }
+  ]
+}
+{% endschema %}

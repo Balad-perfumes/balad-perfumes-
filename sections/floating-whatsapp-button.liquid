@@ -1,0 +1,213 @@
+{% liquid
+  assign whatsapp_number = section.settings.whatsapp_number | remove: ' ' | remove: '-' | remove: '(' | remove: ')' | remove: '+'
+  assign whatsapp_link = section.settings.whatsapp_link
+  if whatsapp_link == blank and whatsapp_number != blank
+    assign whatsapp_link = 'https://wa.me/' | append: whatsapp_number
+  endif
+%}
+
+{% if section.settings.enable_button and whatsapp_link != blank %}
+  <a
+    class="floating-whatsapp-button color-{{ section.settings.color_scheme }}"
+    href="{{ whatsapp_link }}"
+    target="_blank"
+    rel="noopener"
+    aria-label="{{ section.settings.aria_label | escape }}"
+    style="
+      --floating-whatsapp-bottom: {{ section.settings.bottom_offset }}px;
+      --floating-whatsapp-inline: {{ section.settings.side_offset }}px;
+    "
+    >
+    <span class="floating-whatsapp-button__icon" aria-hidden="true">
+      {% if section.settings.icon_image != blank %}
+        {{
+          section.settings.icon_image
+          | image_url: width: 160
+          | image_tag:
+            loading: 'lazy',
+            class: 'floating-whatsapp-button__icon-image',
+            widths: '40, 60, 80, 120, 160',
+            alt: section.settings.aria_label
+        }}
+      {% else %}
+        {{- 'icon-whatsapp.svg' | inline_asset_content -}}
+      {% endif %}
+    </span>
+
+    {% if section.settings.show_label %}
+      <span class="floating-whatsapp-button__text">
+        <span class="floating-whatsapp-button__label">{{ section.settings.label }}</span>
+      </span>
+    {% endif %}
+  </a>
+{% endif %}
+
+<style>
+  .floating-whatsapp-button {
+    position: fixed;
+    right: var(--floating-whatsapp-inline, 18px);
+    bottom: var(--floating-whatsapp-bottom, 18px);
+    z-index: var(--layer-float, 35);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    min-width: 52px;
+    min-height: 52px;
+    padding: 11px;
+    border-radius: 999px;
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
+    background: rgb(var(--color-background-rgb) / 0.98);
+    color: #25d366;
+    text-decoration: none;
+    box-shadow: 0 16px 34px rgb(0 0 0 / 0.16);
+    backdrop-filter: blur(12px);
+  }
+
+  .floating-whatsapp-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 38px rgb(0 0 0 / 0.18);
+  }
+
+  .floating-whatsapp-button__icon {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    color: #25d366;
+  }
+
+  .floating-whatsapp-button__icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .floating-whatsapp-button__icon-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .floating-whatsapp-button__text {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    line-height: 1.1;
+  }
+
+  .floating-whatsapp-button__label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    color: rgb(var(--color-foreground-rgb) / 0.62);
+  }
+
+  @media screen and (max-width: 1024px) {
+    .floating-whatsapp-button {
+      bottom: calc(var(--floating-whatsapp-bottom, 16px) + 64px + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .floating-whatsapp-button {
+      right: var(--floating-whatsapp-inline, 14px);
+      bottom: calc(var(--floating-whatsapp-bottom, 14px) + 64px + env(safe-area-inset-bottom, 0px));
+      min-width: 48px;
+      min-height: 48px;
+      padding: 10px;
+    }
+
+    .floating-whatsapp-button__text {
+      display: none;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "WhatsApp button",
+  "enabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_button",
+      "label": "Show button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_number",
+      "label": "WhatsApp number",
+      "default": "0000000000"
+    },
+    {
+      "type": "url",
+      "id": "whatsapp_link",
+      "label": "WhatsApp link",
+      "info": "Optional. Leave blank to build the link from the number."
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_image",
+      "label": "Icon image"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Button label",
+      "default": "Chat on WhatsApp"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_label",
+      "label": "Show label",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "aria_label",
+      "label": "Accessibility label",
+      "default": "Chat with us on WhatsApp"
+    },
+    {
+      "type": "range",
+      "id": "bottom_offset",
+      "label": "Bottom offset",
+      "min": 8,
+      "max": 80,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "side_offset",
+      "label": "Side offset",
+      "min": 8,
+      "max": 80,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "WhatsApp button"
+    }
+  ]
+}
+{% endschema %}
