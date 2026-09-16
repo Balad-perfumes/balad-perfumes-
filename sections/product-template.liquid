@@ -407,11 +407,11 @@
             <button type="button" class="pf-tabs__tab is-active" data-pf-tab="description" role="tab" aria-selected="true">
               Description
             </button>
-            {% if product_care_content != blank %}
+            {% comment %} {% if product_care_content != blank %}
               <button type="button" class="pf-tabs__tab" data-pf-tab="washcare" role="tab" aria-selected="false">
                 Washcare
               </button>
-            {% endif %}
+            {% endif %} {% endcomment %}
             {% if delivery_returns_content != blank %}
               <button type="button" class="pf-tabs__tab" data-pf-tab="shipping" role="tab" aria-selected="false">
                 Shipping
