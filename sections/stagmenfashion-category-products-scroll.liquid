@@ -256,7 +256,6 @@
       <div class="stagmenfashion-wishlist-modal__sizes">
         <div class="stagmenfashion-wishlist-modal__sizes-top">
           <span class="stagmenfashion-wishlist-modal__label" data-wishlist-size-label>Size</span>
-          <button type="button" class="stagmenfashion-wishlist-modal__size-guide" data-wishlist-size-guide>Size Guide</button>
         </div>
         <div class="stagmenfashion-wishlist-modal__size-grid" data-wishlist-sizes></div>
       </div>
@@ -289,7 +288,6 @@
       <div class="stagmenfashion-qa-modal__sizes">
         <div class="stagmenfashion-qa-modal__sizes-top">
           <span class="stagmenfashion-qa-modal__label">Size</span>
-          <button type="button" class="stagmenfashion-qa-modal__size-guide" data-qa-size-guide>Size Guide</button>
         </div>
         <div class="stagmenfashion-qa-modal__size-grid" data-qa-sizes></div>
       </div>
@@ -304,100 +302,6 @@
           <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
         </svg>
         <span>Sold Out</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Size Guide Modal ── -->
-  <div class="stagmenfashion-size-guide-modal" data-qa-size-guide-modal aria-hidden="true" style="display:none;" hidden>
-    <div class="stagmenfashion-size-guide-modal__backdrop" data-qa-size-guide-close></div>
-    <div class="stagmenfashion-size-guide-modal__card" role="dialog" aria-labelledby="{{ section.id }}-sg-title">
-      <div class="stagmenfashion-size-guide-modal__header">
-        <h3 id="{{ section.id }}-sg-title" class="stagmenfashion-size-guide-modal__title">Size guide</h3>
-        <div class="stagmenfashion-size-guide__unit-toggle" data-qa-unit-toggle role="radiogroup" aria-label="Unit of measurement">
-          <button type="button" class="stagmenfashion-unit-btn" data-unit="in" aria-label="Show measurements in Inches" role="radio" aria-checked="false">
-            IN
-          </button>
-          <button type="button" class="stagmenfashion-unit-btn is-active" data-unit="cm" aria-label="Show measurements in Centimeters" role="radio" aria-checked="true">
-            CM
-          </button>
-        </div>
-        <button type="button" class="stagmenfashion-size-guide-modal__close" data-qa-size-guide-close aria-label="Close size guide">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-      <div class="stagmenfashion-size-guide-modal__body">
-        <div class="stagmenfashion-size-table-wrapper">
-          <table class="stagmenfashion-size-table" data-qa-size-table data-active-unit="cm">
-            <thead>
-              <tr>
-                <th>Size</th>
-                <th>Chest</th>
-                <th>Shoulder</th>
-                <th>Length</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>XXXS</td>
-                <td data-val-cm="88.90" data-val-in="35.00">88.90</td>
-                <td data-val-cm="41.91" data-val-in="16.50">41.91</td>
-                <td data-val-cm="63.50" data-val-in="25.00">63.50</td>
-              </tr>
-              <tr>
-                <td>XXS</td>
-                <td data-val-cm="93.98" data-val-in="37.00">93.98</td>
-                <td data-val-cm="43.18" data-val-in="17.00">43.18</td>
-                <td data-val-cm="66.04" data-val-in="26.00">66.04</td>
-              </tr>
-              <tr>
-                <td>XS</td>
-                <td data-val-cm="99.06" data-val-in="39.00">99.06</td>
-                <td data-val-cm="44.45" data-val-in="17.50">44.45</td>
-                <td data-val-cm="69.85" data-val-in="27.50">69.85</td>
-              </tr>
-              <tr>
-                <td>S</td>
-                <td data-val-cm="106.68" data-val-in="42.00">106.68</td>
-                <td data-val-cm="46.99" data-val-in="18.50">46.99</td>
-                <td data-val-cm="71.12" data-val-in="28.00">71.12</td>
-              </tr>
-              <tr>
-                <td>M</td>
-                <td data-val-cm="111.76" data-val-in="44.00">111.76</td>
-                <td data-val-cm="48.26" data-val-in="19.00">48.26</td>
-                <td data-val-cm="73.66" data-val-in="29.00">73.66</td>
-              </tr>
-              <tr>
-                <td>L</td>
-                <td data-val-cm="116.84" data-val-in="46.00">116.84</td>
-                <td data-val-cm="48.26" data-val-in="19.00">48.26</td>
-                <td data-val-cm="74.93" data-val-in="29.50">74.93</td>
-              </tr>
-              <tr>
-                <td>XL</td>
-                <td data-val-cm="119.38" data-val-in="47.00">119.38</td>
-                <td data-val-cm="49.53" data-val-in="19.50">49.53</td>
-                <td data-val-cm="78.74" data-val-in="31.00">78.74</td>
-              </tr>
-              <tr>
-                <td>XXL</td>
-                <td data-val-cm="129.54" data-val-in="51.00">129.54</td>
-                <td data-val-cm="53.34" data-val-in="21.00">53.34</td>
-                <td data-val-cm="78.74" data-val-in="31.00">78.74</td>
-              </tr>
-              <tr>
-                <td>XXXL</td>
-                <td data-val-cm="134.62" data-val-in="53.00">134.62</td>
-                <td data-val-cm="57.15" data-val-in="22.50">57.15</td>
-                <td data-val-cm="82.55" data-val-in="32.50">82.55</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
   </div>
