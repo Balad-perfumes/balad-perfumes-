@@ -16,10 +16,10 @@
       "settings": {
         "brand_name": "Balad",
         "menu": "main-menu",
-        "show_story_badge": true,
+        "show_story_badge": false,
         "custom_story_avatar": "shopify://shop_images/logo_2.svg",
         "show_location": true,
-        "location_link": "/pages/our-stores",
+        "location_link": "shopify://pages/contact",
         "show_search": true,
         "show_account": true,
         "show_wishlist": true,
