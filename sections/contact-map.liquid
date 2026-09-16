@@ -30,47 +30,102 @@
       {% endif %}
     </div>
 
-    <div class="pf-contact-map__container">
-      <div class="pf-contact-map__card">
-        {% if section.settings.iframe_code != blank %}
-          <div class="pf-contact-map__iframe-wrap">
-            {{ section.settings.iframe_code }}
-          </div>
-        {% else %}
-          <div class="pf-contact-map__fallback">
-            <div class="pf-contact-map__fallback-content">
-              <div class="pf-contact-map__pin-icon">
-                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6">
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-                  <circle cx="12" cy="10" r="3"/>
-                </svg>
+    {% if section.blocks.size > 0 %}
+      <div class="pf-contact-map__grid pf-contact-map__grid--{{ section.blocks.size }}">
+        {% for block in section.blocks %}
+          <div class="pf-contact-map__card" {{ block.shopify_attributes }}>
+            {% if block.settings.iframe_code != blank %}
+              <div class="pf-contact-map__iframe-wrap">
+                {{ block.settings.iframe_code }}
               </div>
-              <h3 class="pf-contact-map__fallback-title">{{ section.settings.studio_name | default: 'Stag Men Fashion Design Studio' }}</h3>
-              <p class="pf-contact-map__fallback-addr">{{ section.settings.studio_address | default: 'Kochi, Kerala, India' }}</p>
-              {% if section.settings.directions_url != blank %}
-                <a href="{{ section.settings.directions_url }}" target="_blank" rel="noopener noreferrer" class="pf-contact-map__fallback-btn">
-                  Get Directions
-                </a>
-              {% endif %}
-            </div>
-          </div>
-        {% endif %}
+            {% else %}
+              <div class="pf-contact-map__fallback">
+                <div class="pf-contact-map__fallback-content">
+                  <div class="pf-contact-map__pin-icon">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6">
+                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                  </div>
+                  <h3 class="pf-contact-map__fallback-title">{{ block.settings.studio_name | default: 'Balad Perfumes' }}</h3>
+                  <p class="pf-contact-map__fallback-addr">{{ block.settings.studio_address }}</p>
+                  {% if block.settings.directions_url != blank %}
+                    <a href="{{ block.settings.directions_url }}" target="_blank" rel="noopener noreferrer" class="pf-contact-map__fallback-btn">
+                      Get Directions
+                    </a>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
 
-        <!-- Studio Quick Badge Overlay -->
-        {% if section.settings.show_location_card and section.settings.studio_name != blank %}
-          <div class="pf-contact-map__floating-card">
-            <div class="pf-contact-map__floating-dot"></div>
-            <div>
-              <p class="pf-contact-map__floating-title">{{ section.settings.studio_name }}</p>
-              <p class="pf-contact-map__floating-text">{{ section.settings.studio_address }}</p>
-              {% if section.settings.studio_hours != blank %}
-                <p class="pf-contact-map__floating-hours">{{ section.settings.studio_hours }}</p>
-              {% endif %}
-            </div>
+            {% if block.settings.show_location_card and block.settings.studio_name != blank %}
+              <div class="pf-contact-map__floating-card">
+                <div class="pf-contact-map__floating-dot"></div>
+                <div class="pf-contact-map__floating-info">
+                  <div class="pf-contact-map__floating-header">
+                    <p class="pf-contact-map__floating-title">{{ block.settings.studio_name }}</p>
+                    {% if block.settings.directions_url != blank %}
+                      <a href="{{ block.settings.directions_url }}" target="_blank" rel="noopener noreferrer" class="pf-contact-map__floating-link" title="Open in Google Maps">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                          <polyline points="15 3 21 3 21 9"></polyline>
+                          <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                      </a>
+                    {% endif %}
+                  </div>
+                  <p class="pf-contact-map__floating-text">{{ block.settings.studio_address }}</p>
+                  {% if block.settings.studio_hours != blank %}
+                    <p class="pf-contact-map__floating-hours">{{ block.settings.studio_hours }}</p>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
           </div>
-        {% endif %}
+        {% endfor %}
       </div>
-    </div>
+    {% else %}
+      <div class="pf-contact-map__grid pf-contact-map__grid--1">
+        <div class="pf-contact-map__card">
+          {% if section.settings.iframe_code != blank %}
+            <div class="pf-contact-map__iframe-wrap">
+              {{ section.settings.iframe_code }}
+            </div>
+          {% else %}
+            <div class="pf-contact-map__fallback">
+              <div class="pf-contact-map__fallback-content">
+                <div class="pf-contact-map__pin-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6">
+                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                </div>
+                <h3 class="pf-contact-map__fallback-title">{{ section.settings.studio_name | default: 'Balad Perfumes' }}</h3>
+                <p class="pf-contact-map__fallback-addr">{{ section.settings.studio_address }}</p>
+                {% if section.settings.directions_url != blank %}
+                  <a href="{{ section.settings.directions_url }}" target="_blank" rel="noopener noreferrer" class="pf-contact-map__fallback-btn">
+                    Get Directions
+                  </a>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if section.settings.show_location_card and section.settings.studio_name != blank %}
+            <div class="pf-contact-map__floating-card">
+              <div class="pf-contact-map__floating-dot"></div>
+              <div>
+                <p class="pf-contact-map__floating-title">{{ section.settings.studio_name }}</p>
+                <p class="pf-contact-map__floating-text">{{ section.settings.studio_address }}</p>
+                {% if section.settings.studio_hours != blank %}
+                  <p class="pf-contact-map__floating-hours">{{ section.settings.studio_hours }}</p>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
 
   </div>
 </section>
@@ -159,6 +214,16 @@
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
   }
 
+  .pf-contact-map__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .pf-contact-map__grid--1 {
+    grid-template-columns: 1fr;
+  }
+
   .pf-contact-map__card {
     position: relative;
     border-radius: 6px;
@@ -242,7 +307,7 @@
     position: absolute;
     bottom: 24px;
     left: 24px;
-    max-width: 320px;
+    max-width: 340px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -266,11 +331,35 @@
     flex: 0 0 auto;
   }
 
+  .pf-contact-map__floating-info {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .pf-contact-map__floating-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 2px;
+  }
+
   .pf-contact-map__floating-title {
-    margin: 0 0 2px;
+    margin: 0;
     font-size: 14px;
     font-weight: 600;
     color: #111111;
+  }
+
+  .pf-contact-map__floating-link {
+    color: #111111;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    display: inline-flex;
+  }
+
+  .pf-contact-map__floating-link:hover {
+    opacity: 1;
   }
 
   .pf-contact-map__floating-text {
@@ -285,6 +374,13 @@
     font-size: 11px;
     font-weight: 500;
     color: rgba(0, 0, 0, 0.5);
+  }
+
+  @media screen and (max-width: 899px) {
+    .pf-contact-map__grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
   }
 
   @media screen and (max-width: 640px) {
@@ -310,21 +406,60 @@
 {
   "name": "Contact map",
   "settings": [
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Flagship Studio" },
-    { "type": "text", "id": "heading", "label": "Heading", "default": "Visit our studio" },
-    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Experience our collection in person, feel the heavyweight fabrics, and get styled by our team." },
-    { "type": "textarea", "id": "iframe_code", "label": "Google Maps Embed <iframe> Code", "info": "Paste the Google Maps HTML embed code here." },
-    { "type": "header", "content": "Studio Card Overlay" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "FLAGSHIP STORES" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Visit Our Stores" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Experience our fragrances in person, explore your favorite scents, and find your signature fragrance with our team." },
+    { "type": "textarea", "id": "iframe_code", "label": "Google Maps Embed <iframe> Code (Fallback)" },
+    { "type": "header", "content": "Fallback Location Settings" },
     { "type": "checkbox", "id": "show_location_card", "label": "Show location summary card", "default": true },
-    { "type": "text", "id": "studio_name", "label": "Studio name", "default": "Stag Men Fashion Studio" },
-    { "type": "text", "id": "studio_address", "label": "Studio address", "default": "Kochi, Kerala, India" },
-    { "type": "text", "id": "studio_hours", "label": "Studio hours", "default": "Mon - Sat: 10:00 AM - 6:30 PM" },
+    { "type": "text", "id": "studio_name", "label": "Studio name", "default": "Balad Perfumes" },
+    { "type": "text", "id": "studio_address", "label": "Studio address", "default": "Calicut, Kerala, India" },
+    { "type": "text", "id": "studio_hours", "label": "Studio hours", "default": "Mon - Sun: 09:30 AM - 08:30 PM" },
     { "type": "url", "id": "directions_url", "label": "Google Maps directions link" },
-    { "type": "text", "id": "directions_label", "label": "Directions link text", "default": "Open in Maps" },
+    { "type": "text", "id": "directions_label", "label": "Directions link text", "default": "Open in Google Maps" },
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
     { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 2, "unit": "px", "label": "Top padding", "default": 20 },
     { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 2, "unit": "px", "label": "Bottom padding", "default": 28 }
   ],
-  "presets": [{ "name": "Contact map" }]
+  "blocks": [
+    {
+      "type": "location",
+      "name": "Map Location",
+      "settings": [
+        { "type": "text", "id": "studio_name", "label": "Location Name", "default": "Balad Perfumes (Calicut)" },
+        { "type": "textarea", "id": "studio_address", "label": "Address", "default": "Khaleej Residency, near Aster, Kozhikode, Kerala 673016" },
+        { "type": "text", "id": "studio_hours", "label": "Hours", "default": "Mon - Sun: 09:30 AM - 08:30 PM" },
+        { "type": "textarea", "id": "iframe_code", "label": "Google Maps <iframe> Code" },
+        { "type": "url", "id": "directions_url", "label": "Directions URL" },
+        { "type": "checkbox", "id": "show_location_card", "label": "Show Location Badge", "default": true }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Contact map",
+      "blocks": [
+        {
+          "type": "location",
+          "settings": {
+            "studio_name": "Balad Perfumes (Calicut)",
+            "studio_address": "Khaleej Residency, near Aster, Near M.I.M.S Hospital, Govindapuram, Kozhikode, Kerala 673016",
+            "studio_hours": "Mon - Sun: 09:30 AM - 08:30 PM",
+            "iframe_code": "<iframe src=\"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d52643.33908510284!2d75.76950604334138!3d11.280543280302826!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba659c5e8b2bc91%3A0xd4dff452d15a7f2f!2sBALAD%20PERFUMES!5e0!3m2!1sen!2sin!4v1789538424914!5m2!1sen!2sin\" width=\"600\" height=\"450\" style=\"border:0;\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\"></iframe>",
+            "directions_url": "https://maps.app.goo.gl/wVwRCDasLU6jKLSQ6"
+          }
+        },
+        {
+          "type": "location",
+          "settings": {
+            "studio_name": "Balad Perfumes (Thekkady)",
+            "studio_address": "BALAD PERFUMES, Kavitha building, JUNCTION thekkadiy, Thekkady, Kumily, Attappallam, Kerala 685509",
+            "studio_hours": "Mon - Sun: 09:30 AM - 08:30 PM",
+            "iframe_code": "<iframe src=\"https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d245.86669628135277!2d77.1671735!3d9.6067067!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b065516fbf48fc5%3A0x38d4930c20c92cc8!2zQkFMQUQgUEVSRlVNRVMgKOC0rOC0suC0puC1jSDgtKrgtYbgtbzgtKvgtY3gtK_gtYLgtILgtLjgtY0p!5e0!3m2!1sen!2sin!4v1789544975056!5m2!1sen!2sin\" width=\"600\" height=\"450\" style=\"border:0;\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\"></iframe>",
+            "directions_url": "https://maps.app.goo.gl/twvc1pxgdXNvDpTx6"
+          }
+        }
+      ]
+    }
+  ]
 }
-{% endschema %}
