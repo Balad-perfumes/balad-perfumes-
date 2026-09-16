@@ -36,23 +36,10 @@
         "discover_more_link": "",
         "color_scheme": ""
       }
-    },
-    "similar_products": {
-      "type": "stagmenfashion-similar-products",
-      "settings": {
-        "heading": "Similar Products",
-        "subheading": "Explore more styles from this category",
-        "collection": "",
-        "products_to_show": 12,
-        "discover_more_label": "Discover More",
-        "discover_more_link": "",
-        "color_scheme": "scheme-1"
-      }
     }
   },
   "order": [
     "main",
-    "stagmenfashion_similar_products_wqLRpx",
-    "similar_products"
+    "stagmenfashion_similar_products_wqLRpx"
   ]
 }
