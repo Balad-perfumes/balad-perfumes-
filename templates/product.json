@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -15,6 +24,19 @@
         "delivery_returns": "<p>Fast express dispatch, secure packaging, and easy 7-day size exchanges as per store policy.</p>"
       }
     },
+    "stagmenfashion_similar_products_wqLRpx": {
+      "type": "stagmenfashion-similar-products",
+      "name": "Similar Category Products",
+      "settings": {
+        "heading": "Similar Products",
+        "subheading": "Explore more styles from this category",
+        "collection": "",
+        "products_to_show": 12,
+        "discover_more_label": "Discover more",
+        "discover_more_link": "",
+        "color_scheme": ""
+      }
+    },
     "similar_products": {
       "type": "stagmenfashion-similar-products",
       "settings": {
@@ -26,46 +48,11 @@
         "discover_more_link": "",
         "color_scheme": "scheme-1"
       }
-    },
-<<<<<<< HEAD
-    "more_you_may_like": {
-      "type": "stagmenfashion-similar-products",
-      "settings": {
-        "heading": "You May Also Like",
-        "subheading": "Handpicked signature fragrances crafted for you",
-        "collection": "",
-        "products_to_show": 12,
-        "discover_more_label": "Explore All",
-        "discover_more_link": "/collections/all",
-        "color_scheme": "scheme-1"
-=======
-    "stagmenfashion_spotlight_FeqWbM": {
-      "type": "stagmenfashion-spotlight",
-      "name": "Stag Spotlight",
-      "settings": {
-        "collection_list": [],
-        "enable_trending": true,
-        "trending_collection": "",
-        "trending_limit": 8,
-        "products_per_collection": 8,
-        "filter_categories_label": "Categories",
-        "filter_price_label": "Price Range",
-        "sort_label": "Sort by",
-        "heading": "Balad Perfumes Spotlight",
-        "subtext": "<p>Discover our most-loved fragrances, signature scents, and new arrivals, curated to make every moment unforgettable.</p>",
-        "see_all_text": "See All",
-        "color_scheme": ""
->>>>>>> 411fab4dfc971a07aa1673209c6ba713134f128f
-      }
     }
   },
   "order": [
     "main",
-    "similar_products",
-<<<<<<< HEAD
-    "more_you_may_like"
-=======
-    "stagmenfashion_spotlight_FeqWbM"
->>>>>>> 411fab4dfc971a07aa1673209c6ba713134f128f
+    "stagmenfashion_similar_products_wqLRpx",
+    "similar_products"
   ]
 }
