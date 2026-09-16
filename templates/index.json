@@ -137,7 +137,7 @@
           "type": "slide",
           "settings": {
             "collection": "new-in",
-            "image": "shopify://shop_images/dee1d956-8079-45db-a96a-344202cfd2c7.png",
+            "image": "shopify://shop_images/ffb0e3da-2549-436a-9c06-5bba86ee039f.png",
             "mobile_image": "shopify://shop_images/606f9946-6826-42e0-803a-0094d26de3ec.png",
             "subheading": "Fresh Drop",
             "heading": "NEW IN ARRIVALS",
@@ -414,7 +414,7 @@
         "background": "#ffffff",
         "text_color": "#111111",
         "muted_text_color": "#6b7280",
-        "accent_color": "#111111",
+        "accent_color": "#0800cf",
         "grid_gap": 12,
         "card_radius": 4
       }
@@ -789,11 +789,7 @@
             "desktop_width_percent": 100,
             "icon_size": 24,
             "icon_color": "#111111",
-<<<<<<< HEAD
-            "hover_color": "#111111"
-=======
             "hover_color": "#0800cf"
->>>>>>> c5aed980f33a3feb73dcbdcb034b2e384b0f155c
           },
           "blocks": {}
         }
