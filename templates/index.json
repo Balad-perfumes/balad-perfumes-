@@ -118,25 +118,12 @@
     "banner_slider": {
       "type": "stagmenfashion-banner-slider",
       "blocks": {
-        "slide_Y3bGkT": {
-          "type": "slide",
-          "disabled": true,
-          "settings": {
-            "collection": "",
-            "subheading": "",
-            "heading": "CO-ORDS & SETS",
-            "button_label": "SHOP NOW",
-            "button_link": "",
-            "button_style": "underline",
-            "content_position": "bottom-center",
-            "text_alignment": "center"
-          }
-        },
         "slide_1": {
           "type": "slide",
           "settings": {
             "collection": "co-ords",
-            "image": "shopify://shop_images/WhatsApp_Image_2026-07-31_at_5.43.18_PM.jpg",
+            "image": "shopify://shop_images/76ead5ee-688d-412d-88cf-6ae14d448ed7.png",
+            "mobile_image": "shopify://shop_images/f19be024-44e4-441f-bd73-cc1410bf8c52.png",
             "subheading": "New Season",
             "heading": "SIGNATURE SCENTS & SETS",
             "button_label": "SHOP NOW",
@@ -146,26 +133,12 @@
             "text_alignment": "center"
           }
         },
-        "slide_2": {
-          "type": "slide",
-          "disabled": true,
-          "settings": {
-            "collection": "trending",
-            "subheading": "Streetwear Cuts",
-            "heading": "TRENDING ESSENTIALS",
-            "button_label": "SHOP NOW",
-            "button_link": "shopify://collections/trending",
-            "button_style": "underline",
-            "content_position": "bottom-center",
-            "text_alignment": "center"
-          }
-        },
         "slide_3": {
           "type": "slide",
           "settings": {
             "collection": "new-in",
-            "image": "shopify://shop_images/WhatsApp_Image_2026-07-31_at_6.10.09_PM.webp",
-            "mobile_image": "shopify://shop_images/WhatsApp_Image_2026-07-31_at_6.17.40_PM.jpg",
+            "image": "shopify://shop_images/dee1d956-8079-45db-a96a-344202cfd2c7.png",
+            "mobile_image": "shopify://shop_images/606f9946-6826-42e0-803a-0094d26de3ec.png",
             "subheading": "Fresh Drop",
             "heading": "NEW IN ARRIVALS",
             "button_label": "SHOP NOW",
@@ -177,9 +150,7 @@
         }
       },
       "block_order": [
-        "slide_Y3bGkT",
         "slide_1",
-        "slide_2",
         "slide_3"
       ],
       "settings": {
@@ -818,7 +789,11 @@
             "desktop_width_percent": 100,
             "icon_size": 24,
             "icon_color": "#111111",
+<<<<<<< HEAD
             "hover_color": "#111111"
+=======
+            "hover_color": "#0800cf"
+>>>>>>> c5aed980f33a3feb73dcbdcb034b2e384b0f155c
           },
           "blocks": {}
         }
