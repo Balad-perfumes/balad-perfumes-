@@ -13,8 +13,8 @@
       "type": "contact-hero",
       "settings": {
         "eyebrow": "Get in touch",
-        "heading": "Let's start a conversation",
-        "subheading": "Have a question about sizing, our latest drops, order tracking, or styling advice? Our team is here to assist you every step of the way.",
+        "heading": "Let's Find Your Signature Scent",
+        "subheading": "Have a question about our fragrances, latest arrivals, or your order? Our team is here to help you find the perfect scent.",
         "align": "center",
         "color_scheme": "scheme-1",
         "padding_top": 20,
@@ -28,11 +28,11 @@
           "type": "info",
           "settings": {
             "icon": "email",
-            "tag": "24h turnaround",
-            "label": "Email Concierge",
-            "text": "hello@stagmenfashion.com",
-            "subtext": "For order updates, sizing advice & support",
-            "link": "mailto:hello@stagmenfashion.com",
+            "tag": "24h response",
+            "label": "CUSTOMER SUPPORT",
+            "text": "hello@baladperfume.com",
+            "subtext": "For fragrance advice, order updates & support",
+            "link": "mailto:hello@baladperfume.com",
             "link_label": "Send an email"
           }
         },
@@ -41,30 +41,43 @@
           "settings": {
             "icon": "phone",
             "tag": "Direct line",
-            "label": "Studio Phone",
-            "text": "+91 98765 43210",
-            "subtext": "Mon - Sat: 10:00 AM – 6:30 PM",
-            "link": "tel:+919876543210",
+            "label": "STUDIO PHONE",
+            "text": "+91 94474 25555",
+            "subtext": "Mon - Sun : 09:00 AM – 8:30 PM",
+            "link": "tel:+919447425555",
             "link_label": "Call now"
+          }
+        },
+        "info_jnfEfj": {
+          "type": "info",
+          "settings": {
+            "icon": "location",
+            "tag": "Visit us",
+            "label": "PERFUME STORE",
+            "text": "BALAD PERFUMES Calicut",
+            "subtext": "Khaleej Residency, near Aster, Near M.I.M.S Hospital, Govindapuram, Kozhikode, Kerala 673016",
+            "link": "https://maps.app.goo.gl/nFukD6v1G2hMCaH59",
+            "link_label": "Get directions"
           }
         },
         "address": {
           "type": "info",
           "settings": {
             "icon": "location",
-            "tag": "Flagship",
-            "label": "Fashion Studio",
-            "text": "Stag Men Fashion, Kochi, Kerala",
-            "subtext": "Store visits & tactile fabric styling sessions",
-            "link": "https://maps.google.com/?q=Kochi,Kerala",
+            "tag": "Visit us",
+            "label": "PERFUME STORE",
+            "text": "BALAD PERFUMES Thekkady",
+            "subtext": "BALAD PERFUMES, Kavitha building, JUNCTION thekkadiy, Thekkady, Kumily, Attappallam, Kerala 685509",
+            "link": "https://maps.app.goo.gl/twvc1pxgdXNvDpTx6",
             "link_label": "Get directions"
           }
         },
         "hours": {
           "type": "info",
+          "disabled": true,
           "settings": {
             "icon": "clock",
-            "tag": "Active",
+            "tag": "Open today",
             "label": "Studio Hours",
             "text": "Mon–Sat, 10:00 AM – 6:30 PM",
             "subtext": "Sunday by private appointment only",
@@ -76,6 +89,7 @@
       "block_order": [
         "email",
         "phone",
+        "info_jnfEfj",
         "address",
         "hours"
       ],
