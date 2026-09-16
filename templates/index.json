@@ -200,11 +200,12 @@
         "store_1": {
           "type": "store",
           "settings": {
+            "image": "shopify://shop_images/WhatsApp_Image_2026-08-03_at_11.55.24_AM.jpg",
             "store_name": "Calicut",
             "directions_label": "Get Direction",
             "directions_url": "",
-            "address": "1st floor,\n4th Gate, Taisha Arcade,\nPT Usha Rd, vellayil,\nkozhikode, kerala 673032",
-            "phone": "+91 7736444674"
+            "address": "Khaleej Residency, near Aster, Near M.I.M.S Hospital, Govindapuram, Kozhikode, Kerala 673016",
+            "phone": "+91 94474 25555"
           }
         },
         "store_3": {
@@ -216,22 +217,11 @@
             "address": "5X25+3QH, Kondotty Bypass Rd, Kondotty, Kerala 673638",
             "phone": "+91 7736444674"
           }
-        },
-        "store_2": {
-          "type": "store",
-          "settings": {
-            "store_name": "Kannur",
-            "directions_label": "Get Direction",
-            "directions_url": "",
-            "address": "V9FF+GGC, Thavakkara, Kannur, Kerala 670012",
-            "phone": "+91 7736444674"
-          }
         }
       },
       "block_order": [
         "store_1",
-        "store_3",
-        "store_2"
+        "store_3"
       ],
       "settings": {
         "color_scheme": "scheme-1",
