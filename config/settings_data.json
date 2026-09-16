@@ -9,9 +9,9 @@
  */
 {
   "current": {
-    "logo": "shopify://shop_images/stag-logo_2.png",
-    "logo_height": 50,
-    "logo_height_mobile": 28,
+    "logo": "shopify://shop_images/logo_2.svg",
+    "logo_height": 52,
+    "logo_height_mobile": 37,
     "favicon": "shopify://shop_images/apple-touch-icon.png",
     "brand_name": "stagmenfashion",
     "loader_enable": true,
