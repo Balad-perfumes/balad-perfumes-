@@ -211,11 +211,12 @@
         "store_3": {
           "type": "store",
           "settings": {
-            "store_name": "Kondotty",
+            "image": "shopify://shop_images/unnamed.webp",
+            "store_name": "Thekkadiy",
             "directions_label": "Get Direction",
             "directions_url": "",
-            "address": "5X25+3QH, Kondotty Bypass Rd, Kondotty, Kerala 673638",
-            "phone": "+91 7736444674"
+            "address": "BALAD PERFUMES, Kavitha building, JUNCTION thekkadiy, Thekkady, Kumily, Attappallam, Kerala 685509",
+            "phone": "+91 94473 76786"
           }
         }
       },
