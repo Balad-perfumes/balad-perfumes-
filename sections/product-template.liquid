@@ -1,6 +1,6 @@
 {% liquid
   assign selected_product = product
-  assign current_variant = selected_product.selected_or_first_available_variant
+  assign current_variant = selected_product.selected_or_first_available_variant | default: selected_product.variants.first
   assign form_id = 'StagProductForm-' | append: section.id
 
   # Dynamic Rating Fetch from Judge.me / Shopify Metafields
@@ -329,8 +329,12 @@
                     endif
 
                     assign is_available = true
-                    if size_variant != blank and size_variant.available == false
-                      assign is_available = false
+                    if size_variant != blank
+                      if size_variant.available or size_variant.inventory_quantity > 0 or size_variant.inventory_management == blank or size_variant.inventory_policy == 'continue'
+                        assign is_available = true
+                      else
+                        assign is_available = false
+                      endif
                     elsif size_variant == blank
                       assign is_available = false
                     endif
@@ -367,13 +371,19 @@
               {% for variant in selected_product.variants %}
                 {% assign v_lower = variant.title | downcase %}
                 {% unless v_lower contains 'personal' or v_lower contains 'custom' %}
+                  {% liquid
+                    assign is_v_avail = false
+                    if variant.available or variant.inventory_quantity > 0 or variant.inventory_management == blank or variant.inventory_policy == 'continue'
+                      assign is_v_avail = true
+                    endif
+                  %}
                   <button
                     type="button"
-                    class="pf-size-pill{% if variant.id == current_variant.id %} is-active{% endif %}{% unless variant.available %} is-unavailable{% endunless %}"
+                    class="pf-size-pill{% if variant.id == current_variant.id %} is-active{% endif %}{% unless is_v_avail %} is-unavailable{% endunless %}"
                     data-pf-size-pill
                     data-value="{{ variant.title | escape }}"
                     data-variant-id="{{ variant.id }}"
-                    {% unless variant.available %}data-sold-out="true"{% endunless %}
+                    {% unless is_v_avail %}data-sold-out="true"{% endunless %}
                     aria-label="{{ variant.title }}"
                   >
                     {% if v_lower contains '100ml' or forloop.index == 2 %}
@@ -397,6 +407,12 @@
           <input type="hidden" name="id" value="{{ current_variant.id }}" data-pf-variant-id>
           <input type="hidden" name="quantity" value="1" data-pf-qty-field>
 
+          {% liquid
+            assign is_curr_avail = false
+            if current_variant.available or current_variant.inventory_quantity > 0 or current_variant.inventory_management == blank or current_variant.inventory_policy == 'continue'
+              assign is_curr_avail = true
+            endif
+          %}
           <div class="pf-buybox__main-actions">
             <div class="pf-qty-picker">
               <button type="button" class="pf-qty-btn" data-pf-qty-minus aria-label="Decrease quantity">
@@ -412,9 +428,9 @@
               type="button"
               class="pf-btn pf-btn--add-to-bag"
               data-pf-add-to-bag
-              {% unless current_variant.available %}disabled{% endunless %}
+              {% unless is_curr_avail %}disabled{% endunless %}
             >
-              <span data-pf-add-text>{% if current_variant.available %}Add to cart{% else %}Sold out{% endif %}</span>
+              <span data-pf-add-text>{% if is_curr_avail %}Add to cart{% else %}Sold out{% endif %}</span>
             </button>
           </div>
 
@@ -422,7 +438,7 @@
             type="button"
             class="pf-btn pf-btn--express-checkout"
             data-pf-buy-now
-            {% unless current_variant.available %}disabled{% endunless %}
+            {% unless is_curr_avail %}disabled{% endunless %}
           >
             Express Checkout
           </button>
