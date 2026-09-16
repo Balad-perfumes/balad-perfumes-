@@ -184,10 +184,6 @@
     },
     "17895486123c3c89da": {
       "type": "_blocks",
-      "custom_css": [
-        "margin-top: 8px !important;",
-        "margin-bottom: 8px !important;"
-      ],
       "blocks": {
         "instareel_ig_reels_instagram_reels_feed_mAaTPW": {
           "type": "shopify://apps/instareel-ig-reels/blocks/instagram-reels-feed/6399ee9c-54c8-4f76-97d7-8f02f7662aa1",
@@ -202,8 +198,8 @@
             "subheading_font_size": 16,
             "subheading_color": "#000000",
             "customize_spacing": true,
-            "padding_top": 4,
-            "padding_bottom": 4,
+            "padding_top": 36,
+            "padding_bottom": 24,
             "padding_horizontal": 0
           }
         }
@@ -235,8 +231,8 @@
         "overlay_color": "#00000026",
         "overlay_style": "solid",
         "gradient_direction": "to top",
-        "padding-block-start": 4,
-        "padding-block-end": 4,
+        "padding-block-start": 48,
+        "padding-block-end": 36,
         "remove_horizontal_padding": false
       }
     },

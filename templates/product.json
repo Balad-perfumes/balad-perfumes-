@@ -35,10 +35,29 @@
         "discover_more_link": "",
         "color_scheme": "scheme-1"
       }
+    },
+    "stagmenfashion_spotlight_FeqWbM": {
+      "type": "stagmenfashion-spotlight",
+      "name": "Stag Spotlight",
+      "settings": {
+        "collection_list": [],
+        "enable_trending": true,
+        "trending_collection": "",
+        "trending_limit": 8,
+        "products_per_collection": 8,
+        "filter_categories_label": "Categories",
+        "filter_price_label": "Price Range",
+        "sort_label": "Sort by",
+        "heading": "Balad Perfumes Spotlight",
+        "subtext": "<p>Discover our most-loved fragrances, signature scents, and new arrivals, curated to make every moment unforgettable.</p>",
+        "see_all_text": "See All",
+        "color_scheme": ""
+      }
     }
   },
   "order": [
     "main",
-    "similar_products"
+    "similar_products",
+    "stagmenfashion_spotlight_FeqWbM"
   ]
 }
