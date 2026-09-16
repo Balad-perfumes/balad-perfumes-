@@ -105,6 +105,9 @@
     },
     "contact_form": {
       "type": "contact-form",
+      "custom_css": [
+        ".pf-contact-form__topics{display: none}"
+      ],
       "settings": {
         "eyebrow": "FRAGRANCE CONCIERGE",
         "heading": "Let's Find Your Signature Scent",
