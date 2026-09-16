@@ -211,7 +211,7 @@
           "settings": {
             "platform": "youtube",
             "label": "Youtube",
-            "handle": "baladperfume",
+            "handle": "@baladperfume",
             "url": "https://www.youtube.com/@baladperfume"
           }
         },
@@ -220,7 +220,7 @@
           "settings": {
             "platform": "facebook",
             "label": "Facebook",
-            "handle": "baladperfume",
+            "handle": "@baladperfume",
             "url": "https://www.facebook.com/baladperfume/"
           }
         },
