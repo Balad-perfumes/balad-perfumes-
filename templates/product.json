@@ -23,8 +23,10 @@
       "settings": {
         "heading": "Similar Products",
         "subheading": "Explore more styles from this category",
+        "collection": "",
         "products_to_show": 12,
         "discover_more_label": "Discover More",
+        "discover_more_link": "",
         "color_scheme": "scheme-1"
       }
     }
