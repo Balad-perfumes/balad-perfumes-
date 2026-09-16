@@ -1,5 +1,6 @@
 {% liquid
-  assign whatsapp_number = section.settings.whatsapp_number | remove: ' ' | remove: '-' | remove: '(' | remove: ')' | remove: '+'
+  assign raw_number = section.settings.whatsapp_number | default: '919447425555'
+  assign whatsapp_number = raw_number | remove: ' ' | remove: '-' | remove: '(' | remove: ')' | remove: '+'
   assign whatsapp_link = section.settings.whatsapp_link
   if whatsapp_link == blank and whatsapp_number != blank
     assign whatsapp_link = 'https://wa.me/' | append: whatsapp_number
@@ -8,16 +9,16 @@
 
 {% if section.settings.enable_button and whatsapp_link != blank %}
   <a
-    class="floating-whatsapp-button color-{{ section.settings.color_scheme }}"
+    class="floating-whatsapp-button"
     href="{{ whatsapp_link }}"
     target="_blank"
     rel="noopener"
     aria-label="{{ section.settings.aria_label | escape }}"
     style="
-      --floating-whatsapp-bottom: {{ section.settings.bottom_offset }}px;
-      --floating-whatsapp-inline: {{ section.settings.side_offset }}px;
+      --floating-whatsapp-bottom: {{ section.settings.bottom_offset | default: 20 }}px;
+      --floating-whatsapp-inline: {{ section.settings.side_offset | default: 20 }}px;
     "
-    >
+  >
     <span class="floating-whatsapp-button__icon" aria-hidden="true">
       {% if section.settings.icon_image != blank %}
         {{
@@ -30,7 +31,9 @@
             alt: section.settings.aria_label
         }}
       {% else %}
-        {{- 'icon-whatsapp.svg' | inline_asset_content -}}
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true" focusable="false" style="width:100%;height:100%;display:block;">
+          <path fill="currentColor" d="M19.11 17.47c-.27-.14-1.59-.78-1.84-.88-.25-.09-.43-.14-.61.14-.18.27-.7.88-.85 1.05-.16.18-.31.2-.58.07-.27-.14-1.13-.41-2.15-1.31-.8-.71-1.34-1.59-1.5-1.86-.16-.27-.02-.42.12-.56.13-.13.27-.35.4-.53.13-.18.18-.31.27-.5.09-.18.04-.34-.02-.48-.06-.14-.61-1.47-.84-2.02-.22-.53-.45-.46-.61-.46-.16 0-.34-.02-.52-.02-.18 0-.48.07-.74.34-.25.27-.96.94-.96 2.29s.98 2.66 1.11 2.84c.14.18 1.95 2.98 4.72 4.18.66.29 1.17.47 1.57.6.66.21 1.26.18 1.74.11.53-.08 1.59-.65 1.82-1.28.22-.63.22-1.17.16-1.28-.07-.11-.25-.18-.52-.31zM16 3C8.82 3 3 8.82 3 16c0 2.29.6 4.52 1.75 6.48L3 29l6.71-1.71A12.92 12.92 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm0 23.44c-2.01 0-3.98-.54-5.69-1.57l-.41-.24-3.99 1.02 1.07-3.89-.27-.4A10.42 10.42 0 0 1 5.58 16C5.58 10.22 10.22 5.58 16 5.58S26.42 10.22 26.42 16 21.78 26.42 16 26.42z"/>
+        </svg>
       {% endif %}
     </span>
 
@@ -45,38 +48,39 @@
 <style>
   .floating-whatsapp-button {
     position: fixed;
-    right: var(--floating-whatsapp-inline, 18px);
-    bottom: var(--floating-whatsapp-bottom, 18px);
-    z-index: var(--layer-float, 35);
+    right: var(--floating-whatsapp-inline, 20px);
+    bottom: var(--floating-whatsapp-bottom, 20px);
+    z-index: 99999;
     display: inline-flex;
     align-items: center;
     gap: 10px;
     justify-content: center;
-    min-width: 52px;
-    min-height: 52px;
-    padding: 11px;
-    border-radius: 999px;
-    border: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
-    background: rgb(var(--color-background-rgb) / 0.98);
-    color: #25d366;
+    width: 56px;
+    height: 56px;
+    padding: 12px;
+    border-radius: 50%;
+    background-color: #25d366;
+    color: #ffffff;
     text-decoration: none;
-    box-shadow: 0 16px 34px rgb(0 0 0 / 0.16);
-    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.45), 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .floating-whatsapp-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 18px 38px rgb(0 0 0 / 0.18);
+  .floating-whatsapp-button:hover,
+  .floating-whatsapp-button:focus-visible {
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 8px 28px rgba(37, 211, 102, 0.6), 0 4px 12px rgba(0, 0, 0, 0.25);
+    color: #ffffff;
   }
 
   .floating-whatsapp-button__icon {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
-    color: #25d366;
+    color: #ffffff;
   }
 
   .floating-whatsapp-button__icon svg {
@@ -98,29 +102,28 @@
     gap: 1px;
     min-width: 0;
     line-height: 1.1;
+    padding-right: 6px;
   }
 
   .floating-whatsapp-button__label {
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0;
-    color: rgb(var(--color-foreground-rgb) / 0.62);
-  }
-
-  @media screen and (max-width: 1024px) {
-    .floating-whatsapp-button {
-      bottom: calc(var(--floating-whatsapp-bottom, 16px) + 64px + env(safe-area-inset-bottom, 0px));
-    }
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: #ffffff;
   }
 
   @media screen and (max-width: 749px) {
     .floating-whatsapp-button {
-      right: var(--floating-whatsapp-inline, 14px);
-      bottom: calc(var(--floating-whatsapp-bottom, 14px) + 64px + env(safe-area-inset-bottom, 0px));
-      min-width: 48px;
-      min-height: 48px;
+      right: var(--floating-whatsapp-inline, 16px);
+      bottom: var(--floating-whatsapp-bottom, 20px);
+      width: 50px;
+      height: 50px;
       padding: 10px;
+    }
+
+    .floating-whatsapp-button__icon {
+      width: 28px;
+      height: 28px;
     }
 
     .floating-whatsapp-button__text {
@@ -146,7 +149,7 @@
       "type": "text",
       "id": "whatsapp_number",
       "label": "WhatsApp number",
-      "default": "0000000000"
+      "default": "+91 94474 25555"
     },
     {
       "type": "url",
@@ -175,7 +178,7 @@
       "type": "text",
       "id": "aria_label",
       "label": "Accessibility label",
-      "default": "Chat with us on WhatsApp"
+      "default": "Chat with Balad Perfumes on WhatsApp"
     },
     {
       "type": "range",
@@ -185,7 +188,7 @@
       "max": 80,
       "step": 1,
       "unit": "px",
-      "default": 18
+      "default": 20
     },
     {
       "type": "range",
@@ -195,7 +198,7 @@
       "max": 80,
       "step": 1,
       "unit": "px",
-      "default": 18
+      "default": 20
     },
     {
       "type": "color_scheme",
