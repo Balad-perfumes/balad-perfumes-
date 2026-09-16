@@ -14,7 +14,8 @@
       "custom_css": [
         ".pf-size-pill.is-active {background: #000 !important; color: #ffffff !important; border-color: #000 !important;}",
         ".pf-btn--buy-now {background: #000; color: #ffffff; border: 1.5px solid #000000b0;}",
-        ".pf-btn--add-to-bag {background: #ffffff; color: #000; border: 1.5px solid #282626;}"
+        ".pf-btn--add-to-bag {background: #ffffff; color: #000; border: 1.5px solid #282626;}",
+        ".pf-buybox__size-guide-btn {display: none;}"
       ],
       "settings": {
         "color_scheme": "scheme-4",
