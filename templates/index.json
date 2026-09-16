@@ -320,7 +320,7 @@
         "benefit_1": {
           "type": "benefit",
           "settings": {
-            "icon": "returns",
+            "icon": "clock",
             "heading": "Long-Lasting Fragrance",
             "text": "Enjoy captivating scents that stay with you throughout the day."
           }
@@ -328,7 +328,7 @@
         "benefit_2": {
           "type": "benefit",
           "settings": {
-            "icon": "shipping",
+            "icon": "quality",
             "heading": "Premium Quality",
             "text": "Carefully crafted fragrances made to leave a lasting impression."
           }
@@ -336,7 +336,7 @@
         "benefit_3": {
           "type": "benefit",
           "settings": {
-            "icon": "support",
+            "icon": "mood",
             "heading": "Scents for Every Mood",
             "text": "Discover distinctive fragrances for every occasion and personality."
           }
@@ -344,7 +344,7 @@
         "benefit_4": {
           "type": "benefit",
           "settings": {
-            "icon": "discount",
+            "icon": "gift",
             "heading": "Elegant Gift Choices",
             "text": "Beautiful fragrances thoughtfully selected for gifting and special moments."
           }
