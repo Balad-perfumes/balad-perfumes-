@@ -17,7 +17,6 @@
       "settings": {
         "color_scheme": "scheme-1",
         "heading": "Join the Club.",
-        "image": "shopify://shop_images/WhatsApp_Image_2026-06-12_at_11.58.53_AM.jpg",
         "card_title": "The Fitting Room",
         "text": "<p>Most brands just sell clothes. We craft confidence. Get exclusive early access to upcoming drops, limited edition capsules, and behind-the-scenes fittings.</p>",
         "button_label": "Explore the Drops",
@@ -27,11 +26,22 @@
     "pf_footer": {
       "type": "footer",
       "settings": {
-        "logo": "",
-        "brand_name": "Stag Men Fashion",
-        "brand_text": "Stag Men Fashion is where bold streetwear meets effortless daily fashion for men.",
-        "menu_title_1": "Boring stuff",
+        "logo": "shopify://shop_images/logo_2.svg",
+        "brand_name": "Balad",
+        "brand_text": "Discover premium fragrances crafted to express your individuality and leave a lasting impression. Find your signature scent with Balad Perfumes.",
+        "contact_email": "hello@baladperfume.com",
+        "contact_whatsapp_text": "+91 94474 25555",
+        "menu_title_1": "EXPLORE BALAD",
         "menu_1": "main-menu",
+        "menu_title_2": "Info & Legal",
+        "menu_2": "",
+        "instagram_url": "",
+        "whatsapp_url": "",
+        "tiktok_url": "",
+        "facebook_url": "",
+        "youtube_url": "",
+        "show_payment_icons": true,
+        "show_back_to_top": true,
         "color_scheme": "scheme-1"
       }
     }
