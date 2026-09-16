@@ -329,15 +329,6 @@
                     endif
 
                     assign is_available = true
-                    if size_variant != blank
-                      if size_variant.available or size_variant.inventory_quantity > 0 or size_variant.inventory_management == blank or size_variant.inventory_policy == 'continue'
-                        assign is_available = true
-                      else
-                        assign is_available = false
-                      endif
-                    elsif size_variant == blank
-                      assign is_available = false
-                    endif
 
                     assign is_selected = false
                     if current_variant != blank and size_variant != blank and current_variant.id == size_variant.id
@@ -348,11 +339,10 @@
                   %}
                   <button
                     type="button"
-                    class="pf-size-pill{% if is_selected %} is-active{% endif %}{% unless is_available %} is-unavailable{% endunless %}"
+                    class="pf-size-pill{% if is_selected %} is-active{% endif %}"
                     data-pf-size-pill
                     data-value="{{ val_name | escape }}"
                     data-variant-id="{{ size_variant.id | default: current_variant.id }}"
-                    {% unless is_available %}data-sold-out="true"{% endunless %}
                     aria-label="Size {{ val_name }}"
                   >
                     {% if val_lower contains '100ml' or forloop.index == 2 %}
@@ -371,19 +361,13 @@
               {% for variant in selected_product.variants %}
                 {% assign v_lower = variant.title | downcase %}
                 {% unless v_lower contains 'personal' or v_lower contains 'custom' %}
-                  {% liquid
-                    assign is_v_avail = false
-                    if variant.available or variant.inventory_quantity > 0 or variant.inventory_management == blank or variant.inventory_policy == 'continue'
-                      assign is_v_avail = true
-                    endif
-                  %}
+                  {% assign is_v_avail = true %}
                   <button
                     type="button"
-                    class="pf-size-pill{% if variant.id == current_variant.id %} is-active{% endif %}{% unless is_v_avail %} is-unavailable{% endunless %}"
+                    class="pf-size-pill{% if variant.id == current_variant.id %} is-active{% endif %}"
                     data-pf-size-pill
                     data-value="{{ variant.title | escape }}"
                     data-variant-id="{{ variant.id }}"
-                    {% unless is_v_avail %}data-sold-out="true"{% endunless %}
                     aria-label="{{ variant.title }}"
                   >
                     {% if v_lower contains '100ml' or forloop.index == 2 %}
@@ -407,12 +391,6 @@
           <input type="hidden" name="id" value="{{ current_variant.id }}" data-pf-variant-id>
           <input type="hidden" name="quantity" value="1" data-pf-qty-field>
 
-          {% liquid
-            assign is_curr_avail = false
-            if current_variant.available or current_variant.inventory_quantity > 0 or current_variant.inventory_management == blank or current_variant.inventory_policy == 'continue'
-              assign is_curr_avail = true
-            endif
-          %}
           <div class="pf-buybox__main-actions">
             <div class="pf-qty-picker">
               <button type="button" class="pf-qty-btn" data-pf-qty-minus aria-label="Decrease quantity">
@@ -428,9 +406,8 @@
               type="button"
               class="pf-btn pf-btn--add-to-bag"
               data-pf-add-to-bag
-              {% unless is_curr_avail %}disabled{% endunless %}
             >
-              <span data-pf-add-text>{% if is_curr_avail %}Add to cart{% else %}Sold out{% endif %}</span>
+              <span data-pf-add-text>Add to cart</span>
             </button>
           </div>
 
@@ -438,7 +415,6 @@
             type="button"
             class="pf-btn pf-btn--express-checkout"
             data-pf-buy-now
-            {% unless is_curr_avail %}disabled{% endunless %}
           >
             Express Checkout
           </button>
@@ -603,16 +579,14 @@
             type="button"
             class="pf-btn pf-btn--add-to-bag pf-sticky-btn pf-sticky-btn--add"
             data-pf-sticky-add
-            {% unless current_variant.available %}disabled{% endunless %}
           >
-            <span data-pf-sticky-add-text>{% if current_variant.available %}ADD TO BAG{% else %}SOLD OUT{% endif %}</span>
+            <span data-pf-sticky-add-text>ADD TO BAG</span>
           </button>
 
           <button
             type="button"
             class="pf-btn pf-btn--buy-now pf-sticky-btn pf-sticky-btn--buy"
             data-pf-sticky-buy
-            {% unless current_variant.available %}disabled{% endunless %}
           >
             BUY NOW
           </button>
@@ -3221,26 +3195,26 @@
 
       const v = variantMap[variantId];
       if (v) {
-        // Update Add / Buy button state
-        const available = v.available;
+        // Update Add / Buy button state (Always available)
+        const available = true;
         if (addToBagBtn) {
-          addToBagBtn.disabled = !available;
+          addToBagBtn.disabled = false;
           if (addTextEl) {
-            addTextEl.textContent = available ? 'ADD TO BAG' : 'SOLD OUT';
+            addTextEl.textContent = 'Add to cart';
           }
         }
         if (buyNowBtn) {
-          buyNowBtn.disabled = !available;
+          buyNowBtn.disabled = false;
         }
 
         if (stickyAddBtn) {
-          stickyAddBtn.disabled = !available;
+          stickyAddBtn.disabled = false;
           if (stickyAddText) {
-            stickyAddText.textContent = available ? 'ADD TO BAG' : 'SOLD OUT';
+            stickyAddText.textContent = 'ADD TO BAG';
           }
         }
         if (stickyBuyBtn) {
-          stickyBuyBtn.disabled = !available;
+          stickyBuyBtn.disabled = false;
         }
 
         // Update Price if present
