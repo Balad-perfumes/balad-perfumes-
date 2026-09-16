@@ -485,7 +485,13 @@
               <span class="pf-accordion-icon">+</span>
             </summary>
             <div class="pf-accordion-body">
-              <p>Ideal for daily signature wear, evening events, celebrations, and luxury gifting.</p>
+              {% if selected_product.metafields.custom.occasion != blank %}
+                <div class="rte">
+                  {{ selected_product.metafields.custom.occasion | metafield_tag }}
+                </div>
+              {% else %}
+                <p>Ideal for daily signature wear, evening events, celebrations, and luxury gifting.</p>
+              {% endif %}
             </div>
           </details>
 
@@ -499,13 +505,19 @@
               <span class="pf-accordion-icon">+</span>
             </summary>
             <div class="pf-accordion-body">
-              <ul class="pf-accordion-bullets">
-                <li>Apply on moisturised skin for better longevity.</li>
-                <li>Spray on pulse points — neck, wrists & behind the ears.</li>
-                <li>Hold the bottle 15 cm away when spraying for even application and to help avoid staining.</li>
-                <li>Don't rub after spraying; let it dry naturally.</li>
-                <li>Store your perfume away from heat, sunlight & humidity.</li>
-              </ul>
+              {% if selected_product.metafields.custom.wear_it_right != blank %}
+                <div class="rte">
+                  {{ selected_product.metafields.custom.wear_it_right | metafield_tag }}
+                </div>
+              {% else %}
+                <ul class="pf-accordion-bullets">
+                  <li>Apply on moisturised skin for better longevity.</li>
+                  <li>Spray on pulse points — neck, wrists & behind the ears.</li>
+                  <li>Hold the bottle 15 cm away when spraying for even application and to help avoid staining.</li>
+                  <li>Don't rub after spraying; let it dry naturally.</li>
+                  <li>Store your perfume away from heat, sunlight & humidity.</li>
+                </ul>
+              {% endif %}
             </div>
           </details>
         </div>
