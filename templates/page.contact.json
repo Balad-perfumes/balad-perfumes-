@@ -106,7 +106,7 @@
     "contact_form": {
       "type": "contact-form",
       "custom_css": [
-        ".pf-contact-form__topics{display: none}"
+        ".pf-contact-form__topics {display: none;}"
       ],
       "settings": {
         "eyebrow": "FRAGRANCE CONCIERGE",
@@ -152,28 +152,28 @@
           "type": "faq",
           "settings": {
             "question": "How quickly do you respond to inquiries?",
-            "answer": "<p>Our concierge team typically reviews and replies to all messages within 2 to 4 business hours during studio hours (Mon–Sat, 10 AM to 6:30 PM IST).</p>"
+            "answer": "<p><br/>Our team typically reviews and replies to messages within 2 to 4 business hours during our support hours.<br/><br/></p>"
           }
         },
         "faq_2": {
           "type": "faq",
           "settings": {
-            "question": "Do you offer Cash on Delivery and Pan-India shipping?",
-            "answer": "<p>Yes! We offer COD across most pincodes in India and express doorstep delivery with end-to-end tracking.</p>"
+            "question": "How can I choose the right fragrance?",
+            "answer": "<p><br/>Explore our fragrance descriptions or contact our team for recommendations based on your preferences and occasion.<br/></p>"
           }
         },
         "faq_3": {
           "type": "faq",
           "settings": {
-            "question": "How do I choose the right size and fit?",
-            "answer": "<p>Our pieces feature contemporary relaxed, boxy, and tailored silhouettes for men. Check the size chart on each product page or reach out to our stylists for personalized size recommendations.</p>"
+            "question": "How long does delivery take?",
+            "answer": "<p>Delivery times vary by location. You’ll receive tracking details once your order has been dispatched.</p>"
           }
         },
         "faq_4": {
           "type": "faq",
           "settings": {
             "question": "What is your return and exchange policy?",
-            "answer": "<p>We offer hassle-free 7-day exchanges on all unworn items with tags intact if you ever need a different size or fit.</p>"
+            "answer": "<p>Please review our return policy for eligibility, timelines, and exchange details before placing your order.</p>"
           }
         }
       },
@@ -185,10 +185,10 @@
       ],
       "settings": {
         "eyebrow": "Common Questions",
-        "heading": "Frequently asked questions",
-        "subheading": "Quick answers to help guide your shopping and styling experience.",
+        "heading": "Frequently Asked Questions",
+        "subheading": "Quick answers to help you choose your fragrance and shop with confidence.",
         "open_first": true,
-        "footer_note": "Have a question not listed here? Please send us a message above or email hello@stagmenfashion.com.",
+        "footer_note": "Have a question not listed here? Please send us a message above or contact us on WhatsApp.",
         "color_scheme": "scheme-1",
         "padding_top": 16,
         "padding_bottom": 28
