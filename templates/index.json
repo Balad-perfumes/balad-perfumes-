@@ -322,16 +322,16 @@
           "type": "benefit",
           "settings": {
             "icon": "support",
-            "heading": "Made to Last",
-            "text": "Premium heavyweight cottons designed to hold structure through washes."
+            "heading": "Scents for Every Mood",
+            "text": "Discover distinctive fragrances for every occasion and personality."
           }
         },
         "benefit_4": {
           "type": "benefit",
           "settings": {
             "icon": "discount",
-            "heading": "Cash on delivery",
-            "text": "Order now and pay at your door. Hassle-free shopping."
+            "heading": "Elegant Gift Choices",
+            "text": "Beautiful fragrances thoughtfully selected for gifting and special moments."
           }
         }
       },
