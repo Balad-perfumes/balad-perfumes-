@@ -27,7 +27,7 @@
       "type": "footer",
       "custom_css": [
         ".stagmenfashion-footer__logo-img {max-width: 60px !important;}",
-        " .stagmenfashion-footer {background: #000 !important; }"
+        ".stagmenfashion-footer {background: #000 !important;}"
       ],
       "settings": {
         "logo": "shopify://shop_images/logo_2.svg",
@@ -39,11 +39,11 @@
         "menu_1": "main-menu",
         "menu_title_2": "Info & Legal",
         "menu_2": "",
-        "instagram_url": "",
-        "whatsapp_url": "",
+        "instagram_url": "https://www.instagram.com/baladperfume/",
+        "whatsapp_url": "https://wa.me/919447425555",
         "tiktok_url": "",
-        "facebook_url": "",
-        "youtube_url": "",
+        "facebook_url": "https://www.facebook.com/baladperfume/",
+        "youtube_url": "https://www.youtube.com/@baladperfume",
         "show_payment_icons": true,
         "show_back_to_top": true,
         "color_scheme": "scheme-3"
