@@ -167,9 +167,9 @@
 }
 
 .updates-filter-btn.is-active {
-  background: #0800CF;
+  background: #111111;
   color: #ffffff;
-  border-color: #0800CF;
+  border-color: #111111;
   box-shadow: 0 4px 12px rgba(8, 0, 207, 0.25);
 }
 
@@ -182,7 +182,7 @@
    Drop Bulletin / Marquee Ticker
    -------------------------------------------------------------------------- */
 .updates-bulletin {
-  background: #0800CF;
+  background: #111111;
   color: #ffffff;
   overflow: hidden;
   white-space: nowrap;
@@ -338,7 +338,7 @@
   gap: 10px;
   padding: 12px 28px;
   border-radius: 999px;
-  background: #0800CF;
+  background: #111111;
   color: #ffffff;
   font-family: var(--font-heading--family), 'Clash Grotesk', sans-serif;
   font-size: 0.82rem;
@@ -351,7 +351,7 @@
 }
 
 .updates-button:hover {
-  background: #0600a3;
+  background: #000000;
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
@@ -632,7 +632,7 @@
    VIP Drop Newsletter Section
    -------------------------------------------------------------------------- */
 .updates-newsletter {
-  background: #0800CF;
+  background: #111111;
   color: #ffffff;
   padding: clamp(48px, 6vw, 80px) 0;
   border-radius: 16px;

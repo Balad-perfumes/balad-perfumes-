@@ -717,7 +717,7 @@
 
 .about-values__card:hover .about-values__icon {
   transform: scale(1.06);
-  background: #0800CF;
+  background: #111111;
   color: #ffffff;
 }
 
@@ -1201,8 +1201,8 @@ body:has(.about-hero) [aria-label*="Previous"] {
 
 .about-stats__card:hover {
   transform: translateY(-4px);
-  border-color: var(--color-primary, #0800cf);
-  box-shadow: 0 14px 32px rgba(8, 0, 207, 0.08);
+  border-color: var(--color-primary, #111111);
+  box-shadow: 0 14px 32px rgba(17, 17, 17, 0.08);
 }
 
 .about-stats__card-top {

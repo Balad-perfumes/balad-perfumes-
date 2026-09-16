@@ -443,7 +443,7 @@
         "background": "#ffffff",
         "text_color": "#111111",
         "muted_text_color": "#6b7280",
-        "accent_color": "#0800cf",
+        "accent_color": "#111111",
         "grid_gap": 12,
         "card_radius": 4
       }
@@ -818,7 +818,7 @@
             "desktop_width_percent": 100,
             "icon_size": 24,
             "icon_color": "#111111",
-            "hover_color": "#0800CF"
+            "hover_color": "#111111"
           },
           "blocks": {}
         }
