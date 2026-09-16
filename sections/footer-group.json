@@ -25,6 +25,9 @@
     },
     "pf_footer": {
       "type": "footer",
+      "custom_css": [
+        ".stagmenfashion-footer__logo-img {max-width: 60px !important; }"
+      ],
       "settings": {
         "logo": "shopify://shop_images/logo_2.svg",
         "brand_name": "Balad",
