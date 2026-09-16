@@ -197,9 +197,9 @@
             "heading_color": "#000000",
             "subheading_font_size": 16,
             "subheading_color": "#000000",
-            "customize_spacing": false,
-            "padding_top": 0,
-            "padding_bottom": 16,
+            "customize_spacing": true,
+            "padding_top": 36,
+            "padding_bottom": 24,
             "padding_horizontal": 0
           }
         }
@@ -231,8 +231,8 @@
         "overlay_color": "#00000026",
         "overlay_style": "solid",
         "gradient_direction": "to top",
-        "padding-block-start": 0,
-        "padding-block-end": 0,
+        "padding-block-start": 48,
+        "padding-block-end": 36,
         "remove_horizontal_padding": false
       }
     },
