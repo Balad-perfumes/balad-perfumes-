@@ -1,6 +1,122 @@
+{% doc %}
+  @prompt
+    Add a WhatsApp social contact option to the existing Contact social section. Display a recognizable WhatsApp icon alongside the existing social icons, keep all current social links and styling unchanged, and provide an editable WhatsApp link or phone-number setting so the merchant can enter their WhatsApp destination. Match the existing icon size, spacing, hover behavior, and responsive layout.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+{% assign whatsapp_destination = block.settings.whatsapp_destination | strip %}
+{% assign whatsapp_href = whatsapp_destination %}
+{% if whatsapp_destination != blank and whatsapp_destination contains 'http' %}
+  {% assign whatsapp_href = whatsapp_destination %}
+{% elsif whatsapp_destination != blank %}
+  {% assign whatsapp_href = 'https://wa.me/' | append: whatsapp_destination | remove: '+' | remove: ' ' | remove: '-' | remove: '(' | remove: ')' %}
+{% endif %}
+
+{% style %}
+  .ai-whatsapp-contact-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+  }
+
+  .ai-whatsapp-contact__link-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: {{ block.settings.icon_size }}px;
+    height: {{ block.settings.icon_size }}px;
+    color: {{ block.settings.icon_color }};
+    text-decoration: none;
+    transition: color 180ms ease, opacity 180ms ease;
+  }
+
+  .ai-whatsapp-contact__link-{{ ai_gen_id }}:hover {
+    color: {{ block.settings.hover_color }};
+  }
+
+  .ai-whatsapp-contact__link-{{ ai_gen_id }}:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
+  .ai-whatsapp-contact__icon-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+{% endstyle %}
+
+<div class="ai-whatsapp-contact-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  {% if whatsapp_href != blank %}
+    <a
+      class="ai-whatsapp-contact__link-{{ ai_gen_id }}"
+      href="{{ whatsapp_href | escape }}"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="WhatsApp"
+    >
+      <svg class="ai-whatsapp-contact__icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2a9.9 9.9 0 0 0-8.57 14.86L2 22l5.3-1.39A10 10 0 1 0 12 2Zm0 18a8 8 0 0 1-4.08-1.12l-.29-.17-3.15.83.84-3.07-.19-.31A8 8 0 1 1 12 20Zm4.39-5.99c-.24-.12-1.41-.7-1.63-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1-.37-1.9-1.18-.7-.62-1.18-1.38-1.32-1.61-.14-.24-.01-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.2-.47-.4-.41-.54-.42h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.51.58.18 1.11.15 1.53.09.47-.07 1.41-.58 1.61-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28Z"/>
+      </svg>
+    </a>
+  {% endif %}
+</div>
+
 {% schema %}
- {
-   "name": "AI_Block",
-   "tag": "shopify-ai-generated-block"
- }
+{
+  "name": "WhatsApp social link",
+  "settings": [
+    {
+      "type": "header",
+      "content": "WhatsApp contact"
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_destination",
+      "label": "Link or phone number",
+      "info": "Enter a full WhatsApp link or an international phone number without the country sign.",
+      "default": "919876543210"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icon color",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "hover_color",
+      "label": "Hover color",
+      "default": "#0800CF"
+    }
+  ],
+  "presets": [
+    {
+      "name": "WhatsApp social link"
+    }
+  ],
+  "tag": null,
+  "class": "whatsapp-social-link"
+}
 {% endschema %}
