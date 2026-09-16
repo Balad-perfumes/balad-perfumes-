@@ -163,6 +163,56 @@
         "enable_animations": true
       }
     },
+    "stagmenfashion_home_benefits_tpYMCn": {
+      "type": "stagmenfashion-home-benefits",
+      "blocks": {
+        "benefit_t4Y6QR": {
+          "type": "benefit",
+          "settings": {
+            "icon": "clock",
+            "heading": "Long-Lasting Fragrance",
+            "text": "Enjoy captivating scents that stay with you throughout the day."
+          }
+        },
+        "benefit_aAkban": {
+          "type": "benefit",
+          "settings": {
+            "icon": "quality",
+            "heading": "Premium Quality",
+            "text": "Carefully crafted fragrances made to leave a lasting impression."
+          }
+        },
+        "benefit_WzRLDE": {
+          "type": "benefit",
+          "settings": {
+            "icon": "mood",
+            "heading": "Scents for Every Mood",
+            "text": "Discover distinctive fragrances for every occasion and personality."
+          }
+        },
+        "benefit_4LjQ7r": {
+          "type": "benefit",
+          "settings": {
+            "icon": "gift",
+            "heading": "Elegant Gift Choices",
+            "text": "Beautiful fragrances thoughtfully selected for gifting and special moments."
+          }
+        }
+      },
+      "block_order": [
+        "benefit_t4Y6QR",
+        "benefit_aAkban",
+        "benefit_WzRLDE",
+        "benefit_4LjQ7r"
+      ],
+      "name": "Stag Benefits Grid",
+      "settings": {
+        "color_scheme": "",
+        "notice_label": "Bulk order note",
+        "notice_text": "For Bulk Orders — WhatsApp us at +123455 or email bulkorders@stagmenfashion.com",
+        "background": "#ffffff"
+      }
+    },
     "testimonials": {
       "type": "stagmenfashion-home-testimonials",
       "blocks": {
@@ -231,6 +281,7 @@
     "about_stats",
     "about_values",
     "about_faq",
+    "stagmenfashion_home_benefits_tpYMCn",
     "testimonials"
   ]
 }
