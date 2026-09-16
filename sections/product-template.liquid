@@ -431,26 +431,19 @@
         <!-- Clean Divider Line -->
         <div class="pf-product-card__divider"></div>
 
-        <!-- Description Tabs Section -->
+        <!-- Description & Shipping Tabs Section (media_1789551203248.png) -->
         <div class="pf-tabs__container">
           <div class="pf-tabs__nav" role="tablist">
             <button type="button" class="pf-tabs__tab is-active" data-pf-tab="description" role="tab" aria-selected="true">
               Description
             </button>
-            {% comment %} {% if product_care_content != blank %}
-              <button type="button" class="pf-tabs__tab" data-pf-tab="washcare" role="tab" aria-selected="false">
-                Washcare
-              </button>
-            {% endif %} {% endcomment %}
-            {% if delivery_returns_content != blank %}
-              <button type="button" class="pf-tabs__tab" data-pf-tab="shipping" role="tab" aria-selected="false">
-                Shipping
-              </button>
-            {% endif %}
+            <button type="button" class="pf-tabs__tab" data-pf-tab="shipping" role="tab" aria-selected="false">
+              Shipping
+            </button>
           </div>
 
           <div class="pf-tabs__content">
-            <!-- Description Pane -->
+            <!-- Description Pane (Default Open) -->
             <div class="pf-tabs__pane is-active" data-pf-pane="description" role="tabpanel">
               <div class="pf-tabs__section">
                 <div class="pf-tabs__description-body rte">
@@ -458,44 +451,63 @@
                   {% if clean_desc != blank %}
                     {{ selected_product.description }}
                   {% else %}
-                    {{ default_product_description }}
+                    <p>Experience the beauty of <strong>{{ selected_product.title }}</strong>, a luxury fragrance crafted with fine concentrated oils, luminous florals, and warm amber notes. Sophisticated, elegant, and long-lasting, this captivating scent is designed to evoke confidence and timeless style.</p>
+                    <p>Perfect for everyday wear and special occasions, <strong>{{ selected_product.title }}</strong> leaves a graceful and unforgettable impression wherever you go.</p>
                   {% endif %}
                 </div>
               </div>
             </div>
 
-            {% if product_care_content != blank %}
-              <!-- Washcare Pane -->
-              <div class="pf-tabs__pane" data-pf-pane="washcare" role="tabpanel" hidden>
-                <div class="pf-tabs__section">
-                  <h4 class="pf-tabs__section-title">Washcare</h4>
-                  <div class="pf-tabs__washcare-body rte">
-                    {% if selected_product.metafields.custom.product_care != blank %}
-                      {{ selected_product.metafields.custom.product_care | metafield_tag }}
-                    {% else %}
-                      {{ product_care_content }}
-                    {% endif %}
-                  </div>
+            <!-- Shipping Pane -->
+            <div class="pf-tabs__pane" data-pf-pane="shipping" role="tabpanel" hidden>
+              <div class="pf-tabs__section">
+                <div class="pf-tabs__shipping-body rte">
+                  {% if selected_product.metafields.custom.delivery_returns != blank %}
+                    {{ selected_product.metafields.custom.delivery_returns | metafield_tag }}
+                  {% else %}
+                    <p>Fast express shipping across India with real-time tracking, Cash on Delivery options, and careful protective packaging.</p>
+                  {% endif %}
                 </div>
               </div>
-            {% endif %}
-
-            {% if delivery_returns_content != blank %}
-              <!-- Shipping Pane -->
-              <div class="pf-tabs__pane" data-pf-pane="shipping" role="tabpanel" hidden>
-                <div class="pf-tabs__section">
-                  <h4 class="pf-tabs__section-title">Shipping & Returns</h4>
-                  <div class="pf-tabs__shipping-body rte">
-                    {% if selected_product.metafields.custom.delivery_returns != blank %}
-                      {{ selected_product.metafields.custom.delivery_returns | metafield_tag }}
-                    {% else %}
-                      {{ delivery_returns_content }}
-                    {% endif %}
-                  </div>
-                </div>
-              </div>
-            {% endif %}
+            </div>
           </div>
+        </div>
+
+        <!-- Collapsible Accordions List (media_1789551247742.png) -->
+        <div class="pf-buybox-accordion-group">
+          <!-- Item 1: Occasion -->
+          <details class="pf-accordion-item">
+            <summary class="pf-accordion-header">
+              <div class="pf-accordion-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <span>Occasion</span>
+              </div>
+              <span class="pf-accordion-icon">+</span>
+            </summary>
+            <div class="pf-accordion-body">
+              <p>Ideal for daily signature wear, evening events, celebrations, and luxury gifting.</p>
+            </div>
+          </details>
+
+          <!-- Item 2: Wear It Right -->
+          <details class="pf-accordion-item" open>
+            <summary class="pf-accordion-header">
+              <div class="pf-accordion-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                <span>Wear It Right</span>
+              </div>
+              <span class="pf-accordion-icon">+</span>
+            </summary>
+            <div class="pf-accordion-body">
+              <ul class="pf-accordion-bullets">
+                <li>Apply on moisturised skin for better longevity.</li>
+                <li>Spray on pulse points — neck, wrists & behind the ears.</li>
+                <li>Hold the bottle 15 cm away when spraying for even application and to help avoid staining.</li>
+                <li>Don't rub after spraying; let it dry naturally.</li>
+                <li>Store your perfume away from heat, sunlight & humidity.</li>
+              </ul>
+            </div>
+          </details>
         </div>
       </div>
     </div>
@@ -1210,13 +1222,18 @@
     cursor: not-allowed;
   }
 
-  /* Details & Tabs Section */
+  /* Details & Tabs Section (media_1789551203248.png) */
+  .pf-tabs__container {
+    margin-top: 18px;
+    margin-bottom: 24px;
+  }
+
   .pf-tabs__nav {
     display: flex;
     align-items: center;
-    gap: 18px;
-    border-bottom: 1px solid #f0f0f0;
-    margin-bottom: 12px;
+    gap: 24px;
+    border-bottom: 1.5px solid #eaeaea;
+    margin-bottom: 16px;
     padding-bottom: 0;
   }
 
@@ -1224,10 +1241,10 @@
     appearance: none;
     background: transparent;
     border: none;
-    font-size: 13px;
+    font-size: 1rem;
     font-weight: 500;
-    color: #777777;
-    padding: 4px 0 8px;
+    color: #888888;
+    padding: 4px 0 10px;
     cursor: pointer;
     position: relative;
     transition: color 0.18s ease;
@@ -1241,18 +1258,105 @@
 
   .pf-tabs__tab.is-active {
     color: #111111;
-    font-weight: 600;
+    font-weight: 700;
   }
 
   .pf-tabs__tab.is-active::after {
     content: '';
     position: absolute;
-    bottom: -1px;
+    bottom: -1.5px;
     left: 0;
     right: 0;
-    height: 2px;
+    height: 2.5px;
     background: #111111;
-    border-radius: 1px;
+    border-radius: 2px;
+  }
+
+  .pf-tabs__description-body {
+    font-size: 0.92rem;
+    color: #4b5563;
+    line-height: 1.65;
+    font-weight: 400;
+  }
+
+  .pf-tabs__description-body p {
+    margin: 0 0 12px 0;
+  }
+
+  .pf-tabs__description-body p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Collapsible Accordion List (media_1789551247742.png) */
+  .pf-buybox-accordion-group {
+    border-top: 1px solid #e5e7eb;
+    margin-top: 24px;
+    margin-bottom: 24px;
+  }
+
+  .pf-accordion-item {
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .pf-accordion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+
+  .pf-accordion-header::-webkit-details-marker {
+    display: none;
+  }
+
+  .pf-accordion-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #111111;
+  }
+
+  .pf-accordion-title svg {
+    color: #111111;
+  }
+
+  .pf-accordion-icon {
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: #111111;
+    transition: transform 0.2s ease;
+  }
+
+  .pf-accordion-item[open] .pf-accordion-icon {
+    transform: rotate(45deg);
+  }
+
+  .pf-accordion-body {
+    padding: 0 0 18px 0;
+    font-size: 0.9rem;
+    color: #4b5563;
+    line-height: 1.6;
+  }
+
+  .pf-accordion-bullets {
+    margin: 0;
+    padding-left: 20px;
+    list-style-type: disc;
+    color: #6b7280;
+  }
+
+  .pf-accordion-bullets li {
+    margin-bottom: 8px;
+    padding-left: 4px;
+  }
+
+  .pf-accordion-bullets li:last-child {
+    margin-bottom: 0;
   }
 
   .pf-tabs__pane {
