@@ -271,6 +271,7 @@
 </style>
 
 {% liquid
+  assign product = selected_product | default: product
   assign reviews_heading = reviews_heading | default: 'Customer Reviews'
   assign reviews_note = reviews_note | default: blank
 %}
@@ -297,13 +298,17 @@
       </button>
     </div>
 
-    {% if selected_product.metafields.judgeme.widget != blank %}
-      <div id="judgeme_product_reviews" class="pf-product-template__reviews-widget">
-        {{ selected_product.metafields.judgeme.widget }}
-      </div>
-    {% else %}
-      <div id="judgeme_product_reviews" class="jdgm-widget jdgm-review-widget pf-product-template__reviews-widget">
-        <!-- Custom verified reviews display list -->
+    <!-- Official Judge.me Widget Code Integration -->
+    {% assign has_legacy = false %}
+    {% if product.metafields.judgeme.widget.size > 20 %}
+      {% assign has_legacy = true %}
+    {% endif %}
+    <div style='clear:both'></div>
+    <div id='judgeme_product_reviews' class='jdgm-widget jdgm-review-widget pf-product-template__reviews-widget' data-product-title='{{ product.title | escape }}' data-id='{{ product.id }}' data-product-id='{{ product.id }}' data-widget='review' data-auto-install='false' data-shop-reviews-count='{{ shop.metafields.judgeme.shop_reviews_count | default: 0 | escape }}' data-entry-point='review_widget.js' data-entry-key='review-widget/main.js'>
+      {% if has_legacy %}
+        <div class='jdgm-legacy-widget-content' style='display: none;'>{{ product.metafields.judgeme.widget }}</div>
+      {% else %}
+        <!-- Custom verified fallback reviews display list -->
         <div class="pf-reviews-list" data-pf-custom-reviews-list>
           <div class="pf-review-card">
             <div class="pf-review-card__header">
@@ -331,7 +336,11 @@
             </div>
           </div>
         </div>
-      </div>
+      {% endif %}
+    </div>
+
+    {% if product.metafields.judgeme.review_widget_data %}
+      <script>jdgm.data ||= {}; jdgm.data.reviewWidget ||= {}; jdgm.data.reviewWidget[{{ product.id }}] = {{ product.metafields.judgeme.review_widget_data }}</script>
     {% endif %}
 
     {% if reviews_note != blank %}
@@ -349,7 +358,7 @@
     <button type="button" class="pf-review-modal__close" data-pf-review-modal-close aria-label="Close modal">&times;</button>
     <div class="pf-review-modal__header">
       <h3 id="pf-review-modal-title" class="pf-review-modal__title">Write a Review</h3>
-      <p class="pf-review-modal__subtitle">Share your experience with <strong>{{ selected_product.title }}</strong></p>
+      <p class="pf-review-modal__subtitle">Share your experience with <strong>{{ product.title }}</strong></p>
     </div>
 
     <form class="pf-review-modal__form" id="pf-review-form">
