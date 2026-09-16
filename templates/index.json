@@ -185,8 +185,8 @@
     "17895486123c3c89da": {
       "type": "_blocks",
       "custom_css": [
-        "margin-top: 16px !important;",
-        "margin-bottom: 16px !important;"
+        "margin-top: 8px !important;",
+        "margin-bottom: 8px !important;"
       ],
       "blocks": {
         "instareel_ig_reels_instagram_reels_feed_mAaTPW": {
@@ -202,8 +202,8 @@
             "subheading_font_size": 16,
             "subheading_color": "#000000",
             "customize_spacing": true,
-            "padding_top": 12,
-            "padding_bottom": 12,
+            "padding_top": 4,
+            "padding_bottom": 4,
             "padding_horizontal": 0
           }
         }
@@ -235,8 +235,8 @@
         "overlay_color": "#00000026",
         "overlay_style": "solid",
         "gradient_direction": "to top",
-        "padding-block-start": 16,
-        "padding-block-end": 16,
+        "padding-block-start": 4,
+        "padding-block-end": 4,
         "remove_horizontal_padding": false
       }
     },
