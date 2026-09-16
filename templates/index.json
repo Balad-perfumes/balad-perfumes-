@@ -118,13 +118,27 @@
     "banner_slider": {
       "type": "stagmenfashion-banner-slider",
       "blocks": {
+        "slide_Y3bGkT": {
+          "type": "slide",
+          "disabled": true,
+          "settings": {
+            "collection": "",
+            "subheading": "",
+            "heading": "CO-ORDS & SETS",
+            "button_label": "SHOP NOW",
+            "button_link": "",
+            "button_style": "underline",
+            "content_position": "bottom-center",
+            "text_alignment": "center"
+          }
+        },
         "slide_1": {
           "type": "slide",
           "settings": {
             "collection": "co-ords",
             "image": "shopify://shop_images/WhatsApp_Image_2026-07-31_at_5.43.18_PM.jpg",
             "subheading": "New Season",
-            "heading": "CO-ORDS & SETS",
+            "heading": "SIGNATURE SCENTS & SETS",
             "button_label": "SHOP NOW",
             "button_link": "shopify://collections/co-ords",
             "button_style": "underline",
@@ -163,6 +177,7 @@
         }
       },
       "block_order": [
+        "slide_Y3bGkT",
         "slide_1",
         "slide_2",
         "slide_3"
