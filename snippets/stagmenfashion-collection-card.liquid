@@ -1,10 +1,13 @@
 {% liquid
-  assign card_variant = product.selected_or_first_available_variant | default: product.variants.first
+  assign card_variant = product.selected_or_first_available_variant
   assign has_sale = false
   if product.compare_at_price_max > product.price_min
     assign has_sale = true
   endif
   assign is_sold_out = false
+  if card_variant.available == false or product.available == false
+    assign is_sold_out = true
+  endif
   assign rating_value = product.metafields.reviews.rating.value.rating | plus: 0
   assign rating_count = product.metafields.reviews.rating_count.value | plus: 0
   assign show_rating_row = false
@@ -86,7 +89,7 @@
           {% render 'add-to-cart-button',
             add_to_cart_text: 'Add to cart',
             class: 'pop-card__cta add-to-cart-button',
-            can_add_to_cart: true,
+            can_add_to_cart: card_variant.available,
             icon_only_on_mobile: true,
             product: product,
             data_testid: 'collection-quick-add'

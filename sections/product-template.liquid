@@ -1,6 +1,6 @@
 {% liquid
   assign selected_product = product
-  assign current_variant = selected_product.selected_or_first_available_variant | default: selected_product.variants.first
+  assign current_variant = selected_product.selected_or_first_available_variant
   assign form_id = 'StagProductForm-' | append: section.id
 
   # Dynamic Rating Fetch from Judge.me / Shopify Metafields
@@ -329,6 +329,11 @@
                     endif
 
                     assign is_available = true
+                    if size_variant != blank and size_variant.available == false
+                      assign is_available = false
+                    elsif size_variant == blank
+                      assign is_available = false
+                    endif
 
                     assign is_selected = false
                     if current_variant != blank and size_variant != blank and current_variant.id == size_variant.id
@@ -339,10 +344,11 @@
                   %}
                   <button
                     type="button"
-                    class="pf-size-pill{% if is_selected %} is-active{% endif %}"
+                    class="pf-size-pill{% if is_selected %} is-active{% endif %}{% unless is_available %} is-unavailable{% endunless %}"
                     data-pf-size-pill
                     data-value="{{ val_name | escape }}"
                     data-variant-id="{{ size_variant.id | default: current_variant.id }}"
+                    {% unless is_available %}data-sold-out="true"{% endunless %}
                     aria-label="Size {{ val_name }}"
                   >
                     {% if val_lower contains '100ml' or forloop.index == 2 %}
@@ -361,13 +367,13 @@
               {% for variant in selected_product.variants %}
                 {% assign v_lower = variant.title | downcase %}
                 {% unless v_lower contains 'personal' or v_lower contains 'custom' %}
-                  {% assign is_v_avail = true %}
                   <button
                     type="button"
-                    class="pf-size-pill{% if variant.id == current_variant.id %} is-active{% endif %}"
+                    class="pf-size-pill{% if variant.id == current_variant.id %} is-active{% endif %}{% unless variant.available %} is-unavailable{% endunless %}"
                     data-pf-size-pill
                     data-value="{{ variant.title | escape }}"
                     data-variant-id="{{ variant.id }}"
+                    {% unless variant.available %}data-sold-out="true"{% endunless %}
                     aria-label="{{ variant.title }}"
                   >
                     {% if v_lower contains '100ml' or forloop.index == 2 %}
@@ -406,8 +412,9 @@
               type="button"
               class="pf-btn pf-btn--add-to-bag"
               data-pf-add-to-bag
+              {% unless current_variant.available %}disabled{% endunless %}
             >
-              <span data-pf-add-text>Add to cart</span>
+              <span data-pf-add-text>{% if current_variant.available %}Add to cart{% else %}Sold out{% endif %}</span>
             </button>
           </div>
 
@@ -415,6 +422,7 @@
             type="button"
             class="pf-btn pf-btn--express-checkout"
             data-pf-buy-now
+            {% unless current_variant.available %}disabled{% endunless %}
           >
             Express Checkout
           </button>
@@ -579,14 +587,16 @@
             type="button"
             class="pf-btn pf-btn--add-to-bag pf-sticky-btn pf-sticky-btn--add"
             data-pf-sticky-add
+            {% unless current_variant.available %}disabled{% endunless %}
           >
-            <span data-pf-sticky-add-text>ADD TO BAG</span>
+            <span data-pf-sticky-add-text>{% if current_variant.available %}ADD TO BAG{% else %}SOLD OUT{% endif %}</span>
           </button>
 
           <button
             type="button"
             class="pf-btn pf-btn--buy-now pf-sticky-btn pf-sticky-btn--buy"
             data-pf-sticky-buy
+            {% unless current_variant.available %}disabled{% endunless %}
           >
             BUY NOW
           </button>
@@ -3195,26 +3205,26 @@
 
       const v = variantMap[variantId];
       if (v) {
-        // Update Add / Buy button state (Always available)
-        const available = true;
+        // Update Add / Buy button state
+        const available = v.available;
         if (addToBagBtn) {
-          addToBagBtn.disabled = false;
+          addToBagBtn.disabled = !available;
           if (addTextEl) {
-            addTextEl.textContent = 'Add to cart';
+            addTextEl.textContent = available ? 'ADD TO BAG' : 'SOLD OUT';
           }
         }
         if (buyNowBtn) {
-          buyNowBtn.disabled = false;
+          buyNowBtn.disabled = !available;
         }
 
         if (stickyAddBtn) {
-          stickyAddBtn.disabled = false;
+          stickyAddBtn.disabled = !available;
           if (stickyAddText) {
-            stickyAddText.textContent = 'ADD TO BAG';
+            stickyAddText.textContent = available ? 'ADD TO BAG' : 'SOLD OUT';
           }
         }
         if (stickyBuyBtn) {
-          stickyBuyBtn.disabled = false;
+          stickyBuyBtn.disabled = !available;
         }
 
         // Update Price if present

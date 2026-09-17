@@ -135,6 +135,9 @@
           %}
           <div class="stagmenfashion-collection-grid__card" data-product-card>
             <a href="{{ product.url }}" class="stagmenfashion-collection-grid__media" data-carousel>
+              {% unless product.available %}
+                <span class="stagmenfashion-collection-grid__badge">Sold Out</span>
+              {% endunless %}
 
               {% if image_count > 0 %}
                 {% for image in images limit: 6 %}
