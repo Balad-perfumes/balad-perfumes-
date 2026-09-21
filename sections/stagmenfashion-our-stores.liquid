@@ -29,16 +29,23 @@
     {% if section.blocks.size > 0 %}
       <div class="smf-stores-grid smf-stores-grid--{{ section.blocks.size }}">
         {% for block in section.blocks %}
+          {% liquid
+            assign dir_url = block.settings.directions_url
+            if dir_url == blank and block.settings.address != blank
+              assign clean_addr = block.settings.address | strip_newlines | strip
+              assign dir_url = 'https://www.google.com/maps/search/?api=1&query=' | append: clean_addr
+            endif
+          %}
           <div class="smf-store-card" {{ block.shopify_attributes }}>
 
-            <!-- Media Container (Single Store Image) -->
+            <!-- Media Container -->
             <div class="smf-store-card__media-box">
               {% if block.settings.image != blank %}
                 <img
-                  src="{{ block.settings.image | image_url: width: 900 }}"
+                  src="{{ block.settings.image | image_url: width: 800 }}"
                   alt="{{ block.settings.store_name | escape }}"
-                  width="900"
-                  height="600"
+                  width="800"
+                  height="500"
                   loading="lazy"
                   class="smf-store-card__img"
                 >
@@ -51,57 +58,46 @@
                   </svg>
                 </div>
               {% endif %}
+              <div class="smf-store-card__badge">BALAD BOUTIQUE</div>
             </div>
 
-            <!-- Store Details Bottom Bar -->
-            <div class="smf-store-card__bottom">
-              
-              <!-- Left Column: Title & Direction Link -->
-              <div class="smf-store-card__info-left">
-                <h3 class="smf-store-card__name">{{ block.settings.store_name | default: 'Store Location' }}</h3>
-                
-                {% assign dir_url = block.settings.directions_url %}
-                {% if dir_url == blank and block.settings.address != blank %}
-                  {% assign clean_addr = block.settings.address | strip_newlines | strip %}
-                  {% assign dir_url = 'https://www.google.com/maps/search/?api=1&query=' | append: clean_addr %}
-                {% endif %}
+            <!-- Store Details Body -->
+            <div class="smf-store-card__body">
+              <h3 class="smf-store-card__title">{{ block.settings.store_name | default: 'BALAD PERFUMES' }}</h3>
 
-                {% if dir_url != blank %}
-                  <a
-                    href="{{ dir_url }}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="smf-store-card__direction-link"
-                    aria-label="Get directions to {{ block.settings.store_name | escape }}"
-                  >
-                    <span>{{ block.settings.directions_label | default: 'Get Direction' }}</span>
-                    <svg viewBox="0 0 16 16" fill="none" width="13" height="13" aria-hidden="true" class="smf-store-card__arrow">
-                      <path d="M4 12L12 4M12 4H6M12 4V10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </a>
-                {% else %}
-                  <div class="smf-store-card__direction-link">
-                    <span>{{ block.settings.directions_label | default: 'Get Direction' }}</span>
-                    <svg viewBox="0 0 16 16" fill="none" width="13" height="13" aria-hidden="true" class="smf-store-card__arrow">
-                      <path d="M4 12L12 4M12 4H6M12 4V10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </div>
-                {% endif %}
-              </div>
+              {% if block.settings.address != blank %}
+                <div class="smf-store-card__address">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  <span>{{ block.settings.address }}</span>
+                </div>
+              {% endif %}
 
-              <!-- Right Column: Address & Phone -->
-              <div class="smf-store-card__info-right">
-                {% if block.settings.address != blank %}
-                  <p class="smf-store-card__address">{{ block.settings.address }}</p>
-                {% endif %}
+              {% if block.settings.phone != blank %}
+                <div class="smf-store-card__phone">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                  </svg>
+                  <a href="tel:{{ block.settings.phone | remove: ' ' }}">{{ block.settings.phone }}</a>
+                </div>
+              {% endif %}
 
-                {% if block.settings.phone != blank %}
-                  <a href="tel:{{ block.settings.phone | remove: ' ' }}" class="smf-store-card__phone">
-                    {{ block.settings.phone }}
-                  </a>
-                {% endif %}
-              </div>
-
+              {% if dir_url != blank %}
+                <a
+                  href="{{ dir_url }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="smf-store-card__btn"
+                  aria-label="Get directions to {{ block.settings.store_name | escape }}"
+                >
+                  <span>{{ block.settings.directions_label | default: 'Get Direction' }}</span>
+                  <svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true">
+                    <path d="M4 12L12 4M12 4H6M12 4V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </a>
+              {% endif %}
             </div>
 
           </div>
@@ -117,156 +113,117 @@
     background: var(--smf-stores-bg, #ffffff);
     color: #111111;
     width: 100%;
-    padding-top: var(--smf-stores-pt, clamp(14px, 2vw, 22px));
-    padding-bottom: var(--smf-stores-pb, clamp(14px, 2vw, 22px));
+    padding-top: clamp(12px, 1.8vw, 24px);
+    padding-bottom: clamp(12px, 1.8vw, 24px);
   }
 
   .smf-stores-shell {
     width: 100%;
-    max-width: 100%;
-    margin: 0;
-    padding: 0 36px clamp(10px, 3.5vw, 12px);
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 clamp(16px, 3vw, 36px);
     box-sizing: border-box;
   }
 
-  /* ── Header: Default Left-Aligned (Matching Homepage / Trending) ── */
   .smf-stores-head {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid rgb(17 17 17 / 0.1);
+    align-items: flex-end;
+    margin-bottom: clamp(18px, 2.5vw, 28px);
   }
 
   .smf-stores-heading-wrap {
     flex: 1;
     min-width: 0;
-    text-align: left;
   }
 
   .smf-stores-heading {
     margin: 0;
-    color: #000000;
-    font-family: var(--font-heading--family);
-    font-style: var(--font-heading--style);
-    font-size: 18px;
+    color: #111111;
+    font-family: var(--font-heading--family, inherit);
+    font-size: clamp(22px, 2.6vw, 32px);
     line-height: 1.1;
-    letter-spacing: -0.03em;
-    font-weight: 700;
-    text-align: left;
+    letter-spacing: -0.02em;
+    font-weight: 800;
+    text-transform: uppercase;
   }
 
   .smf-stores-subheading {
     margin: 6px 0 0;
-    font-size: 13px;
-    color: var(--pf-real-life-muted, #6b7280);
+    font-size: 14px;
+    color: #666666;
     line-height: 1.4;
     font-weight: 400;
-    text-align: left;
   }
 
   .smf-stores-discover-more {
-    display: inline-flex;
-    align-items: center;
-    background: transparent;
     color: #111111;
     font-size: 13px;
     font-weight: 600;
-    padding: 0;
-    border: none;
     text-decoration: underline;
     text-underline-offset: 3px;
-    transition: color 0.25s ease;
-    flex-shrink: 0;
+    transition: opacity 0.2s ease;
   }
 
   .smf-stores-discover-more:hover {
-    color: #000000;
     opacity: 0.7;
   }
 
-  /* ── Header: Centered Alignment (For Dedicated Store Page) ── */
-  .smf-stores--align-center .smf-stores-head {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-  }
-
-  .smf-stores--align-center .smf-stores-heading-wrap {
-    width: 100%;
-    max-width: 640px;
-    margin: 0 auto;
-    text-align: center;
-  }
-
-  .smf-stores--align-center .smf-stores-heading {
-    text-align: center;
-  }
-
-  .smf-stores--align-center .smf-stores-subheading {
-    margin: 6px auto 0;
-    text-align: center;
-  }
-
-  .smf-stores--align-center .smf-stores-discover-more {
-    margin-top: 10px;
-  }
-
-  /* ── Grid ── */
+  /* ── Store Grid Layout ── */
   .smf-stores-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-    align-items: stretch;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
   }
 
-  .smf-stores-grid--1 { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
-  .smf-stores-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .smf-stores-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .smf-stores-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  @media (max-width: 749px) {
+    .smf-stores-grid {
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
 
-  /* ── Card Shell with Clean Light Border ── */
+    .smf-stores-shell {
+      padding: 0 16px;
+    }
+  }
+
+  /* ── Luxury Store Card ── */
   .smf-store-card {
     background: #ffffff;
-    border-radius: 5px;
-    border: 1px solid rgb(17 17 17 / 0.09);
-    box-shadow: none;
+    border-radius: 16px;
+    border: 1px solid #e8e8e8;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: border-color 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
   }
 
   .smf-store-card:hover {
-    border-color: rgb(17 17 17 / 0.25);
-    box-shadow: none;
-    transform: none;
+    transform: translateY(-4px);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.08);
+    border-color: #d0d0d0;
   }
 
-  /* ── Media Box (Single Store Image) ── */
+  /* ── Media Box ── */
   .smf-store-card__media-box {
     position: relative;
     width: 100%;
-    height: 440px;
-    background: #eaeaea;
+    height: clamp(260px, 24vw, 380px);
+    background: #f5f5f5;
     overflow: hidden;
-    border-radius: 4px 4px 0 0;
   }
 
   .smf-store-card__img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
+    object-position: top center;
     display: block;
     transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .smf-store-card:hover .smf-store-card__img {
-    transform: scale(1.03);
+    transform: scale(1.05);
   }
 
   .smf-store-card__placeholder {
@@ -274,153 +231,121 @@
     height: 100%;
     display: grid;
     place-items: center;
-    background: linear-gradient(135deg, #f2f2f4 0%, #e5e5e8 100%);
+    background: #f2f2f4;
     color: rgba(17, 17, 17, 0.28);
   }
 
-  /* ── Bottom Details Bar ── */
-  .smf-store-card__bottom {
-    padding: 16px 16px 18px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
-    gap: 14px;
-    background: #ffffff;
-    align-items: flex-start;
+  .smf-store-card__badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(17, 17, 17, 0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Card Body Details ── */
+  .smf-store-card__body {
+    padding: 20px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     flex-grow: 1;
+    background: #ffffff;
   }
 
-  /* Left Side: Store Name & Get Direction */
-  .smf-store-card__info-left {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 0;
-  }
-
-  .smf-store-card__name {
+  .smf-store-card__title {
     margin: 0;
-    font-family: var(--font-heading--family), sans-serif;
-    font-size: 13.5px;
+    font-family: var(--font-heading--family, inherit);
+    font-size: 17px;
     font-weight: 700;
-    line-height: 1.25;
-    letter-spacing: -0.015em;
     color: #111111;
-    word-break: break-word;
-  }
-
-  .smf-store-card__direction-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 10px;
-    font-weight: 500;
-    color: #111111;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    cursor: pointer;
-    line-height: 1.2;
-    transition: opacity 0.2s ease;
-  }
-
-  .smf-store-card__direction-link:hover {
-    opacity: 0.7;
-  }
-
-  .smf-store-card__arrow {
-    width: 10px;
-    height: 10px;
-    flex-shrink: 0;
-    display: inline-block;
-  }
-
-  /* Right Side: Address & Phone */
-  .smf-store-card__info-right {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    min-width: 0;
+    letter-spacing: -0.01em;
   }
 
   .smf-store-card__address {
-    margin: 0;
-    font-size: 10.5px;
-    line-height: 1.45;
-    color: rgba(17, 17, 17, 0.75);
-    word-break: break-word;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: #555555;
+  }
+
+  .smf-store-card__address svg {
+    width: 18px;
+    height: 18px;
+    color: #111111;
+    flex-shrink: 0;
+    margin-top: 2px;
   }
 
   .smf-store-card__phone {
-    font-size: 10.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
     font-weight: 600;
-    color: rgba(17, 17, 17, 0.75);
-    text-decoration: none;
-    line-height: 1.3;
-    transition: color 0.2s ease;
-  }
-
-  .smf-store-card__phone:hover {
     color: #111111;
   }
 
-  /* ── Responsive Queries (Matching stagmenfashion-trending) ── */
-  @media screen and (max-width: 1024px) {
-    .smf-stores-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .smf-store-card__media-box {
-      height: 380px;
-    }
+  .smf-store-card__phone svg {
+    width: 17px;
+    height: 17px;
+    color: #111111;
+    flex-shrink: 0;
   }
 
-  @media screen and (max-width: 749px) {
-    .smf-our-stores-section {
-      padding: 0;
-    }
+  .smf-store-card__phone a {
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
 
-    .smf-stores-shell {
-      padding: 10px 10px 10px;
-    }
+  .smf-store-card__phone a:hover {
+    opacity: 0.7;
+  }
 
-    .smf-stores-head {
-      margin-bottom: 14px;
-      padding-bottom: 12px;
-    }
+  .smf-store-card__btn {
+    margin-top: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 18px;
+    background: #111111;
+    color: #ffffff;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.15s ease;
+    box-sizing: border-box;
+  }
 
-    .smf-stores-heading {
-      font-size: 13px;
-    }
+  .smf-store-card__btn:hover {
+    background: #000000;
+  }
 
-    .smf-stores-subheading {
-      font-size: 12px;
-    }
+  .smf-store-card__btn:active {
+    transform: scale(0.98);
+  }
 
-    .smf-stores-discover-more {
-      font-size: 10px;
-    }
+  .smf-store-card__btn svg {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s ease;
+  }
 
-    .smf-stores-grid {
-      grid-template-columns: 1fr;
-      gap: 14px;
-    }
-
-    .smf-store-card__media-box {
-      height: 340px;
-    }
-
-    .smf-store-card__bottom {
-      padding: 14px 14px 16px;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    .smf-store-card__direction-link {
-      font-size: 9.5px;
-    }
-
-    .smf-store-card__arrow {
-      width: 9.5px;
-      height: 9.5px;
-    }
+  .smf-store-card__btn:hover svg {
+    transform: translate(2px, -2px);
   }
 </style>
 
@@ -520,7 +445,7 @@
           "type": "text",
           "id": "store_name",
           "label": "Store Name / City",
-          "default": "Gurugram (DLF Summit Plaza)"
+          "default": "Calicut"
         },
         {
           "type": "text",
@@ -537,13 +462,13 @@
           "type": "textarea",
           "id": "address",
           "label": "Address",
-          "default": "GC11, Ground Floor, DLF Summit Plaza, DLF Phase 5, Sector 54, Gurugram, Haryana 122009"
+          "default": "Khaleej Residency, near Aster, Kozhikode, Kerala 673016"
         },
         {
           "type": "text",
           "id": "phone",
           "label": "Phone number",
-          "default": "+91 9958862988"
+          "default": "+91 94474 25555"
         }
       ]
     }
@@ -555,27 +480,18 @@
         {
           "type": "store",
           "settings": {
-            "store_name": "Gurugram (DLF Summit Plaza)",
-            "address": "GC11, Ground Floor, DLF Summit Plaza, DLF Phase 5, Sector 54, Gurugram, Haryana 122009",
-            "phone": "+91 9958862988",
+            "store_name": "Calicut",
+            "address": "Khaleej Residency, near Aster, Kozhikode, Kerala 673016",
+            "phone": "+91 94474 25555",
             "directions_label": "Get Direction"
           }
         },
         {
           "type": "store",
           "settings": {
-            "store_name": "Delhi",
-            "address": "M block market, M-81, Block M, Greater Kailash II, Greater Kailash, New Delhi, Delhi 110048",
-            "phone": "+91 9069191996",
-            "directions_label": "Get Direction"
-          }
-        },
-        {
-          "type": "store",
-          "settings": {
-            "store_name": "Mumbai",
-            "address": "Shop No.2, Park Eleven, 11th Rd, Khar, Khar West, Mumbai, Maharashtra 400052",
-            "phone": "+91 9599199537",
+            "store_name": "Thekkady",
+            "address": "BALAD PERFUMES, Kavitha building, Thekkady, Kerala 685509",
+            "phone": "+91 94473 76786",
             "directions_label": "Get Direction"
           }
         }
