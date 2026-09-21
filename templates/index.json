@@ -171,6 +171,7 @@
     },
     "trending_now": {
       "type": "stagmenfashion-trending-now",
+      "disabled": true,
       "settings": {
         "heading": "Trending Now",
         "subheading": "Most popular picks added to the collection",
