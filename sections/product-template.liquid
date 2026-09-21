@@ -210,176 +210,137 @@
     <div class="pf-product-template__content">
       <!-- Minimal Structured Product Card -->
       <div class="pf-product-card">
+
+        <!-- Top Pill Badges -->
+        <div class="pf-buybox__top-tags">
+          <span class="pf-top-tag">Lasts 6-8 hours</span>
+          <span class="pf-top-tag">Eau De Parfum</span>
+        </div>
+
+        <!-- Product Title -->
         <div class="pf-buybox__header">
           <h1 class="pf-buybox__title">{{ selected_product.title }}</h1>
         </div>
 
-        <!-- Rating Row -->
+        <!-- Fragrance Subtitle Tagline -->
+        <p class="pf-buybox__fragrance-subtitle">
+          {% assign tags_str = selected_product.tags | join: ' ' | downcase %}
+          {% if tags_str contains 'oriental' or tags_str contains 'floral' %}
+            Oriental | Floral Musky | Citrus Floral
+          {% elsif tags_str contains 'woody' %}
+            Woody | Amber Spice | Fresh Cedar
+          {% elsif tags_str contains 'fresh' %}
+            Fresh Citrus | Aquatic | Green Notes
+          {% else %}
+            {{ selected_product.vendor | default: 'EAU DE PARFUM' | upcase }}
+          {% endif %}
+        </p>
+
+        <!-- Rating & Share Row -->
         <div class="pf-buybox__rating-row">
-          <div class="pf-buybox__stars" aria-label="4.62 out of 5 stars">
-            <span class="pf-star">★</span>
-            <span class="pf-star">★</span>
-            <span class="pf-star">★</span>
-            <span class="pf-star">★</span>
-            <span class="pf-star pf-star--half">★</span>
-          </div>
-          <span class="pf-buybox__rating-score">4.62</span>
-          <span class="pf-buybox__rating-divider">|</span>
-          <span class="pf-buybox__reviews-count">156 reviews</span>
-        </div>
-
-        <!-- Feature Badges -->
-        <div class="pf-buybox__badges">
-          <span class="pf-buybox__badge">Built for Indian Weather</span>
-          <span class="pf-buybox__badge">50% Oil Concentration</span>
-        </div>
-
-        {% if color_option != blank and color_option.values.size > 1 %}
-          <div class="pf-buybox__colors">
-            <span class="pf-buybox__option-label">Color: <strong data-pf-selected-color>{{ color_option.selected_value | default: color_option.values.first.name }}</strong></span>
-            <div class="pf-buybox__color-list" data-pf-swatches>
-              {% for product_option_value in color_option.values %}
-                {% assign option_variant = product_option_value.variant %}
-                {% assign option_media = option_variant.featured_media | default: selected_product.featured_media %}
-                <button
-                  type="button"
-                  class="pf-color-swatch-item{% if product_option_value.selected or forloop.first %} is-active{% endif %}"
-                  data-pf-swatch
-                  data-variant-id="{{ option_variant.id | default: current_variant.id }}"
-                  data-media-id="{{ option_media.id | default: '' }}"
-                  data-color-name="{{ product_option_value.name }}"
-                  aria-label="{{ product_option_value.name }}"
-                  aria-pressed="{% if product_option_value.selected or forloop.first %}true{% else %}false{% endif %}"
-                >
-                  <span class="pf-color-swatch">
-                    {% if product_option_value.swatch != blank or option_media != blank %}
-                      {% render 'swatch',
-                        swatch: product_option_value.swatch,
-                        variant_image: option_media,
-                        label: product_option_value.name
-                      %}
-                    {% else %}
-                      <span class="pf-color-swatch-fallback">{{ product_option_value.name | slice: 0, 1 }}</span>
-                    {% endif %}
-                  </span>
-                </button>
-              {% endfor %}
+          <div class="pf-buybox__rating-left">
+            <div class="pf-buybox__stars" aria-label="5 out of 5 stars">
+              <span class="pf-star">★</span>
+              <span class="pf-star">★</span>
+              <span class="pf-star">★</span>
+              <span class="pf-star">★</span>
+              <span class="pf-star">★</span>
             </div>
+            <span class="pf-buybox__reviews-count">102 reviews</span>
           </div>
-        {% endif %}
+          <button type="button" class="pf-buybox__share-btn" data-share-btn aria-label="Share product">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+          </button>
+        </div>
 
-        <!-- Size Pills -->
+        <!-- Price Block -->
+        <div class="pf-buybox__price-block">
+          <div class="pf-buybox__price-row">
+            <span class="pf-price-main" data-pf-price-main>₹{{ current_variant.price | money_without_currency }}</span>
+            {% if current_variant.compare_at_price > current_variant.price %}
+              {% assign save_amt = current_variant.compare_at_price | minus: current_variant.price %}
+              <span class="pf-price-compare" data-pf-compare-price>₹{{ current_variant.compare_at_price | money_without_currency }}</span>
+              <span class="pf-save-badge" data-pf-save-badge>Save ₹{{ save_amt | money_without_currency }}</span>
+            {% endif %}
+          </div>
+          <span class="pf-tax-label">MRP. (Incl. of all tax)</span>
+        </div>
+
+        <!-- Size Pills matching mockup -->
         {% if size_option != blank and size_option.values.size > 0 %}
           <div class="pf-buybox__size-section">
-            <span class="pf-buybox__option-label">Size:</span>
+            <span class="pf-buybox__option-label">Size</span>
             <div class="pf-buybox__sizes" data-pf-size-selector>
               {% assign size_pos = size_option.position %}
-              {% assign selected_color_val = color_option.selected_value | default: color_option.values.first.name | default: color_option.values.first %}
               {% for val in size_option.values %}
                 {% liquid
                   assign val_name = val.name | default: val
                   assign val_lower = val_name | downcase
                 %}
-                {% comment %} Skip any Personalized / Custom option as requested {% endcomment %}
                 {% unless val_lower contains 'personal' or val_lower contains 'custom' %}
                   {% liquid
                     assign size_variant = blank
-
                     for v in selected_product.variants
-                      assign size_matches = false
-                      if size_pos == 1 and v.option1 == val_name
-                        assign size_matches = true
-                      elsif size_pos == 2 and v.option2 == val_name
-                        assign size_matches = true
-                      elsif size_pos == 3 and v.option3 == val_name
-                        assign size_matches = true
-                      elsif v.option1 == val_name or v.option2 == val_name or v.option3 == val_name
-                        assign size_matches = true
-                      endif
-
-                      if size_matches
-                        if color_option != blank and selected_color_val != blank
-                          if v.option1 == selected_color_val or v.option2 == selected_color_val or v.option3 == selected_color_val
-                            assign size_variant = v
-                            break
-                          endif
-                        else
-                          assign size_variant = v
-                          break
-                        endif
+                      if v.option1 == val_name or v.option2 == val_name or v.option3 == val_name
+                        assign size_variant = v
+                        break
                       endif
                     endfor
-
-                    if size_variant == blank
-                      for v in selected_product.variants
-                        if size_pos == 1 and v.option1 == val_name
-                          assign size_variant = v
-                          break
-                        elsif size_pos == 2 and v.option2 == val_name
-                          assign size_variant = v
-                          break
-                        elsif size_pos == 3 and v.option3 == val_name
-                          assign size_variant = v
-                          break
-                        elsif v.option1 == val_name or v.option2 == val_name or v.option3 == val_name
-                          assign size_variant = v
-                          break
-                        endif
-                      endfor
-                    endif
-
-                    assign is_available = true
-                    if size_variant != blank and size_variant.available == false
-                      assign is_available = false
-                    elsif size_variant == blank
-                      assign is_available = false
-                    endif
 
                     assign is_selected = false
                     if current_variant != blank and size_variant != blank and current_variant.id == size_variant.id
                       assign is_selected = true
-                    elsif forloop.first and current_variant == blank
+                    elsif forloop.first
                       assign is_selected = true
+                    endif
+
+                    assign pill_sub = 'Best Value'
+                    if forloop.index == 2
+                      assign pill_sub = 'Standard Pack'
+                    elsif size_variant != blank and size_variant.price > 0
+                      assign pill_sub = 'Standard Pack'
+                    else
+                      assign pill_sub = 'Standard Pack'
                     endif
                   %}
                   <button
                     type="button"
-                    class="pf-size-pill{% if is_selected %} is-active{% endif %}{% unless is_available %} is-unavailable{% endunless %}"
+                    class="pf-size-box{% if is_selected %} is-active{% endif %}"
                     data-pf-size-pill
                     data-value="{{ val_name | escape }}"
                     data-variant-id="{{ size_variant.id | default: current_variant.id }}"
-                    {% unless is_available %}data-sold-out="true"{% endunless %}
                     aria-label="Size {{ val_name }}"
                   >
-                    {% if val_lower contains '100ml' or forloop.index == 2 %}
-                      <span class="pf-size-badge">2x More Values</span>
-                    {% endif %}
-                    <span class="pf-size-pill__text">{{ val_name }}</span>
+                    <span class="pf-size-box__title">{{ val_name }}</span>
+                    <span class="pf-size-box__subtitle">{{ pill_sub }}</span>
                   </button>
                 {% endunless %}
               {% endfor %}
             </div>
           </div>
-        {% elsif selected_product.has_only_default_variant == false and selected_product.variants.size > 1 and color_option == blank %}
+        {% elsif selected_product.has_only_default_variant == false and selected_product.variants.size > 1 %}
           <div class="pf-buybox__size-section">
-            <span class="pf-buybox__option-label">Size:</span>
+            <span class="pf-buybox__option-label">Size</span>
             <div class="pf-buybox__sizes" data-pf-size-selector>
               {% for variant in selected_product.variants %}
                 {% assign v_lower = variant.title | downcase %}
                 {% unless v_lower contains 'personal' or v_lower contains 'custom' %}
                   <button
                     type="button"
-                    class="pf-size-pill{% if variant.id == current_variant.id %} is-active{% endif %}{% unless variant.available %} is-unavailable{% endunless %}"
+                    class="pf-size-box{% if variant.id == current_variant.id %} is-active{% endif %}"
                     data-pf-size-pill
                     data-value="{{ variant.title | escape }}"
                     data-variant-id="{{ variant.id }}"
-                    {% unless variant.available %}data-sold-out="true"{% endunless %}
                     aria-label="{{ variant.title }}"
                   >
-                    {% if v_lower contains '100ml' or forloop.index == 2 %}
-                      <span class="pf-size-badge">2x More Values</span>
-                    {% endif %}
-                    <span class="pf-size-pill__text">{{ variant.title }}</span>
+                    <span class="pf-size-box__title">{{ variant.title }}</span>
+                    <span class="pf-size-box__subtitle">{% if forloop.first %}Best Value{% else %}Standard Pack{% endif %}</span>
                   </button>
                 {% endunless %}
               {% endfor %}
@@ -387,9 +348,38 @@
           </div>
         {% endif %}
 
-        <div class="pf-buybox__price-row">
-          <div class="pf-buybox__price" data-pf-price>
-            {% render 'price', product_resource: selected_product, show_sale_price_first: true %}
+        <!-- 3 Circular Trust Badges Row -->
+        <div class="pf-buybox__trust-row">
+          <div class="pf-trust-item">
+            <div class="pf-trust-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M12 7v5l3 3"/>
+              </svg>
+            </div>
+            <span class="pf-trust-text">Farm to<br>Fragrance</span>
+          </div>
+
+          <div class="pf-trust-item">
+            <div class="pf-trust-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="M9 12l2 2 4-4"/>
+              </svg>
+            </div>
+            <span class="pf-trust-text">100% Authentic<br>Perfume</span>
+          </div>
+
+          <div class="pf-trust-item">
+            <div class="pf-trust-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22">
+                <rect x="1" y="3" width="15" height="13" rx="2"/>
+                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/>
+                <circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
+            </div>
+            <span class="pf-trust-text">Express Shipping<br>& Returns</span>
           </div>
         </div>
 
@@ -397,34 +387,13 @@
           <input type="hidden" name="id" value="{{ current_variant.id }}" data-pf-variant-id>
           <input type="hidden" name="quantity" value="1" data-pf-qty-field>
 
-          <div class="pf-buybox__main-actions">
-            <div class="pf-qty-picker">
-              <button type="button" class="pf-qty-btn" data-pf-qty-minus aria-label="Decrease quantity">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M15 18l-6-6 6-6"/></svg>
-              </button>
-              <input type="number" value="1" min="1" class="pf-qty-input" data-pf-qty-input aria-label="Quantity" readonly>
-              <button type="button" class="pf-qty-btn" data-pf-qty-plus aria-label="Increase quantity">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 18l6-6-6-6"/></svg>
-              </button>
-            </div>
-
-            <button
-              type="button"
-              class="pf-btn pf-btn--add-to-bag"
-              data-pf-add-to-bag
-              {% unless current_variant.available %}disabled{% endunless %}
-            >
-              <span data-pf-add-text>{% if current_variant.available %}Add to cart{% else %}Sold out{% endif %}</span>
-            </button>
-          </div>
-
           <button
             type="button"
-            class="pf-btn pf-btn--express-checkout"
+            class="pf-buy-now-outline-btn"
             data-pf-buy-now
             {% unless current_variant.available %}disabled{% endunless %}
           >
-            Express Checkout
+            BUY NOW
           </button>
         {%- endform -%}
 
@@ -522,7 +491,7 @@
           </details>
         </div>
 
-        {% render 'judgeme-review-section', selected_product: selected_product %}
+        {% comment %} Customer Reviews Section Removed {% endcomment %}
       </div>
     </div>
   </div>
@@ -616,9 +585,274 @@
       width: 100%;
     }
 
-    .pf-product-template__description{
-      padding-top: 5px;
+  /* ── Buybox Redesign matching mockup ── */
+  .pf-buybox__top-tags {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .pf-top-tag {
+    background: #f6efe4;
+    color: #8b6b3e;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.02em;
+  }
+
+  .pf-buybox__fragrance-subtitle {
+    margin: -4px 0 10px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #c59b27;
+    letter-spacing: 0.03em;
+  }
+
+  .pf-buybox__rating-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .pf-buybox__rating-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pf-buybox__stars {
+    color: #f59e0b;
+    font-size: 16px;
+    letter-spacing: 2px;
+  }
+
+  .pf-buybox__reviews-count {
+    font-size: 13px;
+    color: #555555;
+    font-weight: 500;
+  }
+
+  .pf-buybox__share-btn {
+    background: transparent;
+    border: none;
+    color: #555555;
+    cursor: pointer;
+    padding: 4px;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+  }
+
+  .pf-buybox__share-btn:hover {
+    color: #111111;
+  }
+
+  .pf-buybox__price-block {
+    margin-bottom: 20px;
+  }
+
+  .pf-buybox__price-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .pf-price-main {
+    font-size: 24px;
+    font-weight: 800;
+    color: #111111;
+  }
+
+  .pf-price-compare {
+    font-size: 16px;
+    color: #888888;
+    text-decoration: line-through;
+  }
+
+  .pf-save-badge {
+    background: #00a63e;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .pf-tax-label {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #888888;
+  }
+
+  .pf-buybox__size-section {
+    margin-bottom: 24px;
+  }
+
+  .pf-buybox__option-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555555;
+    margin-bottom: 8px;
+  }
+
+  .pf-buybox__sizes {
+    display: flex;
+    gap: 12px;
+  }
+
+  .pf-size-box {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: 1.5px solid #e0e0e0;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 90px;
+  }
+
+  .pf-size-box.is-active {
+    border-color: #c59b27;
+    background: #fcf9f2;
+  }
+
+  .pf-size-box__title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111111;
+  }
+
+  .pf-size-box__subtitle {
+    font-size: 11px;
+    color: #888888;
+    margin-top: 2px;
+  }
+
+  .pf-size-box.is-active .pf-size-box__subtitle {
+    color: #b8860b;
+    font-weight: 600;
+  }
+
+  .pf-buybox__trust-row {
+    display: flex;
+    gap: 28px;
+    margin-bottom: 28px;
+    margin-top: 12px;
+  }
+
+  @media screen and (max-width: 768px) {
+    .pf-buybox__trust-row {
+      gap: 12px;
+      justify-content: space-around;
+      margin-bottom: 20px;
     }
+
+    .pf-trust-circle {
+      width: 48px !important;
+      height: 48px !important;
+    }
+
+    .pf-trust-num {
+      font-size: 14px !important;
+    }
+
+    .pf-trust-unit {
+      font-size: 8px !important;
+    }
+
+    .pf-trust-text {
+      font-size: 11px !important;
+    }
+
+    .pf-buybox__sizes {
+      gap: 8px;
+    }
+
+    .pf-size-box {
+      padding: 8px 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .pf-buybox__title {
+      font-size: 1.6rem !important;
+    }
+  }
+
+  .pf-trust-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .pf-trust-circle {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #f6efe4;
+    color: #b8860b;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pf-trust-num {
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1;
+    color: #b8860b;
+  }
+
+  .pf-trust-unit {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #111111;
+    margin-top: 1px;
+  }
+
+  .pf-trust-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: #111111;
+    line-height: 1.25;
+  }
+
+  .pf-buy-now-outline-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 0;
+    border: 1.5px solid #c59b27;
+    background: #ffffff;
+    color: #111111;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .pf-buy-now-outline-btn:hover {
+    background: #111111;
+    border-color: #111111;
+    color: #ffffff;
+  }
+
+  .pf-product-template__description {
+    padding-top: 5px;
+  }
 
     .pf-product-template__faq-heading {
       margin: 0 0 16px;
@@ -3546,6 +3780,31 @@
       stickyAddBtn.addEventListener('click', (e) => {
         e.preventDefault();
         if (addToBagBtn) addToBagBtn.click();
+      });
+    }
+
+    // Share Button Event Listener (Web Share API / Clipboard fallback)
+    const shareBtn = root.querySelector('[data-share-btn]');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const shareData = {
+          title: document.title,
+          text: 'Check out this luxury fragrance from Balad Perfumes!',
+          url: window.location.href
+        };
+        if (navigator.share) {
+          try {
+            await navigator.share(shareData);
+          } catch (err) {}
+        } else if (navigator.clipboard) {
+          try {
+            await navigator.clipboard.writeText(window.location.href);
+            const origContent = shareBtn.innerHTML;
+            shareBtn.innerHTML = '<span style="font-size: 11px; font-weight: 700; color: #b8860b;">Copied!</span>';
+            setTimeout(() => { shareBtn.innerHTML = origContent; }, 2000);
+          } catch (err) {}
+        }
       });
     }
 
