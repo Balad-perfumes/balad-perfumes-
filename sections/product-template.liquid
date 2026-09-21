@@ -418,7 +418,8 @@
                 <div class="pf-tabs__description-body rte">
                   {% assign clean_desc = selected_product.description | strip_html | strip %}
                   {% if clean_desc != blank %}
-                    {{ selected_product.description }}
+                    {% assign formatted_desc = selected_product.description | replace: 'Ahmed Al Maghribi Bin Shaikh', selected_product.title | replace: 'Ahmed Al Maghribi', 'Balad Perfumes' %}
+                    {{ formatted_desc }}
                   {% else %}
                     <p>Experience the beauty of <strong>{{ selected_product.title }}</strong>, a luxury fragrance crafted with fine concentrated oils, luminous florals, and warm amber notes. Sophisticated, elegant, and long-lasting, this captivating scent is designed to evoke confidence and timeless style.</p>
                     <p>Perfect for everyday wear and special occasions, <strong>{{ selected_product.title }}</strong> leaves a graceful and unforgettable impression wherever you go.</p>
@@ -586,51 +587,57 @@
     }
 
   /* ── Buybox Redesign matching mockup ── */
+  /* ── Buybox Redesign matching mockup & brand theme ── */
+  /* ── Buybox Redesign matching mockup & brand theme ── */
   .pf-buybox__top-tags {
     display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: 6px;
+    margin-bottom: 6px;
   }
 
   .pf-top-tag {
-    background: #f6efe4;
-    color: #8b6b3e;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 5px 14px;
-    border-radius: 20px;
-    letter-spacing: 0.02em;
+    background: #f4f4f5;
+    color: #111111;
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 14px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 1px solid #e4e4e7;
+    line-height: 1.1;
   }
 
   .pf-buybox__fragrance-subtitle {
-    margin: -4px 0 10px 0;
-    font-size: 14px;
+    margin: -2px 0 6px 0;
+    font-size: 10.5px;
     font-weight: 700;
-    color: #c59b27;
-    letter-spacing: 0.03em;
+    color: #b8860b;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .pf-buybox__rating-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
   }
 
   .pf-buybox__rating-left {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
 
   .pf-buybox__stars {
     color: #f59e0b;
-    font-size: 16px;
-    letter-spacing: 2px;
+    font-size: 13px;
+    letter-spacing: 1.5px;
   }
 
   .pf-buybox__reviews-count {
-    font-size: 13px;
+    font-size: 11.5px;
     color: #555555;
     font-weight: 500;
   }
@@ -651,63 +658,68 @@
   }
 
   .pf-buybox__price-block {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
 
   .pf-buybox__price-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
   }
 
   .pf-price-main {
-    font-size: 24px;
+    font-size: 19px;
     font-weight: 800;
     color: #111111;
+    line-height: 1.1;
   }
 
   .pf-price-compare {
-    font-size: 16px;
+    font-size: 13.5px;
     color: #888888;
     text-decoration: line-through;
   }
 
   .pf-save-badge {
-    background: #00a63e;
+    background: #111111;
     color: #ffffff;
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 700;
-    padding: 3px 8px;
+    padding: 2px 6px;
     border-radius: 4px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
   }
 
   .pf-tax-label {
     display: block;
-    margin-top: 4px;
-    font-size: 12px;
+    margin-top: 2px;
+    font-size: 10.5px;
     color: #888888;
   }
 
   .pf-buybox__size-section {
-    margin-bottom: 24px;
+    margin-bottom: 10px;
   }
 
   .pf-buybox__option-label {
     display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: #555555;
-    margin-bottom: 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #111111;
+    margin-bottom: 4px;
   }
 
   .pf-buybox__sizes {
     display: flex;
-    gap: 12px;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
   }
 
   .pf-size-box {
-    padding: 10px 22px;
-    border-radius: 8px;
+    padding: 6px 14px;
+    border-radius: 6px;
     border: 1.5px solid #e0e0e0;
     background: #ffffff;
     display: flex;
@@ -716,74 +728,179 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    min-width: 90px;
+    min-width: 70px;
+    max-width: max-content;
+    flex: 0 0 auto;
   }
 
   .pf-size-box.is-active {
-    border-color: #c59b27;
-    background: #fcf9f2;
+    border: 2px solid #111111;
+    background: #fafafa;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
 
   .pf-size-box__title {
-    font-size: 15px;
+    font-size: 12.5px;
     font-weight: 700;
     color: #111111;
+    line-height: 1.1;
+  }
+
+  .pf-size-box.is-active .pf-size-box__title {
+    color: #111111;
+    font-weight: 800;
   }
 
   .pf-size-box__subtitle {
-    font-size: 11px;
-    color: #888888;
-    margin-top: 2px;
+    font-size: 9.5px;
+    color: #777777;
+    margin-top: 1px;
+    line-height: 1.1;
   }
 
   .pf-size-box.is-active .pf-size-box__subtitle {
     color: #b8860b;
-    font-weight: 600;
+    font-weight: 700;
   }
 
   .pf-buybox__trust-row {
     display: flex;
-    gap: 28px;
-    margin-bottom: 28px;
-    margin-top: 12px;
+    gap: 8px;
+    justify-content: space-around;
+    margin-bottom: 10px;
+    margin-top: 8px;
   }
 
   @media screen and (max-width: 768px) {
-    .pf-buybox__trust-row {
-      gap: 12px;
-      justify-content: space-around;
-      margin-bottom: 20px;
+    .pf-product-card {
+      padding: 12px 10px !important;
+      border-radius: 10px !important;
     }
 
-    .pf-trust-circle {
-      width: 48px !important;
-      height: 48px !important;
+    .pf-buybox__top-tags {
+      margin-bottom: 6px !important;
+      gap: 5px !important;
     }
 
-    .pf-trust-num {
-      font-size: 14px !important;
-    }
-
-    .pf-trust-unit {
-      font-size: 8px !important;
-    }
-
-    .pf-trust-text {
-      font-size: 11px !important;
-    }
-
-    .pf-buybox__sizes {
-      gap: 8px;
-    }
-
-    .pf-size-box {
-      padding: 8px 12px;
-      min-width: 0;
-      flex: 1;
+    .pf-top-tag {
+      font-size: 9.5px !important;
+      padding: 3px 8px !important;
+      border-radius: 12px !important;
+      line-height: 1.1 !important;
     }
 
     .pf-buybox__title {
-      font-size: 1.6rem !important;
+      font-size: 1.25rem !important;
+      margin: 0 0 1px 0 !important;
+      line-height: 1.15 !important;
+      letter-spacing: 0.01em !important;
+    }
+
+    .pf-buybox__fragrance-subtitle {
+      font-size: 10px !important;
+      margin: 0 0 6px 0 !important;
+      letter-spacing: 0.06em !important;
+    }
+
+    .pf-buybox__rating-row {
+      margin-bottom: 8px !important;
+    }
+
+    .pf-buybox__stars {
+      font-size: 12px !important;
+      letter-spacing: 1px !important;
+    }
+
+    .pf-buybox__reviews-count {
+      font-size: 11px !important;
+    }
+
+    .pf-buybox__price-block {
+      margin-bottom: 8px !important;
+    }
+
+    .pf-price-main {
+      font-size: 18px !important;
+      line-height: 1.1 !important;
+    }
+
+    .pf-price-compare {
+      font-size: 13px !important;
+    }
+
+    .pf-save-badge {
+      font-size: 10px !important;
+      padding: 2px 6px !important;
+    }
+
+    .pf-tax-label {
+      font-size: 10px !important;
+      margin-top: 1px !important;
+    }
+
+    .pf-buybox__size-section {
+      margin-bottom: 10px !important;
+    }
+
+    .pf-buybox__option-label {
+      font-size: 11px !important;
+      margin-bottom: 4px !important;
+    }
+
+    .pf-buybox__sizes {
+      gap: 6px !important;
+      flex-wrap: wrap !important;
+    }
+
+    .pf-size-box {
+      padding: 5px 12px !important;
+      min-width: 65px !important;
+      max-width: max-content !important;
+      flex: 0 0 auto !important;
+      border-radius: 5px !important;
+    }
+
+    .pf-size-box__title {
+      font-size: 12px !important;
+      line-height: 1.1 !important;
+    }
+
+    .pf-size-box__subtitle {
+      font-size: 9px !important;
+      margin-top: 1px !important;
+      line-height: 1.1 !important;
+    }
+
+    .pf-buybox__trust-row {
+      gap: 6px !important;
+      justify-content: space-around !important;
+      margin-top: 8px !important;
+      margin-bottom: 10px !important;
+    }
+
+    .pf-trust-circle {
+      width: 38px !important;
+      height: 38px !important;
+    }
+
+    .pf-trust-circle svg {
+      width: 16px !important;
+      height: 16px !important;
+    }
+
+    .pf-trust-text {
+      font-size: 9.5px !important;
+      line-height: 1.15 !important;
+    }
+
+    .pf-buy-now-outline-btn {
+      height: 38px !important;
+      padding: 0 14px !important;
+      font-size: 11.5px !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.05em !important;
+      border-radius: 5px !important;
+      margin-bottom: 4px !important;
     }
   }
 
@@ -793,37 +910,30 @@
     align-items: center;
     text-align: center;
     gap: 8px;
+    flex: 1;
   }
 
   .pf-trust-circle {
-    width: 58px;
-    height: 58px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
-    background: #f6efe4;
-    color: #b8860b;
+    background: #f8f8f8;
+    color: #111111;
+    border: 1px solid #e5e5e5;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
   }
 
-  .pf-trust-num {
-    font-size: 16px;
-    font-weight: 800;
-    line-height: 1;
+  .pf-trust-circle:hover {
+    border-color: #b8860b;
     color: #b8860b;
   }
 
-  .pf-trust-unit {
-    font-size: 9px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #111111;
-    margin-top: 1px;
-  }
-
   .pf-trust-text {
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 600;
     color: #111111;
     line-height: 1.25;
@@ -832,21 +942,22 @@
   .pf-buy-now-outline-btn {
     width: 100%;
     padding: 14px;
-    border-radius: 0;
-    border: 1.5px solid #c59b27;
-    background: #ffffff;
-    color: #111111;
-    font-size: 14px;
+    border-radius: 6px;
+    border: 1.5px solid #111111;
+    background: #111111;
+    color: #ffffff;
+    font-size: 13px;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
   }
 
   .pf-buy-now-outline-btn:hover {
-    background: #111111;
-    border-color: #111111;
+    background: #222222;
+    border-color: #222222;
     color: #ffffff;
   }
 
@@ -1176,16 +1287,16 @@
   .pf-product-card {
     background: #ffffff;
     border: 1px solid #e8e8e8;
-    border-radius: 12px;
+    border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
-    padding: 24px;
+    padding: 16px 14px;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .pf-product-card__divider {
     height: 1px;
     background: #f0f0f0;
-    margin: 18px 0 16px;
+    margin: 12px 0 10px;
   }
 
   /* Buy Box Elements */
@@ -1193,18 +1304,18 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 6px;
+    gap: 10px;
+    margin-bottom: 2px;
   }
 
   /* ── Reference Product Card Styling (PURPLE MYSTIQUE style) ── */
   .pf-buybox__title {
-    margin: 0 0 10px 0;
-    font-size: 2.2rem;
+    margin: 0 0 2px 0;
+    font-size: 1.4rem;
     line-height: 1.15;
     font-weight: 800;
     color: #111111;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
   }
 
