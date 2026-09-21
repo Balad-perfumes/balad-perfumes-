@@ -91,12 +91,12 @@
     "category_scroll": {
       "type": "stagmenfashion-latest-items",
       "settings": {
-        "heading": "New Arrivals",
-        "subheading": "Engineered essentials and new season cuts",
+        "heading": "DISCOVER OUR BESTSELLERS",
+        "subheading": "Engineered essentials and signature drops",
         "collection": "new-in",
-        "discover_more_label": "Discover More",
+        "discover_more_label": "",
         "discover_more_link": "shopify://collections/new-in",
-        "background": "#f7f7f8",
+        "background": "#ffffff",
         "color_scheme": "scheme-1"
       }
     },
