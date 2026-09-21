@@ -1,0 +1,306 @@
+<div class="pf-ig-reels-section spacing-style">
+  <div class="pf-ig-reels-header">
+    <h2 class="pf-ig-reels-title">{{ section.settings.heading | default: "Shop our Instagram" }}</h2>
+    {% if section.settings.subheading != blank %}
+      <p class="pf-ig-reels-sub">{{ section.settings.subheading }}</p>
+    {% else %}
+      <p class="pf-ig-reels-sub">Follow us on Instagram for exciting content</p>
+    {% endif %}
+  </div>
+
+  <div class="pf-ig-reels-wrapper">
+    <div class="pf-ig-reels-container" data-ig-reels-track>
+      {%- content_for 'blocks' -%}
+
+      {%- if section.blocks.size == 0 or section.settings.show_fallback_reels -%}
+        <div class="pf-ig-reels-scroll">
+          {% assign reel_videos = "https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3986519821839708806_video.mp4,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3983616075702959038_video.mp4,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3979993690839627269_video.mp4,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3978544012566563397_video.mp4" | split: "," %}
+          {% assign reel_posters = "https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3986519821839708806_thumbnail.jpeg,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3983616075702959038_thumbnail.jpeg,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3979993690839627269_thumbnail.jpeg,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3978544012566563397_thumbnail.jpeg" | split: "," %}
+
+          {% for vid in reel_videos %}
+            <div class="pf-ig-reel-card">
+              <video
+                src="{{ vid }}"
+                poster="{{ reel_posters[forloop.index0] }}"
+                playsinline
+                loop
+                muted
+                preload="metadata"
+                class="pf-ig-reel-media"
+                onmouseover="this.play()"
+                onmouseout="this.pause()"
+              ></video>
+              <div class="pf-ig-reel-top-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+                <span>baladperfume</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <!-- Floating Circular Right Arrow Button matching media_1789990126218.png -->
+    <button type="button" class="pf-ig-reels-arrow-btn" data-ig-next-btn aria-label="Next Instagram reels">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<style>
+  .pf-ig-reels-section {
+    padding: 40px 0;
+    background: #ffffff;
+    overflow: hidden;
+  }
+
+  .pf-ig-reels-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding: 0 16px;
+  }
+
+  .pf-ig-reels-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #111111;
+    margin: 0 0 6px 0;
+  }
+
+  .pf-ig-reels-sub {
+    font-size: 0.92rem;
+    color: #666666;
+    margin: 0;
+  }
+
+  .pf-ig-reels-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  /* Horizontal Scroll & App Block Override */
+  .pf-ig-reels-scroll,
+  .pf-ig-reels-container [class*="instareel"],
+  .pf-ig-reels-container iframe,
+  .pf-ig-reels-container [class*="feed"],
+  .pf-ig-reels-container [class*="container"] {
+    display: flex !important;
+    gap: 16px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    padding: 8px 24px 24px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-snap-type: x mandatory !important;
+    scroll-behavior: smooth !important;
+  }
+
+  .pf-ig-reels-scroll::-webkit-scrollbar,
+  .pf-ig-reels-container [class*="instareel"]::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Reel Cards Aspect Ratio 9:16 (Desktop matching media_1789990126218.png) */
+  .pf-ig-reel-card,
+  .pf-ig-reels-container [class*="instareel"] [class*="card"],
+  .pf-ig-reels-container [class*="instareel"] [class*="item"],
+  .pf-ig-reels-container [class*="instareel"] video {
+    flex: 0 0 215px !important;
+    width: 215px !important;
+    height: 380px !important;
+    aspect-ratio: 9 / 16 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    position: relative !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+    scroll-snap-align: start !important;
+    background: #111111 !important;
+    transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+    cursor: pointer;
+  }
+
+  .pf-ig-reel-card:hover,
+  .pf-ig-reels-container [class*="instareel"] [class*="card"]:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14) !important;
+  }
+
+  .pf-ig-reel-top-badge,
+  .pf-ig-reels-container [class*="instareel"] [class*="author"],
+  .pf-ig-reels-container [class*="instareel"] [class*="profile"] {
+    position: absolute !important;
+    top: 14px !important;
+    left: 14px !important;
+    z-index: 5 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: rgba(0, 0, 0, 0.35) !important;
+    backdrop-filter: blur(4px) !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    pointer-events: none !important;
+  }
+
+  .pf-ig-reel-media {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+
+  /* Floating White Arrow Button (Matching media_1789990126218.png) */
+  .pf-ig-reels-arrow-btn {
+    position: absolute !important;
+    right: 20px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    background: #ffffff !important;
+    border: none !important;
+    color: #111111 !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+    transition: transform 0.2s ease, background 0.2s ease !important;
+  }
+
+  .pf-ig-reels-arrow-btn:hover {
+    transform: translateY(-50%) scale(1.06) !important;
+    background: #fcfcfc !important;
+  }
+
+  /* Mobile Responsive Card Sizing */
+  @media screen and (max-width: 749px) {
+    .pf-ig-reels-section {
+      padding: 24px 0;
+    }
+
+    .pf-ig-reels-title {
+      font-size: 1.4rem;
+    }
+
+    .pf-ig-reels-arrow-btn {
+      display: none !important;
+    }
+
+    .pf-ig-reel-card,
+    .pf-ig-reels-container [class*="instareel"] [class*="card"],
+    .pf-ig-reels-container [class*="instareel"] [class*="item"],
+    .pf-ig-reels-container [class*="instareel"] video {
+      flex: 0 0 190px !important;
+      width: 190px !important;
+      height: 338px !important;
+      aspect-ratio: 9 / 16 !important;
+      border-radius: 10px !important;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    const initArrowBtn = () => {
+      const nextBtn = document.querySelector('[data-ig-next-btn]');
+      if (!nextBtn || nextBtn.dataset.ready === 'true') return;
+      nextBtn.dataset.ready = 'true';
+
+      nextBtn.addEventListener('click', () => {
+        const scrollContainer = document.querySelector('.pf-ig-reels-scroll') || document.querySelector('.pf-ig-reels-container [class*="instareel"]');
+        if (scrollContainer) {
+          scrollContainer.scrollBy({ left: 230, behavior: 'smooth' });
+        }
+      });
+    };
+
+    const cleanInstaReelsJsonLeak = () => {
+      const walker = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false
+      );
+      let node;
+      const textNodesToRemove = [];
+      while ((node = walker.nextNode())) {
+        const val = node.nodeValue || '';
+        if (val.includes('reels"') || val.includes('"VideoUrl"') || val.includes('tikfeed-cdn') || val.includes('DisplayType') || val.includes('ProviderVideoId')) {
+          textNodesToRemove.push(node);
+        }
+      }
+      textNodesToRemove.forEach((tn) => {
+        tn.nodeValue = '';
+      });
+
+      document.querySelectorAll('.pf-ig-reels-container *').forEach((el) => {
+        if (el.children.length === 0) {
+          const txt = el.textContent || '';
+          if (txt.includes('reels"') || txt.includes('"VideoUrl"') || txt.includes('tikfeed-cdn') || txt.includes('DisplayType')) {
+            el.style.display = 'none';
+          }
+        }
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initArrowBtn();
+      cleanInstaReelsJsonLeak();
+    });
+    window.addEventListener('load', () => {
+      initArrowBtn();
+      cleanInstaReelsJsonLeak();
+    });
+    setInterval(cleanInstaReelsJsonLeak, 400);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Shop our Instagram",
+  "tag": "section",
+  "class": "section-instagram-reels",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop our Instagram"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Follow us on Instagram for exciting content"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_fallback_reels",
+      "label": "Show fallback reels",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop our Instagram"
+    }
+  ]
+}
+{% endschema %}

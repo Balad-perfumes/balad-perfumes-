@@ -183,8 +183,27 @@
                       >
                         {{- item.product.title -}}
                       </a>
-                      <span class="cart-items__inline-price">{{ item_display_price | money }}</span>
                     </p>
+                    <div class="cart-items__price-savings-wrap">
+                      <div class="cart-items__price-row">
+                        <span class="cart-items__sale-price">{{ item.final_price | money }}</span>
+                        {% assign item_compare = item.variant.compare_at_price | default: item.original_price %}
+                        {% if item_compare > item.final_price %}
+                          <span class="cart-items__compare-price">{{ item_compare | money }}</span>
+                        {% endif %}
+                      </div>
+                      {%- if item.product.has_only_default_variant == false and item.item_components.size == 0 -%}
+                        <p class="cart-items__variant-subtitle">
+                          {%- for option in item.options_with_values -%}
+                            {{- option.value -}}{%- if forloop.last != true %},&nbsp;{% endif -%}
+                          {%- endfor -%}
+                        </p>
+                      {%- endif -%}
+                      {%- if item_compare > item.final_price -%}
+                        {% assign item_savings = item_compare | minus: item.final_price | times: item.quantity %}
+                        <span class="cart-items__save-badge">You save {{ item_savings | money }}</span>
+                      {%- endif -%}
+                    </div>
                     {% if item.product.vendor and block_settings.vendor %}
                       <p>
                         {{ item.product.vendor }}
@@ -206,23 +225,9 @@
                   </div>
 
                   <div class="cart-items__variants-wrapper">
-                    {%- if item.product.has_only_default_variant == false
-                      or item.properties.size != 0
+                    {%- if item.properties.size != 0
                       or item.selling_plan_allocation != null
                     -%}
-                      {%- if item.product.has_only_default_variant == false and item.item_components.size == 0 -%}
-                        <dl class="cart-items__variants">
-                          {%- for option in item.options_with_values -%}
-                            <div class="cart-items__variant">
-                              <dt class="visually-hidden">{{ option.name }}:</dt>
-                              <dd>
-                                {{- option.value -}}
-                                {%- if forloop.last != true %},&nbsp;{% endif -%}
-                              </dd>
-                            </div>
-                          {%- endfor -%}
-                        </dl>
-                      {%- endif -%}
 
                       {%- liquid
                         assign has_visible_properties = false
@@ -306,7 +311,7 @@
                         hidden
                       {% endif %}
                     >
-                      {{- 'icon-delete.svg' | inline_asset_content -}}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#222222" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                       <span class="visually-hidden">{{ 'accessibility.remove' | t }}</span>
                     </button>
                   </div>
@@ -680,87 +685,90 @@
     }
 
     .cart-drawer .cart-items__table-row {
-      grid-template-columns: clamp(4.75rem, 28vw, 6.5rem) minmax(0, 1fr);
-      grid-template-rows: min-content min-content min-content min-content;
-      grid-template-areas:
-        'media details'
-        'media price'
-        'media quantity'
-        'media error';
-      column-gap: var(--gap-md);
-      align-items: start;
+      display: grid !important;
+      grid-template-columns: 50px 1fr auto !important;
+      grid-template-rows: auto auto !important;
+      grid-template-areas: none !important;
+      gap: 2px 10px !important;
+      align-items: center !important;
+      position: relative !important;
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 8px !important;
+      padding: 8px 10px !important;
+      margin-bottom: 8px !important;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02) !important;
+    }
+
+    .cart-drawer .cart-items__media {
+      grid-column: 1 !important;
+      grid-row: 1 / 3 !important;
+      width: 50px !important;
+      min-width: 50px !important;
+      height: 50px !important;
+      padding: 0 !important;
+      align-self: center !important;
+    }
+
+    .cart-drawer .cart-items__media-container {
+      width: 50px !important;
+      height: 50px !important;
+      border-radius: 6px !important;
+      overflow: hidden !important;
+      border: 1px solid #eeeeee !important;
     }
 
     .cart-drawer .cart-items__details {
-      display: block;
-      min-width: 0;
-    }
-
-    .cart-drawer .cart-items__details > * + * {
-      margin-block-start: var(--margin-2xs);
+      grid-column: 2 !important;
+      grid-row: 1 !important;
+      padding: 0 20px 0 0 !important;
+      min-width: 0 !important;
     }
 
     .cart-drawer .cart-items__title {
-      display: block;
-      max-width: 100%;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      margin-block-start: 0;
-      font-size: var(--font-size--md);
-      line-height: 1.25;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      color: #111111 !important;
+      line-height: 1.2 !important;
+      margin-bottom: 1px !important;
+      display: block !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      max-width: 100% !important;
     }
 
-    .cart-drawer .cart-items__unit-price-wrapper {
-      display: none;
-    }
-
-    .cart-drawer .cart-items__price {
-      display: none;
-    }
-
-    .cart-drawer .cart-items__title-row {
-      gap: var(--gap-xs);
-    }
-
-    .cart-drawer .cart-items__inline-price {
-      font-size: var(--font-size--sm);
+    .cart-drawer .cart-items__price-savings-wrap {
+      grid-column: 2 !important;
+      grid-row: 2 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 1px !important;
     }
 
     .cart-drawer .cart-items__quantity {
-      grid-area: quantity;
-      width: 100%;
-      margin-block-start: var(--margin-xs);
+      grid-column: 3 !important;
+      grid-row: 2 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      padding: 0 !important;
+      margin-top: 0 !important;
+      width: auto !important;
     }
 
     .cart-drawer .cart-items__quantity-controls {
-      width: 100%;
-      justify-content: space-between;
-      gap: var(--gap-sm);
-      padding: 10px 14px;
-      border: 1px solid rgb(var(--color-foreground-rgb) / 0.14);
-      border-radius: 999px;
-      background: rgb(var(--color-foreground-rgb) / 0.02);
-    }
-
-    .cart-drawer .cart-items__quantity-controls > .volume-pricing-info {
-      margin-inline-start: 0;
-    }
-
-    .cart-drawer .cart-items__remove {
-      width: 26px;
-      height: 26px;
-      min-width: 26px;
-      min-height: 26px;
-    }
-
-    .cart-drawer .cart-items__table-row {
-      padding-bottom: var(--gap-lg);
-      margin-bottom: var(--gap-lg);
+      width: auto !important;
+      justify-content: flex-end !important;
+      gap: 0 !important;
+      padding: 0 !important;
+      border: none !important;
+      border-radius: 0 !important;
+      background: transparent !important;
     }
 
     .cart-drawer .cart-items__table-row:last-child {
-      margin-bottom: 0;
+      margin-bottom: 0 !important;
     }
   }
 

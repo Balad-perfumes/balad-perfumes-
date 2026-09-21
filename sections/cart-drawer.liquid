@@ -69,24 +69,21 @@
         {%- else -%}
           <div class="pf-cart-drawer__header" id="cart-drawer-header">
             <div class="pf-cart-drawer__title-wrap">
+              <button
+                ref="closeButton"
+                on:click="cart-drawer-component/close"
+                class="button button-unstyled pf-cart-drawer__back-btn"
+                aria-label="{{ 'actions.close_dialog' | t }}"
+                type="button"
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
               <h2 class="pf-cart-drawer__heading" id="cart-drawer-heading">
-                Shopping Bag
+                CART
               </h2>
-              <span class="pf-cart-drawer__count">({{ cart.item_count }})</span>
             </div>
-
-            <button
-              ref="closeButton"
-              on:click="cart-drawer-component/close"
-              class="button button-unstyled pf-cart-drawer__close"
-              aria-label="{{ 'actions.close_dialog' | t }}"
-              type="button"
-            >
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
           </div>
 
           <div class="pf-cart-drawer__body" aria-label="{{ 'accessibility.cart' | t }}">
@@ -95,6 +92,63 @@
             </div>
 
             <div class="pf-cart-drawer__summary">
+              <!-- Limited Time Offers Section (Bottom Slider) -->
+              <div class="pf-cart-drawer__offers">
+                <div class="pf-cart-drawer__offers-head">
+                  <div class="pf-cart-drawer__offers-title-wrap">
+                    <span class="pf-cart-drawer__offers-title">LIMITED TIME OFFERS</span>
+                    <span class="pf-cart-drawer__offers-badge">Upto 69% OFF</span>
+                  </div>
+                  <div class="pf-cart-drawer__offers-nav">
+                    <button type="button" class="pf-offers-nav-btn pf-offers-prev" aria-label="Previous offer" onclick="scrollPfOffers(-1)">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <button type="button" class="pf-offers-nav-btn pf-offers-next" aria-label="Next offer" onclick="scrollPfOffers(1)">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="pf-cart-drawer__offers-scroll">
+                  {% for offer_prod in collections.all.products limit: 6 %}
+                    {% assign offer_variant = offer_prod.selected_or_first_available_variant %}
+                    <div class="pf-offer-card">
+                      <img
+                        src="{{ offer_prod.featured_media.preview_image | default: offer_prod.featured_image | image_url: width: 120 }}"
+                        alt="{{ offer_prod.title | escape }}"
+                        width="44"
+                        height="44"
+                        loading="lazy"
+                        class="pf-offer-img"
+                      >
+                      <div class="pf-offer-info">
+                        <span class="pf-offer-name">{{ offer_prod.title | truncate: 20 }}</span>
+                        <div class="pf-offer-price-row">
+                          {% if offer_prod.compare_at_price_max > offer_prod.price_min %}
+                            <span class="pf-offer-compare">{{ offer_prod.compare_at_price_max | money }}</span>
+                          {% endif %}
+                          <span class="pf-offer-price">{{ offer_prod.price_min | money }}</span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        class="pf-offer-add-btn"
+                        data-pf-offer-variant-id="{{ offer_variant.id }}"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  {% endfor %}
+                </div>
+                <!-- Pagination Dots (Matching media_1789986428825.png) -->
+                <div class="pf-offers-dots">
+                  <span class="pf-offers-dot is-active"></span>
+                  <span class="pf-offers-dot"></span>
+                  <span class="pf-offers-dot"></span>
+                  <span class="pf-offers-dot"></span>
+                  <span class="pf-offers-dot"></span>
+                  <span class="pf-offers-dot"></span>
+              </div>
+
               {% render 'cart-summary', section_id: section.id, show_view_cart_button: false %}
               <button
                 type="button"
@@ -112,6 +166,52 @@
     </div>
   </dialog>
 </cart-drawer-component>
+
+<script>
+  window.scrollPfOffers = function(direction) {
+    const container = document.querySelector('.pf-cart-drawer__offers-scroll');
+    if (container) {
+      container.scrollBy({ left: direction * 215, behavior: 'smooth' });
+    }
+  };
+
+  (function() {
+    if (window.__pfOfferListenerAdded) return;
+    window.__pfOfferListenerAdded = true;
+    document.addEventListener('click', function(e) {
+      const offerBtn = e.target.closest('[data-pf-offer-variant-id]');
+      if (!offerBtn) return;
+      const variantId = offerBtn.getAttribute('data-pf-offer-variant-id');
+      if (!variantId) return;
+
+      offerBtn.disabled = true;
+      offerBtn.textContent = '...';
+
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: parseInt(variantId), quantity: 1 })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function() {
+        offerBtn.textContent = 'Added';
+        setTimeout(function() { offerBtn.textContent = 'Add'; offerBtn.disabled = false; }, 1800);
+        document.dispatchEvent(new CustomEvent('cart:updated', { bubbles: true }));
+        const drawer = document.querySelector('cart-drawer-component');
+        if (drawer && typeof drawer.fetchCart === 'function') {
+          drawer.fetchCart();
+        } else {
+          window.location.reload();
+        }
+      })
+      .catch(function(err) {
+        console.error('Add offer failed', err);
+        offerBtn.disabled = false;
+        offerBtn.textContent = 'Add';
+      });
+    });
+  })();
+</script>
 
 <style>
   .pf-cart-drawer__dialog,
@@ -376,6 +476,460 @@
   .pf-cart-drawer__continue-btn:hover {
     border-color: #111111;
     background: #fafafa;
+  }
+
+  /* ── Image 1 Model Cart Drawer Redesign ── */
+
+  /* Header */
+  .pf-cart-drawer__header {
+    padding: 0 16px !important;
+    height: 48px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+
+  .pf-cart-drawer__heading {
+    font-size: 0.88rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+  }
+
+  /* Cart Item Card Container (Matching Image 1) */
+  .pf-cart-drawer__items-scroll {
+    padding: 12px 14px !important;
+  }
+
+  /* ── Header & Back Button (Ajmal Model) ── */
+  .pf-cart-drawer__back-btn {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 0 !important;
+    background: transparent !important;
+    cursor: pointer !important;
+    color: #111111 !important;
+    padding: 0 !important;
+  }
+
+  .pf-cart-drawer__heading {
+    margin: 0 !important;
+    font-size: 0.9rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    color: #111111 !important;
+  }
+
+  /* ── Cart Item Card Grid (Compact Single Line Title & Reduced Height) ── */
+  .cart-items__table-row {
+    display: grid !important;
+    grid-template-columns: 50px 1fr auto !important;
+    grid-template-rows: auto auto !important;
+    gap: 2px 10px !important;
+    align-items: center !important;
+    position: relative !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 8px 10px !important;
+    margin-bottom: 8px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02) !important;
+  }
+
+  .cart-items__media {
+    grid-column: 1 !important;
+    grid-row: 1 / 3 !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    height: 50px !important;
+    padding: 0 !important;
+    align-self: center !important;
+  }
+
+  .cart-items__media-container {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+    border: 1px solid #eeeeee !important;
+  }
+
+  .cart-items__details {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    padding: 0 20px 0 0 !important;
+    min-width: 0 !important;
+  }
+
+  .cart-items__title {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #111111 !important;
+    line-height: 1.2 !important;
+    margin-bottom: 1px !important;
+    display: block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+  }
+
+  .cart-items__price-savings-wrap {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1px !important;
+  }
+
+  .cart-items__price-row {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 6px !important;
+  }
+
+  .cart-items__sale-price {
+    font-size: 13.5px !important;
+    font-weight: 800 !important;
+    color: #111111 !important;
+  }
+
+  .cart-items__compare-price {
+    font-size: 11.5px !important;
+    color: #999999 !important;
+    text-decoration: line-through !important;
+    font-weight: 500 !important;
+  }
+
+  .cart-items__save-badge {
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    color: #16a34a !important;
+    display: block !important;
+  }
+
+  .cart-items__remove {
+    position: absolute !important;
+    top: 6px !important;
+    right: 8px !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 2px !important;
+    color: #111111 !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .cart-items__quantity {
+    grid-column: 3 !important;
+    grid-row: 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding: 0 !important;
+    margin-top: 0 !important;
+    width: auto !important;
+  }
+
+  .quantity-selector {
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 6px !important;
+    height: 26px !important;
+    min-height: 26px !important;
+    padding: 0 2px !important;
+    background: #ffffff !important;
+  }
+
+  .quantity-selector__button {
+    width: 20px !important;
+    height: 20px !important;
+    color: #111111 !important;
+    font-weight: 700 !important;
+  }
+
+  .quantity-selector__input {
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    color: #111111 !important;
+    width: 22px !important;
+  }
+
+  /* ── Limited Time Offers Carousel ── */
+  .pf-cart-drawer__offers {
+    margin-top: 0 !important;
+    margin-bottom: 12px !important;
+    padding-top: 10px !important;
+    border-top: 1px solid #e5e7eb !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .pf-cart-drawer__offers-head {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+    width: 100% !important;
+  }
+
+  .pf-cart-drawer__offers-title-wrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  .pf-cart-drawer__offers-title {
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    color: #111111 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    margin: 0 !important;
+  }
+
+  .pf-cart-drawer__offers-badge {
+    background: #e6f4ea !important;
+    color: #16a34a !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    padding: 2px 7px !important;
+    border-radius: 12px !important;
+    display: inline-block !important;
+  }
+
+  .cart-items__variant-subtitle {
+    font-size: 12px !important;
+    color: #777777 !important;
+    margin: 2px 0 !important;
+    line-height: 1.2 !important;
+  }
+
+  .pf-cart-drawer__offers-nav {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
+  .pf-offers-nav-btn {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
+    border-radius: 4px !important;
+    border: 1px solid #e0e0e0 !important;
+    background: #ffffff !important;
+    color: #111111 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+  }
+
+  .pf-offers-nav-btn:hover {
+    background: #111111 !important;
+    color: #ffffff !important;
+    border-color: #111111 !important;
+  }
+
+  .pf-cart-drawer__offers-scroll {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 10px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    padding-bottom: 4px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-snap-type: x mandatory !important;
+    scroll-behavior: smooth !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .pf-cart-drawer__offers-scroll::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .pf-offer-card {
+    flex: 0 0 215px !important;
+    width: 215px !important;
+    min-width: 215px !important;
+    max-width: 215px !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+    scroll-snap-align: start !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    padding: 8px !important;
+    background: #ffffff !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+  }
+
+  .pf-offer-img {
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    border-radius: 6px !important;
+    object-fit: cover !important;
+    flex: 0 0 44px !important;
+    display: block !important;
+    margin: 0 !important;
+  }
+
+  .pf-offer-info {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+  }
+
+  .pf-offer-name {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #111111 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    margin: 0 !important;
+  }
+
+  .pf-offer-price-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  .pf-offer-compare {
+    font-size: 10px !important;
+    color: #888888 !important;
+    text-decoration: line-through !important;
+  }
+
+  .pf-offer-price {
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    color: #111111 !important;
+  }
+
+  .pf-offer-add-btn {
+    background: #111111 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 5px 12px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease !important;
+    flex-shrink: 0 !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .pf-offers-dots {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    margin-top: 8px !important;
+  }
+
+  .pf-offers-dot {
+    width: 5px !important;
+    height: 5px !important;
+    min-width: 5px !important;
+    min-height: 5px !important;
+    border-radius: 50% !important;
+    background: #d1d5db !important;
+    transition: all 0.2s ease !important;
+    display: inline-block !important;
+  }
+
+  .pf-offers-dot.is-active {
+    background: #4b5563 !important;
+    width: 7px !important;
+    height: 7px !important;
+    min-width: 7px !important;
+    min-height: 7px !important;
+  }
+
+  /* ── Prepaid Banner Removed ── */
+
+  /* ── Footer Total & Checkout Button ── */
+  .cart__checkout-button,
+  .pf-cart-drawer__summary .cart__checkout-button {
+    width: 100% !important;
+    min-height: 48px !important;
+    height: 48px !important;
+    background: #111111 !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    border: none !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 16px !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
+    box-sizing: border-box !important;
+  }
+
+  .cart__checkout-button .button-text {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    color: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    display: inline-block !important;
+  }
+
+  .cart__checkout-button .button-price-wrap {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+  }
+
+  .cart__checkout-button .button-price-wrap svg {
+    display: inline-block !important;
+    margin-top: 1px !important;
+    flex-shrink: 0 !important;
   }
 
   @media screen and (max-width: 749px) {

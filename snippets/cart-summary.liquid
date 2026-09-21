@@ -107,64 +107,43 @@
     endif
   -%}
 
-  <div class="cart-totals__container{% if settings.show_installments %} cart-totals__container--has-installments{% endif %}">
+  <div class="cart-totals__container">
     <span
       class="cart-totals__item cart-totals__total"
       role="status"
     >
-      <span class="cart-totals__total-label cart-primary-typography">{{ 'content.cart_subtotal' | t }}</span>
+      <span class="cart-totals__total-label cart-primary-typography">SUBTOTAL</span>
       <text-component
         ref="cartTotal"
         value="{{ total_price | strip_html }}"
         class="cart-totals__total-value cart-secondary-typography"
-        {% comment %} Used by payment_terms web component {% endcomment %}
         data-testid="cart-total-value"
         data-cart-subtotal
       >
         {{ total_price }}
       </text-component>
     </span>
-    {% if settings.show_installments %}
-      <span class="cart-totals__item cart-totals__installments">
-        {% form 'cart', cart %}
-          {{ form | payment_terms }}
-        {% endform %}
-      </span>
-    {% endif %}
   </div>
 </div>
 
 <div class="cart__ctas">
-  {% if show_view_cart_button %}
-    <button
-      type="submit"
-      class="cart__checkout-button button"
-      name="checkout"
-      form="cart-form"
-      {% if cart == empty %}
-        disabled
-      {% endif %}
-    >
-      <span class="button-text">{{ 'content.checkout' | t }}</span>
-    </button>
-  {% endif %}
-
-  {% unless show_view_cart_button %}
-    <button
-      type="submit"
-      id="checkout"
-      class="cart__checkout-button button"
-      name="checkout"
-      {% if cart == empty %}
-        disabled
-      {% endif %}
-      form="cart-form"
-    >
-      <span class="button-text">
-        {{ 'content.checkout' | t }}
-      </span>
-    </button>
-  {% endunless %}
+  <button
+    type="submit"
+    id="checkout"
+    class="cart__checkout-button button"
+    name="checkout"
+    {% if cart == empty %}
+      disabled
+    {% endif %}
+    form="cart-form"
+  >
+    <span class="button-text">CHECKOUT</span>
+    <span class="button-price-wrap">
+      <span>{{ cart.total_price | money }}</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+    </span>
+  </button>
+</div>
 
   {% if additional_checkout_buttons and settings.show_accelerated_checkout_buttons %}
     <div

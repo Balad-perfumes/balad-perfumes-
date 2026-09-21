@@ -16,24 +16,13 @@
       }
     },
     "instagram_reels_section": {
-      "type": "_blocks",
+      "type": "instagram-reels",
       "blocks": {
         "instareel_ig_reels_instagram_reels_feed": {
           "type": "shopify://apps/instareel-ig-reels/blocks/instagram-reels-feed/6399ee9c-54c8-4f76-97d7-8f02f7662aa1",
           "settings": {
             "playlist_id": "",
-            "hide_when_no_product_playlist": false,
-            "show_background": false,
-            "background_color": "#ffffff",
-            "customize_text": false,
-            "heading_font_size": 28,
-            "heading_color": "#000000",
-            "subheading_font_size": 16,
-            "subheading_color": "#000000",
-            "customize_spacing": true,
-            "padding_top": 0,
-            "padding_bottom": 0,
-            "padding_horizontal": 0
+            "hide_when_no_product_playlist": false
           }
         }
       },
@@ -41,32 +30,9 @@
         "instareel_ig_reels_instagram_reels_feed"
       ],
       "settings": {
-        "content_direction": "column",
-        "vertical_on_mobile": true,
-        "horizontal_alignment": "flex-start",
-        "vertical_alignment": "center",
-        "align_baseline": false,
-        "horizontal_alignment_flex_direction_column": "flex-start",
-        "vertical_alignment_flex_direction_column": "center",
-        "gap": 12,
-        "section_width": "page-width",
-        "section_height": "",
-        "section_height_custom": 50,
-        "color_scheme": "",
-        "background_media": "none",
-        "video_position": "cover",
-        "background_image_position": "cover",
-        "border": "none",
-        "border_width": 1,
-        "border_opacity": 100,
-        "border_radius": 0,
-        "toggle_overlay": false,
-        "overlay_color": "#00000026",
-        "overlay_style": "solid",
-        "gradient_direction": "to top",
-        "padding-block-start": 16,
-        "padding-block-end": 32,
-        "remove_horizontal_padding": false
+        "heading": "Shop our Instagram",
+        "subheading": "Follow us on Instagram for exciting content",
+        "show_fallback_reels": true
       }
     },
     "stagmenfashion_similar_products_wqLRpx": {
