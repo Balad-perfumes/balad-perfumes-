@@ -491,8 +491,6 @@
             </div>
           </details>
         </div>
-
-        {% comment %} Customer Reviews Section Removed {% endcomment %}
       </div>
     </div>
   </div>
@@ -2356,6 +2354,55 @@
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
     padding-bottom: 4px;
+  }
+
+  .pf-product-template__related {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    margin-top: 36px !important;
+    padding-top: 28px !important;
+    border-top: 1px solid #e8e8e8 !important;
+  }
+
+  .pf-product-template__related-heading {
+    font-size: 1.4rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    color: #111111 !important;
+  }
+
+  .pf-product-template__related-track .pop-card {
+    flex: 0 0 calc((100% - 60px) / 4) !important;
+    min-width: 220px !important;
+    scroll-snap-align: start !important;
+  }
+
+  @media screen and (max-width: 1024px) {
+    .pf-product-template__related-track .pop-card {
+      flex: 0 0 calc((100% - 40px) / 3) !important;
+      min-width: 200px !important;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .pf-product-template__related {
+      margin-top: 20px !important;
+      padding-top: 16px !important;
+    }
+
+    .pf-product-template__related-heading {
+      font-size: 1.15rem !important;
+    }
+
+    .pf-product-template__related-track {
+      gap: 12px !important;
+    }
+
+    .pf-product-template__related-track .pop-card {
+      flex: 0 0 calc((100% - 12px) / 2) !important;
+      min-width: 160px !important;
+    }
   }
 
   .pf-product-template__related-card {
