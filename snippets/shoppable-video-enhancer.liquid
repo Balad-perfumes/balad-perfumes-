@@ -9,11 +9,11 @@
     padding-right: clamp(20px, 4vw, 56px) !important;
     box-sizing: border-box !important;
     margin-top: 12px !important;
-    margin-bottom: 20px !important;
+    margin-bottom: 24px !important;
     padding-top: 0 !important;
   }
 
-  /* Reset inner app container top margins/padding that cause blank vertical gap */
+  /* Reset inner app container top margins & padding */
   [id*="1790060856d032d058"] > div,
   .shopify-section[id*="1790060856"] > div {
     margin-top: 0 !important;
@@ -31,11 +31,11 @@
     overflow: hidden !important;
   }
 
-  /* Custom Left-Aligned Header with tight gap to video cards */
+  /* Custom Left-Aligned Header with clean gap before video cards */
   .pf-app-ig-header {
     text-align: left !important;
     margin-top: 0 !important;
-    margin-bottom: 8px !important;
+    margin-bottom: 14px !important;
     padding: 0 !important;
   }
 
@@ -44,7 +44,7 @@
     font-weight: 700 !important;
     letter-spacing: -0.02em !important;
     color: #111111 !important;
-    margin: 0 0 2px 0 !important;
+    margin: 0 0 3px 0 !important;
     line-height: 1.2 !important;
     text-align: left !important;
   }
@@ -64,20 +64,23 @@
     text-align: left !important;
   }
 
-  /* Mobile Responsive Padding & Spacing */
+  /* Mobile Responsive: Zero side white space for video slider, balanced top gap & bottom margin */
   @media screen and (max-width: 749px) {
     [id*="1790060856d032d058"],
     .shopify-section[id*="1790060856"],
     [class*="shoppable-video"] {
-      padding-left: 12px !important;
-      padding-right: 12px !important;
-      margin-top: 8px !important;
-      margin-bottom: 14px !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      margin-top: 10px !important;
+      margin-bottom: 20px !important;
       padding-top: 0 !important;
+      padding-bottom: 0 !important;
     }
 
     .pf-app-ig-header {
-      margin-bottom: 8px !important;
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+      margin-bottom: 12px !important;
     }
   }
 </style>
