@@ -12,7 +12,7 @@
     <div class="pf-ig-reels-container" data-ig-reels-track>
       {%- content_for 'blocks' -%}
 
-      {%- if section.blocks.size == 0 or section.settings.show_fallback_reels -%}
+      {%- if section.blocks.size == 0 and section.settings.show_fallback_reels -%}
         <div class="pf-ig-reels-scroll" data-ig-scroll-track>
           {% assign reel_videos = "https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3986519821839708806_video.mp4,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3983616075702959038_video.mp4,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3979993690839627269_video.mp4,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3978544012566563397_video.mp4" | split: "," %}
           {% assign reel_posters = "https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3986519821839708806_thumbnail.jpeg,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3983616075702959038_thumbnail.jpeg,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3979993690839627269_thumbnail.jpeg,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3978544012566563397_thumbnail.jpeg" | split: "," %}
