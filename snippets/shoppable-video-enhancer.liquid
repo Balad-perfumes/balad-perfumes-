@@ -8,12 +8,12 @@
     padding-left: clamp(20px, 4vw, 56px) !important;
     padding-right: clamp(20px, 4vw, 56px) !important;
     box-sizing: border-box !important;
-    margin-top: 20px !important;
-    margin-bottom: 20px !important;
+    margin-top: 12px !important;
+    margin-bottom: 16px !important;
     padding-top: 0 !important;
   }
 
-  /* Reset inner app container top margins/padding that cause huge blank vertical gap */
+  /* Reset inner app container top margins/padding that cause blank vertical gap */
   [id*="1790060856d032d058"] > div,
   [id*="1790060856d032d058"] [class*="wrapper"],
   [id*="1790060856d032d058"] [class*="container"],
@@ -26,11 +26,11 @@
     padding-top: 0 !important;
   }
 
-  /* Custom Left-Aligned Header with tight 12px gap to video cards */
+  /* Custom Left-Aligned Header with tight 6px gap to video cards */
   .pf-app-ig-header {
     text-align: left !important;
     margin-top: 0 !important;
-    margin-bottom: 12px !important;
+    margin-bottom: 6px !important;
     padding: 0 !important;
   }
 
@@ -68,28 +68,28 @@
     [id*="1790060856d032d058"],
     .shopify-section[id*="1790060856"],
     [class*="shoppable-video"] {
-      padding-left: 16px !important;
-      padding-right: 16px !important;
-      margin-top: 14px !important;
-      margin-bottom: 14px !important;
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+      margin-top: 4px !important;
+      margin-bottom: 12px !important;
       padding-top: 0 !important;
     }
 
     .pf-app-ig-header {
-      margin-bottom: 8px !important;
+      margin-bottom: 6px !important;
     }
 
-    /* Enforce bigger video card dimensions on mobile */
+    /* Optimized 2-column mobile card size (172px x 306px) */
     [id*="1790060856d032d058"] [class*="card"],
     [id*="1790060856d032d058"] [class*="item"],
     [id*="1790060856d032d058"] video,
     [class*="shoppable-video"] [class*="card"],
     [class*="shoppable-video"] video {
-      flex: 0 0 215px !important;
-      width: 215px !important;
-      height: 380px !important;
+      flex: 0 0 172px !important;
+      width: 172px !important;
+      height: 306px !important;
       aspect-ratio: 9 / 16 !important;
-      border-radius: 12px !important;
+      border-radius: 10px !important;
     }
   }
 </style>
