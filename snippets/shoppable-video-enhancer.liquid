@@ -1,0 +1,81 @@
+<style>
+  /* Shoppable Video & App Section Alignment & Side Gap Overrides */
+  [id*="1790060856d032d058"],
+  .shopify-section[id*="1790060856"],
+  [class*="shoppable-video"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: clamp(20px, 4vw, 56px) !important;
+    padding-right: clamp(20px, 4vw, 56px) !important;
+    box-sizing: border-box !important;
+    margin-top: 36px !important;
+    margin-bottom: 36px !important;
+  }
+
+  /* Custom Left-Aligned Header matching media_1790062877837.png */
+  .pf-app-ig-header {
+    text-align: left !important;
+    margin-bottom: 20px !important;
+    padding: 0 !important;
+  }
+
+  .pf-app-ig-title {
+    font-size: clamp(1.4rem, 2.2vw, 1.85rem) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+    color: #111111 !important;
+    margin: 0 0 4px 0 !important;
+    line-height: 1.2 !important;
+    text-align: left !important;
+  }
+
+  .pf-app-ig-sub {
+    font-size: clamp(0.85rem, 1.2vw, 0.95rem) !important;
+    color: #777777 !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+    line-height: 1.35 !important;
+    text-align: left !important;
+  }
+
+  /* Hide default small centered headers produced by third-party app block */
+  [id*="1790060856d032d058"] [class*="title"]:not(.pf-app-ig-title),
+  [id*="1790060856d032d058"] [class*="heading"],
+  [id*="1790060856d032d058"] h1,
+  [id*="1790060856d032d058"] h2,
+  [id*="1790060856d032d058"] h3,
+  [id*="1790060856d032d058"] h4 {
+    text-align: left !important;
+  }
+</style>
+
+<script>
+  (() => {
+    const enhanceShoppableVideoAppSection = () => {
+      const section = document.querySelector('[id*="1790060856d032d058"]') || document.querySelector('.shopify-section[id*="1790060856"]') || document.querySelector('[class*="shoppable-video"]');
+      if (!section) return;
+
+      if (!section.querySelector('.pf-app-ig-header')) {
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'pf-app-ig-header';
+        headerDiv.innerHTML = `
+          <h2 class="pf-app-ig-title">Shop our Instagram</h2>
+          <p class="pf-app-ig-sub">Follow us on Instagram for exciting content</p>
+        `;
+
+        const firstChild = section.firstElementChild;
+        if (firstChild) {
+          section.insertBefore(headerDiv, firstChild);
+        } else {
+          section.appendChild(headerDiv);
+        }
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', enhanceShoppableVideoAppSection);
+    window.addEventListener('load', enhanceShoppableVideoAppSection);
+    setTimeout(enhanceShoppableVideoAppSection, 500);
+    setTimeout(enhanceShoppableVideoAppSection, 1500);
+  })();
+</script>
+

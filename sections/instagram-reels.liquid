@@ -13,15 +13,27 @@
       {%- content_for 'blocks' -%}
 
       {%- if section.blocks.size == 0 or section.settings.show_fallback_reels -%}
-        <div class="pf-ig-reels-scroll">
+        <div class="pf-ig-reels-scroll" data-ig-scroll-track>
           {% assign reel_videos = "https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3986519821839708806_video.mp4,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3983616075702959038_video.mp4,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3979993690839627269_video.mp4,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3978544012566563397_video.mp4" | split: "," %}
           {% assign reel_posters = "https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3986519821839708806_thumbnail.jpeg,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3983616075702959038_thumbnail.jpeg,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3979993690839627269_thumbnail.jpeg,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3978544012566563397_thumbnail.jpeg" | split: "," %}
+          {% assign reel_captions = "Discover Balad Signature Fragrances ✨,Handcrafted Luxury Oils & Oud Blends,Balad Perfumes Flagship Store Experience,Unboxing Premium Perfumes by Balad" | split: "," %}
 
           {% for vid in reel_videos %}
-            <div class="pf-ig-reel-card">
+            {% assign idx = forloop.index0 %}
+            {% assign poster_url = reel_posters[idx] %}
+            {% assign caption_txt = reel_captions[idx] %}
+
+            <div
+              class="pf-ig-reel-card"
+              data-ig-reel-card
+              data-video-src="{{ vid }}"
+              data-poster="{{ poster_url }}"
+              data-caption="{{ caption_txt }}"
+              data-ig-link="https://www.instagram.com/baladperfume/"
+            >
               <video
                 src="{{ vid }}"
-                poster="{{ reel_posters[forloop.index0] }}"
+                poster="{{ poster_url }}"
                 playsinline
                 loop
                 muted
@@ -38,6 +50,11 @@
                 </svg>
                 <span>baladperfume</span>
               </div>
+              <div class="pf-ig-reel-play-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#ffffff">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+              </div>
             </div>
           {% endfor %}
         </div>
@@ -53,52 +70,139 @@
   </div>
 </div>
 
+<!-- Instagram Reel Fullscreen Modal Player -->
+<div class="pf-ig-modal-backdrop" data-ig-modal>
+  <div class="pf-ig-modal-content">
+    <button type="button" class="pf-ig-modal-close" data-ig-modal-close aria-label="Close video player">&times;</button>
+    <div class="pf-ig-modal-video-wrapper">
+      <video class="pf-ig-modal-video" data-ig-modal-video loop playsinline></video>
+
+      <!-- Video Controls Overlay -->
+      <div class="pf-ig-modal-top-bar">
+        <div class="pf-ig-reel-top-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          </svg>
+          <span>baladperfume</span>
+        </div>
+        <button type="button" class="pf-ig-modal-mute-btn" data-ig-mute-btn aria-label="Toggle Mute">
+          <svg class="pf-ig-sound-on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <svg class="pf-ig-sound-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="pf-ig-modal-bottom-bar">
+        <p class="pf-ig-modal-caption" data-ig-modal-caption></p>
+        <a href="https://www.instagram.com/baladperfume/" target="_blank" rel="noopener" class="pf-ig-modal-cta" data-ig-modal-cta>
+          Shop on Instagram
+        </a>
+      </div>
+    </div>
+
+    <!-- Prev/Next Navigation Controls inside Modal -->
+    <button type="button" class="pf-ig-modal-nav pf-ig-modal-prev" data-ig-modal-prev aria-label="Previous Reel">&#10094;</button>
+    <button type="button" class="pf-ig-modal-nav pf-ig-modal-next" data-ig-modal-next aria-label="Next Reel">&#10095;</button>
+  </div>
+</div>
+
 <style>
   .pf-ig-reels-section {
-    padding: 40px 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 44px 0;
     background: #ffffff;
     overflow: hidden;
   }
 
   .pf-ig-reels-header {
-    text-align: center;
+    text-align: left !important;
     margin-bottom: 24px;
-    padding: 0 16px;
+    padding: 0 clamp(20px, 4vw, 56px);
   }
 
+  /* Title styling matching media_1790062877837.png */
   .pf-ig-reels-title {
-    font-size: 1.8rem;
+    font-size: clamp(1.4rem, 2.2vw, 1.85rem);
     font-weight: 700;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
     color: #111111;
-    margin: 0 0 6px 0;
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+    text-align: left !important;
   }
 
+  /* Subheading styling matching media_1790062877837.png */
   .pf-ig-reels-sub {
-    font-size: 0.92rem;
-    color: #666666;
+    font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+    color: #777777;
+    font-weight: 400;
     margin: 0;
+    line-height: 1.35;
+    text-align: left !important;
   }
 
   .pf-ig-reels-wrapper {
-    position: relative;
-    width: 100%;
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
-  /* Horizontal Scroll & App Block Override */
+  .pf-ig-reels-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .pf-ig-reels-container * {
+    max-width: 100% !important;
+  }
+
+  /* Suppress third-party app block internal small title headers */
+  .pf-ig-reels-container [class*="header"]:not(.pf-ig-reels-header),
+  .pf-ig-reels-container [class*="title"]:not(.pf-ig-reels-title):not(.pf-ig-reel-caption),
+  .pf-ig-reels-container [class*="heading"]:not(.pf-ig-reels-title),
+  .pf-ig-reels-container > div > h1,
+  .pf-ig-reels-container > div > h2,
+  .pf-ig-reels-container > div > h3,
+  .pf-ig-reels-container > div > h4,
+  .pf-ig-reels-container > div > header {
+    display: none !important;
+  }
+
+  /* Horizontal Scroll Container Full Width Spacing with Top Section Exact Side Gap */
   .pf-ig-reels-scroll,
   .pf-ig-reels-container [class*="instareel"],
   .pf-ig-reels-container iframe,
   .pf-ig-reels-container [class*="feed"],
-  .pf-ig-reels-container [class*="container"] {
+  .pf-ig-reels-container [class*="container"],
+  .pf-ig-reels-container [class*="wrapper"],
+  .pf-ig-reels-container [class*="slider"] {
     display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
     gap: 16px !important;
     overflow-x: auto !important;
     scrollbar-width: none !important;
-    padding: 8px 24px 24px !important;
+    padding: 8px clamp(20px, 4vw, 56px) 24px clamp(20px, 4vw, 56px) !important;
     -webkit-overflow-scrolling: touch !important;
     scroll-snap-type: x mandatory !important;
     scroll-behavior: smooth !important;
+    touch-action: pan-x pan-y !important;
   }
 
   .pf-ig-reels-scroll::-webkit-scrollbar,
@@ -106,11 +210,10 @@
     display: none !important;
   }
 
-  /* Reel Cards Aspect Ratio 9:16 (Desktop matching media_1789990126218.png) */
+  /* Reel Cards Aspect Ratio 9:16 (Desktop) */
   .pf-ig-reel-card,
   .pf-ig-reels-container [class*="instareel"] [class*="card"],
-  .pf-ig-reels-container [class*="instareel"] [class*="item"],
-  .pf-ig-reels-container [class*="instareel"] video {
+  .pf-ig-reels-container [class*="instareel"] [class*="item"] {
     flex: 0 0 215px !important;
     width: 215px !important;
     height: 380px !important;
@@ -123,6 +226,7 @@
     background: #111111 !important;
     transition: transform 0.25s ease, box-shadow 0.25s ease !important;
     cursor: pointer;
+    text-decoration: none;
   }
 
   .pf-ig-reel-card:hover,
@@ -141,7 +245,7 @@
     display: flex !important;
     align-items: center !important;
     gap: 6px !important;
-    background: rgba(0, 0, 0, 0.35) !important;
+    background: rgba(0, 0, 0, 0.45) !important;
     backdrop-filter: blur(4px) !important;
     padding: 4px 10px !important;
     border-radius: 20px !important;
@@ -149,6 +253,28 @@
     font-size: 13px !important;
     font-weight: 600 !important;
     pointer-events: none !important;
+  }
+
+  .pf-ig-reel-play-icon {
+    position: absolute !important;
+    bottom: 16px !important;
+    right: 16px !important;
+    z-index: 5 !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    background: rgba(0, 0, 0, 0.45) !important;
+    backdrop-filter: blur(4px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: none !important;
+    transition: transform 0.2s ease !important;
+  }
+
+  .pf-ig-reel-card:hover .pf-ig-reel-play-icon {
+    transform: scale(1.1) !important;
+    background: rgba(0, 0, 0, 0.7) !important;
   }
 
   .pf-ig-reel-media {
@@ -161,7 +287,7 @@
   /* Floating White Arrow Button (Matching media_1789990126218.png) */
   .pf-ig-reels-arrow-btn {
     position: absolute !important;
-    right: 20px !important;
+    right: clamp(16px, 3vw, 40px) !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
     width: 44px !important;
@@ -184,46 +310,315 @@
     background: #fcfcfc !important;
   }
 
-  /* Mobile Responsive Card Sizing */
+  /* Fullscreen Video Player Modal */
+  .pf-ig-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(8px);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pf-ig-modal-backdrop.is-open {
+    display: flex !important;
+  }
+
+  .pf-ig-modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    height: 85vh;
+    max-height: 720px;
+    background: #000000;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pf-ig-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+    border: none;
+    font-size: 28px;
+    line-height: 1;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pf-ig-modal-video-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #000;
+  }
+
+  .pf-ig-modal-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .pf-ig-modal-top-bar {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+  }
+
+  .pf-ig-modal-mute-btn {
+    background: rgba(0, 0, 0, 0.45);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .pf-ig-modal-bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 30px 18px 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+    z-index: 10;
+  }
+
+  .pf-ig-modal-caption {
+    color: #ffffff;
+    font-size: 0.9rem;
+    margin: 0 0 12px 0;
+    line-height: 1.4;
+  }
+
+  .pf-ig-modal-cta {
+    display: inline-block;
+    background: #ffffff;
+    color: #111111;
+    padding: 10px 20px;
+    border-radius: 24px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+
+  .pf-ig-modal-cta:hover {
+    transform: scale(1.03);
+    background: #f0f0f0;
+  }
+
+  .pf-ig-modal-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+    color: #ffffff;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .pf-ig-modal-nav:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  .pf-ig-modal-prev {
+    left: -50px;
+  }
+
+  .pf-ig-modal-next {
+    right: -50px;
+  }
+
+  /* Mobile Responsive Spacing */
   @media screen and (max-width: 749px) {
     .pf-ig-reels-section {
-      padding: 24px 0;
+      padding: 28px 0;
+    }
+
+    .pf-ig-reels-header {
+      margin-bottom: 20px;
+      padding: 0 16px;
     }
 
     .pf-ig-reels-title {
-      font-size: 1.4rem;
+      font-size: 1.5rem;
+      margin-bottom: 4px;
+    }
+
+    .pf-ig-reels-sub {
+      font-size: 0.85rem;
     }
 
     .pf-ig-reels-arrow-btn {
       display: none !important;
     }
 
+    .pf-ig-reels-scroll,
+    .pf-ig-reels-container [class*="instareel"] {
+      gap: 12px !important;
+      padding: 4px 16px 16px !important;
+    }
+
     .pf-ig-reel-card,
     .pf-ig-reels-container [class*="instareel"] [class*="card"],
-    .pf-ig-reels-container [class*="instareel"] [class*="item"],
-    .pf-ig-reels-container [class*="instareel"] video {
-      flex: 0 0 190px !important;
-      width: 190px !important;
-      height: 338px !important;
+    .pf-ig-reels-container [class*="instareel"] [class*="item"] {
+      flex: 0 0 180px !important;
+      width: 180px !important;
+      height: 320px !important;
       aspect-ratio: 9 / 16 !important;
       border-radius: 10px !important;
+    }
+
+    .pf-ig-modal-content {
+      width: 92vw;
+      height: 80vh;
+      border-radius: 12px;
+    }
+
+    .pf-ig-modal-prev {
+      left: 8px;
+    }
+    .pf-ig-modal-next {
+      right: 8px;
     }
   }
 </style>
 
 <script>
   (() => {
+    let currentReelIndex = 0;
+    let reelCardsList = [];
+
     const initArrowBtn = () => {
       const nextBtn = document.querySelector('[data-ig-next-btn]');
       if (!nextBtn || nextBtn.dataset.ready === 'true') return;
       nextBtn.dataset.ready = 'true';
 
       nextBtn.addEventListener('click', () => {
-        const scrollContainer = document.querySelector('.pf-ig-reels-scroll') || document.querySelector('.pf-ig-reels-container [class*="instareel"]');
+        const scrollContainer = document.querySelector('[data-ig-scroll-track]') || document.querySelector('.pf-ig-reels-container [class*="instareel"]');
         if (scrollContainer) {
           scrollContainer.scrollBy({ left: 230, behavior: 'smooth' });
         }
       });
+    };
+
+    const initReelModal = () => {
+      const modal = document.querySelector('[data-ig-modal]');
+      const modalVideo = document.querySelector('[data-ig-modal-video]');
+      const modalCaption = document.querySelector('[data-ig-modal-caption]');
+      const modalCta = document.querySelector('[data-ig-modal-cta]');
+      const closeBtn = document.querySelector('[data-ig-modal-close]');
+      const prevBtn = document.querySelector('[data-ig-modal-prev]');
+      const nextBtn = document.querySelector('[data-ig-modal-next]');
+      const muteBtn = document.querySelector('[data-ig-mute-btn]');
+      const soundOn = document.querySelector('.pf-ig-sound-on');
+      const soundOff = document.querySelector('.pf-ig-sound-off');
+
+      if (!modal || !modalVideo) return;
+
+      reelCardsList = Array.from(document.querySelectorAll('[data-ig-reel-card]'));
+
+      const openReelAt = (index) => {
+        if (index < 0) index = reelCardsList.length - 1;
+        if (index >= reelCardsList.length) index = 0;
+        currentReelIndex = index;
+
+        const card = reelCardsList[currentReelIndex];
+        if (!card) return;
+
+        const videoSrc = card.dataset.videoSrc || (card.querySelector('video') ? card.querySelector('video').src : '');
+        const caption = card.dataset.caption || 'Shop our Instagram collection @baladperfume';
+        const igLink = card.dataset.igLink || 'https://www.instagram.com/baladperfume/';
+
+        modalVideo.src = videoSrc;
+        modalVideo.currentTime = 0;
+        modalVideo.muted = false;
+        if (soundOn && soundOff) {
+          soundOn.style.display = 'block';
+          soundOff.style.display = 'none';
+        }
+
+        if (modalCaption) modalCaption.textContent = caption;
+        if (modalCta) modalCta.href = igLink;
+
+        modal.classList.add('is-open');
+        modalVideo.play().catch(() => {
+          modalVideo.muted = true;
+          if (soundOn && soundOff) {
+            soundOn.style.display = 'none';
+            soundOff.style.display = 'block';
+          }
+          modalVideo.play();
+        });
+      };
+
+      const closeModal = () => {
+        modal.classList.remove('is-open');
+        modalVideo.pause();
+        modalVideo.src = '';
+      };
+
+      reelCardsList.forEach((card, idx) => {
+        card.addEventListener('click', (e) => {
+          e.preventDefault();
+          openReelAt(idx);
+        });
+      });
+
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) closeModal();
+        });
+      }
+
+      if (prevBtn) prevBtn.addEventListener('click', () => openReelAt(currentReelIndex - 1));
+      if (nextBtn) nextBtn.addEventListener('click', () => openReelAt(currentReelIndex + 1));
+
+      if (muteBtn) {
+        muteBtn.addEventListener('click', () => {
+          modalVideo.muted = !modalVideo.muted;
+          if (soundOn && soundOff) {
+            soundOn.style.display = modalVideo.muted ? 'none' : 'block';
+            soundOff.style.display = modalVideo.muted ? 'block' : 'none';
+          }
+        });
+      }
     };
 
     const cleanInstaReelsJsonLeak = () => {
@@ -257,10 +652,12 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       initArrowBtn();
+      initReelModal();
       cleanInstaReelsJsonLeak();
     });
     window.addEventListener('load', () => {
       initArrowBtn();
+      initReelModal();
       cleanInstaReelsJsonLeak();
     });
     setInterval(cleanInstaReelsJsonLeak, 400);
