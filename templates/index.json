@@ -100,19 +100,12 @@
         "color_scheme": "scheme-1"
       }
     },
-    "category_products_scroll": {
-      "type": "stagmenfashion-category-products-scroll",
+    "17895486123c3c89da": {
+      "type": "instagram-reels",
       "settings": {
-        "heading": "Discover Your Signature Scent",
-        "subheading": "Explore captivating fragrances, from fresh everyday scents to rich and unforgettable blends.",
-        "collection": "all",
-        "products_to_show": 12,
-        "discover_more_label": "Shop All Fragrances →",
-        "discover_more_link": "shopify://collections/all",
-        "background": "#f0f1f4",
-        "section_background": "rgba(0,0,0,0)",
-        "shell_radius": 12,
-        "color_scheme": "scheme-1"
+        "heading": "Shop our Instagram",
+        "subheading": "Follow us on Instagram for exciting content",
+        "show_fallback_reels": true
       }
     },
     "banner_slider": {
@@ -169,6 +162,21 @@
         "padding_bottom": 0
       }
     },
+    "category_products_scroll": {
+      "type": "stagmenfashion-category-products-scroll",
+      "settings": {
+        "heading": "Discover Your Signature Scent",
+        "subheading": "Explore captivating fragrances, from fresh everyday scents to rich and unforgettable blends.",
+        "collection": "all",
+        "products_to_show": 12,
+        "discover_more_label": "Shop All Fragrances →",
+        "discover_more_link": "shopify://collections/all",
+        "background": "#f0f1f4",
+        "section_background": "rgba(0,0,0,0)",
+        "shell_radius": 12,
+        "color_scheme": "scheme-1"
+      }
+    },
     "trending_now": {
       "type": "stagmenfashion-trending-now",
       "disabled": true,
@@ -181,26 +189,6 @@
         "discover_more_link": "shopify://collections/trending",
         "background": "#f7f7f8",
         "color_scheme": "scheme-1"
-      }
-    },
-    "17895486123c3c89da": {
-      "type": "instagram-reels",
-      "blocks": {
-        "instareel_ig_reels_instagram_reels_feed_mAaTPW": {
-          "type": "shopify://apps/instareel-ig-reels/blocks/instagram-reels-feed/6399ee9c-54c8-4f76-97d7-8f02f7662aa1",
-          "settings": {
-            "playlist_id": "",
-            "hide_when_no_product_playlist": false
-          }
-        }
-      },
-      "block_order": [
-        "instareel_ig_reels_instagram_reels_feed_mAaTPW"
-      ],
-      "settings": {
-        "heading": "Shop our Instagram",
-        "subheading": "Follow us on Instagram for exciting content",
-        "show_fallback_reels": true
       }
     },
     "our_stores": {
