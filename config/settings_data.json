@@ -108,6 +108,11 @@
         "type": "shopify://apps/judge-me-reviews/blocks/judgeme_core/61ccd3b1-a9f2-4160-9fe9-4fec8413e5d8",
         "disabled": false,
         "settings": {}
+      },
+      "10070826256114897734": {
+        "type": "shopify://apps/reelme/blocks/reelify-body/019b9281-4b4d-7fac-9362-f43cb90e74cc",
+        "disabled": false,
+        "settings": {}
       }
     },
     "color_schemes": {
