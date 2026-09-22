@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -17,18 +26,6 @@
     },
     "instagram_reels_section": {
       "type": "instagram-reels",
-      "blocks": {
-        "instareel_ig_reels_instagram_reels_feed": {
-          "type": "shopify://apps/instareel-ig-reels/blocks/instagram-reels-feed/6399ee9c-54c8-4f76-97d7-8f02f7662aa1",
-          "settings": {
-            "playlist_id": "",
-            "hide_when_no_product_playlist": false
-          }
-        }
-      },
-      "block_order": [
-        "instareel_ig_reels_instagram_reels_feed"
-      ],
       "settings": {
         "heading": "Shop our Instagram",
         "subheading": "Follow us on Instagram for exciting content",
