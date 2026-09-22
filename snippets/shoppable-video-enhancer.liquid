@@ -1,5 +1,5 @@
 <style>
-  /* Shoppable Video & App Section Alignment, Spacing & Gap Overrides */
+  /* Shoppable Video & App Section Container & Alignment */
   [id*="1790060856d032d058"],
   .shopify-section[id*="1790060856"],
   [class*="shoppable-video"] {
@@ -9,28 +9,33 @@
     padding-right: clamp(20px, 4vw, 56px) !important;
     box-sizing: border-box !important;
     margin-top: 12px !important;
-    margin-bottom: 16px !important;
+    margin-bottom: 20px !important;
     padding-top: 0 !important;
   }
 
   /* Reset inner app container top margins/padding that cause blank vertical gap */
   [id*="1790060856d032d058"] > div,
-  [id*="1790060856d032d058"] [class*="wrapper"],
-  [id*="1790060856d032d058"] [class*="container"],
-  [id*="1790060856d032d058"] [class*="feed"],
-  [id*="1790060856d032d058"] [class*="grid"],
-  [id*="1790060856d032d058"] [class*="slider"],
-  [class*="shoppable-video"] > div,
-  [class*="shoppable-video"] [class*="container"] {
+  .shopify-section[id*="1790060856"] > div {
     margin-top: 0 !important;
     padding-top: 0 !important;
   }
 
-  /* Custom Left-Aligned Header with tight 6px gap to video cards */
+  /* Collapse & hide app block internal header wrapper (div.tg-social-header-wrapper) */
+  .tg-social-header-wrapper,
+  [class*="tg-social-header"],
+  [class*="social-header-wrapper"] {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Custom Left-Aligned Header with tight gap to video cards */
   .pf-app-ig-header {
     text-align: left !important;
     margin-top: 0 !important;
-    margin-bottom: 6px !important;
+    margin-bottom: 8px !important;
     padding: 0 !important;
   }
 
@@ -55,41 +60,24 @@
 
   /* Hide default small centered headers produced by third-party app block */
   [id*="1790060856d032d058"] [class*="title"]:not(.pf-app-ig-title),
-  [id*="1790060856d032d058"] [class*="heading"],
-  [id*="1790060856d032d058"] h1,
-  [id*="1790060856d032d058"] h2,
-  [id*="1790060856d032d058"] h3,
-  [id*="1790060856d032d058"] h4 {
+  [id*="1790060856d032d058"] [class*="heading"] {
     text-align: left !important;
   }
 
-  /* Mobile Responsive Optimizations for App Section */
+  /* Mobile Responsive Padding & Spacing */
   @media screen and (max-width: 749px) {
     [id*="1790060856d032d058"],
     .shopify-section[id*="1790060856"],
     [class*="shoppable-video"] {
       padding-left: 12px !important;
       padding-right: 12px !important;
-      margin-top: 4px !important;
-      margin-bottom: 12px !important;
+      margin-top: 8px !important;
+      margin-bottom: 14px !important;
       padding-top: 0 !important;
     }
 
     .pf-app-ig-header {
-      margin-bottom: 6px !important;
-    }
-
-    /* Optimized 2-column mobile card size (172px x 306px) */
-    [id*="1790060856d032d058"] [class*="card"],
-    [id*="1790060856d032d058"] [class*="item"],
-    [id*="1790060856d032d058"] video,
-    [class*="shoppable-video"] [class*="card"],
-    [class*="shoppable-video"] video {
-      flex: 0 0 172px !important;
-      width: 172px !important;
-      height: 306px !important;
-      aspect-ratio: 9 / 16 !important;
-      border-radius: 10px !important;
+      margin-bottom: 8px !important;
     }
   }
 </style>
