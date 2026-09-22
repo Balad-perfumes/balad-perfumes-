@@ -1,5 +1,5 @@
 <style>
-  /* Shoppable Video & App Section Alignment & Side Gap Overrides */
+  /* Shoppable Video & App Section Alignment, Spacing & Gap Overrides */
   [id*="1790060856d032d058"],
   .shopify-section[id*="1790060856"],
   [class*="shoppable-video"] {
@@ -8,14 +8,29 @@
     padding-left: clamp(20px, 4vw, 56px) !important;
     padding-right: clamp(20px, 4vw, 56px) !important;
     box-sizing: border-box !important;
-    margin-top: 36px !important;
-    margin-bottom: 36px !important;
+    margin-top: 24px !important;
+    margin-bottom: 24px !important;
+    padding-top: 0 !important;
   }
 
-  /* Custom Left-Aligned Header matching media_1790062877837.png */
+  /* Reset inner app container top margins/padding that cause huge blank vertical gap */
+  [id*="1790060856d032d058"] > div,
+  [id*="1790060856d032d058"] [class*="wrapper"],
+  [id*="1790060856d032d058"] [class*="container"],
+  [id*="1790060856d032d058"] [class*="feed"],
+  [id*="1790060856d032d058"] [class*="grid"],
+  [id*="1790060856d032d058"] [class*="slider"],
+  [class*="shoppable-video"] > div,
+  [class*="shoppable-video"] [class*="container"] {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  /* Custom Left-Aligned Header with tight 16px gap to video cards */
   .pf-app-ig-header {
     text-align: left !important;
-    margin-bottom: 20px !important;
+    margin-top: 0 !important;
+    margin-bottom: 16px !important;
     padding: 0 !important;
   }
 
@@ -74,8 +89,7 @@
 
     document.addEventListener('DOMContentLoaded', enhanceShoppableVideoAppSection);
     window.addEventListener('load', enhanceShoppableVideoAppSection);
-    setTimeout(enhanceShoppableVideoAppSection, 500);
-    setTimeout(enhanceShoppableVideoAppSection, 1500);
+    setTimeout(enhanceShoppableVideoAppSection, 400);
+    setTimeout(enhanceShoppableVideoAppSection, 1200);
   })();
 </script>
-
