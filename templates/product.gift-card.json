@@ -13,18 +13,9 @@
         "amount_label_5": "₹10,000",
         "color_scheme": "scheme-1"
       }
-    },
-    "instagram_reels_section": {
-      "type": "instagram-reels",
-      "settings": {
-        "heading": "Shop our Instagram",
-        "subheading": "Follow us on Instagram for exciting content",
-        "show_fallback_reels": true
-      }
     }
   },
   "order": [
-    "main",
-    "instagram_reels_section"
+    "main"
   ]
 }

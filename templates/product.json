@@ -15,25 +15,6 @@
         "delivery_returns": "<p>Fast express dispatch, secure packaging, and easy 7-day size exchanges as per store policy.</p>"
       }
     },
-    "instagram_reels_section": {
-      "type": "instagram-reels",
-      "blocks": {
-        "tg_shoppable_video_main_feed_Wnbm9D": {
-          "type": "shopify://apps/tg-shoppable-video/blocks/main-feed/0199c376-d35a-7319-8e37-e7e7ac8bb0e1",
-          "settings": {
-            "feed_id_widget": ""
-          }
-        }
-      },
-      "block_order": [
-        "tg_shoppable_video_main_feed_Wnbm9D"
-      ],
-      "settings": {
-        "heading": "Shop our Instagram",
-        "subheading": "Follow us on Instagram for exciting content",
-        "show_fallback_reels": true
-      }
-    },
     "stagmenfashion_similar_products_wqLRpx": {
       "type": "stagmenfashion-similar-products",
       "name": "Similar Category Products",
@@ -50,7 +31,6 @@
   },
   "order": [
     "main",
-    "instagram_reels_section",
     "stagmenfashion_similar_products_wqLRpx"
   ]
 }
