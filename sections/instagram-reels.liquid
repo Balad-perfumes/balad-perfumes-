@@ -12,53 +12,6 @@
     <div class="pf-ig-reels-container" data-ig-reels-track>
       {%- content_for 'blocks' -%}
 
-      {%- if section.blocks.size == 0 and section.settings.show_fallback_reels -%}
-        <div class="pf-ig-reels-scroll" data-ig-scroll-track>
-          {% assign reel_videos = "https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3986519821839708806_video.mp4,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3983616075702959038_video.mp4,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3979993690839627269_video.mp4,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3978544012566563397_video.mp4" | split: "," %}
-          {% assign reel_posters = "https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3986519821839708806_thumbnail.jpeg,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3983616075702959038_thumbnail.jpeg,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3979993690839627269_thumbnail.jpeg,https://tikfeed-cdn.neomega.tools/hcfxwy-gs.myshopify.com/ig/3978544012566563397_thumbnail.jpeg" | split: "," %}
-          {% assign reel_captions = "Discover Balad Signature Fragrances ✨,Handcrafted Luxury Oils & Oud Blends,Balad Perfumes Flagship Store Experience,Unboxing Premium Perfumes by Balad" | split: "," %}
-
-          {% for vid in reel_videos %}
-            {% assign idx = forloop.index0 %}
-            {% assign poster_url = reel_posters[idx] %}
-            {% assign caption_txt = reel_captions[idx] %}
-
-            <div
-              class="pf-ig-reel-card"
-              data-ig-reel-card
-              data-video-src="{{ vid }}"
-              data-poster="{{ poster_url }}"
-              data-caption="{{ caption_txt }}"
-              data-ig-link="https://www.instagram.com/baladperfume/"
-            >
-              <video
-                src="{{ vid }}"
-                poster="{{ poster_url }}"
-                playsinline
-                loop
-                muted
-                preload="metadata"
-                class="pf-ig-reel-media"
-                onmouseover="this.play()"
-                onmouseout="this.pause()"
-              ></video>
-              <div class="pf-ig-reel-top-badge">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                </svg>
-                <span>baladperfume</span>
-              </div>
-              <div class="pf-ig-reel-play-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="#ffffff">
-                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-              </div>
-            </div>
-          {% endfor %}
-        </div>
-      {%- endif -%}
     </div>
 
     <!-- Floating Circular Right Arrow Button matching media_1789990126218.png -->
