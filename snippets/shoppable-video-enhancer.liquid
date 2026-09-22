@@ -8,8 +8,8 @@
     padding-left: clamp(20px, 4vw, 56px) !important;
     padding-right: clamp(20px, 4vw, 56px) !important;
     box-sizing: border-box !important;
-    margin-top: 24px !important;
-    margin-bottom: 24px !important;
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
     padding-top: 0 !important;
   }
 
@@ -26,11 +26,11 @@
     padding-top: 0 !important;
   }
 
-  /* Custom Left-Aligned Header with tight 16px gap to video cards */
+  /* Custom Left-Aligned Header with tight 12px gap to video cards */
   .pf-app-ig-header {
     text-align: left !important;
     margin-top: 0 !important;
-    margin-bottom: 16px !important;
+    margin-bottom: 12px !important;
     padding: 0 !important;
   }
 
@@ -39,7 +39,7 @@
     font-weight: 700 !important;
     letter-spacing: -0.02em !important;
     color: #111111 !important;
-    margin: 0 0 4px 0 !important;
+    margin: 0 0 2px 0 !important;
     line-height: 1.2 !important;
     text-align: left !important;
   }
@@ -61,6 +61,36 @@
   [id*="1790060856d032d058"] h3,
   [id*="1790060856d032d058"] h4 {
     text-align: left !important;
+  }
+
+  /* Mobile Responsive Optimizations for App Section */
+  @media screen and (max-width: 749px) {
+    [id*="1790060856d032d058"],
+    .shopify-section[id*="1790060856"],
+    [class*="shoppable-video"] {
+      padding-left: 16px !important;
+      padding-right: 16px !important;
+      margin-top: 14px !important;
+      margin-bottom: 14px !important;
+      padding-top: 0 !important;
+    }
+
+    .pf-app-ig-header {
+      margin-bottom: 8px !important;
+    }
+
+    /* Enforce bigger video card dimensions on mobile */
+    [id*="1790060856d032d058"] [class*="card"],
+    [id*="1790060856d032d058"] [class*="item"],
+    [id*="1790060856d032d058"] video,
+    [class*="shoppable-video"] [class*="card"],
+    [class*="shoppable-video"] video {
+      flex: 0 0 215px !important;
+      width: 215px !important;
+      height: 380px !important;
+      aspect-ratio: 9 / 16 !important;
+      border-radius: 12px !important;
+    }
   }
 </style>
 
