@@ -205,7 +205,8 @@
         "discover_more_label": "Discover more",
         "discover_more_link": "shopify://collections",
         "collection_list": [
-          "for-her"
+          "for-her",
+          "for-him"
         ],
         "show_product_count": true,
         "hide_empty_collections": false,
