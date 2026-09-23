@@ -4220,6 +4220,12 @@
       );
     };
 
+    const initializeJudgeMeReviews = () => {
+      if (window.jdgm && typeof window.jdgm.initializeWidgets === 'function') {
+        window.jdgm.initializeWidgets();
+      }
+    };
+
     reviewOpenBtns.forEach((reviewOpenBtn) => reviewOpenBtn.addEventListener('click', () => {
       let attempts = 0;
       const openJudgeMeForm = () => {
@@ -4230,9 +4236,11 @@
         }
         if (attempts < 60) {
           attempts += 1;
+          if (attempts % 4 === 0) initializeJudgeMeReviews();
           window.setTimeout(openJudgeMeForm, 250);
         }
       };
+      initializeJudgeMeReviews();
       openJudgeMeForm();
     }));
 
