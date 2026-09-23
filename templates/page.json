@@ -228,6 +228,7 @@
         "store_rbtFGV": {
           "type": "store",
           "settings": {
+            "image": "shopify://shop_images/WhatsApp_Image_2026-08-03_at_11.55.24_AM.jpg",
             "store_name": "Calicut",
             "directions_label": "Get Direction",
             "directions_url": "",
@@ -238,6 +239,7 @@
         "store_q6PPyn": {
           "type": "store",
           "settings": {
+            "image": "shopify://shop_images/unnamed.webp",
             "store_name": "Thekkady",
             "directions_label": "Get Direction",
             "directions_url": "",
