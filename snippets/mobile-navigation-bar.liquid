@@ -13,7 +13,18 @@
 
   assign home_url = routes.root_url
   assign collections_url = section.settings.mobile_nav_collections_url | default: routes.collections_url
-  assign about_url = section.settings.mobile_nav_about_url | default: '/pages/about'
+  assign about_url = section.settings.mobile_nav_about_url
+  if about_url == blank and section.settings.menu != blank
+    for navigation_link in section.settings.menu.links
+      assign navigation_title = navigation_link.title | downcase
+      assign navigation_url = navigation_link.url | downcase
+      if navigation_title contains 'about' or navigation_url contains '/pages/about'
+        assign about_url = navigation_link.url
+        break
+      endif
+    endfor
+  endif
+  assign about_url = about_url | default: '/pages/about'
   if customer
     assign account_url = routes.account_url
   else
@@ -21,6 +32,7 @@
   endif
 
   assign current_path = request.path | downcase
+  assign about_path = about_url | split: '?' | first | downcase
   assign is_home_active = false
   assign is_col_active = false
   assign is_about_active = false
@@ -30,7 +42,7 @@
     assign is_home_active = true
   elsif template.name == 'collection' or template.name == 'list-collections' or current_path contains '/collections'
     assign is_col_active = true
-  elsif current_path contains '/pages/about' or template.suffix == 'about'
+  elsif current_path contains about_path or template.suffix == 'about'
     assign is_about_active = true
   elsif template.name contains 'account' or template.name contains 'order' or template.name contains 'login' or template.name contains 'register' or current_path contains '/account'
     assign is_account_active = true
