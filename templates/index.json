@@ -196,6 +196,24 @@
         "padding_bottom": 0
       }
     },
+    "stagmenfashion_category_scroll_iGAtgb": {
+      "type": "stagmenfashion-category-scroll",
+      "name": "Category Scroll",
+      "settings": {
+        "heading": "Shop by Category",
+        "subheading": "Browse our curated collections",
+        "discover_more_label": "Discover more",
+        "discover_more_link": "shopify://collections/new-in",
+        "collection_list": [],
+        "show_product_count": true,
+        "hide_empty_collections": false,
+        "card_radius": 6,
+        "background": "#ffffff",
+        "text_color": "#111111",
+        "muted_text_color": "#6b7280",
+        "color_scheme": ""
+      }
+    },
     "category_products_scroll": {
       "type": "stagmenfashion-category-products-scroll",
       "settings": {
@@ -950,6 +968,7 @@
     "category_scroll",
     "1790060856d032d058",
     "banner_slider",
+    "stagmenfashion_category_scroll_iGAtgb",
     "category_products_scroll",
     "trending_now",
     "our_stores",
