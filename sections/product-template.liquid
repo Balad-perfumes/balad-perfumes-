@@ -493,7 +493,7 @@
         </div>
         <button type="button" class="pf-btn-write-review pf-buybox__write-review" data-pf-reviews-open>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-          Write a Review
+          Write a review
         </button>
       </div>
     </div>
@@ -4221,42 +4221,30 @@
     };
 
     reviewOpenBtns.forEach((reviewOpenBtn) => reviewOpenBtn.addEventListener('click', () => {
-      const reviewWidget = document.querySelector('.pf-product-template__reviews-widget');
-      if (!reviewWidget) return;
-
-      reviewWidget.scrollIntoView({ behavior: 'smooth', block: 'start' });
       let attempts = 0;
       const openJudgeMeForm = () => {
-        const judgeMeWriteButton = reviewWidget.querySelector('.jdgm-write-rev-link, .jdgm-rev-widg__write-rev-btn, .jdgm-write-rev-btn');
+        const judgeMeWriteButton = document.querySelector('#judgeme_product_reviews .jdgm-write-rev-link, #judgeme_product_reviews .jdgm-rev-widg__write-rev-btn, #judgeme_product_reviews .jdgm-write-rev-btn');
         if (judgeMeWriteButton) {
           judgeMeWriteButton.click();
           return;
         }
-        if (attempts < 15) {
+        if (attempts < 60) {
           attempts += 1;
-          window.setTimeout(openJudgeMeForm, 200);
+          window.setTimeout(openJudgeMeForm, 250);
         }
       };
-      window.setTimeout(openJudgeMeForm, 300);
+      openJudgeMeForm();
     }));
 
-    if (reviewOpenBtns.length && reviewModal) {
-      reviewOpenBtns.forEach((reviewOpenBtn) => reviewOpenBtn.addEventListener('click', () => {
-        const jdgmWriteBtn = document.querySelector('.jdgm-write-rev-link, .jdgm-rev-widg__write-rev-btn');
-        if (jdgmWriteBtn) {
-          jdgmWriteBtn.click();
-        } else {
-          reviewModal.classList.add('is-active');
-          reviewModal.setAttribute('aria-hidden', 'false');
-        }
-      }));
-
-      reviewModalCloseBtns.forEach((btn) => {
-        btn.addEventListener('click', () => {
-          reviewModal.classList.remove('is-active');
-          reviewModal.setAttribute('aria-hidden', 'true');
-        });
+    reviewModalCloseBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (!reviewModal) return;
+        reviewModal.classList.remove('is-active');
+        reviewModal.setAttribute('aria-hidden', 'true');
       });
+    });
+
+    if (reviewOpenBtns.length && reviewModal) {
 
       starBtns.forEach((btn) => {
         btn.addEventListener('click', () => {
