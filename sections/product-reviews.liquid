@@ -1,0 +1,20 @@
+{% render 'judgeme-review-section', selected_product: product, reviews_heading: section.settings.heading %}
+
+{% schema %}
+{
+  "name": "Product reviews",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Customer Reviews"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product reviews"
+    }
+  ]
+}
+{% endschema %}

@@ -491,6 +491,10 @@
             </div>
           </details>
         </div>
+        <button type="button" class="pf-btn-write-review pf-buybox__write-review" data-pf-reviews-open>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Write a Review
+        </button>
       </div>
     </div>
   </div>
@@ -1031,6 +1035,12 @@
 
     .pf-product-template__faq-body :is(p, ul, ol):last-child {
       margin-bottom: 0;
+    }
+
+    .pf-buybox__write-review {
+      width: 100%;
+      justify-content: center;
+      margin-top: 14px;
     }
 
     /* ---- Customer Reviews Section ---- */
@@ -4222,14 +4232,14 @@
     };
 
     // Write a Review Modal & Rating Logic
-    const reviewOpenBtn = root.querySelector('[data-pf-reviews-open]');
+    const reviewOpenBtns = document.querySelectorAll('[data-pf-reviews-open]');
     const reviewModal = document.getElementById('pf-review-modal');
     const reviewModalCloseBtns = document.querySelectorAll('[data-pf-review-modal-close]');
     const starBtns = document.querySelectorAll('.pf-star-btn');
     const starRatingVal = document.getElementById('pf-review-rating-val');
     const reviewForm = document.getElementById('pf-review-form');
     const reviewSuccess = document.getElementById('pf-review-success');
-    const customReviewsList = root.querySelector('[data-pf-custom-reviews-list]');
+    const customReviewsList = document.querySelector('[data-pf-custom-reviews-list]');
 
     const escapeHtml = (str) => {
       return String(str).replace(/[&<>'"]/g, 
@@ -4237,8 +4247,8 @@
       );
     };
 
-    if (reviewOpenBtn && reviewModal) {
-      reviewOpenBtn.addEventListener('click', () => {
+    if (reviewOpenBtns.length && reviewModal) {
+      reviewOpenBtns.forEach((reviewOpenBtn) => reviewOpenBtn.addEventListener('click', () => {
         const jdgmWriteBtn = document.querySelector('.jdgm-write-rev-link, .jdgm-rev-widg__write-rev-btn');
         if (jdgmWriteBtn) {
           jdgmWriteBtn.click();
@@ -4246,7 +4256,7 @@
           reviewModal.classList.add('is-active');
           reviewModal.setAttribute('aria-hidden', 'false');
         }
-      });
+      }));
 
       reviewModalCloseBtns.forEach((btn) => {
         btn.addEventListener('click', () => {

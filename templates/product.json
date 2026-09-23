@@ -79,6 +79,12 @@
         "color_scheme": ""
       }
     },
+    "product_reviews": {
+      "type": "product-reviews",
+      "settings": {
+        "heading": "Customer Reviews"
+      }
+    },
     "179015426732e1050b": {
       "type": "_blocks",
       "blocks": {
@@ -131,6 +137,7 @@
     "main",
     "179015115805925714",
     "stagmenfashion_similar_products_wqLRpx",
+    "product_reviews",
     "179015426732e1050b"
   ]
 }
