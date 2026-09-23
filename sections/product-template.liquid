@@ -2,6 +2,7 @@
   assign selected_product = product
   assign current_variant = selected_product.selected_or_first_available_variant
   assign form_id = 'StagProductForm-' | append: section.id
+  assign review_count = selected_product.metafields.reviews.rating_count.value | default: 0 | plus: 0
 
   # Dynamic Rating Fetch from Judge.me / Shopify Metafields
   assign review_rating = blank
@@ -21,9 +22,6 @@
     assign review_rating = selected_product.metafields.judgeme.rating
   endif
 
-  if review_rating == blank or review_rating == '0' or review_rating == '0.0' or review_rating == '0.00'
-    assign review_rating = '5.0'
-  endif
 %}
 
   {% comment %} Product Metafield Image Fetching {% endcomment %}
@@ -239,14 +237,16 @@
         <!-- Rating & Share Row -->
         <div class="pf-buybox__rating-row">
           <div class="pf-buybox__rating-left">
-            <div class="pf-buybox__stars" aria-label="5 out of 5 stars">
+            <div class="pf-buybox__stars" aria-label="{% if review_rating != blank and review_count > 0 %}{{ review_rating }} out of 5 stars{% else %}No reviews yet{% endif %}">
               <span class="pf-star">★</span>
               <span class="pf-star">★</span>
               <span class="pf-star">★</span>
               <span class="pf-star">★</span>
               <span class="pf-star">★</span>
             </div>
-            <span class="pf-buybox__reviews-count">102 reviews</span>
+            <a class="pf-buybox__reviews-count" href="#pf-product-reviews">
+              {{ review_count }} {% if review_count == 1 %}review{% else %}reviews{% endif %}
+            </a>
           </div>
           <button type="button" class="pf-buybox__share-btn" data-share-btn aria-label="Share product">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18">
@@ -642,6 +642,13 @@
     font-size: 11.5px;
     color: #555555;
     font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .pf-buybox__reviews-count:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   .pf-buybox__share-btn {
