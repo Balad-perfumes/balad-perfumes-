@@ -206,11 +206,12 @@
         "discover_more_link": "shopify://collections",
         "collection_list": [
           "for-her",
-          "for-him"
+          "for-him",
+          "unisex"
         ],
         "show_product_count": true,
         "hide_empty_collections": false,
-        "card_radius": 6,
+        "card_radius": 0,
         "background": "#ffffff",
         "text_color": "#111111",
         "muted_text_color": "#6b7280",
