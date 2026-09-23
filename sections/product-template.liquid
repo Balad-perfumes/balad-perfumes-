@@ -4229,7 +4229,12 @@
     reviewOpenBtns.forEach((reviewOpenBtn) => reviewOpenBtn.addEventListener('click', () => {
       let attempts = 0;
       const openJudgeMeForm = () => {
-        const judgeMeWriteButton = document.querySelector('#judgeme_product_reviews .jdgm-write-rev-link, #judgeme_product_reviews .jdgm-rev-widg__write-rev-btn, #judgeme_product_reviews .jdgm-write-rev-btn');
+        const reviewWidget = document.querySelector('#judgeme_product_reviews');
+        const judgeMeWriteButton = reviewWidget?.querySelector(
+          '.jdgm-write-rev-link, .jdgm-rev-widg__write-rev-btn, .jdgm-write-rev-btn'
+        ) || [...(reviewWidget?.querySelectorAll('button, a, [role="button"]') || [])].find((button) =>
+          /write\s+a?\s*review/i.test(`${button.textContent} ${button.getAttribute('aria-label') || ''}`)
+        );
         if (judgeMeWriteButton) {
           judgeMeWriteButton.click();
           return;
