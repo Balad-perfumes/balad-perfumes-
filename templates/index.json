@@ -200,11 +200,13 @@
       "type": "stagmenfashion-category-scroll",
       "name": "Category Scroll",
       "settings": {
-        "heading": "Shop by Category",
-        "subheading": "Browse our curated collections",
+        "heading": "Shop Our Collections",
+        "subheading": "Explore our carefully curated fragrance collections, crafted to suit every mood, moment, and style.",
         "discover_more_label": "Discover more",
-        "discover_more_link": "shopify://collections/new-in",
-        "collection_list": [],
+        "discover_more_link": "shopify://collections",
+        "collection_list": [
+          "for-her"
+        ],
         "show_product_count": true,
         "hide_empty_collections": false,
         "card_radius": 6,
