@@ -107,8 +107,7 @@
           endif
         %}
 
-        <product-card class="stagmenfashion-similar-grid__card" data-product-id="{{ prod.id }}" id="similar-product-card-{{ section.id }}-{{ prod.id }}">
-          <a href="{{ prod.url }}" id="similar-product-link-{{ section.id }}-{{ prod.id }}" class="visually-hidden" ref="productCardLink" tabindex="-1" aria-hidden="true"></a>
+        <div class="stagmenfashion-similar-grid__card" data-product-card>
           <a href="{{ prod.url }}" class="stagmenfashion-similar-grid__media" data-carousel>
             {% if image_count > 0 %}
               {% for image in images limit: 6 %}
@@ -162,22 +161,21 @@
               </a>
               <span class="stagmenfashion-similar-grid__price">RS. {{ prod.price | money_without_currency | remove: ',' }}</span>
             </div>
-            <quick-add-component
-              class="stagmenfashion-similar-grid__quick-add"
-              ref="quickAdd"
-              data-product-title="{{ prod.title | escape }}"
-              data-quick-add-button="choose"
-              data-product-options-count="{{ prod.options.size }}"
+            <button
+              type="button"
+              class="stagmenfashion-similar-grid__plus-btn"
+              data-similar-add
+              data-variant-id="{{ prod.selected_or_first_available_variant.id }}"
+              aria-label="Add {{ prod.title | escape }} to cart"
+              {% unless prod.available %}disabled{% endunless %}
             >
-              <button type="button" class="stagmenfashion-similar-grid__plus-btn" on:click="/handleClick" aria-label="Quick add {{ prod.title | escape }}" {% unless prod.available %}disabled{% endunless %}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-              </button>
-            </quick-add-component>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
           </div>
-        </product-card>
+        </div>
       {% endfor %}
     </div>
   </div>
@@ -186,6 +184,59 @@
 <script>
   (() => {
     const initSectionSimilar = (scope = document) => {
+      scope.querySelectorAll('[data-similar-add]').forEach((button) => {
+        if (button.dataset.readySimilarAdd === 'true') return;
+        button.dataset.readySimilarAdd = 'true';
+
+        button.addEventListener('click', async (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          const variantId = button.dataset.variantId;
+          if (!variantId || button.disabled) return;
+
+          const originalLabel = button.getAttribute('aria-label') || 'Add to cart';
+          button.disabled = true;
+
+          try {
+            const cartAddUrl = window.Shopify?.routes?.root
+              ? `${window.Shopify.routes.root}cart/add.js`
+              : '/cart/add.js';
+            const response = await fetch(cartAddUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+              },
+              body: JSON.stringify({ items: [{ id: Number(variantId), quantity: 1 }] })
+            });
+            const responseData = await response.json();
+            if (!response.ok) throw new Error(responseData.description || 'Unable to add this product to cart');
+
+            const cartResponse = await fetch(window.Shopify?.routes?.root
+              ? `${window.Shopify.routes.root}cart.js`
+              : '/cart.js');
+            const cart = cartResponse.ok ? await cartResponse.json() : responseData;
+            document.dispatchEvent(new CustomEvent('cart:update', {
+              bubbles: true,
+              detail: { data: cart, resource: cart, metadata: { itemCount: cart.item_count } }
+            }));
+
+            button.setAttribute('aria-label', 'Added to cart');
+            button.dataset.added = 'true';
+            window.setTimeout(() => {
+              button.disabled = false;
+              button.setAttribute('aria-label', originalLabel);
+              delete button.dataset.added;
+            }, 1200);
+          } catch (error) {
+            console.error('Similar product add-to-cart failed:', error);
+            button.disabled = false;
+            button.setAttribute('aria-label', originalLabel);
+          }
+        });
+      });
+
       // Carousels inside section
       scope.querySelectorAll('[data-carousel]').forEach((carousel) => {
         if (carousel.dataset.readySimilar === 'true') return;
@@ -655,13 +706,6 @@
     cursor: pointer;
     transition: opacity 0.2s ease, transform 0.2s ease;
     text-decoration: none;
-  }
-
-  .stagmenfashion-similar-grid__quick-add {
-    display: flex;
-    flex: 0 0 28px;
-    width: 28px;
-    height: 28px;
   }
 
   .stagmenfashion-similar-grid__plus-btn:hover { opacity: 1; transform: scale(1.15); }
