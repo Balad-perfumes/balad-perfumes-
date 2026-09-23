@@ -203,7 +203,7 @@
         "heading": "Shop Our Collections",
         "subheading": "Explore our carefully curated fragrance collections, crafted to suit every mood, moment, and style.",
         "discover_more_label": "Discover more",
-        "discover_more_link": "shopify://collections",
+        "discover_more_link": "shopify://collections/all",
         "collection_list": [
           "for-her",
           "for-him",
