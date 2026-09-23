@@ -117,6 +117,15 @@
         "enable_animations": true
       }
     },
+    "about_quote_banner_ARn7Rr": {
+      "type": "about-quote-banner",
+      "name": "About quote banner",
+      "settings": {
+        "text": "<p>At Balad Perfumes, we don’t follow fleeting trends. We create fragrances that make a lasting impression. From rich ouds to elegant florals, every scent is crafted to express your personality and become a signature part of your everyday style.</p>",
+        "color_scheme": "",
+        "enable_animations": true
+      }
+    },
     "about_faq": {
       "type": "about-faq",
       "blocks": {
@@ -213,6 +222,47 @@
         "background": "#ffffff"
       }
     },
+    "stagmenfashion_our_stores_7YD4et": {
+      "type": "stagmenfashion-our-stores",
+      "blocks": {
+        "store_rbtFGV": {
+          "type": "store",
+          "settings": {
+            "store_name": "Calicut",
+            "directions_label": "Get Direction",
+            "directions_url": "",
+            "address": "Khaleej Residency, near Aster, Kozhikode, Kerala 673016",
+            "phone": "+91 94474 25555"
+          }
+        },
+        "store_q6PPyn": {
+          "type": "store",
+          "settings": {
+            "store_name": "Thekkady",
+            "directions_label": "Get Direction",
+            "directions_url": "",
+            "address": "BALAD PERFUMES, Kavitha building, Thekkady, Kerala 685509",
+            "phone": "+91 94473 76786"
+          }
+        }
+      },
+      "block_order": [
+        "store_rbtFGV",
+        "store_q6PPyn"
+      ],
+      "name": "Our Stores",
+      "settings": {
+        "color_scheme": "",
+        "header_alignment": "left",
+        "heading": "Our Stores",
+        "subheading": "Visit our retail locations across India.",
+        "discover_more_label": "",
+        "discover_more_link": "",
+        "padding_top": 0,
+        "padding_bottom": 24,
+        "background": "#ffffff"
+      }
+    },
     "testimonials": {
       "type": "stagmenfashion-home-testimonials",
       "blocks": {
@@ -280,8 +330,10 @@
     "about_story",
     "about_stats",
     "about_values",
+    "about_quote_banner_ARn7Rr",
     "about_faq",
     "stagmenfashion_home_benefits_tpYMCn",
+    "stagmenfashion_our_stores_7YD4et",
     "testimonials"
   ]
 }

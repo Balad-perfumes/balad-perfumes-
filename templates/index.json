@@ -211,7 +211,7 @@
         ],
         "show_product_count": true,
         "hide_empty_collections": false,
-        "card_radius": 0,
+        "card_radius": 6,
         "background": "#ffffff",
         "text_color": "#111111",
         "muted_text_color": "#6b7280",
