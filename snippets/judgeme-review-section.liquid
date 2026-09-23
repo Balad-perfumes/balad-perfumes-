@@ -28,7 +28,7 @@
     color: #111111;
   }
   .pf-reviews-score-bar {
-    display: flex;
+    display: none;
     align-items: center;
     gap: 10px;
   }
@@ -327,7 +327,7 @@
     <div id='judgeme_product_reviews' class='jdgm-widget jdgm-review-widget pf-product-template__reviews-widget' data-product-title='{{ product.title | escape }}' data-id='{{ product.id }}' data-product-id='{{ product.id }}' data-widget='review' data-auto-install='false' data-shop-reviews-count='{{ shop.metafields.judgeme.shop_reviews_count | default: 0 | escape }}' data-entry-point='review_widget.js' data-entry-key='review-widget/main.js'>
       {% if has_legacy %}
         <div class='jdgm-legacy-widget-content' style='display: none;'>{{ product.metafields.judgeme.widget }}</div>
-      {% else %}
+      {% elsif false %}
         <!-- Custom verified fallback reviews display list -->
         <div class="pf-reviews-list" data-pf-custom-reviews-list>
           <div class="pf-review-card">
@@ -371,6 +371,7 @@
   </div>
 </div>
 
+{% comment %}
 <!-- Write a Review Modal -->
 <div class="pf-review-modal" id="pf-review-modal" aria-hidden="true">
   <div class="pf-review-modal__backdrop" data-pf-review-modal-close></div>
@@ -425,3 +426,4 @@
     </form>
   </div>
 </div>
+{% endcomment %}

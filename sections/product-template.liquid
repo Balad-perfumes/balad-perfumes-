@@ -1111,47 +1111,13 @@
       border: none !important;
     }
 
-    /* 1. Hide the outer Judge.me widget completely when empty and form is closed (collapses all padding/margins) */
-    #judgeme_product_reviews[data-empty-state="empty_widget"]:not(.jdgm-form-open),
-    .jm-review-widget[data-empty-state="empty_widget"]:not(.jdgm-form-open),
-    .jdgm-review-widget[data-empty-state="empty_widget"]:not(.jdgm-form-open),
-    #judgeme_product_reviews:has(.jdgm-empty-state):not(.jdgm-form-open),
-    .jdgm-widget:has(.jdgm-empty-state):not(.jdgm-form-open),
-    .jm-review-widget:has(.jdgm-empty-state):not(.jdgm-form-open),
-    .jm-review-widget:has(.jm-no-reviews-state):not(.jdgm-form-open) {
-      display: none !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      height: 0 !important;
-      min-height: 0 !important;
-    }
-    /* 2. Force show the widget container when the review form is opened */
+    /* Keep Judge.me's native review header, write button, and empty state visible. */
     #judgeme_product_reviews.jdgm-form-open,
     .jm-review-widget.jdgm-form-open,
     .jdgm-widget.jdgm-form-open {
       display: block !important;
       height: auto !important;
       min-height: auto !important;
-    }
-    /* 3. Collapse the custom theme widget container margin if empty */
-    .pf-product-template__reviews-widget:has([data-empty-state="empty_widget"]):not(:has(.jdgm-form-open)),
-    .pf-product-template__reviews-widget:has(.jdgm-empty-state):not(:has(.jdgm-form-open)) {
-      margin: 0 !important;
-    }
-    /* 4. Hide default headers inside the widget if reviews exist */
-    .jdgm-rev-wid__header,
-    .jdgm-rev-wid__title,
-    .jdgm-rev-wid__summary,
-    .jdgm-rev-wid__summary-text,
-    .jdgm-rev-wid__header-actions,
-    .jdgm-histogram,
-    [data-testid="header"],
-    .jdgm-rev-wid .jdgm-write-rev-link,
-    .jdgm-rev-wid .jdgm-rev-mgr__write-rev-btn,
-    .jm-review-widget__header,
-    .jm-no-reviews-state,
-    .jdgm-empty-state {
-      display: none !important;
     }
     /* Custom Styling for Judge.me Review Form & Stars to match custom theme */
     .jdgm-write-rev-form, .jm-write-rev-form, .jm-form {
@@ -4246,6 +4212,26 @@
         tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
       );
     };
+
+    reviewOpenBtns.forEach((reviewOpenBtn) => reviewOpenBtn.addEventListener('click', () => {
+      const reviewWidget = document.querySelector('.pf-product-template__reviews-widget');
+      if (!reviewWidget) return;
+
+      reviewWidget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      let attempts = 0;
+      const openJudgeMeForm = () => {
+        const judgeMeWriteButton = reviewWidget.querySelector('.jdgm-write-rev-link, .jdgm-rev-widg__write-rev-btn, .jdgm-write-rev-btn');
+        if (judgeMeWriteButton) {
+          judgeMeWriteButton.click();
+          return;
+        }
+        if (attempts < 15) {
+          attempts += 1;
+          window.setTimeout(openJudgeMeForm, 200);
+        }
+      };
+      window.setTimeout(openJudgeMeForm, 300);
+    }));
 
     if (reviewOpenBtns.length && reviewModal) {
       reviewOpenBtns.forEach((reviewOpenBtn) => reviewOpenBtn.addEventListener('click', () => {
