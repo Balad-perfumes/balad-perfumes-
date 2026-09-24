@@ -4047,15 +4047,15 @@
       let stickyTicking = false;
 
       const updateStickyVisibility = () => {
-        let mainPassed = false;
+        let shouldShow = false;
         if (addToBagBtn) {
           const rect = addToBagBtn.getBoundingClientRect();
-          mainPassed = rect.bottom < 50;
+          shouldShow = window.scrollY > 120 || rect.bottom < 100;
         } else {
-          mainPassed = window.scrollY > 280;
+          shouldShow = window.scrollY > 100;
         }
 
-        if (mainPassed) {
+        if (shouldShow) {
           stickyBar.setAttribute('data-visible', 'true');
           stickyBar.setAttribute('data-mobile-visible', 'true');
           stickyBar.setAttribute('aria-hidden', 'false');
