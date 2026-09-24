@@ -505,27 +505,33 @@
     {{ selected_product.variants | json }}
   </script>
 
-  <!-- Mobile Sticky Add to Cart Bar -->
+  <!-- Sticky Bar: Price & Add To Bag -->
   <div class="pf-product-template__sticky-bar" data-pf-sticky-bar aria-hidden="true">
     <div class="pf-product-template__sticky-shell">
-      <button
-        type="button"
-        class="pf-mobile-sticky-btn"
-        data-pf-sticky-add
-        {% unless current_variant.available %}disabled{% endunless %}
-      >
-        <span class="pf-mobile-sticky-btn__text" data-pf-sticky-add-text>
-          {% if current_variant.available %}
-            ADD TO CART
-          {% else %}
-            SOLD OUT
+      <div class="pf-product-template__sticky-price-side">
+        <span class="pf-product-template__sticky-price-label">Price</span>
+        <div class="pf-product-template__sticky-price-wrap">
+          <span class="pf-product-template__sticky-price" data-pf-sticky-price>
+            {{ current_variant.price | money }}
+          </span>
+          {% if current_variant.compare_at_price > current_variant.price %}
+            <span class="pf-product-template__sticky-compare-price" data-pf-sticky-compare-price>
+              {{ current_variant.compare_at_price | money }}
+            </span>
           {% endif %}
-        </span>
-        <span class="pf-mobile-sticky-btn__separator" data-pf-sticky-separator {% unless current_variant.available %}style="display: none;"{% endunless %}> - </span>
-        <span class="pf-mobile-sticky-btn__price" data-pf-sticky-price {% unless current_variant.available %}style="display: none;"{% endunless %}>
-          {{ current_variant.price | money }}
-        </span>
-      </button>
+        </div>
+      </div>
+
+      <div class="pf-product-template__sticky-btn-side">
+        <button
+          type="button"
+          class="pf-btn pf-btn--add-to-bag pf-sticky-btn pf-sticky-btn--add"
+          data-pf-sticky-add
+          {% unless current_variant.available %}disabled{% endunless %}
+        >
+          <span data-pf-sticky-add-text>{% if current_variant.available %}ADD TO BAG{% else %}SOLD OUT{% endif %}</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -3040,7 +3046,7 @@
     }
   }
 
-  /* ── Mobile Sticky Add to Cart Bottom Bar ────────────── */
+  /* ── Sticky Add to Cart Bottom Bar ────────────── */
   #stagmenfashion-mobile-nav {
     display: none !important;
   }
@@ -3052,10 +3058,8 @@
     right: 0;
     width: 100%;
     z-index: 999998;
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    background: #ffffff;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
     transform: translateY(100%);
     opacity: 0;
@@ -3088,59 +3092,60 @@
   }
 
   .pf-product-template__sticky-shell {
-    width: 100%;
-    max-width: 540px;
+    width: min(100%, 1200px);
+    max-width: 1200px;
     margin: 0 auto;
     padding: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    gap: 16px;
     box-sizing: border-box;
   }
 
-  .pf-mobile-sticky-btn {
-    width: 100%;
-    height: 48px;
-    background: #000000;
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
+  .pf-product-template__sticky-price-side {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    gap: 2px;
+    min-width: 0;
+    flex: 0 1 auto;
+  }
+
+  .pf-product-template__sticky-price-label {
+    font-size: 11px;
     text-transform: uppercase;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
-    transition: background-color 0.2s ease, transform 0.12s ease;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    padding: 0 16px;
-    box-sizing: border-box;
-    font-family: inherit;
+    letter-spacing: 0.05em;
+    color: #888888;
+    font-weight: 500;
+    line-height: 1;
   }
 
-  .pf-mobile-sticky-btn:active {
-    transform: scale(0.985);
-    background: #1a1a1a;
+  .pf-product-template__sticky-price-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    line-height: 1.2;
   }
 
-  .pf-mobile-sticky-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background: #555555;
+  .pf-product-template__sticky-price {
+    font-size: 17px;
+    font-weight: 700;
+    color: #111111;
   }
 
-  .pf-mobile-sticky-btn__separator {
-    margin: 0 6px;
-    opacity: 0.8;
+  .pf-product-template__sticky-compare-price {
+    font-size: 13px;
+    color: #999999;
+    text-decoration: line-through;
     font-weight: 400;
   }
 
-  .pf-mobile-sticky-btn__price {
-    font-weight: 700;
+  .pf-product-template__sticky-btn-side {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: flex-end;
+    max-width: 260px;
   }
 
   .pf-product-template__sticky-info {
@@ -3338,45 +3343,67 @@
   }
 
   .pf-sticky-btn--add {
-    background: #ffffff;
-    color: #111111;
-    border: 1.5px solid #111111;
+    width: 100%;
+    height: 46px;
+    background: #000000 !important;
+    color: #ffffff !important;
+    border: 1px solid #000000 !important;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+    transition: background-color 0.2s ease, transform 0.12s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    font-family: inherit;
   }
 
-  .pf-sticky-btn--add:hover {
-    background: #111111;
-    color: #ffffff;
+  .pf-sticky-btn--add:active {
+    transform: scale(0.98);
+    background: #222222 !important;
   }
 
-  .pf-sticky-btn--buy {
-    background: #111111;
-    color: #ffffff;
-    border: 1.5px solid #111111;
-  }
-
-  .pf-sticky-btn--buy:hover {
-    background: #000000;
-    border-color: #000000;
-  }
-
-  .pf-sticky-btn:disabled {
-    opacity: 0.45;
+  .pf-sticky-btn--add:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
+    background: #666666 !important;
+    border-color: #666666 !important;
   }
 
-  @media screen and (min-width: 1025px) {
-    .pf-product-template {
-      padding-bottom: 0px !important;
-    }
-    .pf-product-template__sticky-bar {
-      display: none !important;
-    }
-  }
-
-  /* ── Responsive: Mobile & Tablet Bottom Spacing ── */
   @media screen and (max-width: 1024px) {
     .pf-product-template {
       padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    .pf-product-template__sticky-shell {
+      max-width: 500px;
+    }
+
+    .pf-product-template__sticky-btn-side {
+      max-width: 200px;
+    }
+  }
+
+  @media screen and (max-width: 380px) {
+    .pf-product-template__sticky-price {
+      font-size: 15px;
+    }
+
+    .pf-product-template__sticky-btn-side {
+      max-width: 170px;
+    }
+
+    .pf-sticky-btn--add {
+      height: 42px;
+      font-size: 12px;
+      padding: 0 12px;
     }
   }
 
@@ -3492,12 +3519,11 @@
         if (stickyAddBtn) {
           stickyAddBtn.disabled = !available;
           if (stickyAddText) {
-            stickyAddText.textContent = available ? 'ADD TO CART' : 'SOLD OUT';
+            stickyAddText.textContent = available ? 'ADD TO BAG' : 'SOLD OUT';
           }
-          const stickySep = root.querySelector('[data-pf-sticky-separator]');
-          if (stickySep) {
-            stickySep.style.display = available ? 'inline' : 'none';
-          }
+        }
+        if (stickyBuyBtn) {
+          stickyBuyBtn.disabled = !available;
         }
 
         // Update Price if present
@@ -3514,7 +3540,6 @@
 
           if (stickyPriceEl) {
             stickyPriceEl.textContent = priceText;
-            stickyPriceEl.style.display = available ? 'inline' : 'none';
           }
 
           const stickyCompareEl = root.querySelector('[data-pf-sticky-compare-price]');
@@ -4018,19 +4043,10 @@
         buyNowBtn?.click();
       });
 
-      // Sticky bar show/hide scroll controller for Mobile
+      // Sticky bar show/hide scroll controller
       let stickyTicking = false;
 
       const updateStickyVisibility = () => {
-        const isMobile = window.innerWidth <= 1024;
-        if (!isMobile) {
-          stickyBar.removeAttribute('data-visible');
-          stickyBar.removeAttribute('data-mobile-visible');
-          stickyBar.setAttribute('aria-hidden', 'true');
-          stickyTicking = false;
-          return;
-        }
-
         let mainPassed = false;
         if (addToBagBtn) {
           const rect = addToBagBtn.getBoundingClientRect();
@@ -4040,9 +4056,11 @@
         }
 
         if (mainPassed) {
+          stickyBar.setAttribute('data-visible', 'true');
           stickyBar.setAttribute('data-mobile-visible', 'true');
           stickyBar.setAttribute('aria-hidden', 'false');
         } else {
+          stickyBar.removeAttribute('data-visible');
           stickyBar.removeAttribute('data-mobile-visible');
           stickyBar.setAttribute('aria-hidden', 'true');
         }
