@@ -103,9 +103,10 @@
     "1790060856d032d058": {
       "type": "_blocks",
       "blocks": {
-        "reelfy_videos_reelfy_section_kL8tXA": {
+        "reelfy_videos_reelfy_section_kwGhG7": {
           "type": "shopify://apps/reelfy-videos/blocks/reelfy-section/4022ffb0-05c3-4ef3-a409-6df51f4b1b3f",
           "settings": {
+            "gallery_id": 24926,
             "title": "",
             "subtitle": "",
             "heading_size": "1",
@@ -129,7 +130,7 @@
         }
       },
       "block_order": [
-        "reelfy_videos_reelfy_section_kL8tXA",
+        "reelfy_videos_reelfy_section_kwGhG7",
         "tg_shoppable_video_main_feed_Wnbm9D"
       ],
       "settings": {
