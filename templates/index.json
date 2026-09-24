@@ -105,6 +105,7 @@
       "blocks": {
         "tg_shoppable_video_main_feed_Wnbm9D": {
           "type": "shopify://apps/tg-shoppable-video/blocks/main-feed/0199c376-d35a-7319-8e37-e7e7ac8bb0e1",
+          "disabled": true,
           "settings": {
             "feed_id_widget": ""
           }

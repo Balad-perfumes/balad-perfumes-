@@ -113,6 +113,13 @@
         "type": "shopify://apps/tg-shoppable-video/blocks/embed-feed/0199c376-d35a-7319-8e37-e7e7ac8bb0e1",
         "disabled": false,
         "settings": {}
+      },
+      "15191099883265461803": {
+        "type": "shopify://apps/reelfy-videos/blocks/app-embed/4022ffb0-05c3-4ef3-a409-6df51f4b1b3f",
+        "disabled": false,
+        "settings": {
+          "exclude_pages": ""
+        }
       }
     },
     "color_schemes": {
