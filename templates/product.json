@@ -24,18 +24,29 @@
         "delivery_returns": "<p>Fast express dispatch, secure packaging, and easy 7-day size exchanges as per store policy.</p>"
       }
     },
-    "179015115805925714": {
+    "1790242250043b352a": {
       "type": "_blocks",
       "blocks": {
-        "tg_shoppable_video_main_feed_RxYTfN": {
-          "type": "shopify://apps/tg-shoppable-video/blocks/main-feed/0199c376-d35a-7319-8e37-e7e7ac8bb0e1",
+        "reelfy_videos_reelfy_section_P4idcz": {
+          "type": "shopify://apps/reelfy-videos/blocks/reelfy-section/4022ffb0-05c3-4ef3-a409-6df51f4b1b3f",
           "settings": {
-            "feed_id_widget": ""
+            "title": "",
+            "subtitle": "",
+            "heading_size": "1",
+            "heading_align": "left",
+            "heading_color": "",
+            "desc_style": "subtitle",
+            "desc_color": "",
+            "custom_class": "",
+            "background_color": "",
+            "padding_top": 36,
+            "padding_bottom": 36,
+            "padding_left_right": 0
           }
         }
       },
       "block_order": [
-        "tg_shoppable_video_main_feed_RxYTfN"
+        "reelfy_videos_reelfy_section_P4idcz"
       ],
       "settings": {
         "content_direction": "column",
@@ -46,7 +57,7 @@
         "horizontal_alignment_flex_direction_column": "flex-start",
         "vertical_alignment_flex_direction_column": "center",
         "gap": 12,
-        "section_width": "full-width",
+        "section_width": "page-width",
         "section_height": "",
         "section_height_custom": 50,
         "color_scheme": "",
@@ -135,7 +146,7 @@
   },
   "order": [
     "main",
-    "179015115805925714",
+    "1790242250043b352a",
     "stagmenfashion_similar_products_wqLRpx",
     "product_reviews",
     "179015426732e1050b"

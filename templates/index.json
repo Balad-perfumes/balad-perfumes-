@@ -120,18 +120,10 @@
             "padding_bottom": 36,
             "padding_left_right": 0
           }
-        },
-        "tg_shoppable_video_main_feed_Wnbm9D": {
-          "type": "shopify://apps/tg-shoppable-video/blocks/main-feed/0199c376-d35a-7319-8e37-e7e7ac8bb0e1",
-          "disabled": true,
-          "settings": {
-            "feed_id_widget": ""
-          }
         }
       },
       "block_order": [
-        "reelfy_videos_reelfy_section_kwGhG7",
-        "tg_shoppable_video_main_feed_Wnbm9D"
+        "reelfy_videos_reelfy_section_kwGhG7"
       ],
       "settings": {
         "content_direction": "column",
