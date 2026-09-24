@@ -32,7 +32,7 @@
           "settings": {
             "title": "",
             "subtitle": "",
-            "heading_size": "1",
+            "heading_size": "0.8",
             "heading_align": "left",
             "heading_color": "",
             "desc_style": "subtitle",
@@ -41,7 +41,7 @@
             "background_color": "",
             "padding_top": 36,
             "padding_bottom": 36,
-            "padding_left_right": 0
+            "padding_left_right": 30
           }
         }
       },
@@ -57,7 +57,7 @@
         "horizontal_alignment_flex_direction_column": "flex-start",
         "vertical_alignment_flex_direction_column": "center",
         "gap": 12,
-        "section_width": "page-width",
+        "section_width": "full-width",
         "section_height": "",
         "section_height_custom": 50,
         "color_scheme": "",
