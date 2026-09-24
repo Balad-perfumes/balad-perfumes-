@@ -103,6 +103,23 @@
     "1790060856d032d058": {
       "type": "_blocks",
       "blocks": {
+        "reelfy_videos_reelfy_section_kL8tXA": {
+          "type": "shopify://apps/reelfy-videos/blocks/reelfy-section/4022ffb0-05c3-4ef3-a409-6df51f4b1b3f",
+          "settings": {
+            "title": "",
+            "subtitle": "",
+            "heading_size": "1",
+            "heading_align": "left",
+            "heading_color": "",
+            "desc_style": "subtitle",
+            "desc_color": "",
+            "custom_class": "",
+            "background_color": "",
+            "padding_top": 36,
+            "padding_bottom": 36,
+            "padding_left_right": 0
+          }
+        },
         "tg_shoppable_video_main_feed_Wnbm9D": {
           "type": "shopify://apps/tg-shoppable-video/blocks/main-feed/0199c376-d35a-7319-8e37-e7e7ac8bb0e1",
           "disabled": true,
@@ -112,6 +129,7 @@
         }
       },
       "block_order": [
+        "reelfy_videos_reelfy_section_kL8tXA",
         "tg_shoppable_video_main_feed_Wnbm9D"
       ],
       "settings": {
