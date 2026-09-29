@@ -66,8 +66,8 @@
             aria-hidden="{% if is_first %}false{% else %}true{% endif %}"
             {{ block.shopify_attributes }}
           >
-            {% if button_link != blank %}
-              <a href="{{ button_link }}" class="smf-banner-slider__full-link" aria-label="{{ heading | default: button_label | default: 'Banner slide' | escape }}"></a>
+            {% if button_link != blank and button_label == blank %}
+              <a href="{{ button_link }}" class="smf-banner-slider__full-link" aria-label="{{ heading | default: 'Banner slide' }}"></a>
             {% endif %}
 
             <div class="smf-banner-slider__media">
@@ -223,10 +223,7 @@
   .smf-banner-slider__full-link {
     position: absolute;
     inset: 0;
-    z-index: 2;
-    display: block;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
+    z-index: 5;
   }
 
   .smf-banner-slider__media {

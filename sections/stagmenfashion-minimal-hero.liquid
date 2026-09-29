@@ -42,18 +42,8 @@
       <div class="stagmenfashion-min-hero__track" data-track>
         {% for block in section.blocks %}
           {% liquid
-            assign btn_label = block.settings.button_label
-            if btn_label == blank
-              assign btn_label = 'Shop now'
-            endif
-
-            assign btn_link = block.settings.button_link
-            if btn_link == blank and block.settings.featured_product != blank
-              assign btn_link = block.settings.featured_product.url
-            endif
-            if btn_link == blank
-              assign btn_link = routes.all_products_collection_url
-            endif
+            assign btn_label = block.settings.button_label | default: 'Shop now'
+            assign btn_link = block.settings.button_link | default: routes.all_products_collection_url
             assign has_btn = true
 
             assign has_product = false
@@ -77,15 +67,7 @@
           >
             {%- comment -%} ==================== LAYOUT 1: FULL BLEED MINIMAL ==================== {%- endcomment -%}
             {% if layout_mode == 'full_bleed' %}
-              {% if btn_link != blank %}
-                <a
-                  href="{{ btn_link }}"
-                  class="stagmenfashion-min-hero__media-wrapper stagmenfashion-min-hero__media-link"
-                  aria-label="{{ block.settings.heading | default: btn_label | default: 'Shop now' | escape }}"
-                >
-              {% else %}
-                <div class="stagmenfashion-min-hero__media-wrapper">
-              {% endif %}
+              <div class="stagmenfashion-min-hero__media-wrapper">
                 <div class="stagmenfashion-min-hero__media{% if section.settings.enable_zoom %} stagmenfashion-min-hero__media--zoom{% endif %}">
                   {% if block.settings.image != blank %}
                     {% assign loading_attr = 'lazy' %}
@@ -112,11 +94,7 @@
                 {% if section.settings.enable_overlay %}
                   <div class="stagmenfashion-min-hero__overlay overlay--{{ section.settings.overlay_type | default: 'backdrop_blur' }}{% if section.settings.enable_backdrop_blur %} overlay--has-backdrop{% endif %}"></div>
                 {% endif %}
-              {% if btn_link != blank %}
-                </a>
-              {% else %}
-                </div>
-              {% endif %}
+              </div>
 
               <div class="stagmenfashion-min-hero__content-box pos-{{ block.settings.content_position | default: 'bottom-left' }} align-{{ block.settings.text_alignment | default: 'left' }}">
                 <div class="stagmenfashion-min-hero__inner{% if section.settings.enable_content_backdrop %} stagmenfashion-min-hero__inner--backdrop{% endif %}">
@@ -184,25 +162,13 @@
                 </div>
 
                 <div class="stagmenfashion-min-hero__split-media-col">
-                  {% if btn_link != blank %}
-                    <a
-                      href="{{ btn_link }}"
-                      class="stagmenfashion-min-hero__split-media-frame stagmenfashion-min-hero__media-link"
-                      aria-label="{{ block.settings.heading | default: btn_label | default: 'Shop now' | escape }}"
-                    >
-                  {% else %}
-                    <div class="stagmenfashion-min-hero__split-media-frame">
-                  {% endif %}
+                  <div class="stagmenfashion-min-hero__split-media-frame">
                     {% if block.settings.image != blank %}
                       {{ block.settings.image | image_url: width: 1600 | image_tag: class: 'stagmenfashion-min-hero__split-img', widths: '600, 900, 1200, 1600', loading: 'eager', alt: block.settings.heading | default: 'Editorial Image' }}
                     {% else %}
                       <div class="stagmenfashion-min-hero__placeholder"><span>Editorial Image</span></div>
                     {% endif %}
-                  {% if btn_link != blank %}
-                    </a>
-                  {% else %}
-                    </div>
-                  {% endif %}
+                  </div>
                 </div>
               </div>
 
@@ -210,25 +176,13 @@
             {% elsif layout_mode == 'framed_lookbook' %}
               <div class="stagmenfashion-min-hero__lookbook-wrap">
                 <div class="stagmenfashion-min-hero__lookbook-card">
-                  {% if btn_link != blank %}
-                    <a
-                      href="{{ btn_link }}"
-                      class="stagmenfashion-min-hero__lookbook-primary stagmenfashion-min-hero__media-link"
-                      aria-label="{{ block.settings.heading | default: btn_label | default: 'Shop now' | escape }}"
-                    >
-                  {% else %}
-                    <div class="stagmenfashion-min-hero__lookbook-primary">
-                  {% endif %}
+                  <div class="stagmenfashion-min-hero__lookbook-primary">
                     {% if block.settings.image != blank %}
                       {{ block.settings.image | image_url: width: 2200 | image_tag: class: 'stagmenfashion-min-hero__lookbook-img', widths: '700, 1100, 1500, 2200', loading: 'eager', alt: block.settings.heading | default: 'Lookbook Primary' }}
                     {% else %}
                       <div class="stagmenfashion-min-hero__placeholder"><span>Lookbook Main Image</span></div>
                     {% endif %}
-                  {% if btn_link != blank %}
-                    </a>
-                  {% else %}
-                    </div>
-                  {% endif %}
+                  </div>
 
                   {% if section.settings.enable_overlay %}
                     <div class="stagmenfashion-min-hero__overlay overlay--{{ section.settings.overlay_type | default: 'backdrop_blur' }}{% if section.settings.enable_backdrop_blur %} overlay--has-backdrop{% endif %}"></div>
@@ -259,15 +213,7 @@
 
             {%- comment -%} ==================== LAYOUT 4: FLOATING BADGE SPOTLIGHT ==================== {%- endcomment -%}
             {% elsif layout_mode == 'floating_badge' %}
-              {% if btn_link != blank %}
-                <a
-                  href="{{ btn_link }}"
-                  class="stagmenfashion-min-hero__media-wrapper stagmenfashion-min-hero__media-link"
-                  aria-label="{{ block.settings.heading | default: btn_label | default: 'Shop now' | escape }}"
-                >
-              {% else %}
-                <div class="stagmenfashion-min-hero__media-wrapper">
-              {% endif %}
+              <div class="stagmenfashion-min-hero__media-wrapper">
                 <div class="stagmenfashion-min-hero__media{% if section.settings.enable_zoom %} stagmenfashion-min-hero__media--zoom{% endif %}">
                   {% if block.settings.image != blank %}
                     {% if block.settings.mobile_image != blank %}
@@ -286,11 +232,7 @@
                 {% if section.settings.enable_overlay %}
                   <div class="stagmenfashion-min-hero__overlay overlay--{{ section.settings.overlay_type | default: 'backdrop_blur' }}{% if section.settings.enable_backdrop_blur %} overlay--has-backdrop{% endif %}"></div>
                 {% endif %}
-              {% if btn_link != blank %}
-                </a>
-              {% else %}
-                </div>
-              {% endif %}
+              </div>
 
               <div class="stagmenfashion-min-hero__spotlight-shell">
                 <div class="stagmenfashion-min-hero__spotlight-content">
@@ -458,18 +400,6 @@
     width: 100%;
     height: 100%;
     z-index: 1;
-  }
-
-  .stagmenfashion-min-hero__media-link {
-    display: block;
-    cursor: pointer;
-    text-decoration: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .stagmenfashion-min-hero__media-link:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: -2px;
   }
 
   .stagmenfashion-min-hero__media {
@@ -1335,11 +1265,9 @@
         let startX = 0;
         let currentX = 0;
         let isTouching = false;
-        let isSwiping = false;
 
         hero.addEventListener('touchstart', (e) => {
           isTouching = true;
-          isSwiping = false;
           startX = e.touches[0].clientX;
           currentX = startX;
           stopAutoplay();
@@ -1348,9 +1276,6 @@
         hero.addEventListener('touchmove', (e) => {
           if (!isTouching) return;
           currentX = e.touches[0].clientX;
-          if (Math.abs(startX - currentX) > 15) {
-            isSwiping = true;
-          }
         }, { passive: true });
 
         hero.addEventListener('touchend', () => {
@@ -1364,19 +1289,7 @@
           } else {
             startAutoplay();
           }
-          if (isSwiping) {
-            setTimeout(() => {
-              isSwiping = false;
-            }, 300);
-          }
         });
-
-        hero.addEventListener('click', (e) => {
-          if (isSwiping) {
-            e.preventDefault();
-            e.stopPropagation();
-          }
-        }, true);
 
         // Initialize first state
         updatePagination(0);
