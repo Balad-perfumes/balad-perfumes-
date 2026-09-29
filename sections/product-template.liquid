@@ -3739,112 +3739,97 @@
     });
 
     // Add To Bag Action
-    if (addToBagBtn) {
-      addToBagBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const variantId = variantIdInput?.value || root.querySelector('[data-pf-variant-id]')?.value;
-        if (!variantId || addToBagBtn.disabled) return;
-
-        const originalText = addTextEl ? addTextEl.textContent : 'ADD TO BAG';
-        addToBagBtn.disabled = true;
-        if (addTextEl) addTextEl.textContent = 'ADDING...';
-
-        try {
-          const cartItemsComponents = document.querySelectorAll('cart-items-component');
-          const sectionIds = [];
-          cartItemsComponents.forEach((item) => {
-            if (item.dataset.sectionId && !sectionIds.includes(item.dataset.sectionId)) {
-              sectionIds.push(item.dataset.sectionId);
-            }
-          });
-
-          const formData = new FormData();
-          formData.append('id', variantId);
-          formData.append('quantity', 1);
-          if (sectionIds.length > 0) {
-            formData.append('sections', sectionIds.join(','));
-            formData.append('sections_url', window.location.pathname);
-          }
-
-          const response = await fetch('/cart/add.js', {
-            method: 'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            body: formData
-          });
-
-          if (!response.ok) throw new Error('Add to cart failed');
-          const addData = await response.json();
-
-          const cartResponse = await fetch('/cart.js');
-          const cartData = await cartResponse.json();
-
-          document.dispatchEvent(new CustomEvent('cart:update', {
-            bubbles: true,
-            detail: {
-              resource: cartData,
-              sourceId: 'pf-product-template',
-              data: {
-                itemCount: cartData.item_count,
-                sections: addData.sections
-              }
-            }
-          }));
-
-          const cartDrawer = document.querySelector('cart-drawer, #cart-drawer, [data-cart-drawer], cart-drawer-component');
-          if (cartDrawer && typeof cartDrawer.open === 'function') {
-            cartDrawer.open();
-          } else {
-            window.location.href = window.Shopify?.routes?.root ? `${window.Shopify.routes.root}cart` : '/cart';
-          }
-
-          if (addTextEl) addTextEl.textContent = 'ADDED!';
-          setTimeout(() => {
-            if (addTextEl) addTextEl.textContent = originalText;
-            addToBagBtn.disabled = false;
-          }, 1500);
-        } catch (err) {
-          if (addTextEl) addTextEl.textContent = 'TRY AGAIN';
-          setTimeout(() => {
-            if (addTextEl) addTextEl.textContent = originalText;
-            addToBagBtn.disabled = false;
-          }, 1500);
-        }
-      });
-    }
-
-    // Buy Now Action
-    const handleBuyNow = (btn) => {
+    const handleAddToBag = async (btn) => {
       const variantId = variantIdInput?.value || root.querySelector('[data-pf-variant-id]')?.value;
       if (!variantId || (btn && btn.disabled)) return;
 
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'REDIRECTING...';
-      }
+      const textEl = btn?.querySelector('[data-pf-sticky-add-text], [data-pf-add-text]') || btn;
+      const originalText = textEl ? textEl.textContent : 'ADD TO BAG';
 
-      const rootUrl = window.Shopify?.routes?.root || '/';
-      const cleanRoot = rootUrl.endsWith('/') ? rootUrl : rootUrl + '/';
-      window.location.href = `${cleanRoot}cart/${variantId}:1`;
+      if (btn) btn.disabled = true;
+      if (textEl) textEl.textContent = 'ADDING...';
+
+      try {
+        const cartItemsComponents = document.querySelectorAll('cart-items-component');
+        const sectionIds = [];
+        cartItemsComponents.forEach((item) => {
+          if (item.dataset.sectionId && !sectionIds.includes(item.dataset.sectionId)) {
+            sectionIds.push(item.dataset.sectionId);
+          }
+        });
+
+        const formData = new FormData();
+        formData.append('id', variantId);
+        formData.append('quantity', 1);
+        if (sectionIds.length > 0) {
+          formData.append('sections', sectionIds.join(','));
+          formData.append('sections_url', window.location.pathname);
+        }
+
+        const response = await fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          body: formData
+        });
+
+        if (!response.ok) throw new Error('Add to cart failed');
+        const addData = await response.json();
+
+        const cartResponse = await fetch('/cart.js');
+        const cartData = await cartResponse.json();
+
+        document.dispatchEvent(new CustomEvent('cart:update', {
+          bubbles: true,
+          detail: {
+            resource: cartData,
+            sourceId: 'pf-product-template',
+            data: {
+              itemCount: cartData.item_count,
+              sections: addData.sections
+            }
+          }
+        }));
+
+        const cartDrawer = document.getElementById('cart-drawer') || document.querySelector('cart-drawer, cart-drawer-component');
+        if (cartDrawer && typeof cartDrawer.open === 'function') {
+          cartDrawer.open();
+        } else if (cartDrawer && typeof cartDrawer.showDialog === 'function') {
+          cartDrawer.showDialog();
+        } else {
+          const drawerTrigger = document.querySelector('[data-testid="cart-drawer-trigger"], [data-cart-drawer-trigger], .header__icon--cart, #cart-icon-bubble');
+          if (drawerTrigger) {
+            drawerTrigger.click();
+          } else {
+            window.location.href = window.Shopify?.routes?.root ? `${window.Shopify.routes.root}cart` : '/cart';
+          }
+        }
+
+        if (textEl) textEl.textContent = 'ADDED!';
+        setTimeout(() => {
+          if (textEl) textEl.textContent = originalText;
+          if (btn) btn.disabled = false;
+        }, 1200);
+      } catch (err) {
+        console.error('Add to cart error:', err);
+        if (textEl) textEl.textContent = 'TRY AGAIN';
+        setTimeout(() => {
+          if (textEl) textEl.textContent = originalText;
+          if (btn) btn.disabled = false;
+        }, 1200);
+      }
     };
 
-    if (buyNowBtn) {
-      buyNowBtn.addEventListener('click', (e) => {
+    if (addToBagBtn) {
+      addToBagBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        handleBuyNow(buyNowBtn);
-      });
-    }
-
-    if (stickyBuyBtn) {
-      stickyBuyBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        handleBuyNow(stickyBuyBtn);
+        handleAddToBag(addToBagBtn);
       });
     }
 
     if (stickyAddBtn) {
       stickyAddBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        if (addToBagBtn) addToBagBtn.click();
+        handleAddToBag(stickyAddBtn);
       });
     }
 
@@ -4031,31 +4016,13 @@
           }
         });
       });
-
-      // Delegate sticky add/buy to main buttons
-      stickyAddBtn?.addEventListener('click', (e) => {
-        e.preventDefault();
-        addToBagBtn?.click();
-      });
-
-      stickyBuyBtn?.addEventListener('click', (e) => {
-        e.preventDefault();
-        buyNowBtn?.click();
-      });
-
       // Sticky bar show/hide scroll controller
       let stickyTicking = false;
 
       const updateStickyVisibility = () => {
-        let mainPassed = false;
-        if (addToBagBtn) {
-          const rect = addToBagBtn.getBoundingClientRect();
-          mainPassed = rect.bottom < 50;
-        } else {
-          mainPassed = window.scrollY > 280;
-        }
+        const shouldShow = window.scrollY > 120;
 
-        if (mainPassed) {
+        if (shouldShow) {
           stickyBar.setAttribute('data-visible', 'true');
           stickyBar.setAttribute('data-mobile-visible', 'true');
           stickyBar.setAttribute('aria-hidden', 'false');
