@@ -3833,6 +3833,45 @@
       });
     }
 
+    // Buy Now adds the selected variant and proceeds directly to checkout.
+    const handleBuyNow = async (btn) => {
+      const variantId = variantIdInput?.value;
+      if (!variantId || !btn || btn.disabled) return;
+
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'PLEASE WAIT...';
+
+      try {
+        const quantity = Math.max(1, parseInt(formQtyField?.value, 10) || 1);
+        const formData = new FormData();
+        formData.append('id', variantId);
+        formData.append('quantity', quantity);
+
+        const response = await fetch(`${window.Shopify?.routes?.root || '/'}cart/add.js`, {
+          method: 'POST',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          body: formData
+        });
+
+        if (!response.ok) throw new Error('Could not add this item to the cart');
+        window.location.assign(`${window.Shopify?.routes?.root || '/'}checkout`);
+      } catch (err) {
+        console.error('Buy Now error:', err);
+        btn.disabled = false;
+        btn.textContent = originalText;
+        alert('We could not start checkout. Please try again.');
+      }
+    };
+
+    [buyNowBtn, stickyBuyBtn].forEach((btn) => {
+      if (!btn) return;
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleBuyNow(btn);
+      });
+    });
+
     // Share Button Event Listener (Web Share API / Clipboard fallback)
     const shareBtn = root.querySelector('[data-share-btn]');
     if (shareBtn) {
