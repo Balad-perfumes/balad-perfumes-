@@ -121,11 +121,67 @@
             {% endif %}
           </a>
 
+          {% liquid
+            assign trend_card_rating = 0
+            assign trend_card_rating_count = 0
+            assign trend_has_real_reviews = false
+
+            if product.metafields.reviews.rating.value != blank
+              assign trend_card_rating = product.metafields.reviews.rating.value.rating | default: product.metafields.reviews.rating.value | plus: 0
+            endif
+            if product.metafields.reviews.rating_count != blank
+              assign trend_card_rating_count = product.metafields.reviews.rating_count.value | default: product.metafields.reviews.rating_count | plus: 0
+            endif
+
+            assign trend_jm_badge = product.metafields.judgeme.badge
+            if trend_jm_badge != blank
+              if trend_jm_badge contains "data-average-rating='"
+                assign trend_jm_r = trend_jm_badge | split: "data-average-rating='" | last | split: "'" | first | plus: 0
+                if trend_jm_r > 0
+                  assign trend_card_rating = trend_jm_r
+                endif
+              endif
+              if trend_jm_badge contains "data-number-of-reviews='"
+                assign trend_jm_c = trend_jm_badge | split: "data-number-of-reviews='" | last | split: "'" | first | plus: 0
+                if trend_jm_c > 0
+                  assign trend_card_rating_count = trend_jm_c
+                endif
+              endif
+            endif
+
+            if trend_card_rating == 0 and product.metafields.judgeme.rating != blank
+              assign trend_card_rating = product.metafields.judgeme.rating | plus: 0
+            endif
+            if trend_card_rating_count == 0 and product.metafields.judgeme.review_count != blank
+              assign trend_card_rating_count = product.metafields.judgeme.review_count | plus: 0
+            endif
+
+            if trend_card_rating_count > 0 and trend_card_rating > 0
+              assign trend_has_real_reviews = true
+            endif
+
+            assign trend_card_rating_round = trend_card_rating | round
+          %}
           <div class="stagmenfashion-trending-grid__info">
             <div class="stagmenfashion-trending-grid__details">
-              <a href="{{ product.url }}" class="stagmenfashion-trending-grid__title-link">
-                <h3 class="stagmenfashion-trending-grid__title">{{ product.title }}</h3>
-              </a>
+              <div class="stagmenfashion-trending-grid__title-row">
+                <a href="{{ product.url }}" class="stagmenfashion-trending-grid__title-link">
+                  <h3 class="stagmenfashion-trending-grid__title">{{ product.title }}</h3>
+                </a>
+                <div class="stagmenfashion-trending-grid__rating" aria-label="{% if trend_has_real_reviews %}Rated {{ trend_card_rating }} out of 5 stars ({{ trend_card_rating_count }} reviews){% else %}0 reviews{% endif %}">
+                  <span class="stagmenfashion-trending-grid__stars">
+                    {% for star_i in (1..5) %}
+                      <span class="stagmenfashion-trending-grid__star{% if trend_has_real_reviews and star_i > trend_card_rating_round %} is-dim{% endif %}">★</span>
+                    {% endfor %}
+                  </span>
+                  {% if trend_has_real_reviews %}
+                    <span class="stagmenfashion-trending-grid__rating-score">{{ trend_card_rating | round: 1 }}</span>
+                    <span class="stagmenfashion-trending-grid__rating-count">({{ trend_card_rating_count }})</span>
+                  {% else %}
+                    <span class="stagmenfashion-trending-grid__rating-count">(0)</span>
+                  {% endif %}
+                </div>
+              </div>
               <span class="stagmenfashion-trending-grid__price">RS. {{ product.price | money_without_currency | remove: ',' }}</span>
             </div>
             <button
@@ -1214,14 +1270,100 @@
     flex: 1;
   }
 
+  .stagmenfashion-trending-grid__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
+  }
+
   .stagmenfashion-trending-grid__title-link {
     text-decoration: none;
     color: inherit;
     display: inline-block;
-    width: fit-content;
+    flex: 1 1 auto;
+    min-width: 0;
     max-width: 100%;
     position: relative;
     line-height: 1;
+  }
+
+  .stagmenfashion-trending-grid__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 3.5px;
+    flex-shrink: 0;
+    line-height: 1;
+    white-space: nowrap;
+    padding: 1px 0;
+  }
+
+  .stagmenfashion-trending-grid__stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5px;
+    color: #ffb400;
+    font-size: 14.5px;
+    line-height: 1;
+  }
+
+  .stagmenfashion-trending-grid__star {
+    display: inline-block;
+    color: #ffb400;
+    font-size: 14.5px;
+    line-height: 1;
+  }
+
+  .stagmenfashion-trending-grid__star.is-dim {
+    color: #dedede;
+  }
+
+  .stagmenfashion-trending-grid__rating-score {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111111;
+    line-height: 1;
+    margin-left: 2px;
+  }
+
+  .stagmenfashion-trending-grid__rating-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666666;
+    line-height: 1;
+  }
+
+  /* Judge.me preview badge sizing overrides */
+  .stagmenfashion-trending-grid__rating .jdgm-preview-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3.5px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+
+  .stagmenfashion-trending-grid__rating .jdgm-prev-badge__stars {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 1.5px !important;
+    color: #ffb400 !important;
+    font-size: 14.5px !important;
+    line-height: 1 !important;
+  }
+
+  .stagmenfashion-trending-grid__rating .jdgm-star {
+    font-size: 14.5px !important;
+    color: #ffb400 !important;
+    line-height: 1 !important;
+  }
+
+  .stagmenfashion-trending-grid__rating .jdgm-prev-badge__text {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #666666 !important;
+    line-height: 1 !important;
+    margin-left: 2px !important;
   }
 
   .stagmenfashion-trending-grid__title {

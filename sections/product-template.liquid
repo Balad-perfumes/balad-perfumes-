@@ -2,26 +2,39 @@
   assign selected_product = product
   assign current_variant = selected_product.selected_or_first_available_variant
   assign form_id = 'StagProductForm-' | append: section.id
-  assign review_count = selected_product.metafields.reviews.rating_count.value | default: 0 | plus: 0
+  assign review_count = selected_product.metafields.reviews.rating_count.value | default: selected_product.metafields.reviews.rating_count | default: 0 | plus: 0
 
   # Dynamic Rating Fetch from Judge.me / Shopify Metafields
   assign review_rating = blank
 
   if selected_product.metafields.reviews.rating.value != blank
-    assign review_rating = selected_product.metafields.reviews.rating.value.rating | round: 1
+    assign review_rating = selected_product.metafields.reviews.rating.value.rating | default: selected_product.metafields.reviews.rating.value | plus: 0
   endif
 
-  if review_rating == blank
-    assign jm_badge = selected_product.metafields.judgeme.badge
-    if jm_badge != blank and jm_badge contains "data-average-rating='"
-      assign review_rating = jm_badge | split: "data-average-rating='" | last | split: "'" | first | round: 1
+  assign jm_badge = selected_product.metafields.judgeme.badge
+  if jm_badge != blank
+    if review_rating == blank or review_rating == 0
+      if jm_badge contains "data-average-rating='"
+        assign review_rating = jm_badge | split: "data-average-rating='" | last | split: "'" | first | plus: 0
+      endif
+    endif
+    if review_count == 0 and jm_badge contains "data-number-of-reviews='"
+      assign review_count = jm_badge | split: "data-number-of-reviews='" | last | split: "'" | first | plus: 0
     endif
   endif
 
-  if review_rating == blank
-    assign review_rating = selected_product.metafields.judgeme.rating
+  if review_rating == blank or review_rating == 0
+    if selected_product.metafields.judgeme.rating != blank
+      assign review_rating = selected_product.metafields.judgeme.rating | plus: 0
+    endif
+  endif
+  if review_count == 0 and selected_product.metafields.judgeme.review_count != blank
+    assign review_count = selected_product.metafields.judgeme.review_count | plus: 0
   endif
 
+  if review_rating != blank and review_rating > 0
+    assign review_rating = review_rating | round: 1
+  endif
 %}
 
   {% comment %} Product Metafield Image Fetching {% endcomment %}

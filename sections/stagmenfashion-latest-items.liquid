@@ -164,31 +164,97 @@
             {% endif %}
           </a>
 
-          <div class="stagmenfashion-latest-grid__info">
-            <a href="{{ product.url }}" class="stagmenfashion-latest-grid__title-link">
-              <h3 class="stagmenfashion-latest-grid__title">{{ product.title }}</h3>
-            </a>
-            <p class="stagmenfashion-latest-grid__subtitle">{{ fragrance_descriptor }}</p>
-            <div class="stagmenfashion-latest-grid__price-wrap">
-              <span class="stagmenfashion-latest-grid__price">₹{{ product.price | money_without_currency }}</span>
-            </div>
+          {% liquid
+            assign card_rating = 0
+            assign card_rating_count = 0
+            assign has_real_reviews = false
 
-            {% if size_array.size > 0 %}
-              <div class="stagmenfashion-latest-grid__size-pills" data-card-size-pills>
-                {% for sz in size_array %}
-                  {% assign clean_sz = sz | strip %}
-                  {% if clean_sz != blank %}
-                    <button
-                      type="button"
-                      class="stagmenfashion-latest-grid__size-pill{% if forloop.first %} is-selected{% endif %}"
-                      data-size-value="{{ clean_sz }}"
-                    >
-                      {{ clean_sz }}
-                    </button>
-                  {% endif %}
-                {% endfor %}
+            # 1. Native Shopify Reviews Metafields
+            if product.metafields.reviews.rating.value != blank
+              assign card_rating = product.metafields.reviews.rating.value.rating | default: product.metafields.reviews.rating.value | plus: 0
+            endif
+            if product.metafields.reviews.rating_count != blank
+              assign card_rating_count = product.metafields.reviews.rating_count.value | default: product.metafields.reviews.rating_count | plus: 0
+            endif
+
+            # 2. Judge.me Metafields Badge data
+            assign jm_badge = product.metafields.judgeme.badge
+            if jm_badge != blank
+              if jm_badge contains "data-average-rating='"
+                assign jm_rating_val = jm_badge | split: "data-average-rating='" | last | split: "'" | first | plus: 0
+                if jm_rating_val > 0
+                  assign card_rating = jm_rating_val
+                endif
+              endif
+              if jm_badge contains "data-number-of-reviews='"
+                assign jm_count_val = jm_badge | split: "data-number-of-reviews='" | last | split: "'" | first | plus: 0
+                if jm_count_val > 0
+                  assign card_rating_count = jm_count_val
+                endif
+              endif
+            endif
+
+            # 3. Direct Judge.me rating / review_count
+            if card_rating == 0 and product.metafields.judgeme.rating != blank
+              assign card_rating = product.metafields.judgeme.rating | plus: 0
+            endif
+            if card_rating_count == 0 and product.metafields.judgeme.review_count != blank
+              assign card_rating_count = product.metafields.judgeme.review_count | plus: 0
+            endif
+
+            if card_rating_count > 0 and card_rating > 0
+              assign has_real_reviews = true
+            endif
+
+            assign card_rating_round = card_rating | round
+          %}
+          <div class="stagmenfashion-latest-grid__info">
+            <div class="stagmenfashion-latest-grid__details-row">
+              <div class="stagmenfashion-latest-grid__left-details">
+                <a href="{{ product.url }}" class="stagmenfashion-latest-grid__title-link">
+                  <h3 class="stagmenfashion-latest-grid__title">{{ product.title }}</h3>
+                </a>
+                <p class="stagmenfashion-latest-grid__subtitle">{{ fragrance_descriptor }}</p>
+                <div class="stagmenfashion-latest-grid__price-wrap">
+                  <span class="stagmenfashion-latest-grid__price">₹{{ product.price | money_without_currency }}</span>
+                </div>
               </div>
-            {% endif %}
+
+              <div class="stagmenfashion-latest-grid__right-details">
+                {% if section.settings.show_rating != false %}
+                  <div class="stagmenfashion-latest-grid__rating" aria-label="{% if has_real_reviews %}Rated {{ card_rating }} out of 5 stars ({{ card_rating_count }} reviews){% else %}0 reviews{% endif %}">
+                    <span class="stagmenfashion-latest-grid__stars" aria-hidden="true">
+                      {% for star_i in (1..5) %}
+                        <span class="stagmenfashion-latest-grid__star{% if has_real_reviews and star_i > card_rating_round %} is-dim{% endif %}">★</span>
+                      {% endfor %}
+                    </span>
+                    {% if has_real_reviews %}
+                      <span class="stagmenfashion-latest-grid__rating-score">{{ card_rating | round: 1 }}</span>
+                      <span class="stagmenfashion-latest-grid__rating-count">({{ card_rating_count }})</span>
+                    {% else %}
+                      <span class="stagmenfashion-latest-grid__rating-count">(0)</span>
+                    {% endif %}
+                  </div>
+                {% endif %}
+
+                {% if size_array.size > 0 %}
+                  <div class="stagmenfashion-latest-grid__size-pills" data-card-size-pills>
+                    {% for sz in size_array %}
+                      {% assign clean_sz = sz | strip %}
+                      {% if clean_sz != blank %}
+                        <button
+                          type="button"
+                          class="stagmenfashion-latest-grid__size-pill{% if forloop.first %} is-selected{% endif %}"
+                          data-size-value="{{ clean_sz }}"
+                        >
+                          {{ clean_sz }}
+                        </button>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
 
             <button
               type="button"
@@ -219,10 +285,29 @@
               {{ 'product-1' | placeholder_svg_tag: 'stagmenfashion-latest-grid__placeholder' }}
             </div>
             <div class="stagmenfashion-latest-grid__info">
-              <h3 class="stagmenfashion-latest-grid__title">Product {{ i }}</h3>
-              <p class="stagmenfashion-latest-grid__subtitle">FRAGRANCE NOTES</p>
-              <div class="stagmenfashion-latest-grid__price-wrap">
-                <span class="stagmenfashion-latest-grid__price">₹0.00</span>
+              <div class="stagmenfashion-latest-grid__details-row">
+                <div class="stagmenfashion-latest-grid__left-details">
+                  <h3 class="stagmenfashion-latest-grid__title">Product {{ i }}</h3>
+                  <p class="stagmenfashion-latest-grid__subtitle">FRAGRANCE NOTES</p>
+                  <div class="stagmenfashion-latest-grid__price-wrap">
+                    <span class="stagmenfashion-latest-grid__price">₹0.00</span>
+                  </div>
+                </div>
+                <div class="stagmenfashion-latest-grid__right-details">
+                  <div class="stagmenfashion-latest-grid__rating">
+                    <span class="stagmenfashion-latest-grid__stars">
+                      <span class="stagmenfashion-latest-grid__star">★</span>
+                      <span class="stagmenfashion-latest-grid__star">★</span>
+                      <span class="stagmenfashion-latest-grid__star">★</span>
+                      <span class="stagmenfashion-latest-grid__star">★</span>
+                      <span class="stagmenfashion-latest-grid__star">★</span>
+                    </span>
+                    <span class="stagmenfashion-latest-grid__rating-count">(0)</span>
+                  </div>
+                  <div class="stagmenfashion-latest-grid__size-pills">
+                    <button type="button" class="stagmenfashion-latest-grid__size-pill is-selected">70 ML</button>
+                  </div>
+                </div>
               </div>
               <button type="button" class="stagmenfashion-latest-grid__quick-add-btn">
                 Quick Add
@@ -1141,22 +1226,49 @@
      CARD DETAILS & QUICK ADD BUTTON
      ══════════════════════════════════════════════════════════════ */
   .stagmenfashion-latest-grid__info {
-    padding: 14px 4px 4px 4px;
+    padding: 12px 4px 4px 4px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 10px;
     flex: 1;
+  }
+
+  .stagmenfashion-latest-grid__details-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .stagmenfashion-latest-grid__left-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .stagmenfashion-latest-grid__right-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-top: 2px;
   }
 
   .stagmenfashion-latest-grid__title-link {
     text-decoration: none;
     color: inherit;
+    display: block;
+    min-width: 0;
   }
 
   .stagmenfashion-latest-grid__title {
     margin: 0;
     font-family: var(--font-heading--family, inherit);
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 700;
     color: #111111;
     text-transform: uppercase;
@@ -1167,6 +1279,83 @@
     text-overflow: ellipsis;
   }
 
+  .stagmenfashion-latest-grid__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 3.5px;
+    flex-shrink: 0;
+    line-height: 1;
+    white-space: nowrap;
+    padding: 0;
+  }
+
+  .stagmenfashion-latest-grid__stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5px;
+    color: #ffb400;
+    font-size: 14.5px;
+    line-height: 1;
+  }
+
+  .stagmenfashion-latest-grid__star {
+    display: inline-block;
+    color: #ffb400;
+    font-size: 14.5px;
+    line-height: 1;
+  }
+
+  .stagmenfashion-latest-grid__star.is-dim {
+    color: #dedede;
+  }
+
+  .stagmenfashion-latest-grid__rating-score {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111111;
+    line-height: 1;
+    margin-left: 2px;
+  }
+
+  .stagmenfashion-latest-grid__rating-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666666;
+    line-height: 1;
+  }
+
+  /* Judge.me preview badge sizing overrides */
+  .stagmenfashion-latest-grid__rating .jdgm-preview-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3.5px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+
+  .stagmenfashion-latest-grid__rating .jdgm-prev-badge__stars {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 1.5px !important;
+    color: #ffb400 !important;
+    font-size: 14.5px !important;
+    line-height: 1 !important;
+  }
+
+  .stagmenfashion-latest-grid__rating .jdgm-star {
+    font-size: 14.5px !important;
+    color: #ffb400 !important;
+    line-height: 1 !important;
+  }
+
+  .stagmenfashion-latest-grid__rating .jdgm-prev-badge__text {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #666666 !important;
+    line-height: 1 !important;
+    margin-left: 2px !important;
+  }
+
   .stagmenfashion-latest-grid__subtitle {
     margin: 0;
     font-size: 11px;
@@ -1174,6 +1363,9 @@
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .stagmenfashion-latest-grid__price-wrap {
@@ -1181,7 +1373,7 @@
   }
 
   .stagmenfashion-latest-grid__price {
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 700;
     color: #111111;
   }
@@ -1189,20 +1381,22 @@
   .stagmenfashion-latest-grid__size-pills {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 6px;
-    margin-bottom: 8px;
+    justify-content: flex-end;
+    gap: 4px;
+    margin: 0;
   }
 
   .stagmenfashion-latest-grid__size-pill {
-    padding: 4px 10px;
-    border-radius: 6px;
-    border: 1px solid #e2e2e2;
-    background: #ffffff;
-    color: #333333;
-    font-size: 11px;
-    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid #111111;
+    background: #111111;
+    color: #ffffff;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
     cursor: pointer;
+    line-height: 1.2;
     transition: all 0.2s ease;
   }
 
@@ -1453,6 +1647,12 @@
       "type": "url",
       "id": "discover_more_link",
       "label": "Discover More Link (Optional)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "label": "Show Review Rating & Count",
+      "default": true
     },
     {
       "type": "color",

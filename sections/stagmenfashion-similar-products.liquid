@@ -154,11 +154,67 @@
             {% endif %}
           </a>
 
+          {% liquid
+            assign sim_card_rating = 0
+            assign sim_card_rating_count = 0
+            assign sim_has_real_reviews = false
+
+            if prod.metafields.reviews.rating.value != blank
+              assign sim_card_rating = prod.metafields.reviews.rating.value.rating | default: prod.metafields.reviews.rating.value | plus: 0
+            endif
+            if prod.metafields.reviews.rating_count != blank
+              assign sim_card_rating_count = prod.metafields.reviews.rating_count.value | default: prod.metafields.reviews.rating_count | plus: 0
+            endif
+
+            assign sim_jm_badge = prod.metafields.judgeme.badge
+            if sim_jm_badge != blank
+              if sim_jm_badge contains "data-average-rating='"
+                assign sim_jm_r = sim_jm_badge | split: "data-average-rating='" | last | split: "'" | first | plus: 0
+                if sim_jm_r > 0
+                  assign sim_card_rating = sim_jm_r
+                endif
+              endif
+              if sim_jm_badge contains "data-number-of-reviews='"
+                assign sim_jm_c = sim_jm_badge | split: "data-number-of-reviews='" | last | split: "'" | first | plus: 0
+                if sim_jm_c > 0
+                  assign sim_card_rating_count = sim_jm_c
+                endif
+              endif
+            endif
+
+            if sim_card_rating == 0 and prod.metafields.judgeme.rating != blank
+              assign sim_card_rating = prod.metafields.judgeme.rating | plus: 0
+            endif
+            if sim_card_rating_count == 0 and prod.metafields.judgeme.review_count != blank
+              assign sim_card_rating_count = prod.metafields.judgeme.review_count | plus: 0
+            endif
+
+            if sim_card_rating_count > 0 and sim_card_rating > 0
+              assign sim_has_real_reviews = true
+            endif
+
+            assign sim_card_rating_round = sim_card_rating | round
+          %}
           <div class="stagmenfashion-similar-grid__info">
             <div class="stagmenfashion-similar-grid__details">
-              <a href="{{ prod.url }}" class="stagmenfashion-similar-grid__title-link">
-                <h3 class="stagmenfashion-similar-grid__title">{{ prod.title }}</h3>
-              </a>
+              <div class="stagmenfashion-similar-grid__title-row">
+                <a href="{{ prod.url }}" class="stagmenfashion-similar-grid__title-link">
+                  <h3 class="stagmenfashion-similar-grid__title">{{ prod.title }}</h3>
+                </a>
+                <div class="stagmenfashion-similar-grid__rating" aria-label="{% if sim_has_real_reviews %}Rated {{ sim_card_rating }} out of 5 stars ({{ sim_card_rating_count }} reviews){% else %}0 reviews{% endif %}">
+                  <span class="stagmenfashion-similar-grid__stars" aria-hidden="true">
+                    {% for star_i in (1..5) %}
+                      <span class="stagmenfashion-similar-grid__star{% if sim_has_real_reviews and star_i > sim_card_rating_round %} is-dim{% endif %}">★</span>
+                    {% endfor %}
+                  </span>
+                  {% if sim_has_real_reviews %}
+                    <span class="stagmenfashion-similar-grid__rating-score">{{ sim_card_rating | round: 1 }}</span>
+                    <span class="stagmenfashion-similar-grid__rating-count">({{ sim_card_rating_count }})</span>
+                  {% else %}
+                    <span class="stagmenfashion-similar-grid__rating-count">(0)</span>
+                  {% endif %}
+                </div>
+              </div>
               <span class="stagmenfashion-similar-grid__price">RS. {{ prod.price | money_without_currency | remove: ',' }}</span>
             </div>
             <button
@@ -642,7 +698,101 @@
     flex: 1;
   }
 
+  .stagmenfashion-similar-grid__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
+  }
+
   .stagmenfashion-similar-grid__title-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    position: relative;
+    line-height: 1;
+  }
+
+  .stagmenfashion-similar-grid__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 3.5px;
+    flex-shrink: 0;
+    line-height: 1;
+    white-space: nowrap;
+    padding: 1px 0;
+  }
+
+  .stagmenfashion-similar-grid__stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5px;
+    color: #ffb400;
+    font-size: 14.5px;
+    line-height: 1;
+  }
+
+  .stagmenfashion-similar-grid__star {
+    display: inline-block;
+    color: #ffb400;
+    font-size: 14.5px;
+    line-height: 1;
+  }
+
+  .stagmenfashion-similar-grid__star.is-dim {
+    color: #dedede;
+  }
+
+  .stagmenfashion-similar-grid__rating-score {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111111;
+    line-height: 1;
+    margin-left: 2px;
+  }
+
+  .stagmenfashion-similar-grid__rating-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666666;
+    line-height: 1;
+  }
+
+  /* Judge.me preview badge sizing overrides */
+  .stagmenfashion-similar-grid__rating .jdgm-preview-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3.5px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+
+  .stagmenfashion-similar-grid__rating .jdgm-prev-badge__stars {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 1.5px !important;
+    color: #ffb400 !important;
+    font-size: 14.5px !important;
+    line-height: 1 !important;
+  }
+
+  .stagmenfashion-similar-grid__rating .jdgm-star {
+    font-size: 14.5px !important;
+    color: #ffb400 !important;
+    line-height: 1 !important;
+  }
+
+  .stagmenfashion-similar-grid__rating .jdgm-prev-badge__text {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #666666 !important;
+    line-height: 1 !important;
+    margin-left: 2px !important;
+  }
     text-decoration: none;
     color: inherit;
     display: inline-block;

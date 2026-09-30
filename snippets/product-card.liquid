@@ -56,15 +56,46 @@
   assign card_section_id = block.id
   assign card_form_id = 'ProductCardForm-' | append: card_section_id | append: '-' | append: product.id
   assign card_variant = product.selected_or_first_available_variant
-  assign card_rating = product.metafields.reviews.rating.value.rating
-  if card_rating == blank
-    assign card_rating = 4.9
+
+  assign card_rating = 0
+  assign card_rating_count = 0
+  assign has_real_reviews = false
+
+  if product.metafields.reviews.rating.value != blank
+    assign card_rating = product.metafields.reviews.rating.value.rating | default: product.metafields.reviews.rating.value | plus: 0
   endif
+  if product.metafields.reviews.rating_count != blank
+    assign card_rating_count = product.metafields.reviews.rating_count.value | default: product.metafields.reviews.rating_count | plus: 0
+  endif
+
+  assign jm_badge = product.metafields.judgeme.badge
+  if jm_badge != blank
+    if jm_badge contains "data-average-rating='"
+      assign jm_rating_val = jm_badge | split: "data-average-rating='" | last | split: "'" | first | plus: 0
+      if jm_rating_val > 0
+        assign card_rating = jm_rating_val
+      endif
+    endif
+    if jm_badge contains "data-number-of-reviews='"
+      assign jm_count_val = jm_badge | split: "data-number-of-reviews='" | last | split: "'" | first | plus: 0
+      if jm_count_val > 0
+        assign card_rating_count = jm_count_val
+      endif
+    endif
+  endif
+
+  if card_rating == 0 and product.metafields.judgeme.rating != blank
+    assign card_rating = product.metafields.judgeme.rating | plus: 0
+  endif
+  if card_rating_count == 0 and product.metafields.judgeme.review_count != blank
+    assign card_rating_count = product.metafields.judgeme.review_count | plus: 0
+  endif
+
+  if card_rating_count > 0 and card_rating > 0
+    assign has_real_reviews = true
+  endif
+
   assign card_rating_round = card_rating | round
-  assign card_rating_count = product.metafields.reviews.rating_count
-  if card_rating_count == blank
-    assign card_rating_count = 128
-  endif
 
   assign card_has_price = false
   if children contains 'product-price' or children contains 'compare-at-price' or children contains 'price__regular'
@@ -154,9 +185,24 @@
       {% if is_collection_page %}
         {{ children }}
         <div class="product-card__collection-meta">
-          <a href="{{ variant_to_link.url }}" class="product-card__collection-title" aria-label="{{ product.title | escape }}">
-            {{ product.title }}
-          </a>
+          <div class="product-card__collection-title-row">
+            <a href="{{ variant_to_link.url }}" class="product-card__collection-title" aria-label="{{ product.title | escape }}">
+              {{ product.title }}
+            </a>
+            <div class="product-card__review" aria-label="{% if has_real_reviews %}Rated {{ card_rating }} out of 5 stars ({{ card_rating_count }} reviews){% else %}0 reviews{% endif %}">
+              <span class="product-card__review-stars" aria-hidden="true">
+                {% for star in (1..5) %}
+                  <span class="{% if has_real_reviews and star > card_rating_round %}is-dim{% endif %}">★</span>
+                {% endfor %}
+              </span>
+              {% if has_real_reviews %}
+                <span class="product-card__review-score">{{ card_rating | round: 1 }}</span>
+                <span class="product-card__review-count">({{ card_rating_count }})</span>
+              {% else %}
+                <span class="product-card__review-count">(0)</span>
+              {% endif %}
+            </div>
+          </div>
 
           <div class="product-card__collection-price-row">
             {% if card_has_sale %}
@@ -173,13 +219,18 @@
       {% else %}
         {{ children }}
         <div class="product-card__footer">
-          <div class="product-card__review" aria-label="Rated {{ card_rating }} out of 5">
+          <div class="product-card__review" aria-label="{% if has_real_reviews %}Rated {{ card_rating }} out of 5 stars ({{ card_rating_count }} reviews){% else %}0 reviews{% endif %}">
             <span class="product-card__review-stars" aria-hidden="true">
               {% for star in (1..5) %}
-                <span class="{% if star > card_rating_round %}is-dim{% endif %}">★</span>
+                <span class="{% if has_real_reviews and star > card_rating_round %}is-dim{% endif %}">★</span>
               {% endfor %}
             </span>
-            <span class="product-card__review-score">({{ card_rating | round: 1 }})</span>
+            {% if has_real_reviews %}
+              <span class="product-card__review-score">{{ card_rating | round: 1 }}</span>
+              <span class="product-card__review-count">({{ card_rating_count }})</span>
+            {% else %}
+              <span class="product-card__review-count">(0)</span>
+            {% endif %}
           </div>
 
           <div
@@ -522,6 +573,14 @@
     padding: 10px 12px 12px;
   }
 
+  .product-card--collection-shop .product-card__collection-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+  }
+
   .product-card--collection-shop .product-card__collection-title {
     color: var(--color-primary);
     font-size: 0.98rem;
@@ -601,10 +660,10 @@
   .product-card__review-stars {
     display: inline-flex;
     align-items: center;
-    gap: 1px;
+    gap: 1.5px;
     line-height: 1;
-    color: #f0ab25;
-    font-size: 0.82rem;
+    color: #ffb400;
+    font-size: 0.95rem;
   }
 
   .product-card__review-stars .is-dim {
@@ -613,9 +672,20 @@
 
   .product-card__review-score {
     display: inline;
-    font-size: 0.72rem;
+    font-size: 0.82rem;
+    font-weight: 700;
     line-height: 1;
-    color: rgb(var(--color-primary-rgb) / 0.82);
+    color: rgb(var(--color-primary-rgb) / 0.88);
+    margin-left: 2px;
+  }
+
+  .product-card__review-count {
+    display: inline;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1;
+    color: rgb(var(--color-primary-rgb) / 0.65);
+    margin-left: 1px;
   }
 
   .product-card__quick-form {

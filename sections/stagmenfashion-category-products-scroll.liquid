@@ -154,11 +154,67 @@
               </div>
 
               <!-- Product Details -->
+              {% liquid
+                assign cat_card_rating = 0
+                assign cat_card_rating_count = 0
+                assign cat_has_real_reviews = false
+
+                if product.metafields.reviews.rating.value != blank
+                  assign cat_card_rating = product.metafields.reviews.rating.value.rating | default: product.metafields.reviews.rating.value | plus: 0
+                endif
+                if product.metafields.reviews.rating_count != blank
+                  assign cat_card_rating_count = product.metafields.reviews.rating_count.value | default: product.metafields.reviews.rating_count | plus: 0
+                endif
+
+                assign cat_jm_badge = product.metafields.judgeme.badge
+                if cat_jm_badge != blank
+                  if cat_jm_badge contains "data-average-rating='"
+                    assign cat_jm_r = cat_jm_badge | split: "data-average-rating='" | last | split: "'" | first | plus: 0
+                    if cat_jm_r > 0
+                      assign cat_card_rating = cat_jm_r
+                    endif
+                  endif
+                  if cat_jm_badge contains "data-number-of-reviews='"
+                    assign cat_jm_c = cat_jm_badge | split: "data-number-of-reviews='" | last | split: "'" | first | plus: 0
+                    if cat_jm_c > 0
+                      assign cat_card_rating_count = cat_jm_c
+                    endif
+                  endif
+                endif
+
+                if cat_card_rating == 0 and product.metafields.judgeme.rating != blank
+                  assign cat_card_rating = product.metafields.judgeme.rating | plus: 0
+                endif
+                if cat_card_rating_count == 0 and product.metafields.judgeme.review_count != blank
+                  assign cat_card_rating_count = product.metafields.judgeme.review_count | plus: 0
+                endif
+
+                if cat_card_rating_count > 0 and cat_card_rating > 0
+                  assign cat_has_real_reviews = true
+                endif
+
+                assign cat_card_rating_round = cat_card_rating | round
+              %}
               <div class="stagmenfashion-catprod__body">
                 <div class="stagmenfashion-catprod__meta">
-                  <a href="{{ product.url }}" class="stagmenfashion-catprod__title-link">
-                    <h3 class="stagmenfashion-catprod__title">{{ product.title }}</h3>
-                  </a>
+                  <div class="stagmenfashion-catprod__title-row">
+                    <a href="{{ product.url }}" class="stagmenfashion-catprod__title-link">
+                      <h3 class="stagmenfashion-catprod__title">{{ product.title }}</h3>
+                    </a>
+                    <div class="stagmenfashion-catprod__rating" aria-label="{% if cat_has_real_reviews %}Rated {{ cat_card_rating }} out of 5 stars ({{ cat_card_rating_count }} reviews){% else %}0 reviews{% endif %}">
+                      <span class="stagmenfashion-catprod__stars">
+                        {% for star_i in (1..5) %}
+                          <span class="stagmenfashion-catprod__star{% if cat_has_real_reviews and star_i > cat_card_rating_round %} is-dim{% endif %}">★</span>
+                        {% endfor %}
+                      </span>
+                      {% if cat_has_real_reviews %}
+                        <span class="stagmenfashion-catprod__rating-score">{{ cat_card_rating | round: 1 }}</span>
+                        <span class="stagmenfashion-catprod__rating-count">({{ cat_card_rating_count }})</span>
+                      {% else %}
+                        <span class="stagmenfashion-catprod__rating-count">(0)</span>
+                      {% endif %}
+                    </div>
+                  </div>
                   <div class="stagmenfashion-catprod__price-row">
                     <span class="stagmenfashion-catprod__price">RS. {{ product.price | money_without_currency | remove: ',' }}</span>
                     {% if card_has_sale %}
@@ -675,12 +731,98 @@
     min-width: 0;
   }
 
+  .stagmenfashion-catprod__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
+  }
+
   .stagmenfashion-catprod__title-link {
     text-decoration: none;
     color: inherit;
     display: block;
-    width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
     line-height: 1.3;
+  }
+
+  .stagmenfashion-catprod__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 3.5px;
+    flex-shrink: 0;
+    line-height: 1;
+    white-space: nowrap;
+    padding: 1px 0;
+  }
+
+  .stagmenfashion-catprod__stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5px;
+    color: #ffb400;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .stagmenfashion-catprod__star {
+    display: inline-block;
+    color: #ffb400;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .stagmenfashion-catprod__star.is-dim {
+    color: #dedede;
+  }
+
+  .stagmenfashion-catprod__rating-score {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #111111;
+    line-height: 1;
+    margin-left: 2px;
+  }
+
+  .stagmenfashion-catprod__rating-count {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #666666;
+    line-height: 1;
+  }
+
+  /* Judge.me preview badge sizing overrides */
+  .stagmenfashion-catprod__rating .jdgm-preview-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3.5px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+
+  .stagmenfashion-catprod__rating .jdgm-prev-badge__stars {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 1.5px !important;
+    color: #ffb400 !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+  }
+
+  .stagmenfashion-catprod__rating .jdgm-star {
+    font-size: 14px !important;
+    color: #ffb400 !important;
+    line-height: 1 !important;
+  }
+
+  .stagmenfashion-catprod__rating .jdgm-prev-badge__text {
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: #666666 !important;
+    line-height: 1 !important;
+    margin-left: 2px !important;
   }
 
   .stagmenfashion-catprod__title {
