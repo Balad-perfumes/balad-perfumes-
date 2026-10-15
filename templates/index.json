@@ -20,7 +20,7 @@
             "eyebrow": "New Season / Drop 01",
             "heading": "Minimalist Streetwear Curation",
             "subheading": "<p>Heavyweight cottons and relaxed tailoring designed for effortless daily wear.</p>",
-            "button_label": "Shop now",
+            "button_label": "",
             "button_link": "shopify://collections/all",
             "button_style": "text_underline",
             "content_position": "bottom-center",
@@ -36,7 +36,7 @@
             "eyebrow": "",
             "heading": "",
             "subheading": "",
-            "button_label": "Shop now",
+            "button_label": "",
             "button_link": "shopify://collections/co-ords",
             "button_style": "text_underline",
             "content_position": "bottom-center",
@@ -96,6 +96,7 @@
         "collection": "new-in",
         "discover_more_label": "",
         "discover_more_link": "shopify://collections/new-in",
+        "show_rating": true,
         "background": "#ffffff",
         "color_scheme": "scheme-1"
       }
