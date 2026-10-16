@@ -42,11 +42,6 @@
       <div class="stagmenfashion-min-hero__track" data-track>
         {% for block in section.blocks %}
           {% liquid
-            assign btn_label = block.settings.button_label
-            if btn_label == blank
-              assign btn_label = 'Shop now'
-            endif
-
             assign btn_link = block.settings.button_link
             if btn_link == blank and block.settings.featured_product != blank
               assign btn_link = block.settings.featured_product.url
@@ -57,8 +52,6 @@
             if btn_link == blank
               assign btn_link = '/collections/all'
             endif
-            assign has_btn = true
-
             assign has_product = false
             if block.settings.featured_product != blank
               assign has_product = true
@@ -82,7 +75,7 @@
               <a
                 href="{{ btn_link }}"
                 class="stagmenfashion-min-hero__full-link"
-                aria-label="{{ block.settings.heading | default: btn_label | default: 'Shop now' | escape }}"
+                aria-label="{{ block.settings.heading | default: 'Banner slide' | escape }}"
               ></a>
             {% endif %}
 
@@ -92,7 +85,7 @@
                 <a
                   href="{{ btn_link }}"
                   class="stagmenfashion-min-hero__media-wrapper stagmenfashion-min-hero__media-link"
-                  aria-label="{{ block.settings.heading | default: btn_label | default: 'Shop now' | escape }}"
+                  aria-label="{{ block.settings.heading | default: 'Banner slide' | escape }}"
                 >
               {% else %}
                 <div class="stagmenfashion-min-hero__media-wrapper">
@@ -151,13 +144,6 @@
                     {% endif %}
                   {% endif %}
 
-                  {% if has_btn %}
-                    <div class="stagmenfashion-min-hero__actions">
-                      <a href="{{ btn_link }}" class="stagmenfashion-min-btn stagmenfashion-min-btn--{{ block.settings.button_style | default: 'text_underline' }}">
-                        <span>{{ btn_label | escape }}</span>
-                      </a>
-                    </div>
-                  {% endif %}
                 </div>
               </div>
 
@@ -184,13 +170,6 @@
                       </div>
                     {% endif %}
 
-                    {% if has_btn %}
-                      <div class="stagmenfashion-min-hero__actions">
-                        <a href="{{ btn_link }}" class="stagmenfashion-min-btn stagmenfashion-min-btn--dark stagmenfashion-min-btn--{{ block.settings.button_style | default: 'text_underline' }}">
-                          <span>{{ btn_label | escape }}</span>
-                        </a>
-                      </div>
-                    {% endif %}
                   </div>
                 </div>
 
@@ -199,7 +178,7 @@
                     <a
                       href="{{ btn_link }}"
                       class="stagmenfashion-min-hero__split-media-frame stagmenfashion-min-hero__media-link"
-                      aria-label="{{ block.settings.heading | default: btn_label | default: 'Shop now' | escape }}"
+                      aria-label="{{ block.settings.heading | default: 'Banner slide' | escape }}"
                     >
                   {% else %}
                     <div class="stagmenfashion-min-hero__split-media-frame">
@@ -225,7 +204,7 @@
                     <a
                       href="{{ btn_link }}"
                       class="stagmenfashion-min-hero__lookbook-primary stagmenfashion-min-hero__media-link"
-                      aria-label="{{ block.settings.heading | default: btn_label | default: 'Shop now' | escape }}"
+                      aria-label="{{ block.settings.heading | default: 'Banner slide' | escape }}"
                     >
                   {% else %}
                     <div class="stagmenfashion-min-hero__lookbook-primary">
@@ -258,11 +237,6 @@
                         {% endif %}
                       </div>
 
-                      {% if has_btn %}
-                        <a href="{{ btn_link }}" class="stagmenfashion-min-btn stagmenfashion-min-btn--{{ block.settings.button_style | default: 'text_underline' }}">
-                          <span>{{ btn_label }}</span>
-                        </a>
-                      {% endif %}
                     </div>
                   {% endif %}
                 </div>
@@ -274,7 +248,7 @@
                 <a
                   href="{{ btn_link }}"
                   class="stagmenfashion-min-hero__media-wrapper stagmenfashion-min-hero__media-link"
-                  aria-label="{{ block.settings.heading | default: btn_label | default: 'Shop now' | escape }}"
+                  aria-label="{{ block.settings.heading | default: 'Banner slide' | escape }}"
                 >
               {% else %}
                 <div class="stagmenfashion-min-hero__media-wrapper">
@@ -319,13 +293,6 @@
                     {% if block.settings.subheading != blank %}
                       <div class="stagmenfashion-min-hero__subheading">{{ block.settings.subheading }}</div>
                     {% endif %}
-                  {% endif %}
-                  {% if has_btn %}
-                    <div class="stagmenfashion-min-hero__actions">
-                      <a href="{{ btn_link }}" class="stagmenfashion-min-btn stagmenfashion-min-btn--{{ block.settings.button_style | default: 'text_underline' }}">
-                        <span>{{ btn_label }}</span>
-                      </a>
-                    </div>
                   {% endif %}
                 </div>
 
@@ -1620,30 +1587,9 @@
           "default": "<p>Heavyweight cottons and relaxed tailoring designed for effortless daily wear.</p>"
         },
         {
-          "type": "header",
-          "content": "Button Settings"
-        },
-        {
-          "type": "text",
-          "id": "button_label",
-          "label": "Button Label",
-          "default": "Shop now"
-        },
-        {
           "type": "url",
           "id": "button_link",
-          "label": "Button Link"
-        },
-        {
-          "type": "select",
-          "id": "button_style",
-          "label": "Button Style",
-          "options": [
-            { "value": "text_underline", "label": "Minimal Border Bottom (Recommended)" },
-            { "value": "minimal_pill", "label": "Clean Solid Pill" },
-            { "value": "thin_outline", "label": "Thin Line Outline" }
-          ],
-          "default": "text_underline"
+          "label": "Slide Link"
         },
         {
           "type": "header",
@@ -1699,9 +1645,7 @@
           "settings": {
             "eyebrow": "Autumn / Winter 26",
             "heading": "Minimalist Streetwear Curation",
-            "subheading": "<p>Heavyweight cottons and relaxed tailoring designed for effortless daily wear.</p>",
-            "button_label": "Shop Collection",
-            "button_style": "text_underline"
+            "subheading": "<p>Heavyweight cottons and relaxed tailoring designed for effortless daily wear.</p>"
           }
         }
       ]
