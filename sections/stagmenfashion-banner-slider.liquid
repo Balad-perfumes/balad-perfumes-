@@ -40,8 +40,6 @@
               assign heading = 'STAG MEN ESSENTIALS'
             endif
 
-            assign button_label = block.settings.button_label | default: 'SHOP NOW'
-
             assign button_link = block.settings.button_link
             if button_link == blank and coll != blank
               assign button_link = coll.url
@@ -112,22 +110,6 @@
                   <h2 class="smf-banner-slider__heading">{{ heading | escape }}</h2>
                 {% endif %}
 
-                {% if button_label != blank %}
-                  <div class="smf-banner-slider__action">
-                    <a
-                      href="{{ button_link | default: '#' }}"
-                      class="smf-banner-slider__btn smf-banner-slider__btn--{{ block.settings.button_style | default: 'underline' }}"
-                    >
-                      <span>{{ button_label | escape }}</span>
-                      {% if block.settings.button_style == 'arrow' %}
-                        <svg class="smf-banner-slider__btn-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                          <line x1="5" y1="12" x2="19" y2="12"></line>
-                          <polyline points="12 5 19 12 12 19"></polyline>
-                        </svg>
-                      {% endif %}
-                    </a>
-                  </div>
-                {% endif %}
               </div>
             </div>
           </article>
@@ -170,6 +152,10 @@
     padding-top: var(--smf-bs-pt);
     padding-bottom: var(--smf-bs-pb);
     overflow: hidden;
+  }
+
+  #{{ section_id }} .smf-banner-slider__content-wrap {
+    display: none !important;
   }
 
   #{{ section_id }}.smf-banner-slider--contained {
@@ -380,6 +366,7 @@
   }
 
   .smf-banner-slider__action {
+    display: none !important;
     margin-top: 2px;
     display: inline-flex;
   }
@@ -954,27 +941,9 @@
           "default": "CO-ORDS & SETS"
         },
         {
-          "type": "text",
-          "id": "button_label",
-          "label": "Button / Link label",
-          "default": "SHOP NOW"
-        },
-        {
           "type": "url",
           "id": "button_link",
           "label": "Link destination"
-        },
-        {
-          "type": "select",
-          "id": "button_style",
-          "label": "Button style",
-          "options": [
-            { "value": "underline", "label": "Minimal Underline Link" },
-            { "value": "solid", "label": "Solid Pill Button" },
-            { "value": "outline", "label": "Outline Pill Button" },
-            { "value": "arrow", "label": "Text with Arrow" }
-          ],
-          "default": "underline"
         },
         {
           "type": "select",
