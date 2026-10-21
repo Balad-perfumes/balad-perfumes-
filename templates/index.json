@@ -14,6 +14,7 @@
       "blocks": {
         "slide_rUGkDE": {
           "type": "slide",
+          "disabled": true,
           "settings": {
             "image": "shopify://shop_images/WhatsApp_Image_2026-10-15_at_3.39.53_PM.jpg",
             "mobile_image": "shopify://shop_images/mob_4_jpg.jpg",
