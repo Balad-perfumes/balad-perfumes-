@@ -29,8 +29,8 @@
         "slide_1": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/normal_1_jpg.jpg",
-            "mobile_image": "shopify://shop_images/mob_1_jpg_3e54d6e4-7f17-4c8e-b3cb-edc2c1e9eab8.jpg",
+            "image": "shopify://shop_images/IMG_6344.png",
+            "mobile_image": "shopify://shop_images/IMG_6346.png",
             "eyebrow": "",
             "heading": "",
             "subheading": "",
@@ -162,9 +162,7 @@
             "mobile_image": "shopify://shop_images/f19be024-44e4-441f-bd73-cc1410bf8c52.png",
             "subheading": "New Season",
             "heading": "SIGNATURE SCENTS & SETS",
-            "button_label": "SHOP NOW",
             "button_link": "shopify://collections/co-ords",
-            "button_style": "underline",
             "content_position": "bottom-center",
             "text_alignment": "center"
           }
@@ -177,9 +175,7 @@
             "mobile_image": "shopify://shop_images/606f9946-6826-42e0-803a-0094d26de3ec.png",
             "subheading": "Fresh Drop",
             "heading": "NEW IN ARRIVALS",
-            "button_label": "SHOP NOW",
             "button_link": "shopify://collections/new-in",
-            "button_style": "underline",
             "content_position": "bottom-center",
             "text_alignment": "center"
           }
