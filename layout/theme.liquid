@@ -132,7 +132,24 @@
       data-product-transition="{{ settings.transition_to_main_product }}"
       data-template="{{ template }}"
     >
-      {% if request.path == '/policies/terms-of-service' %}
+      {% if request.path == '/policies/refund-policy' %}
+        <article class="shopify-policy__container rte">
+          <h1>Refund and Return Policy</h1>
+          <p>Contact us within 7 days of delivery to request a return or report a problem with your perfume order. Include your order number and clear photos when reporting damage or an incorrect item. Email <a href="mailto:hello@baladperfume.com">hello@baladperfume.com</a> or call <a href="tel:+919447425555">+91 94474 25555</a>.</p>
+
+          <h2>Sealed perfumes</h2>
+          <p>Unused perfumes in their original, unopened factory seal and packaging are eligible for a return request within 7 days of delivery. Please contact us before sending anything back. We will confirm the return instructions and eligibility.</p>
+
+          <h2>Opened perfumes</h2>
+          <p>Perfumes that have been opened, unsealed, or used are not eligible for a return due to a change of mind or scent preference. This does not exclude claims for a damaged, defective, or incorrect item; contact us within 7 days so we can review the issue.</p>
+
+          <h2>Damaged deliveries or incorrect items</h2>
+          <p>If your order arrives damaged, defective, or different from what you ordered, contact us within 7 days of delivery with your order number and photos of the item and packaging. After review, we will arrange an appropriate replacement or refund. Please keep the item and packaging until we respond.</p>
+
+          <h2>Return shipping and refunds</h2>
+          <p>Perfumes may be treated as flammable goods by carriers. Do not mail a perfume back until our team provides return instructions. Approved refunds are processed after the returned item or claim has been reviewed. This policy does not limit any rights you may have under applicable consumer law.</p>
+        </article>
+      {% elsif request.path == '/policies/terms-of-service' %}
         {{ content_for_layout | replace: '[LINK]', '<a href="/policies/privacy-policy">Privacy Policy</a>' }}
       {% else %}
         {{ content_for_layout }}
