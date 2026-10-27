@@ -258,7 +258,11 @@
               <span class="pf-star">★</span>
             </div>
             <a class="pf-buybox__reviews-count" href="#pf-product-reviews">
-              {{ review_count }} {% if review_count == 1 %}review{% else %}reviews{% endif %}
+              {% if review_count > 0 %}
+                {{ review_count }} {% if review_count == 1 %}review{% else %}reviews{% endif %}
+              {% else %}
+                Read reviews
+              {% endif %}
             </a>
           </div>
           <button type="button" class="pf-buybox__share-btn" data-share-btn aria-label="Share product">

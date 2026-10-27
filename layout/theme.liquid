@@ -132,7 +132,11 @@
       data-product-transition="{{ settings.transition_to_main_product }}"
       data-template="{{ template }}"
     >
-      {{ content_for_layout }}
+      {% if request.path == '/policies/terms-of-service' %}
+        {{ content_for_layout | replace: '[LINK]', '<a href="/policies/privacy-policy">Privacy Policy</a>' }}
+      {% else %}
+        {{ content_for_layout }}
+      {% endif %}
     </main>
 
     <footer>
