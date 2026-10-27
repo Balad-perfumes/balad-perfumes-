@@ -216,7 +216,7 @@
                 </a>
                 <p class="stagmenfashion-latest-grid__subtitle">{{ fragrance_descriptor }}</p>
                 <div class="stagmenfashion-latest-grid__price-wrap">
-                  <span class="stagmenfashion-latest-grid__price">₹{{ product.price | money_without_currency }}</span>
+                  <span class="stagmenfashion-latest-grid__price">{{ product.price | money_without_trailing_zeros }}</span>
                 </div>
               </div>
 
@@ -241,13 +241,17 @@
                   <div class="stagmenfashion-latest-grid__size-pills" data-card-size-pills>
                     {% for sz in size_array %}
                       {% assign clean_sz = sz | strip %}
+                      {% assign display_sz = clean_sz | downcase %}
+                      {% if display_sz contains 'ml' %}
+                        {% assign display_sz = display_sz | remove: ' ' | replace: 'ml', ' ml' %}
+                      {% endif %}
                       {% if clean_sz != blank %}
                         <button
                           type="button"
                           class="stagmenfashion-latest-grid__size-pill{% if forloop.first %} is-selected{% endif %}"
                           data-size-value="{{ clean_sz }}"
                         >
-                          {{ clean_sz }}
+                          {{ display_sz }}
                         </button>
                       {% endif %}
                     {% endfor %}
@@ -290,7 +294,7 @@
                   <h3 class="stagmenfashion-latest-grid__title">Product {{ i }}</h3>
                   <p class="stagmenfashion-latest-grid__subtitle">FRAGRANCE NOTES</p>
                   <div class="stagmenfashion-latest-grid__price-wrap">
-                    <span class="stagmenfashion-latest-grid__price">₹0.00</span>
+                    <span class="stagmenfashion-latest-grid__price">₹0</span>
                   </div>
                 </div>
                 <div class="stagmenfashion-latest-grid__right-details">
@@ -305,7 +309,7 @@
                     <span class="stagmenfashion-latest-grid__rating-count">(0)</span>
                   </div>
                   <div class="stagmenfashion-latest-grid__size-pills">
-                    <button type="button" class="stagmenfashion-latest-grid__size-pill is-selected">70 ML</button>
+                    <button type="button" class="stagmenfashion-latest-grid__size-pill is-selected">70 ml</button>
                   </div>
                 </div>
               </div>
