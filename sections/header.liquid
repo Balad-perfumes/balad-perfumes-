@@ -357,7 +357,7 @@
               </div>
               <div class="pf-story-modal__brand-info">
                 <span class="pf-story-modal__brand-name">{{ brand_name }}</span>
-                <span class="pf-story-modal__story-tag" data-story-tag>Polo Season</span>
+                <span class="pf-story-modal__story-tag" data-story-tag>Find Your Signature Scent</span>
               </div>
             </div>
 
@@ -439,7 +439,7 @@
           endif
 
           if s_img == blank
-            assign s_img = 'https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?auto=format&fit=crop&w=1200&q=80'
+            assign s_img = 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1200&q=80'
           endif
 
           assign s_tag = block.settings.tag
@@ -486,50 +486,6 @@
         endif
       endfor
 
-      # 2. If no story blocks, populate dynamically from collections that have images
-      if story_count == 0 and collections.size > 0
-        assign coll_added = 0
-        for col in collections
-          if col.all_products_count == 0 and collections.size > 1
-            continue
-          endif
-
-          assign c_img = ''
-          if col.image != blank
-            assign c_img = col.image | image_url: width: 1200
-          elsif col.featured_image != blank
-            assign c_img = col.featured_image | image_url: width: 1200
-          endif
-
-          if c_img != blank
-            assign c_tag = col.title
-            assign c_link = col.url
-            assign c_img_json = c_img | json
-            assign c_tag_json = c_tag | json
-            assign c_link_json = c_link | json
-
-            capture current_item
-              echo '{"image":'
-              echo c_img_json
-              echo ',"tag":'
-              echo c_tag_json
-              echo ',"link":'
-              echo c_link_json
-              echo ',"btn_text":"Shop Now"}'
-            endcapture
-
-            if story_items_raw == ''
-              assign story_items_raw = current_item
-            else
-              assign story_items_raw = story_items_raw | append: ',' | append: current_item
-            endif
-            assign coll_added = coll_added | plus: 1
-            if coll_added >= 4
-              break
-            endif
-          endif
-        endfor
-      endif
     -%}
 
     <!-- JSON Story Data -->
@@ -539,21 +495,9 @@
           {{ story_items_raw }}
         {%- else -%}
           {
-            "image": "https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?auto=format&fit=crop&w=1200&q=80",
-            "tag": "New Arrivals",
-            "link": "{{ routes.all_products_collection_url }}",
-            "btn_text": "Shop Now"
-          },
-          {
-            "image": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1200&q=80",
-            "tag": "Winter Drop",
-            "link": "{{ routes.all_products_collection_url }}",
-            "btn_text": "Shop Now"
-          },
-          {
-            "image": "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1200&q=80",
-            "tag": "Polo Season",
-            "link": "{{ routes.all_products_collection_url }}",
+            "image": "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1200&q=80",
+            "tag": "Find Your Signature Scent",
+            "link": "/collections/all",
             "btn_text": "Shop Now"
           }
         {%- endif -%}
@@ -2236,20 +2180,14 @@
       if (!Array.isArray(stories) || stories.length === 0) {
         stories = [
           {
-            image: "https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?auto=format&fit=crop&w=1200&q=80",
-            tag: "New Arrivals",
+            image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1200&q=80",
+            tag: "Find Your Signature Scent",
             link: "/collections/all",
             btn_text: "Shop Now"
           },
           {
-            image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1200&q=80",
-            tag: "Winter Drop",
-            link: "/collections/all",
-            btn_text: "Shop Now"
-          },
-          {
-            image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1200&q=80",
-            tag: "Polo Season",
+            image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1200&q=80",
+            tag: "Find Your Signature Scent",
             link: "/collections/all",
             btn_text: "Shop Now"
           }
@@ -2391,7 +2329,7 @@
             if (storyLoader) storyLoader.classList.remove('is-active');
             isImageLoading = false;
             if (storyImage) {
-              const fallbackUrl = "https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?auto=format&fit=crop&w=1200&q=80";
+              const fallbackUrl = "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1200&q=80";
               storyImage.src = fallbackUrl;
               storyImage.classList.add('is-loaded');
             }
@@ -2798,7 +2736,7 @@
           "type": "text",
           "id": "tag",
           "label": "Story Tag",
-          "default": "Polo Season"
+          "default": "Find Your Signature Scent"
         },
         {
           "type": "collection",
