@@ -822,12 +822,7 @@ class FacetStatusComponent extends Component {
    * @returns {string} The formatted money value
    */
   #formatMoney(moneyValue) {
-    if (!(this.refs.moneyFormat instanceof HTMLTemplateElement)) return '';
-
-    const format = this.refs.moneyFormat.content.textContent || '{{amount}}';
-    const currency = this.refs.facetStatus.dataset.currency || '';
-
-    return formatMoney(moneyValue, format, currency);
+    return '\u20B9' + ((Number(moneyValue) || 0) / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 });
   }
 
   /**

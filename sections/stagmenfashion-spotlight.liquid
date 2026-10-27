@@ -119,10 +119,10 @@
             {% for product in trending_collection.products limit: section.settings.trending_limit %}
               {% liquid
                 assign product_price_raw = product.price
-                assign product_price = product.price | money
+                assign product_price = product.price | money_without_currency | remove: '.00' | remove: ',00' | prepend: '₹'
                 assign product_compare = blank
                 if product.compare_at_price > product.price
-                  assign product_compare = product.compare_at_price | money
+                  assign product_compare = product.compare_at_price | money_without_currency | remove: '.00' | remove: ',00' | prepend: '₹'
                 endif
                 assign product_image = product.featured_image
                 assign product_hover_image = product.images[1]
@@ -258,10 +258,10 @@
             {% for product in spotlight_collection.products limit: section.settings.products_per_collection %}
               {% liquid
                 assign product_price_raw = product.price
-                assign product_price = product.price | money
+                assign product_price = product.price | money_without_currency | remove: '.00' | remove: ',00' | prepend: '₹'
                 assign product_compare = blank
                 if product.compare_at_price > product.price
-                  assign product_compare = product.compare_at_price | money
+                  assign product_compare = product.compare_at_price | money_without_currency | remove: '.00' | remove: ',00' | prepend: '₹'
                 endif
                 assign product_image = product.featured_image
                 assign product_hover_image = product.images[1]

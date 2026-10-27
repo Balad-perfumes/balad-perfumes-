@@ -119,9 +119,9 @@
     <a class="pop-card__title" href="{{ product.url }}">{{ product.title }}</a>
 
     <div class="pop-card__price-row">
-      <span class="pop-card__price" data-pop-price>{{ card_variant.price | money }}</span>
+      <span class="pop-card__price" data-pop-price>{% render 'format-price', price: card_variant.price %}</span>
       {% if has_sale and card_variant.compare_at_price > card_variant.price %}
-        <s class="pop-card__compare" data-pop-compare>{{ card_variant.compare_at_price | money }}</s>
+        <s class="pop-card__compare" data-pop-compare>{% render 'format-price', price: card_variant.compare_at_price %}</s>
       {% endif %}
     </div>
 

@@ -189,17 +189,17 @@
             <a href="{{ variant_to_link.url }}" class="product-card__collection-title" aria-label="{{ product.title | escape }}">
               {{ product.title }}
             </a>
-            <div class="product-card__review" aria-label="{% if has_real_reviews %}Rated {{ card_rating }} out of 5 stars ({{ card_rating_count }} reviews){% else %}0 reviews{% endif %}">
-              <span class="product-card__review-stars" aria-hidden="true">
-                {% for star in (1..5) %}
-                  <span class="{% if has_real_reviews and star > card_rating_round %}is-dim{% endif %}">★</span>
-                {% endfor %}
-              </span>
+            <div class="product-card__review" aria-label="{% if has_real_reviews %}Rated {{ card_rating }} out of 5 stars ({{ card_rating_count }} reviews){% else %}No reviews yet{% endif %}">
               {% if has_real_reviews %}
+                <span class="product-card__review-stars" aria-hidden="true">
+                  {% for star in (1..5) %}
+                    <span class="{% if star > card_rating_round %}is-dim{% endif %}">★</span>
+                  {% endfor %}
+                </span>
                 <span class="product-card__review-score">{{ card_rating | round: 1 }}</span>
                 <span class="product-card__review-count">({{ card_rating_count }})</span>
               {% else %}
-                <span class="product-card__review-count">(0)</span>
+                <span class="product-card__review-count">No reviews yet</span>
               {% endif %}
             </div>
           </div>
@@ -207,9 +207,9 @@
           <div class="product-card__collection-price-row">
             {% if card_has_sale %}
               <span class="product-card__collection-discount">-{{ card_discount_percentage }}%</span>
-              <span class="product-card__collection-compare-at">{{ card_compare_at_price | money }}</span>
+              <span class="product-card__collection-compare-at">{% render 'format-price', price: card_compare_at_price %}</span>
             {% endif %}
-            <span class="product-card__collection-price">{{ card_price | money }}</span>
+            <span class="product-card__collection-price">{% render 'format-price', price: card_price %}</span>
           </div>
 
           <div class="product-card__collection-delivery">
@@ -219,17 +219,17 @@
       {% else %}
         {{ children }}
         <div class="product-card__footer">
-          <div class="product-card__review" aria-label="{% if has_real_reviews %}Rated {{ card_rating }} out of 5 stars ({{ card_rating_count }} reviews){% else %}0 reviews{% endif %}">
-            <span class="product-card__review-stars" aria-hidden="true">
-              {% for star in (1..5) %}
-                <span class="{% if has_real_reviews and star > card_rating_round %}is-dim{% endif %}">★</span>
-              {% endfor %}
-            </span>
+          <div class="product-card__review" aria-label="{% if has_real_reviews %}Rated {{ card_rating }} out of 5 stars ({{ card_rating_count }} reviews){% else %}No reviews yet{% endif %}">
             {% if has_real_reviews %}
+              <span class="product-card__review-stars" aria-hidden="true">
+                {% for star in (1..5) %}
+                  <span class="{% if star > card_rating_round %}is-dim{% endif %}">★</span>
+                {% endfor %}
+              </span>
               <span class="product-card__review-score">{{ card_rating | round: 1 }}</span>
               <span class="product-card__review-count">({{ card_rating_count }})</span>
             {% else %}
-              <span class="product-card__review-count">(0)</span>
+              <span class="product-card__review-count">No reviews yet</span>
             {% endif %}
           </div>
 

@@ -216,7 +216,7 @@
                 </a>
                 <p class="stagmenfashion-latest-grid__subtitle">{{ fragrance_descriptor }}</p>
                 <div class="stagmenfashion-latest-grid__price-wrap">
-                  <span class="stagmenfashion-latest-grid__price">{{ product.price | money_without_trailing_zeros }}</span>
+                  <span class="stagmenfashion-latest-grid__price">{% render 'format-price', price: product.price %}</span>
                 </div>
               </div>
 
@@ -714,7 +714,7 @@
       modal.dataset.qaVariants = variantsData;
 
       if (titleEl) titleEl.textContent = title;
-      if (priceEl) priceEl.textContent = 'RS. ' + price;
+      if (priceEl) priceEl.textContent = '₹' + Number(price || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
       if (imgEl) {
         if (image) {

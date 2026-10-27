@@ -124,9 +124,9 @@
                         <span class="pf-offer-name">{{ offer_prod.title | truncate: 20 }}</span>
                         <div class="pf-offer-price-row">
                           {% if offer_prod.compare_at_price_max > offer_prod.price_min %}
-                            <span class="pf-offer-compare">{{ offer_prod.compare_at_price_max | money }}</span>
+                            <span class="pf-offer-compare">{% render 'format-price', price: offer_prod.compare_at_price_max %}</span>
                           {% endif %}
-                          <span class="pf-offer-price">{{ offer_prod.price_min | money }}</span>
+                          <span class="pf-offer-price">{% render 'format-price', price: offer_prod.price_min %}</span>
                         </div>
                       </div>
                       <button

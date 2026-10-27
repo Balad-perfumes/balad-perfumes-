@@ -158,9 +158,9 @@
 
                         <div class="stagmenfashion-gift-combo-card__footer">
                           <div class="stagmenfashion-gift-combo-card__price-wrap">
-                            <span class="stagmenfashion-gift-combo-card__price">{{ combo_price | money }}</span>
+                            <span class="stagmenfashion-gift-combo-card__price">{% render 'format-price', price: combo_price %}</span>
                             {% if product.compare_at_price > combo_price %}
-                              <span class="stagmenfashion-gift-combo-card__compare">{{ product.compare_at_price | money }}</span>
+                              <span class="stagmenfashion-gift-combo-card__compare">{% render 'format-price', price: product.compare_at_price %}</span>
                             {% endif %}
                           </div>
                           <button type="button" class="stagmenfashion-gift-combo-card__toggle" data-gift-card-toggle>
@@ -202,15 +202,15 @@
           <div class="stagmenfashion-gift-combo__totals">
             <div class="stagmenfashion-gift-combo__row">
               <span>Subtotal</span>
-              <strong data-gift-subtotal>{{ 0 | money }}</strong>
+              <strong data-gift-subtotal>{% render 'format-price', price: 0 %}</strong>
             </div>
             <div class="stagmenfashion-gift-combo__row stagmenfashion-gift-combo__row--discount" data-gift-discount-row hidden>
               <span>Estimated savings</span>
-              <strong data-gift-savings>{{ 0 | money }}</strong>
+              <strong data-gift-savings>{% render 'format-price', price: 0 %}</strong>
             </div>
             <div class="stagmenfashion-gift-combo__row stagmenfashion-gift-combo__row--total">
               <span>Combo total</span>
-              <strong data-gift-total>{{ 0 | money }}</strong>
+              <strong data-gift-total>{% render 'format-price', price: 0 %}</strong>
             </div>
           </div>
 
@@ -1066,10 +1066,11 @@
         return new Intl.NumberFormat(locale, {
           style: 'currency',
           currency,
+          minimumFractionDigits: 0,
           maximumFractionDigits: 2,
         }).format((Number(cents) || 0) / 100);
       } catch (error) {
-        return (currency === 'INR' ? '₹' : '$') + ((Number(cents) || 0) / 100).toFixed(2);
+        return '\u20B9' + ((Number(cents) || 0) / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 });
       }
     };
 

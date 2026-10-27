@@ -48,28 +48,11 @@
     endif
   endif
 
-  # Determine if currency code should be shown
-  assign use_currency = false
-  if product.handle == product_resource.handle
-    if settings.currency_code_enabled_product_pages
-      assign use_currency = true
-    endif
-  elsif settings.currency_code_enabled_product_cards
-    assign use_currency = true
-  endif
-
-  # Format all prices
-  if use_currency
-    assign price = price | money_with_currency
-    assign compare_at_price = compare_at_price | money_with_currency
-    assign price_min = price_min | money_with_currency
-    assign price_max = price_max | money_with_currency
-  else
-    assign price = price | money
-    assign compare_at_price = compare_at_price | money
-    assign price_min = price_min | money
-    assign price_max = price_max | money
-  endif
+  # Format all prices consistently for the store's INR pricing
+  assign price = price | money_without_currency | remove: '.00' | remove: ',00' | prepend: '₹'
+  assign compare_at_price = compare_at_price | money_without_currency | remove: '.00' | remove: ',00' | prepend: '₹'
+  assign price_min = price_min | money_without_currency | remove: '.00' | remove: ',00' | prepend: '₹'
+  assign price_max = price_max | money_without_currency | remove: '.00' | remove: ',00' | prepend: '₹'
 -%}
 
 <div ref="priceContainer">
@@ -129,9 +112,9 @@
   {%- if selected_variant.unit_price and show_unit_price %}
     {%- liquid
       if use_currency
-        assign unit_price = selected_variant.unit_price | money_with_currency
+        assign unit_price = selected_variant.unit_price | money_without_currency | remove: '.00' | remove: ',00' | prepend: '₹'
       else
-        assign unit_price = selected_variant.unit_price | money
+        assign unit_price = selected_variant.unit_price | money_without_currency | remove: '.00' | remove: ',00' | prepend: '₹'
       endif
     -%}
     {% render 'unit-price', price: unit_price, measurement: selected_variant.unit_price_measurement %}

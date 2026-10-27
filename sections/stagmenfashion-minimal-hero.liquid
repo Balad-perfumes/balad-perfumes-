@@ -306,7 +306,7 @@
                     <div class="stagmenfashion-min-hero__product-info">
                       <span class="stagmenfashion-min-hero__product-tag">Featured</span>
                       <span class="stagmenfashion-min-hero__product-title">{{ feat_prod.title | truncate: 24 }}</span>
-                      <span class="stagmenfashion-min-hero__product-price">{{ feat_prod.price | money }}</span>
+                      <span class="stagmenfashion-min-hero__product-price">{% render 'format-price', price: feat_prod.price %}</span>
                     </div>
                   </a>
                 {% endif %}

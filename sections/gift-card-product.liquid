@@ -69,9 +69,9 @@
       <h1 class="pf-gift-card__title">{{ product.title }}</h1>
 
       <div class="pf-gift-card__price-row">
-        <span class="pf-gift-card__price">{{ product.selected_or_first_available_variant.price | money }}</span>
+        <span class="pf-gift-card__price">{% render 'format-price', price: product.selected_or_first_available_variant.price %}</span>
         {% if product.compare_at_price_max > product.price_min %}
-          <s class="pf-gift-card__compare">{{ product.compare_at_price_max | money }}</s>
+          <s class="pf-gift-card__compare">{% render 'format-price', price: product.compare_at_price_max %}</s>
         {% endif %}
       </div>
 

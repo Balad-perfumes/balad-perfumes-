@@ -16,8 +16,8 @@
   assign facebook_url = section.settings.facebook_url | default: settings.social_facebook_link
   assign youtube_url = section.settings.youtube_url | default: settings.social_youtube_link
 
-  assign contact_email = section.settings.contact_email | default: 'support@stagmenfashion.com'
-  assign contact_whatsapp_text = section.settings.contact_whatsapp_text | default: '+91 98765 43210'
+  assign contact_email = section.settings.contact_email | default: 'hello@baladperfume.com'
+  assign contact_whatsapp_text = section.settings.contact_whatsapp_text | default: '+91 94474 25555'
 %}
 
 <footer class="stagmenfashion-footer color-{{ section.settings.color_scheme }}" id="stagmenfashion-site-footer">
@@ -87,7 +87,9 @@
               <li><a href="{{ link.url }}" class="stagmenfashion-footer__link">{{ link.title }}</a></li>
             {% endfor %}
           {% else %}
-            <li><a href="/pages/contact" class="stagmenfashion-footer__link">Track Order & Shipping</a></li>
+            {% if shop.shipping_policy != blank and shop.shipping_policy.url != blank %}
+              <li><a href="{{ shop.shipping_policy.url }}" class="stagmenfashion-footer__link">Shipping Information</a></li>
+            {% endif %}
             <li><a href="/policies/refund-policy" class="stagmenfashion-footer__link">Returns & Exchanges</a></li>
             <li><a href="/policies/privacy-policy" class="stagmenfashion-footer__link">Privacy Policy</a></li>
             <li><a href="/policies/terms-of-service" class="stagmenfashion-footer__link">Terms of Service</a></li>
@@ -476,13 +478,13 @@
       "type": "text",
       "id": "contact_email",
       "label": "Contact Email",
-      "default": "support@stagmenfashion.com"
+      "default": "hello@baladperfume.com"
     },
     {
       "type": "text",
       "id": "contact_whatsapp_text",
       "label": "WhatsApp Display Text",
-      "default": "+91 98765 43210"
+      "default": "+91 94474 25555"
     },
     {
       "type": "header",

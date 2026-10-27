@@ -158,9 +158,9 @@
                 </div>
                 <a class="pf-product-card__title" href="{{ product.url }}">{{ product.title }}</a>
                 <div class="pf-product-card__price-row">
-                  <span class="pf-product-card__price">{{ product.price | money }}</span>
+                  <span class="pf-product-card__price">{% render 'format-price', price: product.price %}</span>
                   {% if has_sale %}
-                    <s class="pf-product-card__compare">{{ product.compare_at_price | money }}</s>
+                    <s class="pf-product-card__compare">{% render 'format-price', price: product.compare_at_price %}</s>
                   {% endif %}
                 </div>
 

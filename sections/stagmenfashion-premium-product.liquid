@@ -135,12 +135,12 @@
 
               <div class="stagmenfashion-premium-product__price-line">
                 <div class="stagmenfashion-premium-product__price-wrap">
-                  <span class="stagmenfashion-premium-product__price" data-price>{{ current_variant.price | money }}</span>
+                  <span class="stagmenfashion-premium-product__price" data-price>{% render 'format-price', price: current_variant.price %}</span>
                   <span
                     class="stagmenfashion-premium-product__compare{% if current_variant.compare_at_price <= current_variant.price or current_variant.compare_at_price == blank %} hidden{% endif %}"
                     data-compare-price
                   >
-                    {{ current_variant.compare_at_price | money }}
+                    {% render 'format-price', price: current_variant.compare_at_price %}
                   </span>
                   {% if current_variant.compare_at_price > current_variant.price %}
                     {% assign discount_amount = current_variant.compare_at_price | minus: current_variant.price %}
@@ -202,8 +202,8 @@
                       "options": {{ variant.options | json }},
                       "price": {{ variant.price | json }},
                       "compare_at_price": {{ variant.compare_at_price | json }},
-                      "formatted_price": {{ variant.price | money | json }},
-                      "formatted_compare_at_price": {{ variant.compare_at_price | money | json }},
+                      "formatted_price": "₹{{ variant.price | money_without_currency | remove: '.00' | remove: ',00' }}",
+                      "formatted_compare_at_price": "₹{{ variant.compare_at_price | money_without_currency | remove: '.00' | remove: ',00' }}",
                       "featured_image_id": {{ variant.featured_image.id | default: blank | json }}
                     }{% unless forloop.last %},{% endunless %}
                   {% endfor %}
@@ -632,7 +632,7 @@
     </div>
 
     <div class="stagmenfashion-premium-product__sticky-mobile">
-      <div class="stagmenfashion-premium-product__sticky-price" data-sticky-price>{{ current_variant.price | money }}</div>
+      <div class="stagmenfashion-premium-product__sticky-price" data-sticky-price>{% render 'format-price', price: current_variant.price %}</div>
       <button
         type="button"
         class="stagmenfashion-premium-product__button stagmenfashion-premium-product__button--primary stagmenfashion-premium-product__sticky-button"
@@ -1943,16 +1943,8 @@
 
   <script>
     (() => {
-      const runtimeLocale = document.documentElement.lang || navigator.language || 'en-IN';
-      const runtimeCurrency = document.querySelector('meta[property="og:price:currency"]')?.content || 'INR';
-      const money = new Intl.NumberFormat(runtimeLocale, {
-        style: 'currency',
-        currency: runtimeCurrency,
-        maximumFractionDigits: 2,
-      });
-
       function formatMoney(cents) {
-        return money.format((cents || 0) / 100);
+        return '₹' + ((cents || 0) / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 });
       }
 
       function initSection(section) {

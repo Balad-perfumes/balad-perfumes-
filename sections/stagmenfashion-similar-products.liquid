@@ -215,7 +215,7 @@
                   {% endif %}
                 </div>
               </div>
-              <span class="stagmenfashion-similar-grid__price">RS. {{ prod.price | money_without_currency | remove: ',' }}</span>
+              <span class="stagmenfashion-similar-grid__price">{% render 'format-price', price: prod.price %}</span>
             </div>
             <button
               type="button"

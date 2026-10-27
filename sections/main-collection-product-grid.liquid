@@ -189,7 +189,7 @@
                 <a href="{{ product.url }}" class="stagmenfashion-collection-grid__title-link">
                   <h3 class="stagmenfashion-collection-grid__title">{{ product.title }}</h3>
                 </a>
-                <span class="stagmenfashion-collection-grid__price">RS. {{ product.price | money_without_currency | remove: ',' }}</span>
+                <span class="stagmenfashion-collection-grid__price">{% render 'format-price', price: product.price %}</span>
               </div>
               <button
                 type="button"
@@ -855,7 +855,7 @@
       modal.dataset.qaProductAvailable = productAvailable;
 
       titleEl.textContent = title;
-      priceEl.textContent = 'RS. ' + price;
+      priceEl.textContent = '₹' + Number(price || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
       if (image) {
         imgEl.innerHTML = '<img src="' + image + '" alt="' + title.replace(/"/g, '&quot;') + '" />';

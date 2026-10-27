@@ -116,7 +116,7 @@
 
                   assign item_image = item_product.featured_image | default: item_product.images.first
                   assign item_title = item_product.title
-                  assign item_price = item_product.price | money
+                  assign item_price = item_product.price | money_without_currency | remove: '.00' | remove: ',00' | prepend: '₹'
                   assign item_link = item_product.url
                   assign button_label = section.settings.button_label | default: 'View Product'
                 %}

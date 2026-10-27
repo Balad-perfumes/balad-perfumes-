@@ -79,7 +79,7 @@
             role="caption"
           >
             {{ 'content.cart_total' | t }}
-            <span>{{ cart.total_price | money_with_currency }}</span>
+            <span>{% render 'format-price', price: cart.total_price %}</span>
           </caption>
 
           <thead
@@ -186,10 +186,10 @@
                     </p>
                     <div class="cart-items__price-savings-wrap">
                       <div class="cart-items__price-row">
-                        <span class="cart-items__sale-price">{{ item.final_price | money }}</span>
+                        <span class="cart-items__sale-price">{% render 'format-price', price: item.final_price %}</span>
                         {% assign item_compare = item.variant.compare_at_price | default: item.original_price %}
                         {% if item_compare > item.final_price %}
-                          <span class="cart-items__compare-price">{{ item_compare | money }}</span>
+                          <span class="cart-items__compare-price">{% render 'format-price', price: item_compare %}</span>
                         {% endif %}
                       </div>
                       {%- if item.product.has_only_default_variant == false and item.item_components.size == 0 -%}
@@ -201,7 +201,7 @@
                       {%- endif -%}
                       {%- if item_compare > item.final_price -%}
                         {% assign item_savings = item_compare | minus: item.final_price | times: item.quantity %}
-                        <span class="cart-items__save-badge">You save {{ item_savings | money }}</span>
+                        <span class="cart-items__save-badge">You save {% render 'format-price', price: item_savings %}</span>
                       {%- endif -%}
                     </div>
                     {% if item.product.vendor and block_settings.vendor %}
@@ -336,13 +336,8 @@
                   </div>
                 </td>
                 {%- liquid
-                  if settings.currency_code_enabled_cart_items
-                    assign price = item.final_line_price | money_with_currency
-                    assign unit_price = item.unit_price | money_with_currency
-                  else
-                    assign price = item.final_line_price | money
-                    assign unit_price = item.unit_price | money
-                  endif
+                  assign price = item.final_line_price | money_without_currency | remove: '.00' | remove: ',00' | prepend: '₹'
+                  assign unit_price = item.unit_price | money_without_currency | remove: '.00' | remove: ',00' | prepend: '₹'
                 -%}
                 <td
                   class="cart-items__price cart-secondary-typography"

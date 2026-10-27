@@ -35,7 +35,7 @@
               </div>
               <div class="search-modal__product-info">
                 <span class="search-modal__product-title">{{ product.title }}</span>
-                <span class="search-modal__product-price">{{ product.price | money }}</span>
+                <span class="search-modal__product-price">{% render 'format-price', price: product.price %}</span>
               </div>
             </a>
           {% endfor %}

@@ -45,16 +45,16 @@
         >
           {%- if filter.min_value.value != null or filter.max_value.value != null %}
             {%- if filter.min_value.value != null and filter.max_value.value != null %}
-              {{- filter.min_value.value | money | strip_html -}}
+              {% render 'format-price', price: filter.min_value.value %}
               –
-              {{- filter.max_value.value | money | strip_html -}}
+              {% render 'format-price', price: filter.max_value.value %}
             {%- elsif filter.min_value.value != null -%}
-              {{ filter.min_value.value | money | strip_html }}–{{ filter.range_max | money | strip_html }}
+              {% render 'format-price', price: filter.min_value.value %}–{% render 'format-price', price: filter.range_max %}
 
             {%- elsif filter.max_value.value != null -%}
-              {{- 0 | money | strip_html -}}
+              {% render 'format-price', price: 0 %}
               –
-              {{- filter.max_value.value | money | strip_html -}}
+              {% render 'format-price', price: filter.max_value.value %}
             {%- endif -%}
           {%- endif -%}
         </span>
@@ -151,7 +151,7 @@
             {%- endif %}
           "
         >
-          {%- assign formatted_highest_price = filter.range_max | money -%}
+          {%- capture formatted_highest_price -%}{% render 'format-price', price: filter.range_max %}{%- endcapture -%}
           {{ 'content.price_filter_html' | t: price: formatted_highest_price }}
         </div>
 

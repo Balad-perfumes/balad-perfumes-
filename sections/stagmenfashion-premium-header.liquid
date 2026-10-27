@@ -270,9 +270,9 @@
 
                       <span class="cart-drawer__recommendation-price">
                         {% if recommended_product.compare_at_price > recommended_product.price %}
-                          <s>{{ recommended_product.compare_at_price | money }}</s>
+                          <s>{% render 'format-price', price: recommended_product.compare_at_price %}</s>
                         {% endif %}
-                        <span>{{ recommended_product.price | money }}</span>
+                        <span>{% render 'format-price', price: recommended_product.price %}</span>
                       </span>
                     </span>
 

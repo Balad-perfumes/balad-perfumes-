@@ -34,7 +34,9 @@
               assign amount_label = section.settings.amount_label_5
           endcase
           if amount_label == blank
-            assign amount_label = variant.price | money
+            capture amount_label
+              render 'format-price', price: variant.price
+            endcapture
           endif
         %}
         <label class="pf-gift-card__amount{% if variant.id == product.selected_or_first_available_variant.id %} is-active{% endif %}">

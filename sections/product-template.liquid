@@ -279,11 +279,11 @@
         <!-- Price Block -->
         <div class="pf-buybox__price-block">
           <div class="pf-buybox__price-row">
-            <span class="pf-price-main" data-pf-price-main>₹{{ current_variant.price | money_without_currency }}</span>
+            <span class="pf-price-main" data-pf-price-main>{% render 'format-price', price: current_variant.price %}</span>
             {% if current_variant.compare_at_price > current_variant.price %}
               {% assign save_amt = current_variant.compare_at_price | minus: current_variant.price %}
-              <span class="pf-price-compare" data-pf-compare-price>₹{{ current_variant.compare_at_price | money_without_currency }}</span>
-              <span class="pf-save-badge" data-pf-save-badge>Save ₹{{ save_amt | money_without_currency }}</span>
+              <span class="pf-price-compare" data-pf-compare-price>{% render 'format-price', price: current_variant.compare_at_price %}</span>
+              <span class="pf-save-badge" data-pf-save-badge>Save {% render 'format-price', price: save_amt %}</span>
             {% endif %}
           </div>
           <span class="pf-tax-label">MRP. (Incl. of all tax)</span>
@@ -529,11 +529,11 @@
         <span class="pf-product-template__sticky-price-label">Price</span>
         <div class="pf-product-template__sticky-price-wrap">
           <span class="pf-product-template__sticky-price" data-pf-sticky-price>
-            {{ current_variant.price | money }}
+            {% render 'format-price', price: current_variant.price %}
           </span>
           {% if current_variant.compare_at_price > current_variant.price %}
             <span class="pf-product-template__sticky-compare-price" data-pf-sticky-compare-price>
-              {{ current_variant.compare_at_price | money }}
+              {% render 'format-price', price: current_variant.compare_at_price %}
             </span>
           {% endif %}
         </div>
@@ -3484,43 +3484,9 @@
       });
     }
 
-    function formatMoney(cents, format) {
-      if (typeof cents === 'string') cents = parseInt(cents, 10);
-      let value = '';
-      const placeholderRegex = /\{\{\s*(\w+)\s*\}\}/;
-      const cleanFormat = (format || 'RS. {{amount}}').replace(/₹/g, 'RS.');
-      const match = cleanFormat.match(placeholderRegex);
-      if (!match) return `RS. ${(cents / 100).toLocaleString()}`;
-
-      const placeholder = match[1];
-      switch (placeholder) {
-        case 'amount':
-          value = (cents / 100).toFixed(2);
-          break;
-        case 'amount_no_decimals':
-          value = Math.round(cents / 100).toString();
-          break;
-        case 'amount_with_comma_separator':
-          value = (cents / 100).toFixed(2).replace('.', ',');
-          break;
-        case 'amount_no_decimals_with_comma_separator':
-          value = Math.round(cents / 100).toString().replace('.', ',');
-          break;
-        default:
-          value = (cents / 100).toFixed(2);
-      }
-
-      if (placeholder.includes('comma_separator')) {
-        const parts = value.split(',');
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        value = parts.join(',');
-      } else {
-        const parts = value.split('.');
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        value = parts.join('.');
-      }
-
-      return cleanFormat.replace(placeholderRegex, value);
+    function formatMoney(cents) {
+      const rupees = (Number(cents) || 0) / 100;
+      return '\u20B9' + rupees.toLocaleString('en-IN', { maximumFractionDigits: 0 });
     }
 
     const syncVariant = (variantId) => {
@@ -3554,14 +3520,13 @@
 
         // Update Price if present
         if (priceEl && v.price) {
-          const moneyFormat = root.dataset.moneyFormat || 'RS. {{amount}}';
-          const priceText = formatMoney(v.price, moneyFormat);
+          const priceText = formatMoney(v.price);
           const priceValEl = priceEl.querySelector('.price') || priceEl;
           if (priceValEl) priceValEl.textContent = priceText;
 
           const compareValEl = priceEl.querySelector('.compare-at-price');
           if (compareValEl && v.compare_at_price && v.compare_at_price > v.price) {
-            compareValEl.textContent = formatMoney(v.compare_at_price, moneyFormat);
+            compareValEl.textContent = formatMoney(v.compare_at_price);
           }
 
           if (stickyPriceEl) {
@@ -3571,7 +3536,7 @@
           const stickyCompareEl = root.querySelector('[data-pf-sticky-compare-price]');
           if (stickyCompareEl) {
             if (v.compare_at_price && v.compare_at_price > v.price) {
-              stickyCompareEl.textContent = formatMoney(v.compare_at_price, moneyFormat);
+              stickyCompareEl.textContent = formatMoney(v.compare_at_price);
               stickyCompareEl.style.display = 'inline';
             } else {
               stickyCompareEl.style.display = 'none';

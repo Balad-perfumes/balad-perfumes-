@@ -63,7 +63,7 @@ function getVariants(card) {
 
 function renderMoney(cents) {
   const amount = Number(cents || 0) / 100;
-  return `₹ ${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return '\u20B9' + amount.toLocaleString('en-IN', { maximumFractionDigits: 0 });
 }
 
 function setupVariantControls() {

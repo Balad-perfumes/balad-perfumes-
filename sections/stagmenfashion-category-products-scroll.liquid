@@ -216,9 +216,9 @@
                     </div>
                   </div>
                   <div class="stagmenfashion-catprod__price-row">
-                    <span class="stagmenfashion-catprod__price">RS. {{ product.price | money_without_currency | remove: ',' }}</span>
+                    <span class="stagmenfashion-catprod__price">{% render 'format-price', price: product.price %}</span>
                     {% if card_has_sale %}
-                      <span class="stagmenfashion-catprod__compare-price">RS. {{ product.compare_at_price | money_without_currency | remove: ',' }}</span>
+                      <span class="stagmenfashion-catprod__compare-price">{% render 'format-price', price: product.compare_at_price %}</span>
                       <span class="stagmenfashion-catprod__discount-tag">{{ card_discount_pct }}% OFF</span>
                     {% endif %}
                   </div>
@@ -266,8 +266,8 @@
                 <div class="stagmenfashion-catprod__meta">
                   <h3 class="stagmenfashion-catprod__title">Stag Essential {{ i }}</h3>
                   <div class="stagmenfashion-catprod__price-row">
-                    <span class="stagmenfashion-catprod__price">RS. 1,499</span>
-                    <span class="stagmenfashion-catprod__compare-price">RS. 1,899</span>
+                    <span class="stagmenfashion-catprod__price">₹1,499</span>
+                    <span class="stagmenfashion-catprod__compare-price">₹1,899</span>
                     <span class="stagmenfashion-catprod__discount-tag">20% OFF</span>
                   </div>
                 </div>
@@ -1523,10 +1523,10 @@
 
       currentProductId = productId;
       titleEl.textContent = title;
-      priceEl.textContent = 'RS. ' + price;
+      priceEl.textContent = '₹' + Number(price || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
       if (comparePrice && comparePrice !== price && comparePrice !== '0' && comparePrice !== '') {
-        comparePriceEl.textContent = 'RS. ' + comparePrice;
+        comparePriceEl.textContent = '₹' + Number(comparePrice || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
         comparePriceEl.style.display = 'inline';
       } else {
         comparePriceEl.textContent = '';
@@ -1691,7 +1691,7 @@
       qaSelectedSize = null;
 
       titleEl.textContent = title;
-      priceEl.textContent = 'RS. ' + price;
+      priceEl.textContent = '₹' + Number(price || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
       if (image) {
         imgEl.innerHTML = '<img src="' + image + '" alt="' + title.replace(/"/g, '&quot;') + '" />';

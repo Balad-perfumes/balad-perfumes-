@@ -182,7 +182,7 @@
                   {% endif %}
                 </div>
               </div>
-              <span class="stagmenfashion-trending-grid__price">RS. {{ product.price | money_without_currency | remove: ',' }}</span>
+              <span class="stagmenfashion-trending-grid__price">{% render 'format-price', price: product.price %}</span>
             </div>
             <button
               type="button"
@@ -218,7 +218,7 @@
             <div class="stagmenfashion-trending-grid__info">
               <div class="stagmenfashion-trending-grid__details">
                 <h3 class="stagmenfashion-trending-grid__title">Trending Item {{ i }}</h3>
-                <span class="stagmenfashion-trending-grid__price">RS. 0</span>
+              <span class="stagmenfashion-trending-grid__price">₹0</span>
               </div>
               <span class="stagmenfashion-trending-grid__plus-btn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -587,7 +587,7 @@
       modal.dataset.qaProductAvailable = productAvailable;
 
       titleEl.textContent = title;
-      priceEl.textContent = 'RS. ' + price;
+      priceEl.textContent = '₹' + Number(price || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
       if (image) {
         imgEl.innerHTML = '<img src="' + image + '" alt="' + title.replace(/"/g, '&quot;') + '" />';

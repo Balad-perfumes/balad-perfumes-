@@ -22,7 +22,7 @@
           class="cart-totals__original-value cart-secondary-typography"
           data-testid="cart-subtotal-value"
         >
-          {{- cart.items_subtotal_price | money -}}
+          {% render 'format-price', price: cart.items_subtotal_price %}
         </span>
       </span>
       <ul
@@ -37,7 +37,7 @@
               {{ discount.title | escape }}
             </span>
             <span class="cart-discounts__value cart-secondary-typography"
-              >-{{ discount.total_allocated_amount | money -}}
+              >-{% render 'format-price', price: discount.total_allocated_amount %}
             </span>
           </li>
         {%- endfor -%}
@@ -99,13 +99,7 @@
     </div>
   {% endif %}
 
-  {%- liquid
-    if settings.currency_code_enabled_cart_total
-      assign total_price = cart.total_price | money_with_currency
-    else
-      assign total_price = cart.total_price | money
-    endif
-  -%}
+  {%- capture total_price -%}{%- render 'format-price', price: cart.total_price -%}{%- endcapture -%}
 
   <div class="cart-totals__container">
     <span
@@ -139,7 +133,7 @@
   >
     <span class="button-text">CHECKOUT</span>
     <span class="button-price-wrap">
-      <span>{{ cart.total_price | money }}</span>
+      <span>{% render 'format-price', price: cart.total_price %}</span>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
     </span>
   </button>
