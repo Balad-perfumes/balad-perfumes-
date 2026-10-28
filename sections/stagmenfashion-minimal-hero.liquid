@@ -100,11 +100,11 @@
                     {% endif %}
                     {% if block.settings.mobile_image != blank %}
                       <picture class="stagmenfashion-min-hero__picture">
-                        <source media="(max-width: 749px)" srcset="{{ block.settings.mobile_image | image_url: width: 375, format: 'webp' }} 375w, {{ block.settings.mobile_image | image_url: width: 550, format: 'webp' }} 550w, {{ block.settings.mobile_image | image_url: width: 750, format: 'webp' }} 750w" sizes="100vw">
-                        {{ block.settings.image | image_url: width: 1200, format: 'webp' | image_tag: class: 'stagmenfashion-min-hero__img', widths: '550, 750, 950, 1200', sizes: '100vw', loading: loading_attr, fetchpriority: priority_attr, decoding: 'async', alt: block.settings.heading | default: 'Hero image' }}
+                        <source media="(max-width: 749px)" srcset="{{ block.settings.mobile_image | image_url: width: 750, format: 'webp' }} 750w, {{ block.settings.mobile_image | image_url: width: 1000, format: 'webp' }} 1000w, {{ block.settings.mobile_image | image_url: width: 1200, format: 'webp' }} 1200w, {{ block.settings.mobile_image | image_url: width: 1500, format: 'webp' }} 1500w" sizes="100vw">
+                        {{ block.settings.image | image_url: width: 3000, format: 'webp' | image_tag: class: 'stagmenfashion-min-hero__img', widths: '750, 1200, 1600, 2000, 2400, 3000', sizes: '100vw', loading: loading_attr, fetchpriority: priority_attr, decoding: 'async', alt: block.settings.heading | default: 'Hero image' }}
                       </picture>
                     {% else %}
-                      {{ block.settings.image | image_url: width: 1200, format: 'webp' | image_tag: class: 'stagmenfashion-min-hero__img', widths: '550, 750, 950, 1200', sizes: '100vw', loading: loading_attr, fetchpriority: priority_attr, decoding: 'async', alt: block.settings.heading | default: 'Hero image' }}
+                      {{ block.settings.image | image_url: width: 3000, format: 'webp' | image_tag: class: 'stagmenfashion-min-hero__img', widths: '750, 1200, 1600, 2000, 2400, 3000', sizes: '100vw', loading: loading_attr, fetchpriority: priority_attr, decoding: 'async', alt: block.settings.heading | default: 'Hero image' }}
                     {% endif %}
                   {% else %}
                     <div class="stagmenfashion-min-hero__placeholder">
@@ -1211,6 +1211,99 @@
       right: 16px;
     }
   }
+
+  /* ===== Balad modern framed hero ===== */
+  .stagmenfashion-min-hero.stagmenfashion-min-hero--contained {
+    padding-inline: clamp(10px, 2vw, 28px) !important;
+    padding-top: clamp(10px, 1.2vw, 16px) !important;
+    padding-bottom: clamp(6px, 1vw, 12px) !important;
+  }
+
+  .stagmenfashion-min-hero--contained .stagmenfashion-min-hero__viewport {
+    border-radius: clamp(16px, 2vw, 28px);
+    box-shadow: 0 24px 60px -28px rgba(20, 24, 59, 0.45);
+    isolation: isolate;
+  }
+
+  .stagmenfashion-min-hero .stagmenfashion-min-hero__viewport::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 28%;
+    background: linear-gradient(0deg, rgba(20, 24, 59, 0.42), rgba(20, 24, 59, 0));
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .stagmenfashion-min-hero__controls {
+    z-index: 5;
+    gap: 10px;
+  }
+
+  .stagmenfashion-min-hero__pagination {
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.32);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    font-weight: 500;
+  }
+
+  .stagmenfashion-min-hero__progress-bar {
+    width: 44px;
+    height: 3px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.28);
+  }
+
+  .stagmenfashion-min-hero__progress-fill {
+    border-radius: 3px;
+    background: linear-gradient(90deg, #ffffff, #d9a6e6);
+  }
+
+  .stagmenfashion-min-hero__nav-arrows {
+    gap: 8px;
+  }
+
+  .stagmenfashion-min-hero__nav-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.16);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    transition: background-color 0.25s ease, transform 0.25s ease, color 0.25s ease;
+  }
+
+  .stagmenfashion-min-hero__nav-btn:hover {
+    background: #ffffff;
+    color: #14183b;
+    transform: scale(1.06);
+  }
+
+  @media (max-width: 749px) {
+    .stagmenfashion-min-hero__nav-btn { width: 32px; height: 32px; }
+    .stagmenfashion-min-hero__pagination { padding: 7px 12px; }
+  }
+
+  /* ===== Balad hero: header sits inside the banner ===== */
+  .stagmenfashion-min-hero.stagmenfashion-min-hero--contained {
+    padding-top: 12px !important;
+  }
+
+  /* dark veil at the top so the glass header and white text stay readable */
+  .stagmenfashion-min-hero .stagmenfashion-min-hero__viewport::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 150px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.38), rgba(0, 0, 0, 0));
+    pointer-events: none;
+    z-index: 2;
+  }
 </style>
 
 {% javascript %}
@@ -1437,6 +1530,7 @@
         { "value": "80vh", "label": "Medium (80vh)" },
         { "value": "85vh", "label": "Standard (85vh)" },
         { "value": "90vh", "label": "Tall (90vh)" },
+        { "value": "95vh", "label": "Almost full (95vh)" },
         { "value": "100vh", "label": "Full Screen (100vh)" }
       ],
       "default": "fit_screen"
@@ -1451,6 +1545,7 @@
         { "value": "75vh", "label": "Standard (75vh)" },
         { "value": "82vh", "label": "Tall (82vh)" },
         { "value": "90vh", "label": "Extra Tall (90vh)" },
+        { "value": "95vh", "label": "Almost full (95vh)" },
         { "value": "100vh", "label": "Full Screen (100vh)" }
       ],
       "default": "fit_screen"
