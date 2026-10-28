@@ -12,6 +12,19 @@
     "hero_slider": {
       "type": "stagmenfashion-minimal-hero",
       "blocks": {
+        "slide_TQLMdc": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/Luxury_Perfume_Collection_on_Stone_Platforms.png",
+            "eyebrow": "New Season / Drop 01",
+            "heading": "Minimalist Streetwear Curation",
+            "subheading": "<p>Heavyweight cottons and relaxed tailoring designed for effortless daily wear.</p>",
+            "button_link": "",
+            "content_position": "bottom-center",
+            "text_alignment": "center",
+            "featured_product": ""
+          }
+        },
         "slide_rUGkDE": {
           "type": "slide",
           "disabled": true,
@@ -43,6 +56,7 @@
         }
       },
       "block_order": [
+        "slide_TQLMdc",
         "slide_rUGkDE",
         "slide_1"
       ],
