@@ -185,6 +185,35 @@
     }
   }
 
+  /* ── Mobile: horizontal swipe scroll instead of a stacked grid ── */
+  @media screen and (max-width: 749px) {
+    .balad-promo-cards .balad-promo-cards__grid,
+    .balad-promo-cards--mobile-2 .balad-promo-cards__grid {
+      display: grid;
+      grid-auto-flow: column;
+      grid-template-columns: none;
+      grid-auto-columns: 82%;
+      gap: 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding-bottom: 2px;
+    }
+
+    .balad-promo-cards__grid::-webkit-scrollbar {
+      display: none;
+    }
+
+    .balad-promo-cards__grid > .balad-promo-card {
+      min-width: 0;
+      scroll-snap-align: start;
+    }
+  }
+
   .balad-promo-card {
     position: relative;
     overflow: hidden;
