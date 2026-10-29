@@ -236,7 +236,7 @@
         "padding_top": 20,
         "padding_bottom": 20,
         "height_desktop": 380,
-        "height_mobile": 200
+        "height_mobile": 240
       }
     },
     "feature_cards": {
@@ -553,7 +553,7 @@
         "padding_top": 40,
         "padding_bottom": 40,
         "height_desktop": 350,
-        "height_mobile": 200
+        "height_mobile": 240
       }
     },
     "spotlight": {
