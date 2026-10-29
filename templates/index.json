@@ -14,6 +14,7 @@
       "blocks": {
         "slide_TQLMdc": {
           "type": "slide",
+          "disabled": true,
           "settings": {
             "image": "shopify://shop_images/Luxury_Balad_Perfumes_Still_Life.png",
             "mobile_image": "shopify://shop_images/Luxury_Perfume_Collection_on_Marble.png",
@@ -49,7 +50,7 @@
             "eyebrow": "",
             "heading": "",
             "subheading": "",
-            "button_link": "shopify://collections/co-ords",
+            "button_link": "shopify://collections",
             "content_position": "bottom-center",
             "text_alignment": "center",
             "featured_product": ""
@@ -82,6 +83,27 @@
         "custom_text": ""
       }
     },
+    "balad_category_scroll_iGAtgb": {
+      "type": "balad-category-scroll",
+      "name": "Category Scroll",
+      "settings": {
+        "heading": "Shop Our Collections",
+        "subheading": "Fragrances for every mood.",
+        "discover_more_label": "Discover more",
+        "discover_more_link": "shopify://collections/all",
+        "collection_list": [
+          "for-her",
+          "for-him",
+          "unisex"
+        ],
+        "hide_empty_collections": false,
+        "image_radius": 24,
+        "background": "#ffffff",
+        "text_color": "#111111",
+        "muted_text_color": "#6b7280",
+        "color_scheme": ""
+      }
+    },
     "shop_by_category": {
       "type": "balad-category-scroll",
       "disabled": true,
@@ -92,6 +114,7 @@
         "discover_more_link": "shopify://collections",
         "collection_list": [],
         "hide_empty_collections": false,
+        "image_radius": 24,
         "background": "#ffffff",
         "text_color": "#111111",
         "muted_text_color": "#6b7280",
@@ -106,6 +129,7 @@
         "collection": "new-in",
         "discover_more_label": "",
         "discover_more_link": "shopify://collections/new-in",
+        "rows": "2",
         "show_rating": true,
         "background": "#ffffff",
         "color_scheme": "scheme-1"
@@ -265,29 +289,10 @@
         "background": "#ffffff"
       }
     },
-    "balad_category_scroll_iGAtgb": {
-      "type": "balad-category-scroll",
-      "name": "Category Scroll",
-      "settings": {
-        "heading": "Shop Our Collections",
-        "subheading": "Fragrances for every mood.",
-        "discover_more_label": "Discover more",
-        "discover_more_link": "shopify://collections/all",
-        "collection_list": [
-          "for-her",
-          "for-him",
-          "unisex"
-        ],
-        "hide_empty_collections": false,
-        "background": "#ffffff",
-        "text_color": "#111111",
-        "muted_text_color": "#6b7280",
-        "color_scheme": ""
-      }
-    },
     "category_products_scroll": {
       "type": "balad-category-products-scroll",
       "settings": {
+        "rows": 2,
         "heading": "Discover Your Signature Scent",
         "subheading": "Explore captivating fragrances, from fresh everyday scents to rich and unforgettable blends.",
         "collection": "all",
@@ -543,6 +548,7 @@
         "heading": "",
         "subheading": "",
         "color_scheme": "scheme-1",
+        "mobile_columns": "1",
         "gap": 20,
         "padding_top": 40,
         "padding_bottom": 40,
