@@ -1,5 +1,5 @@
 /**
- * Stag Men Fashion - Updates Interactive Category Filtering
+ * Balad Perfumes - Updates Interactive Category Filtering
  */
 (function () {
   'use strict';

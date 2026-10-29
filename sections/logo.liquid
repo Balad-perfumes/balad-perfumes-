@@ -19,7 +19,7 @@
         widths: '240, 352, 832, 1200, 1600, 1920, 2560, 3840',
         height: image.height,
         class: 'logo-section__image',
-        alt: settings.brand_name | default: 'stagmenfashion',
+        alt: settings.brand_name | default: 'balad',
         sizes: '(min-width: 750px) calc(var(--logo-width)), 100vw'
     -}}
   {% endcapture %}
@@ -42,7 +42,7 @@
         {% if image %}
           --logo-width: {{ image.width | times: 1.00 | divided_by: image.height | times: section_settings.pixel_height }}px;
         {% else %}
-          --logo-width: {{ settings.brand_name | default: 'stagmenfashion' | size | times: 0.65 }}em;
+          --logo-width: {{ settings.brand_name | default: 'balad' | size | times: 0.65 }}em;
           --logo-height: {{ section_settings.pixel_height }}px;
         {% endif %}
       {% endif %}
@@ -55,7 +55,7 @@
           {% if image %}
             --logo-width-mobile: {{ image.width | times: 1.00 | divided_by: image.height | times: section_settings.pixel_height_mobile }}px;
             {% else %}
-              --logo-width-mobile: {{ settings.brand_name | default: 'stagmenfashion' | size | times: 0.65 }}em;
+              --logo-width-mobile: {{ settings.brand_name | default: 'balad' | size | times: 0.65 }}em;
               --logo-height-mobile: {{ section_settings.pixel_height_mobile }}px;
           {% endif %}
         {% endif %}
@@ -69,7 +69,7 @@
         {{ logo_image }}
       </div>
     {% else %}
-      {% render 'jumbo-text', text: settings.brand_name, default: 'stagmenfashion', block_settings: section.settings %}
+      {% render 'jumbo-text', text: settings.brand_name, default: 'balad', block_settings: section.settings %}
     {% endif %}
   </div>
 </div>
@@ -343,9 +343,9 @@ This file has been rewritten to preserve the original behavior.
 
 ---
 Changes:
-- from: "{% render 'jumbo-text', text: settings.brand_name | default: 'stagmenfashion',
+- from: "{% render 'jumbo-text', text: settings.brand_name | default: 'balad',
     block_settings: section.settings %}"
-  to: "{% render 'jumbo-text', text: settings.brand_name, default: 'stagmenfashion', block_settings:
+  to: "{% render 'jumbo-text', text: settings.brand_name, default: 'balad', block_settings:
     section.settings %}"
   position: 2458..2565
 {% endcomment %}

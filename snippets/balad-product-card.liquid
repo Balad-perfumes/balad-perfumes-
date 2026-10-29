@@ -1,0 +1,205 @@
+{%- doc -%}
+  Product card: white frame, rounded image panel with wishlist, "Buy now" + price dock, and a grey info panel.
+  Styles live in assets/balad-product-card.css (load it once per section).
+  Keeps the existing JS hooks: data-carousel, data-carousel-slide,
+  data-wishlist-heart and data-quick-add (+ data-qa-* / data-product-*).
+
+  @param {object} product - The product
+  @param {number} [limit] - Max images in the hover/swipe carousel (default 6)
+  @param {boolean} [eager] - Load the first image eagerly
+  @param {boolean} [badge_first] - Show the "Selling fast" badge on this card
+  @param {boolean} [show_rating] - Show the rating next to the subtitle (default true)
+  @param {boolean} [direct_add] - "Buy now" adds the first variant straight to the cart (data-similar-add) instead of opening quick-add
+{%- enddoc -%}
+
+{%- liquid
+  assign images = product.images
+  assign image_count = images.size
+  assign first_image = product.featured_image | default: images.first
+  assign img_limit = limit | default: 6
+  assign variant = product.selected_or_first_available_variant
+
+  assign sizes_list = ''
+  assign size_idx = 0
+  assign has_size_option = false
+  for opt in product.options_with_values
+    assign opt_name_down = opt.name | downcase
+    if opt_name_down contains 'size'
+      assign has_size_option = true
+      assign sizes_list = opt.values | join: ','
+      assign size_idx = forloop.index0
+    endif
+  endfor
+  if has_size_option == false
+    assign sizes_check = '|'
+    for v in product.variants
+      assign sz = v.option1 | strip
+      unless sz == blank or sz == 'Default Title'
+        assign check_sz = '|' | append: sz | append: '|'
+        unless sizes_check contains check_sz
+          assign sizes_check = sizes_check | append: check_sz
+          if sizes_list != ''
+            assign sizes_list = sizes_list | append: ','
+          endif
+          assign sizes_list = sizes_list | append: sz
+        endunless
+      endunless
+    endfor
+  endif
+
+  assign size_label = variant.options[size_idx] | strip
+  if size_label == 'Default Title'
+    assign size_label = ''
+  endif
+
+  assign card_price = variant.price
+  assign card_compare = variant.compare_at_price
+  assign off_pct = 0
+  if card_compare > card_price
+    assign off_pct = card_compare | minus: card_price | times: 100.0 | divided_by: card_compare | round
+  endif
+
+  assign subtitle = product.type | default: product.vendor
+  assign card_title = product.title | truncate: 26
+
+  assign rating = 0
+  assign rating_count = 0
+  if product.metafields.reviews.rating.value != blank
+    assign rating = product.metafields.reviews.rating.value.rating | default: product.metafields.reviews.rating.value | plus: 0
+  endif
+  if product.metafields.reviews.rating_count != blank
+    assign rating_count = product.metafields.reviews.rating_count.value | default: product.metafields.reviews.rating_count | plus: 0
+  endif
+  assign jm_badge = product.metafields.judgeme.badge | default: ''
+  if jm_badge != blank
+    assign jm_badge_q = jm_badge | replace: '"', "'"
+    if jm_badge_q contains "data-average-rating='"
+      assign jm_r = jm_badge_q | split: "data-average-rating='" | last | split: "'" | first | plus: 0
+      if jm_r > 0
+        assign rating = jm_r
+      endif
+    endif
+    if jm_badge_q contains "data-number-of-reviews='"
+      assign jm_c = jm_badge_q | split: "data-number-of-reviews='" | last | split: "'" | first | plus: 0
+      if jm_c > 0
+        assign rating_count = jm_c
+      endif
+    endif
+  endif
+  if rating == 0 and product.metafields.judgeme.rating != blank
+    assign rating = product.metafields.judgeme.rating | plus: 0
+  endif
+  if rating_count == 0 and product.metafields.judgeme.review_count != blank
+    assign rating_count = product.metafields.judgeme.review_count | plus: 0
+  endif
+  assign has_reviews = false
+  if rating > 0 and show_rating != false
+    assign has_reviews = true
+  endif
+
+  assign qa_variants = ''
+  assign qa_availability = ''
+  for v in product.variants
+    unless v.option1 == 'Default Title'
+      assign qa_variants = qa_variants | append: v.option1 | append: ':' | append: v.id | append: ','
+      assign qa_availability = qa_availability | append: v.option1 | append: ':' | append: v.available | append: ','
+    endunless
+  endfor
+-%}
+
+<article class="bpc">
+  <a href="{{ product.url }}" class="bpc__media" data-carousel>
+    {%- if image_count > 0 -%}
+      {%- for image in images limit: img_limit -%}
+        <img
+          class="bpc__image{% if forloop.first %} is-active{% endif %}"
+          src="{{ image | image_url: width: 600 }}"
+          srcset="{{ image | image_url: width: 300 }} 300w, {{ image | image_url: width: 600 }} 600w"
+          sizes="(max-width: 749px) 50vw, (max-width: 1200px) 33vw, 25vw"
+          alt="{{ image.alt | default: product.title | escape }}"
+          width="600"
+          height="750"
+          loading="{% if eager and forloop.first %}eager{% else %}lazy{% endif %}"
+          decoding="async"
+          data-carousel-slide
+        >
+      {%- endfor -%}
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'bpc__placeholder' }}
+    {%- endif -%}
+
+    <div class="bpc__badges">
+      {%- if product.available == false -%}
+        <span class="bpc__badge bpc__badge--sold">Sold out</span>
+      {%- elsif badge_first or product.tags contains 'selling-fast' or product.tags contains 'bestseller' -%}
+        <span class="bpc__badge">Selling fast</span>
+      {%- endif -%}
+      {%- if off_pct > 0 -%}
+        <span class="bpc__badge">-{{ off_pct }}%</span>
+      {%- endif -%}
+    </div>
+
+    <button
+      type="button"
+      class="bpc__wish"
+      data-wishlist-heart
+      data-product-id="{{ product.id }}"
+      data-product-title="{{ product.title | escape }}"
+      data-product-price="{{ product.price | money_without_currency | remove: ',' }}"
+      data-product-compare-price="{{ product.compare_at_price | money_without_currency | remove: ',' }}"
+      data-product-url="{{ product.url }}"
+      data-product-image="{{ first_image | image_url: width: 400 }}"
+      data-product-sizes="{{ sizes_list }}"
+      data-product-available="{{ product.available }}"
+      aria-label="Add {{ product.title | escape }} to wishlist"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+      </svg>
+    </button>
+
+    <div class="bpc__dock">
+      <button
+        type="button"
+        class="bpc__buy"
+        {%- if direct_add %}
+        data-similar-add
+        data-variant-id="{{ variant.id }}"
+        aria-label="Add {{ product.title | escape }} to cart"
+        {%- unless product.available %} disabled{% endunless %}
+        {%- else %}
+        data-quick-add
+        data-qa-title="{{ product.title | escape }}"
+        data-qa-price="{{ product.price | money_without_currency | remove: ',' }}"
+        data-qa-url="{{ product.url }}"
+        data-qa-id="{{ product.id }}"
+        data-qa-image="{{ first_image | image_url: width: 400 }}"
+        data-qa-sizes="{{ sizes_list }}"
+        data-qa-first-variant="{{ variant.id }}"
+        data-qa-variants="{{ qa_variants }}"
+        data-qa-available="{{ product.available }}"
+        data-qa-variant-availability="{{ qa_availability }}"
+        aria-label="{% if product.available %}Buy{% else %}View{% endif %} {{ product.title | escape }}"
+        {%- endif %}
+      >
+        <span class="bpc__buy-label">{% if product.available %}Buy now{% else %}Sold out{% endif %}</span>
+        <span class="bpc__buy-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M13 6l6 6-6 6"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+  </a>
+
+  <a href="{{ product.url }}" class="bpc__info">
+    <h3 class="bpc__title" title="{{ product.title | escape }}">{{ card_title }}</h3>
+    {%- if size_label != blank -%}
+      <span class="bpc__size">{{ size_label }}</span>
+    {%- endif -%}
+    <span class="bpc__price-alt">
+      {%- if off_pct > 0 -%}<s>{% render 'format-price', price: card_compare %}</s>{%- endif -%}
+      {% render 'format-price', price: card_price %}
+    </span>
+  </a>
+</article>

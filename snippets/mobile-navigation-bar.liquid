@@ -51,27 +51,27 @@
 
 {% if enable_mobile_nav and template.name != 'product' %}
   <nav
-    class="stagmenfashion-mobile-nav stagmenfashion-mobile-nav--{{ nav_style }}"
-    id="stagmenfashion-mobile-nav"
+    class="balad-mobile-nav balad-mobile-nav--{{ nav_style }}"
+    id="balad-mobile-nav"
     aria-label="Mobile Navigation"
-    data-stagmenfashion-mobile-nav
+    data-balad-mobile-nav
   >
-    <div class="stagmenfashion-mobile-nav__bar">
+    <div class="balad-mobile-nav__bar">
       <!-- 1. Home -->
       {% if show_home %}
         <a
           href="{{ home_url }}"
-          class="stagmenfashion-mobile-nav__tab{% if is_home_active %} is-active{% endif %}"
+          class="balad-mobile-nav__tab{% if is_home_active %} is-active{% endif %}"
           aria-label="{{ 'general.home' | t | default: 'Home' }}"
           {% if is_home_active %}aria-current="page"{% endif %}
         >
-          <span class="stagmenfashion-mobile-nav__top-indicator" aria-hidden="true"></span>
-          <span class="stagmenfashion-mobile-nav__icon-wrap">
-            <svg class="stagmenfashion-mobile-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <span class="balad-mobile-nav__top-indicator" aria-hidden="true"></span>
+          <span class="balad-mobile-nav__icon-wrap">
+            <svg class="balad-mobile-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-4.5v-6a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v6H4.5A1.5 1.5 0 0 1 3 20V9.5z"/>
             </svg>
           </span>
-          <span class="stagmenfashion-mobile-nav__title">{{ section.settings.mobile_nav_home_label | default: 'Home' }}</span>
+          <span class="balad-mobile-nav__title">{{ section.settings.mobile_nav_home_label | default: 'Home' }}</span>
         </a>
       {% endif %}
 
@@ -79,20 +79,20 @@
       {% if show_collections %}
         <a
           href="{{ collections_url }}"
-          class="stagmenfashion-mobile-nav__tab{% if is_col_active %} is-active{% endif %}"
+          class="balad-mobile-nav__tab{% if is_col_active %} is-active{% endif %}"
           aria-label="Collections"
           {% if is_col_active %}aria-current="page"{% endif %}
         >
-          <span class="stagmenfashion-mobile-nav__top-indicator" aria-hidden="true"></span>
-          <span class="stagmenfashion-mobile-nav__icon-wrap">
-            <svg class="stagmenfashion-mobile-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <span class="balad-mobile-nav__top-indicator" aria-hidden="true"></span>
+          <span class="balad-mobile-nav__icon-wrap">
+            <svg class="balad-mobile-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/>
               <rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/>
               <rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/>
               <rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/>
             </svg>
           </span>
-          <span class="stagmenfashion-mobile-nav__title">{{ section.settings.mobile_nav_collections_label | default: 'Shop' }}</span>
+          <span class="balad-mobile-nav__title">{{ section.settings.mobile_nav_collections_label | default: 'Shop' }}</span>
         </a>
       {% endif %}
 
@@ -100,29 +100,29 @@
       {% if show_story %}
         <button
           type="button"
-          class="stagmenfashion-mobile-nav__tab stagmenfashion-mobile-nav__tab--story"
+          class="balad-mobile-nav__tab balad-mobile-nav__tab--story"
           data-open-story-modal
           aria-label="View Stories"
           title="View Stories"
         >
-          <span class="stagmenfashion-mobile-nav__top-indicator" aria-hidden="true"></span>
-          <span class="stagmenfashion-mobile-nav__icon-wrap">
-            <span class="stagmenfashion-mobile-nav__story-badge">
-              <span class="stagmenfashion-mobile-nav__story-ring">
+          <span class="balad-mobile-nav__top-indicator" aria-hidden="true"></span>
+          <span class="balad-mobile-nav__icon-wrap">
+            <span class="balad-mobile-nav__story-badge">
+              <span class="balad-mobile-nav__story-ring">
                 {% if custom_story_avatar != blank %}
                   {{
                     custom_story_avatar
                     | image_url: width: 60
-                    | image_tag: class: 'stagmenfashion-mobile-nav__story-logo', loading: 'eager', alt: 'Story'
+                    | image_tag: class: 'balad-mobile-nav__story-logo', loading: 'eager', alt: 'Story'
                   }}
                 {% elsif header_logo != blank %}
                   {{
                     header_logo
                     | image_url: width: 60
-                    | image_tag: class: 'stagmenfashion-mobile-nav__story-logo', loading: 'eager', alt: brand_name
+                    | image_tag: class: 'balad-mobile-nav__story-logo', loading: 'eager', alt: brand_name
                   }}
                 {% else %}
-                  <span class="stagmenfashion-mobile-nav__story-text-logo">{{ brand_name | slice: 0, 2 | upcase }}</span>
+                  <span class="balad-mobile-nav__story-text-logo">{{ brand_name | slice: 0, 2 | upcase }}</span>
                 {% endif %}
               </span>
             </span>
@@ -134,18 +134,18 @@
       {% if show_about %}
         <a
           href="{{ about_url }}"
-          class="stagmenfashion-mobile-nav__tab{% if is_about_active %} is-active{% endif %}"
+          class="balad-mobile-nav__tab{% if is_about_active %} is-active{% endif %}"
           aria-label="About"
           {% if is_about_active %}aria-current="page"{% endif %}
         >
-          <span class="stagmenfashion-mobile-nav__top-indicator" aria-hidden="true"></span>
-          <span class="stagmenfashion-mobile-nav__icon-wrap">
-            <svg class="stagmenfashion-mobile-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <span class="balad-mobile-nav__top-indicator" aria-hidden="true"></span>
+          <span class="balad-mobile-nav__icon-wrap">
+            <svg class="balad-mobile-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M12 2l2.4 6.8 6.8 2.4-6.8 2.4L12 20.4l-2.4-6.8L2.8 11.2l6.8-2.4L12 2z"/>
               <circle cx="19" cy="4" r="1.5" fill="currentColor" stroke="none"/>
             </svg>
           </span>
-          <span class="stagmenfashion-mobile-nav__title">{{ section.settings.mobile_nav_about_label | default: 'About' }}</span>
+          <span class="balad-mobile-nav__title">{{ section.settings.mobile_nav_about_label | default: 'About' }}</span>
         </a>
       {% endif %}
 
@@ -153,18 +153,18 @@
       {% if show_account %}
         <a
           href="{{ account_url }}"
-          class="stagmenfashion-mobile-nav__tab{% if is_account_active %} is-active{% endif %}"
+          class="balad-mobile-nav__tab{% if is_account_active %} is-active{% endif %}"
           aria-label="Account"
           {% if is_account_active %}aria-current="page"{% endif %}
         >
-          <span class="stagmenfashion-mobile-nav__top-indicator" aria-hidden="true"></span>
-          <span class="stagmenfashion-mobile-nav__icon-wrap">
-            <svg class="stagmenfashion-mobile-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <span class="balad-mobile-nav__top-indicator" aria-hidden="true"></span>
+          <span class="balad-mobile-nav__icon-wrap">
+            <svg class="balad-mobile-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="12" cy="7.5" r="4"/>
               <path d="M4.5 20c0-4 3.5-6.5 7.5-6.5s7.5 2.5 7.5 6.5"/>
             </svg>
           </span>
-          <span class="stagmenfashion-mobile-nav__title">{{ section.settings.mobile_nav_account_label | default: 'Account' }}</span>
+          <span class="balad-mobile-nav__title">{{ section.settings.mobile_nav_account_label | default: 'Account' }}</span>
         </a>
       {% endif %}
     </div>
@@ -172,9 +172,9 @@
 
   <style>
     /* ==========================================================================
-       STAGMENFASHION FLOATING GLASS ISLAND WITH ELEVATED STORY CAPSULE
+       BALAD FLOATING GLASS ISLAND WITH ELEVATED STORY CAPSULE
        ========================================================================== */
-    .stagmenfashion-mobile-nav {
+    .balad-mobile-nav {
       display: none;
       position: fixed !important;
       left: 50% !important;
@@ -194,17 +194,17 @@
     }
 
     /* Scroll Hide State - Smoothly Slides Down into Screen Edge */
-    .stagmenfashion-mobile-nav[data-hidden="true"] {
+    .balad-mobile-nav[data-hidden="true"] {
       transform: translate(-50%, calc(100% + 40px)) !important;
       opacity: 0 !important;
       pointer-events: none !important;
     }
 
     /* Instant Complete Hide when Drawer / Story Modal is Open */
-    body.pf-drawer-open .stagmenfashion-mobile-nav,
-    body.story-modal-open .stagmenfashion-mobile-nav,
-    .pf-header__drawer:not([hidden]) ~ .stagmenfashion-mobile-nav,
-    html:has(.pf-header__drawer:not([hidden])) .stagmenfashion-mobile-nav {
+    body.pf-drawer-open .balad-mobile-nav,
+    body.story-modal-open .balad-mobile-nav,
+    .pf-header__drawer:not([hidden]) ~ .balad-mobile-nav,
+    html:has(.pf-header__drawer:not([hidden])) .balad-mobile-nav {
       display: none !important;
       opacity: 0 !important;
       pointer-events: none !important;
@@ -214,7 +214,7 @@
     /* -------------------------------------------------------------
        1. Style: modern_glass (Floating Frosted Glass Island - Default)
        ------------------------------------------------------------- */
-    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__bar {
+    .balad-mobile-nav--modern_glass .balad-mobile-nav__bar {
       pointer-events: auto;
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -236,7 +236,7 @@
       position: relative;
     }
 
-    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__tab {
+    .balad-mobile-nav--modern_glass .balad-mobile-nav__tab {
       position: relative;
       display: flex;
       flex-direction: column;
@@ -256,17 +256,17 @@
       text-align: center;
     }
 
-    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__tab:not(.stagmenfashion-mobile-nav__tab--story):active {
+    .balad-mobile-nav--modern_glass .balad-mobile-nav__tab:not(.balad-mobile-nav__tab--story):active {
       transform: scale(0.92);
       background: rgba(8, 0, 207, 0.05);
     }
 
     /* Top Highlight Pill Indicator */
-    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__top-indicator {
+    .balad-mobile-nav--modern_glass .balad-mobile-nav__top-indicator {
       display: none;
     }
 
-    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__icon-wrap {
+    .balad-mobile-nav--modern_glass .balad-mobile-nav__icon-wrap {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -275,13 +275,13 @@
       margin: 0 auto;
     }
 
-    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__svg {
+    .balad-mobile-nav--modern_glass .balad-mobile-nav__svg {
       width: 20px;
       height: 20px;
       transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.2s ease, stroke-width 0.2s ease;
     }
 
-    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__title {
+    .balad-mobile-nav--modern_glass .balad-mobile-nav__title {
       font-size: 10px;
       font-weight: 550;
       letter-spacing: -0.01em;
@@ -295,16 +295,16 @@
     }
 
     /* Active Tab */
-    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__tab.is-active {
+    .balad-mobile-nav--modern_glass .balad-mobile-nav__tab.is-active {
       color: #111111;
     }
 
-    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__tab.is-active .stagmenfashion-mobile-nav__svg {
+    .balad-mobile-nav--modern_glass .balad-mobile-nav__tab.is-active .balad-mobile-nav__svg {
       transform: translateY(-1px);
       stroke-width: 2.2;
     }
 
-    .stagmenfashion-mobile-nav--modern_glass .stagmenfashion-mobile-nav__tab.is-active .stagmenfashion-mobile-nav__title {
+    .balad-mobile-nav--modern_glass .balad-mobile-nav__tab.is-active .balad-mobile-nav__title {
       font-weight: 700;
       color: #111111;
     }
@@ -321,7 +321,7 @@
       }
     }
 
-    .stagmenfashion-mobile-nav__tab--story {
+    .balad-mobile-nav__tab--story {
       background: transparent;
       border: none;
       font-family: inherit;
@@ -340,11 +340,11 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    .stagmenfashion-mobile-nav__tab--story .stagmenfashion-mobile-nav__top-indicator {
+    .balad-mobile-nav__tab--story .balad-mobile-nav__top-indicator {
       display: none !important;
     }
 
-    .stagmenfashion-mobile-nav__tab--story .stagmenfashion-mobile-nav__icon-wrap {
+    .balad-mobile-nav__tab--story .balad-mobile-nav__icon-wrap {
       width: 56px;
       height: 56px;
       border-radius: 50%;
@@ -360,11 +360,11 @@
       transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
-    .stagmenfashion-mobile-nav__tab--story:active .stagmenfashion-mobile-nav__icon-wrap {
+    .balad-mobile-nav__tab--story:active .balad-mobile-nav__icon-wrap {
       transform: scale(0.92);
     }
 
-    .stagmenfashion-mobile-nav__story-badge {
+    .balad-mobile-nav__story-badge {
       position: relative;
       width: 56px;
       height: 56px;
@@ -383,7 +383,7 @@
         0 4px 12px rgba(0, 0, 0, 0.14);
     }
 
-    .stagmenfashion-mobile-nav__story-badge::before {
+    .balad-mobile-nav__story-badge::before {
       content: '';
       position: absolute;
       inset: -55%;
@@ -393,7 +393,7 @@
       z-index: 0;
     }
 
-    .stagmenfashion-mobile-nav__story-ring {
+    .balad-mobile-nav__story-ring {
       position: relative;
       z-index: 1;
       width: 100%;
@@ -409,7 +409,7 @@
       margin: 0 auto;
     }
 
-    .stagmenfashion-mobile-nav__story-logo {
+    .balad-mobile-nav__story-logo {
       width: 100%;
       height: 100%;
       object-fit: contain;
@@ -417,7 +417,7 @@
       filter: brightness(0) invert(1);
     }
 
-    .stagmenfashion-mobile-nav__story-text-logo {
+    .balad-mobile-nav__story-text-logo {
       font-size: 15px;
       font-weight: 800;
       color: #ffffff;
@@ -427,7 +427,7 @@
     /* -------------------------------------------------------------
        2. Style: dark_luxury (Floating Dark Glass Island Capsule)
        ------------------------------------------------------------- */
-    .stagmenfashion-mobile-nav--dark_luxury {
+    .balad-mobile-nav--dark_luxury {
       bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
       left: 50% !important;
       transform: translateX(-50%);
@@ -435,13 +435,13 @@
       max-width: 410px;
     }
 
-    .stagmenfashion-mobile-nav--dark_luxury[data-hidden="true"] {
+    .balad-mobile-nav--dark_luxury[data-hidden="true"] {
       transform: translate(-50%, calc(100% + 40px)) !important;
       opacity: 0 !important;
       pointer-events: none !important;
     }
 
-    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__bar {
+    .balad-mobile-nav--dark_luxury .balad-mobile-nav__bar {
       pointer-events: auto;
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -459,11 +459,11 @@
         inset 0 1px 1px rgba(255, 255, 255, 0.25);
     }
 
-    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__top-indicator {
+    .balad-mobile-nav--dark_luxury .balad-mobile-nav__top-indicator {
       display: none;
     }
 
-    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__tab {
+    .balad-mobile-nav--dark_luxury .balad-mobile-nav__tab {
       position: relative;
       display: flex;
       flex-direction: column;
@@ -481,12 +481,12 @@
       text-align: center;
     }
 
-    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__svg {
+    .balad-mobile-nav--dark_luxury .balad-mobile-nav__svg {
       width: 19px;
       height: 19px;
     }
 
-    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__title {
+    .balad-mobile-nav--dark_luxury .balad-mobile-nav__title {
       font-size: 10px;
       font-weight: 550;
       color: rgba(255, 255, 255, 0.7);
@@ -497,20 +497,20 @@
       max-width: 100%;
     }
 
-    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__tab.is-active {
+    .balad-mobile-nav--dark_luxury .balad-mobile-nav__tab.is-active {
       color: #ffffff;
     }
 
-    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__tab.is-active .stagmenfashion-mobile-nav__title {
+    .balad-mobile-nav--dark_luxury .balad-mobile-nav__tab.is-active .balad-mobile-nav__title {
       color: #38bdf8;
       font-weight: 700;
     }
 
-    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__tab.is-active .stagmenfashion-mobile-nav__svg {
+    .balad-mobile-nav--dark_luxury .balad-mobile-nav__tab.is-active .balad-mobile-nav__svg {
       color: #38bdf8;
     }
 
-    .stagmenfashion-mobile-nav--dark_luxury .stagmenfashion-mobile-nav__tab--story .stagmenfashion-mobile-nav__icon-wrap {
+    .balad-mobile-nav--dark_luxury .balad-mobile-nav__tab--story .balad-mobile-nav__icon-wrap {
       background: rgba(24, 24, 24, 0.96);
       border-color: rgba(255, 255, 255, 0.2);
       box-shadow: 0 12px 28px -3px rgba(56, 189, 248, 0.35);
@@ -519,7 +519,7 @@
     /* -------------------------------------------------------------
        3. Style: floating_light (Floating Light Frosted Capsule)
        ------------------------------------------------------------- */
-    .stagmenfashion-mobile-nav--floating_light {
+    .balad-mobile-nav--floating_light {
       bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
       left: 50% !important;
       transform: translateX(-50%);
@@ -527,13 +527,13 @@
       max-width: 410px;
     }
 
-    .stagmenfashion-mobile-nav--floating_light[data-hidden="true"] {
+    .balad-mobile-nav--floating_light[data-hidden="true"] {
       transform: translate(-50%, calc(100% + 40px)) !important;
       opacity: 0 !important;
       pointer-events: none !important;
     }
 
-    .stagmenfashion-mobile-nav--floating_light .stagmenfashion-mobile-nav__bar {
+    .balad-mobile-nav--floating_light .balad-mobile-nav__bar {
       pointer-events: auto;
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -551,11 +551,11 @@
         inset 0 1px 2px rgba(255, 255, 255, 1);
     }
 
-    .stagmenfashion-mobile-nav--floating_light .stagmenfashion-mobile-nav__top-indicator {
+    .balad-mobile-nav--floating_light .balad-mobile-nav__top-indicator {
       display: none;
     }
 
-    .stagmenfashion-mobile-nav--floating_light .stagmenfashion-mobile-nav__tab {
+    .balad-mobile-nav--floating_light .balad-mobile-nav__tab {
       position: relative;
       display: flex;
       flex-direction: column;
@@ -573,12 +573,12 @@
       text-align: center;
     }
 
-    .stagmenfashion-mobile-nav--floating_light .stagmenfashion-mobile-nav__svg {
+    .balad-mobile-nav--floating_light .balad-mobile-nav__svg {
       width: 19px;
       height: 19px;
     }
 
-    .stagmenfashion-mobile-nav--floating_light .stagmenfashion-mobile-nav__title {
+    .balad-mobile-nav--floating_light .balad-mobile-nav__title {
       font-size: 10px;
       font-weight: 550;
       text-align: center;
@@ -588,11 +588,11 @@
       max-width: 100%;
     }
 
-    .stagmenfashion-mobile-nav--floating_light .stagmenfashion-mobile-nav__tab.is-active {
+    .balad-mobile-nav--floating_light .balad-mobile-nav__tab.is-active {
       color: #111111;
     }
 
-    .stagmenfashion-mobile-nav--floating_light .stagmenfashion-mobile-nav__tab.is-active .stagmenfashion-mobile-nav__title {
+    .balad-mobile-nav--floating_light .balad-mobile-nav__tab.is-active .balad-mobile-nav__title {
       font-weight: 700;
       color: #111111;
     }
@@ -601,14 +601,14 @@
        RESPONSIVE RULES (Mobile & Tablet: screens <= 1024px)
        ------------------------------------------------------------- */
     @media screen and (max-width: 1024px) {
-      .stagmenfashion-mobile-nav {
+      .balad-mobile-nav {
         display: block;
       }
     }
 
     /* Tablet Screen Specifics (768px - 1024px) */
     @media screen and (min-width: 768px) and (max-width: 1024px) {
-      .stagmenfashion-mobile-nav {
+      .balad-mobile-nav {
         max-width: 460px;
       }
     }
@@ -623,7 +623,7 @@
 
   <script>
     (() => {
-      const nav = document.getElementById('stagmenfashion-mobile-nav');
+      const nav = document.getElementById('balad-mobile-nav');
       if (!nav) return;
 
       // Teleport nav directly to document.body so that header/parent backdrop-filter or transform cannot trap it at the top

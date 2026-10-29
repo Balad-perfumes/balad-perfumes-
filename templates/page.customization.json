@@ -56,8 +56,8 @@
         "padding-block-end": 80
       }
     },
-    "stagmenfashion_gift_combo": {
-      "type": "stagmenfashion-custom-gift-combo",
+    "balad_gift_combo": {
+      "type": "balad-custom-gift-combo",
       "settings": {
         "color_scheme": "scheme-1",
         "eyebrow": "Wardrobe combo",
@@ -72,6 +72,6 @@
   },
   "order": [
     "main",
-    "stagmenfashion_gift_combo"
+    "balad_gift_combo"
   ]
 }

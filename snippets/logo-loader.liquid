@@ -1,5 +1,5 @@
 {% comment %}
-  Stag Men Fashion Pure Minimal Luxury Logo Preloader with Synchronized Progress
+  Balad Perfumes Pure Minimal Luxury Logo Preloader with Synchronized Progress
   - Spotless clean light backdrop
   - Progressive Essence Fill: Logo fills upward in sync with the progress bar
   - Animated hairline progress bar (0% -> 100%)
@@ -18,8 +18,8 @@
   {%- assign show_progress = settings.loader_show_progress | default: true -%}
 
   <div
-    id="stagmenfashion-page-loader"
-    class="stagmenfashion-pure-loader"
+    id="balad-page-loader"
+    class="balad-pure-loader"
     data-frequency="{{ loader_frequency }}"
     data-design-mode="{% if request.design_mode %}true{% else %}false{% endif %}"
     aria-hidden="false"
@@ -29,15 +29,15 @@
     <script>
       (function() {
         if (/Lighthouse|Chrome-Lighthouse|PageSpeed|PTST|Headless/i.test(navigator.userAgent) || window.navigator.webdriver) {
-          document.documentElement.classList.add('stagmenfashion-loader-bypassed');
+          document.documentElement.classList.add('balad-loader-bypassed');
         }
       })();
     </script>
     <style>
-      .stagmenfashion-loader-bypassed #stagmenfashion-page-loader {
+      .balad-loader-bypassed #balad-page-loader {
         display: none !important;
       }
-      #stagmenfashion-page-loader.stagmenfashion-pure-loader {
+      #balad-page-loader.balad-pure-loader {
         position: fixed;
         inset: 0;
         width: 100vw;
@@ -55,7 +55,7 @@
         overflow: hidden;
       }
 
-      .stagmenfashion-pure-loader__container {
+      .balad-pure-loader__container {
         position: relative;
         display: flex;
         flex-direction: column;
@@ -66,14 +66,14 @@
       }
 
       /* Logo Stacking for Synchronized Progressive Fill */
-      .stagmenfashion-pure-loader__logo-stack {
+      .balad-pure-loader__logo-stack {
         position: relative;
         display: inline-block;
         margin-bottom: 22px;
       }
 
       /* Layer 1: Ghosted Base */
-      .stagmenfashion-pure-loader__logo-base {
+      .balad-pure-loader__logo-base {
         display: block;
         height: {{ logo_h }}px;
         width: auto;
@@ -83,7 +83,7 @@
       }
 
       /* Layer 2: Filling Active Logo */
-      .stagmenfashion-pure-loader__logo-fill {
+      .balad-pure-loader__logo-fill {
         position: absolute;
         top: 0;
         left: 0;
@@ -98,14 +98,14 @@
       }
 
       @media (max-width: 768px) {
-        .stagmenfashion-pure-loader__logo-base,
-        .stagmenfashion-pure-loader__logo-fill {
+        .balad-pure-loader__logo-base,
+        .balad-pure-loader__logo-fill {
           height: {{ logo_h_mob }}px;
         }
       }
 
       /* Text Fallback */
-      .stagmenfashion-pure-loader__text-stack {
+      .balad-pure-loader__text-stack {
         position: relative;
         font-family: var(--font-heading-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
         font-size: 26px;
@@ -115,12 +115,12 @@
         margin-bottom: 22px;
       }
 
-      .stagmenfashion-pure-loader__text-base {
+      .balad-pure-loader__text-base {
         color: rgba(0, 0, 0, 0.12);
         display: block;
       }
 
-      .stagmenfashion-pure-loader__text-fill {
+      .balad-pure-loader__text-fill {
         position: absolute;
         top: 0;
         left: 0;
@@ -132,7 +132,7 @@
       }
 
       /* Minimal Hairline Progress Bar */
-      .stagmenfashion-pure-loader__track {
+      .balad-pure-loader__track {
         position: relative;
         width: 120px;
         height: 2px;
@@ -141,7 +141,7 @@
         overflow: hidden;
       }
 
-      .stagmenfashion-pure-loader__fill {
+      .balad-pure-loader__fill {
         position: absolute;
         top: 0;
         left: 0;
@@ -154,7 +154,7 @@
       }
 
       /* Subtle shimmer shine on active progress tip */
-      .stagmenfashion-pure-loader__fill::after {
+      .balad-pure-loader__fill::after {
         content: '';
         position: absolute;
         top: 0;
@@ -165,39 +165,39 @@
       }
 
       /* Dissolve Exit State */
-      .stagmenfashion-pure-loader.stagmenfashion-pure-loader--hiding {
+      .balad-pure-loader.balad-pure-loader--hiding {
         opacity: 0 !important;
         visibility: hidden !important;
         pointer-events: none !important;
       }
 
-      .stagmenfashion-pure-loader.stagmenfashion-pure-loader--hiding .stagmenfashion-pure-loader__container {
+      .balad-pure-loader.balad-pure-loader--hiding .balad-pure-loader__container {
         transform: scale(1.03) translateY(-4px);
         opacity: 0;
       }
 
-      .stagmenfashion-pure-loader.stagmenfashion-pure-loader--hidden {
+      .balad-pure-loader.balad-pure-loader--hidden {
         display: none !important;
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .stagmenfashion-pure-loader__logo-fill,
-        .stagmenfashion-pure-loader__text-fill,
-        .stagmenfashion-pure-loader__fill {
+        .balad-pure-loader__logo-fill,
+        .balad-pure-loader__text-fill,
+        .balad-pure-loader__fill {
           transition: none !important;
         }
       }
     </style>
 
-    <div class="stagmenfashion-pure-loader__container">
+    <div class="balad-pure-loader__container">
       {%- if loader_logo != blank -%}
-        <div class="stagmenfashion-pure-loader__logo-stack">
+        <div class="balad-pure-loader__logo-stack">
           <!-- Base Ghosted Silhouette -->
           {{
             loader_logo
             | image_url: width: 320
             | image_tag:
-              class: 'stagmenfashion-pure-loader__logo-base',
+              class: 'balad-pure-loader__logo-base',
               alt: shop.name,
               loading: 'eager',
               fetchpriority: 'low'
@@ -207,48 +207,48 @@
             loader_logo
             | image_url: width: 320
             | image_tag:
-              id: 'stagmenfashion-logo-fill-el',
-              class: 'stagmenfashion-pure-loader__logo-fill',
+              id: 'balad-logo-fill-el',
+              class: 'balad-pure-loader__logo-fill',
               alt: shop.name,
               loading: 'eager',
               fetchpriority: 'low'
           }}
         </div>
       {%- else -%}
-        <div class="stagmenfashion-pure-loader__text-stack">
-          <span class="stagmenfashion-pure-loader__text-base">{{ settings.brand_name | default: shop.name }}</span>
-          <span id="stagmenfashion-text-fill-el" class="stagmenfashion-pure-loader__text-fill">{{ settings.brand_name | default: shop.name }}</span>
+        <div class="balad-pure-loader__text-stack">
+          <span class="balad-pure-loader__text-base">{{ settings.brand_name | default: shop.name }}</span>
+          <span id="balad-text-fill-el" class="balad-pure-loader__text-fill">{{ settings.brand_name | default: shop.name }}</span>
         </div>
       {%- endif -%}
 
       {%- if show_progress -%}
-        <div class="stagmenfashion-pure-loader__track">
-          <div id="stagmenfashion-loader-progress-bar" class="stagmenfashion-pure-loader__fill"></div>
+        <div class="balad-pure-loader__track">
+          <div id="balad-loader-progress-bar" class="balad-pure-loader__fill"></div>
         </div>
       {%- endif -%}
     </div>
 
     <script>
       (function() {
-        const loader = document.getElementById('stagmenfashion-page-loader');
+        const loader = document.getElementById('balad-page-loader');
         if (!loader) return;
 
         const isDesignMode = loader.getAttribute('data-design-mode') === 'true';
         const frequency = loader.getAttribute('data-frequency') || 'all';
-        const progressBar = document.getElementById('stagmenfashion-loader-progress-bar');
-        const logoFill = document.getElementById('stagmenfashion-logo-fill-el');
-        const textFill = document.getElementById('stagmenfashion-text-fill-el');
+        const progressBar = document.getElementById('balad-loader-progress-bar');
+        const logoFill = document.getElementById('balad-logo-fill-el');
+        const textFill = document.getElementById('balad-text-fill-el');
 
         if (!isDesignMode && frequency === 'once_per_session') {
-          if (sessionStorage.getItem('stagmenfashion_loader_shown')) {
-            loader.classList.add('stagmenfashion-pure-loader--hidden');
+          if (sessionStorage.getItem('balad_loader_shown')) {
+            loader.classList.add('balad-pure-loader--hidden');
             return;
           }
-          sessionStorage.setItem('stagmenfashion_loader_shown', 'true');
+          sessionStorage.setItem('balad_loader_shown', 'true');
         } else if (!isDesignMode && frequency === 'homepage_only') {
           const isHome = window.location.pathname === '/' || window.location.pathname === '{{ routes.root_url }}';
           if (!isHome) {
-            loader.classList.add('stagmenfashion-pure-loader--hidden');
+            loader.classList.add('balad-pure-loader--hidden');
             return;
           }
         }
@@ -315,9 +315,9 @@
         function dismissLoader() {
           if (isFinished) return;
           isFinished = true;
-          loader.classList.add('stagmenfashion-pure-loader--hiding');
+          loader.classList.add('balad-pure-loader--hiding');
           setTimeout(function() {
-            loader.classList.add('stagmenfashion-pure-loader--hidden');
+            loader.classList.add('balad-pure-loader--hidden');
           }, 500);
         }
 
@@ -338,7 +338,7 @@
         // Theme Customizer support
         if (isDesignMode) {
           document.addEventListener('shopify:section:select', function() {
-            loader.classList.add('stagmenfashion-pure-loader--hidden');
+            loader.classList.add('balad-pure-loader--hidden');
           });
         }
       })();

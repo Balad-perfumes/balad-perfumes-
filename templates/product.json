@@ -77,8 +77,8 @@
         "remove_horizontal_padding": false
       }
     },
-    "stagmenfashion_similar_products_wqLRpx": {
-      "type": "stagmenfashion-similar-products",
+    "balad_similar_products_wqLRpx": {
+      "type": "balad-similar-products",
       "name": "Similar Category Products",
       "settings": {
         "heading": "Similar Products",
@@ -147,7 +147,7 @@
   "order": [
     "main",
     "1790242250043b352a",
-    "stagmenfashion_similar_products_wqLRpx",
+    "balad_similar_products_wqLRpx",
     "product_reviews",
     "179015426732e1050b"
   ]

@@ -1,0 +1,755 @@
+<section
+  class="balad-home-testimonials color-{{ section.settings.color_scheme }}"
+  style="--testimonials-bg: {{ section.settings.background | default: '#f7f7f8' }};"
+>
+  <div class="balad-home-testimonials__inner">
+    <header class="balad-home-testimonials__header">
+      {% if section.settings.eyebrow != blank %}
+        <p class="balad-home-testimonials__eyebrow">{{ section.settings.eyebrow }}</p>
+      {% endif %}
+      {% if section.settings.heading != blank %}
+        <h2 class="balad-home-testimonials__title">{{ section.settings.heading }}</h2>
+      {% endif %}
+
+      {% if section.settings.subheading != blank %}
+        <p class="balad-home-testimonials__subheading">{{ section.settings.subheading }}</p>
+      {% endif %}
+    </header>
+
+    {% if section.settings.content_source == 'judgeme' %}
+      <div class="balad-home-testimonials__judgeme-wrapper">
+        {% case section.settings.judgeme_widget_type %}
+          {% when 'all_reviews' %}
+            <div class="jdgm-widget jdgm-all-reviews-widget" data-auto-install="false">
+              {% if shop.metafields.judgeme.all_reviews_widget != blank %}
+                {{ shop.metafields.judgeme.all_reviews_widget }}
+              {% endif %}
+            </div>
+          {% when 'product_reviews' %}
+            {% assign selected_product = section.settings.judgeme_product %}
+            {% if selected_product != blank %}
+              {% if selected_product.metafields.judgeme.widget != blank %}
+                <div id="judgeme_product_reviews" class="jdgm-widget jdgm-review-widget" data-id="{{ selected_product.id }}">
+                  {{ selected_product.metafields.judgeme.widget }}
+                </div>
+              {% else %}
+                <div id="judgeme_product_reviews" class="jdgm-widget jdgm-review-widget" data-id="{{ selected_product.id }}">
+                  <div class="balad-home-testimonials__empty-judgeme">
+                    <span class="balad-home-testimonials__star is-active">★</span>
+                    <p>Judge.me reviews for <strong>{{ selected_product.title }}</strong> will load here.</p>
+                  </div>
+                </div>
+              {% endif %}
+            {% else %}
+              <div class="jdgm-carousel-wrapper">
+                {% if shop.metafields.judgeme.featured_carousel != blank %}
+                  {{ shop.metafields.judgeme.featured_carousel }}
+                {% else %}
+                  <div class="jdgm-widget jdgm-featured-reviews-carousel" data-auto-install="false"></div>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% else %}
+            {% comment %} Default to Judge.me Featured Reviews Carousel {% endcomment %}
+            <div class="jdgm-carousel-wrapper">
+              {% if shop.metafields.judgeme.featured_carousel != blank %}
+                {{ shop.metafields.judgeme.featured_carousel }}
+              {% else %}
+                <div class="jdgm-widget jdgm-featured-reviews-carousel" data-auto-install="false"></div>
+              {% endif %}
+            </div>
+        {% endcase %}
+      </div>
+    {% else %}
+      {% comment %} Single Row Static Testimonial Cards Marquee with Drag & Swipe Support {% endcomment %}
+      <div class="balad-home-testimonials__marquee-container" aria-label="{{ section.settings.heading | escape }}">
+        <div class="balad-home-testimonials__marquee" role="list">
+          <div class="balad-home-testimonials__track">
+            {% for group_idx in (1..4) %}
+              <div class="balad-home-testimonials__group"{% if group_idx > 1 %} aria-hidden="true"{% endif %}>
+                {% for block in section.blocks %}
+                  <div
+                    class="balad-home-testimonials__card"
+                    {% if group_idx == 1 %}role="listitem"{% endif %}
+                    {{ block.shopify_attributes }}
+                  >
+                    <div class="balad-home-testimonials__rating" aria-label="{{ block.settings.rating }} out of 5 stars">
+                      {% for i in (1..5) %}
+                        <span class="balad-home-testimonials__star{% if i <= block.settings.rating %} is-active{% endif %}">★</span>
+                      {% endfor %}
+                    </div>
+
+                    <blockquote class="balad-home-testimonials__quote">
+                      {{ block.settings.quote }}
+                    </blockquote>
+
+                    <div class="balad-home-testimonials__footer">
+                      <div class="balad-home-testimonials__avatar" aria-hidden="true">
+                        {{ block.settings.initials }}
+                      </div>
+                      <div class="balad-home-testimonials__meta">
+                        <strong class="balad-home-testimonials__name">{{ block.settings.name }}</strong>
+                        {% if block.settings.role != blank %}
+                          <span class="balad-home-testimonials__role">{{ block.settings.role }}</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<script>
+  function initTestimonialsMarquee() {
+    const containers = document.querySelectorAll('.balad-home-testimonials__marquee-container');
+
+    containers.forEach(container => {
+      if (container.dataset.marqueeReady === 'true') return;
+      container.dataset.marqueeReady = 'true';
+
+      const marquee = container.querySelector('.balad-home-testimonials__marquee');
+      const track = container.querySelector('.balad-home-testimonials__track');
+      if (!track || !marquee) return;
+
+      const firstGroup = track.querySelector('.balad-home-testimonials__group');
+      if (!firstGroup) return;
+
+      let currentPos = 0;
+      const baseSpeed = 0.8; // px per frame
+      let isHovered = false;
+      let isDragging = false;
+      let startX = 0;
+      let lastX = 0;
+      let startY = 0;
+      let velocity = 0;
+      let hasMoved = false;
+      let isHorizontalSwipe = null;
+
+      const getGroupWidth = () => firstGroup.offsetWidth || 1;
+
+      function renderLoop() {
+        const groupWidth = getGroupWidth();
+        if (groupWidth > 1) {
+          if (isDragging) {
+            // Position updated live during drag
+          } else {
+            if (Math.abs(velocity) > 0.05) {
+              currentPos += velocity;
+              velocity *= 0.93; // smooth deceleration momentum
+            } else {
+              velocity = 0;
+              if (!isHovered) {
+                currentPos -= baseSpeed;
+              }
+            }
+          }
+
+          // Wrap seamlessly
+          while (currentPos <= -groupWidth) {
+            currentPos += groupWidth;
+          }
+          while (currentPos > 0) {
+            currentPos -= groupWidth;
+          }
+
+          track.style.transform = `translate3d(${currentPos}px, 0, 0)`;
+        }
+
+        requestAnimationFrame(renderLoop);
+      }
+
+      requestAnimationFrame(renderLoop);
+
+      // Hover controls
+      container.addEventListener('mouseenter', () => { isHovered = true; });
+      container.addEventListener('mouseleave', () => { 
+        if (!isDragging) isHovered = false; 
+      });
+
+      // Pointer / Drag / Touch handling
+      const handleDragStart = (clientX, clientY) => {
+        isDragging = true;
+        hasMoved = false;
+        isHorizontalSwipe = null;
+        startX = clientX;
+        lastX = clientX;
+        startY = clientY;
+        velocity = 0;
+        marquee.classList.add('is-dragging');
+      };
+
+      const handleDragMove = (clientX, clientY, e) => {
+        if (!isDragging) return;
+
+        const diffX = clientX - lastX;
+        const totalDiffX = clientX - startX;
+        const totalDiffY = clientY - startY;
+
+        if (isHorizontalSwipe === null && (Math.abs(totalDiffX) > 4 || Math.abs(totalDiffY) > 4)) {
+          isHorizontalSwipe = Math.abs(totalDiffX) >= Math.abs(totalDiffY);
+        }
+
+        if (isHorizontalSwipe === false) {
+          // Vertical page scroll gesture, cancel drag
+          isDragging = false;
+          marquee.classList.remove('is-dragging');
+          return;
+        }
+
+        if (Math.abs(totalDiffX) > 5) {
+          hasMoved = true;
+        }
+
+        lastX = clientX;
+        currentPos += diffX;
+        velocity = diffX * 1.25; // add responsive swipe momentum
+
+        if (e && e.cancelable && isHorizontalSwipe) {
+          e.preventDefault();
+        }
+      };
+
+      const handleDragEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        marquee.classList.remove('is-dragging');
+        if (!container.matches(':hover')) {
+          isHovered = false;
+        }
+      };
+
+      // Pointer Events for Desktop Mouse Drag + Modern Mobile Touch
+      if (window.PointerEvent) {
+        marquee.addEventListener('pointerdown', (e) => {
+          if (e.button && e.button !== 0) return;
+          handleDragStart(e.clientX, e.clientY);
+          try {
+            marquee.setPointerCapture(e.pointerId);
+          } catch (_) {}
+        });
+
+        marquee.addEventListener('pointermove', (e) => {
+          handleDragMove(e.clientX, e.clientY, e);
+        });
+
+        marquee.addEventListener('pointerup', (e) => {
+          handleDragEnd();
+          try {
+            marquee.releasePointerCapture(e.pointerId);
+          } catch (_) {}
+        });
+
+        marquee.addEventListener('pointercancel', (e) => {
+          handleDragEnd();
+          try {
+            marquee.releasePointerCapture(e.pointerId);
+          } catch (_) {}
+        });
+      } else {
+        // Fallback Touch Events
+        marquee.addEventListener('touchstart', (e) => {
+          if (e.touches && e.touches.length === 1) {
+            handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
+          }
+        }, { passive: true });
+
+        marquee.addEventListener('touchmove', (e) => {
+          if (e.touches && e.touches.length === 1) {
+            handleDragMove(e.touches[0].clientX, e.touches[0].clientY, e);
+          }
+        }, { passive: false });
+
+        marquee.addEventListener('touchend', handleDragEnd);
+        marquee.addEventListener('touchcancel', handleDragEnd);
+
+        // Fallback Mouse Events
+        marquee.addEventListener('mousedown', (e) => {
+          if (e.button === 0) {
+            handleDragStart(e.clientX, e.clientY);
+          }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+          handleDragMove(e.clientX, e.clientY, e);
+        });
+
+        window.addEventListener('mouseup', handleDragEnd);
+      }
+
+      // Trackpad / Wheel Horizontal Scrolling
+      container.addEventListener('wheel', (e) => {
+        const delta = e.deltaX || (e.shiftKey ? e.deltaY : 0);
+        if (delta) {
+          currentPos -= delta * 0.7;
+          velocity = -delta * 0.35;
+        }
+      }, { passive: true });
+
+      // Prevent link clicks during swipe/drag
+      marquee.addEventListener('click', (e) => {
+        if (hasMoved) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, true);
+    });
+  }
+
+  function initJudgeMeWidgets() {
+    if (window.jdgm && typeof window.jdgm.initializeWidgets === 'function') {
+      window.jdgm.initializeWidgets();
+    }
+  }
+
+  if (document.readyState !== 'loading') {
+    initTestimonialsMarquee();
+    initJudgeMeWidgets();
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      initTestimonialsMarquee();
+      initJudgeMeWidgets();
+    });
+  }
+  
+  // Re-run in Shopify theme customizer when sections are reloaded
+  document.addEventListener('shopify:section:load', () => {
+    initTestimonialsMarquee();
+    initJudgeMeWidgets();
+  });
+</script>
+
+<style>
+  .balad-home-testimonials {
+    --balad-testimonials-ink: #242424;
+    --balad-testimonials-muted: rgb(36 36 36 / 0.62);
+    --balad-testimonials-line: rgb(36 36 36 / 0.08);
+    --balad-testimonials-accent: #c13b2f;
+    background: var(--testimonials-bg, #f7f7f8);
+    color: var(--balad-testimonials-ink);
+    padding-top: clamp(14px, 1.8vw, 20px);
+    padding-bottom: clamp(12px, 1.6vw, 18px);
+    overflow-x: hidden;
+  }
+
+  .balad-home-testimonials__inner {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 36px 0;
+    box-sizing: border-box;
+  }
+
+  .balad-home-testimonials__header {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 0 20px 0;
+    padding: 0 0 15px 0;
+    border-bottom: 1px solid rgb(17 17 17 / 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .balad-home-testimonials__eyebrow {
+    margin: 0 0 4px 0;
+    color: rgb(36 36 36 / 0.52);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .balad-home-testimonials__title {
+    margin: 0;
+    color: #000000;
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
+    font-size: 18px;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    text-align: left;
+  }
+
+  .balad-home-testimonials__subheading {
+    margin: 6px 0 0;
+    max-width: 60ch;
+    font-size: 13px;
+    color: var(--pf-real-life-muted, #6b7280);
+    line-height: 1.4;
+    font-weight: 400;
+    text-align: left;
+    opacity: 1;
+  }
+
+  /* Single row marquee styling */
+  .balad-home-testimonials__marquee-container {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: clamp(8px, 1.5vw, 16px) 0;
+  }
+
+  .balad-home-testimonials__marquee {
+    display: flex;
+    overflow: hidden;
+    width: 100%;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: pan-y;
+    cursor: grab;
+  }
+
+  .balad-home-testimonials__marquee.is-dragging {
+    cursor: grabbing;
+  }
+
+  .balad-home-testimonials__track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+  }
+
+  .balad-home-testimonials__group {
+    display: flex;
+    gap: clamp(16px, 2vw, 24px);
+    padding-right: clamp(16px, 2vw, 24px);
+    flex-shrink: 0;
+  }
+
+  .balad-home-testimonials__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: clamp(270px, 25vw, 330px);
+    flex-shrink: 0;
+    padding: 6px;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgb(17 17 17 / 0.07);
+    transition: box-shadow 0.3s ease;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .balad-home-testimonials__card:hover {
+    box-shadow: 0 0 0 1px rgb(17 17 17 / 0.14), 0 14px 30px rgba(0, 0, 0, 0.07);
+  }
+
+  .balad-home-testimonials__rating {
+    position: relative;
+    display: flex;
+    gap: 3px;
+    padding: 14px 16px 0;
+    color: #e4e4e1;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .balad-home-testimonials__star.is-active {
+    color: #e9a52f;
+  }
+
+  .balad-home-testimonials__quote {
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 12px 16px 16px;
+    color: #2a2a2a;
+    font-size: 13.5px;
+    line-height: 1.55;
+    font-style: normal;
+  }
+
+  .balad-home-testimonials__footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+    padding: 10px;
+    border-radius: 15px;
+    background: #f3f3f2;
+  }
+
+  .balad-home-testimonials__avatar {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #111111;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    flex: 0 0 auto;
+  }
+
+  .balad-home-testimonials__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .balad-home-testimonials__name {
+    color: #111111;
+    font-size: 13px;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  .balad-home-testimonials__role {
+    color: #8a8a8a;
+    font-size: 10.5px;
+    line-height: 1.2;
+  }
+
+  /* Judge.me Wrapper styling */
+  .balad-home-testimonials__judgeme-wrapper {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .balad-home-testimonials__judgeme-wrapper .jdgm-carousel-wrapper {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .balad-home-testimonials__judgeme-wrapper .jdgm-widget {
+    width: 100%;
+  }
+
+  .balad-home-testimonials__empty-judgeme {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 20px;
+    background: #ffffff;
+    border: 1px dashed var(--balad-testimonials-line);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--balad-testimonials-muted);
+  }
+
+  @media screen and (max-width: 749px) {
+    .balad-home-testimonials {
+      padding: 10px 0 8px;
+    }
+
+    .balad-home-testimonials__inner {
+      width: 100%;
+      padding: 8px 14px 0;
+    }
+
+    .balad-home-testimonials__header {
+      padding-left: 0;
+      padding-right: 0;
+      margin-bottom: 14px;
+    }
+
+    .balad-home-testimonials__title {
+      font-size: 14px !important;
+    }
+
+    .balad-home-testimonials__subheading {
+      font-size: 12px !important;
+    }
+
+    .balad-home-testimonials__card {
+      width: clamp(250px, 72vw, 300px);
+    }
+
+    .balad-home-testimonials__name {
+      font-size: 13px !important;
+    }
+
+    .balad-home-testimonials__role {
+      font-size: 10px !important;
+    }
+
+    .balad-home-testimonials__quote {
+      font-size: 12.5px !important;
+      line-height: 1.5;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Stag Testimonials",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Community Voices"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Why They Wear Us"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Real feedback on our premium fits, heavyweight cottons, and daily styles."
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#f7f7f8"
+    },
+    {
+      "type": "header",
+      "content": "Content Source"
+    },
+    {
+      "type": "select",
+      "id": "content_source",
+      "label": "Testimonials Content Source",
+      "options": [
+        {
+          "value": "static",
+          "label": "Static Testimonials (Blocks)"
+        },
+        {
+          "value": "judgeme",
+          "label": "Judge.me Reviews"
+        }
+      ],
+      "default": "static",
+      "info": "Choose whether to display custom static testimonial cards or reviews synced from Judge.me."
+    },
+    {
+      "type": "select",
+      "id": "judgeme_widget_type",
+      "label": "Judge.me Widget Type",
+      "options": [
+        {
+          "value": "featured_carousel",
+          "label": "Featured Reviews Carousel (Recommended)"
+        },
+        {
+          "value": "all_reviews",
+          "label": "All Reviews Widget"
+        },
+        {
+          "value": "product_reviews",
+          "label": "Specific Product Reviews"
+        }
+      ],
+      "default": "featured_carousel",
+      "info": "Applies when Content Source is set to Judge.me Reviews."
+    },
+    {
+      "type": "product",
+      "id": "judgeme_product",
+      "label": "Select Product for Judge.me Reviews",
+      "info": "Used only when Widget Type is set to 'Specific Product Reviews'."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Rating",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote",
+          "default": "\"Finally found streetwear that gets the oversized silhouette just right for men. The heavyweight cotton feels incredibly luxe.\""
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Sneha"
+        },
+        {
+          "type": "text",
+          "id": "initials",
+          "label": "Initials",
+          "default": "SM"
+        },
+        {
+          "type": "text",
+          "id": "role",
+          "label": "Role",
+          "default": "Fashion Creator"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Stag Testimonials",
+      "blocks": [
+        {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "\"Finally found streetwear that gets the oversized silhouette just right for men. The heavyweight cotton feels incredibly luxe and holds its shape.\"",
+            "name": "Sneha",
+            "initials": "SM",
+            "role": "Fashion Creator"
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "\"The co-ord sets are an absolute staple in my wardrobe now. Impeccable tailoring, vibrant colors, and super comfortable for all-day styling.\"",
+            "name": "Ananya",
+            "initials": "AR",
+            "role": "Verified Buyer"
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "\"Balad Perfumes has redefined daily fits for men. The attention to drop shoulders, neckline ribbing, and fabric weight is unmatched.\"",
+            "name": "Tanya",
+            "initials": "TK",
+            "role": "Stylist"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

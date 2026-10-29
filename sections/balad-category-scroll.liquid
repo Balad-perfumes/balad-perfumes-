@@ -1,0 +1,469 @@
+{%- liquid
+  assign hide_empty = section.settings.hide_empty_collections
+  assign discover_url = section.settings.discover_more_link | default: routes.collections_url
+  assign has_cards = false
+-%}
+
+<section
+  class="balad-cats{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  data-cats-section="{{ section.id }}"
+  style="
+    --cats-bg: {{ section.settings.background | default: '#ffffff' }};
+    --cats-text: {{ section.settings.text_color | default: '#111111' }};
+    --cats-muted: {{ section.settings.muted_text_color | default: '#6b7280' }};
+    --cats-radius: {{ section.settings.image_radius | default: 24 }}px;
+  "
+>
+  <div class="balad-cats__shell">
+    <div class="balad-cats__head">
+      <div class="balad-cats__heading-wrap">
+        {% if section.settings.heading != blank %}
+          <h2 class="balad-cats__heading">{{ section.settings.heading }}</h2>
+        {% endif %}
+        {% if section.settings.subheading != blank %}
+          <p class="balad-cats__subheading">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </div>
+      {% if section.settings.discover_more_label != blank and discover_url != blank %}
+        <a href="{{ discover_url }}" class="balad-cats__discover">{{ section.settings.discover_more_label }}</a>
+      {% endif %}
+    </div>
+
+    <div class="balad-cats__rail" data-cats-rail>
+        {%- for coll in section.settings.collection_list -%}
+          {%- liquid
+            assign skip = false
+            if hide_empty and coll.products_count == 0
+              assign skip = true
+            endif
+            assign img = coll.image
+            if img == blank
+              assign img = coll.products.first.featured_image
+            endif
+          -%}
+          {%- unless skip -%}
+            {%- assign has_cards = true -%}
+            <div class="balad-cc">
+              <div class="balad-cc__card">
+                <div class="balad-cc__media">
+                  <a href="{{ coll.url }}" class="balad-cc__cover" draggable="false" aria-label="{{ coll.title | escape }}"></a>
+                  {%- if img != blank -%}
+                    {{
+                      img
+                      | image_url: width: 700
+                      | image_tag:
+                        loading: 'lazy',
+                        widths: '240, 360, 480, 700',
+                        sizes: '(min-width: 1025px) 16vw, (min-width: 750px) 24vw, 44vw',
+                        alt: coll.title,
+                        class: 'balad-cc__image',
+                        draggable: 'false'
+                    }}
+                  {%- else -%}
+                    {{ 'collection-1' | placeholder_svg_tag: 'balad-cc__image balad-cc__placeholder' }}
+                  {%- endif -%}
+
+                  <div class="balad-cc__dock">
+                    <a href="{{ coll.url }}" class="balad-cc__buy" draggable="false">
+                      <span class="balad-cc__buy-label">{{ coll.title }}</span>
+                      <span class="balad-cc__buy-arrow" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                      </span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {%- endunless -%}
+        {%- endfor -%}
+
+        {%- unless has_cards -%}
+          {%- for coll in collections limit: 12 -%}
+            {%- liquid
+              if coll.handle == 'all' or coll.handle == 'frontpage'
+                continue
+              endif
+              if hide_empty and coll.products_count == 0
+                continue
+              endif
+              assign img = coll.image | default: coll.products.first.featured_image
+            -%}
+            <div class="balad-cc">
+              <div class="balad-cc__card">
+                <div class="balad-cc__media">
+                  <a href="{{ coll.url }}" class="balad-cc__cover" draggable="false" aria-label="{{ coll.title | escape }}"></a>
+                  {%- if img != blank -%}
+                    {{
+                      img
+                      | image_url: width: 700
+                      | image_tag:
+                        loading: 'lazy',
+                        widths: '240, 360, 480, 700',
+                        sizes: '(min-width: 1025px) 16vw, (min-width: 750px) 24vw, 44vw',
+                        alt: coll.title,
+                        class: 'balad-cc__image',
+                        draggable: 'false'
+                    }}
+                  {%- else -%}
+                    {{ 'collection-1' | placeholder_svg_tag: 'balad-cc__image balad-cc__placeholder' }}
+                  {%- endif -%}
+
+                  <div class="balad-cc__dock">
+                    <a href="{{ coll.url }}" class="balad-cc__buy" draggable="false">
+                      <span class="balad-cc__buy-label">{{ coll.title }}</span>
+                      <span class="balad-cc__buy-arrow" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                      </span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {%- endfor -%}
+        {%- endunless -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  .balad-cats {
+    background: var(--cats-bg, #ffffff);
+    padding-top: 20px;
+    padding-bottom: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .balad-cats__shell {
+    width: 100%;
+    margin: 0;
+    padding: 0 36px;
+    box-sizing: border-box;
+  }
+
+  .balad-cats__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgb(17 17 17 / 0.08);
+  }
+
+  .balad-cats__heading-wrap { flex: 1; min-width: 0; }
+
+  .balad-cats__heading {
+    margin: 0;
+    color: var(--cats-text, #111111);
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
+    font-size: 18px;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+
+  .balad-cats__subheading {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--cats-muted, #6b7280);
+    line-height: 1.4;
+    font-weight: 400;
+  }
+
+  .balad-cats__discover {
+    flex-shrink: 0;
+    color: var(--cats-text, #111111);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: opacity 0.2s ease;
+  }
+  .balad-cats__discover:hover { opacity: 0.7; }
+
+  /* ── Rail (same track as the product sliders) ── */
+  .balad-cats__rail {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - (5 * 12px)) / 6);
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0 0 4px;
+    margin: 0;
+    cursor: grab;
+    scroll-snap-type: none;
+    touch-action: pan-x pan-y;
+  }
+  .balad-cats__rail::-webkit-scrollbar { display: none; }
+  .balad-cats__rail.is-dragging { cursor: grabbing; user-select: none; -webkit-user-select: none; }
+  .balad-cats__rail.is-dragging a,
+  .balad-cats__rail.is-dragging img { pointer-events: none; }
+
+  /* ── Collection card (self-contained: does not use the product card styles) ── */
+  .balad-cc { min-width: 0; display: flex; flex-direction: column; }
+
+  .balad-cc .balad-cc__card {
+    --cc-pad: 8px;
+    --cc-border: rgb(0 0 0 / 0.08);
+    container-type: inline-size;
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    padding: var(--cc-pad);
+    background: #fff;
+    box-shadow: 0 0 0 1px var(--cc-border);
+    border-radius: var(--cats-radius, 24px);
+    color: #111;
+  }
+
+  .balad-cc .balad-cc__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 5;
+    background: #ece9e4;
+    overflow: hidden;
+    isolation: isolate;
+    border-radius: max(calc(var(--cats-radius, 24px) - var(--cc-pad, 8px)), 0px);
+  }
+
+  .balad-cc .balad-cc__media::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 40%;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.22), transparent);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .balad-cc .balad-cc__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1);
+    transform-origin: center center;
+    transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+    will-change: transform;
+    -webkit-user-drag: none;
+  }
+
+  .balad-cc:hover .balad-cc__image,
+  .balad-cc:focus-within .balad-cc__image {
+    transform: scale(1.1);
+  }
+
+  .balad-cc__cover {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    -webkit-user-drag: none;
+  }
+
+  .balad-cc .balad-cc__dock {
+    position: absolute;
+    inset: auto 10px 10px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .balad-cc .balad-cc__buy {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0;
+    height: 40px;
+    padding: 0 5px 0 16px;
+    border-radius: 999px;
+    background: rgb(32 28 25 / 0.42);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    backdrop-filter: blur(14px) saturate(1.2);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    text-align: left;
+    text-decoration: none;
+    text-transform: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* Theme gradient that spreads slowly from the start of the button to the end on hover */
+  .balad-cc .balad-cc__buy::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      to right,
+      #13173a 0%,
+      #2a1b46 18%,
+      #521f5a 36%,
+      #632266 54%,
+      rgb(99 34 102 / 0.85) 66%,
+      rgb(99 34 102 / 0.5) 80%,
+      rgb(99 34 102 / 0.15) 92%,
+      rgb(99 34 102 / 0) 100%
+    );
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.65s cubic-bezier(0.33, 0.85, 0.4, 1);
+    will-change: transform;
+    pointer-events: none;
+  }
+
+  .balad-cats__shell .balad-cc:hover .balad-cc__buy::before,
+  .balad-cats__shell .balad-cc:focus-within .balad-cc__buy::before {
+    transform: scaleX(1.85);
+  }
+
+  .balad-cc .balad-cc__buy-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .balad-cc .balad-cc__buy-arrow {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #fff;
+    color: #111;
+  }
+
+  .balad-cc .balad-cc__buy-arrow svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .balad-cc .balad-cc__buy-arrow {
+    transition: transform 0.25s ease;
+  }
+
+  .balad-cats__shell .balad-cc:hover .balad-cc__buy-arrow {
+    transform: translateX(2px);
+  }
+
+  .balad-cc a:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -3px;
+  }
+
+  @container (max-width: 230px) {
+    .balad-cc__buy { height: 38px; padding: 0 4px 0 14px; font-size: 12px; }
+    .balad-cc__buy-arrow { width: 28px; height: 28px; }
+  }
+
+  @media screen and (min-width: 1025px) and (max-width: 1400px) {
+    .balad-cats__rail { grid-auto-columns: calc((100% - (5 * 10px)) / 6); gap: 10px; }
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .balad-cats__shell { padding: 0 20px; }
+    .balad-cats__rail { grid-auto-columns: calc((100% - 30px) / 4); gap: 10px; }
+  }
+
+  @media screen and (max-width: 749px) {
+    .balad-cats { padding-top: 20px; padding-bottom: 10px; }
+    .balad-cats__shell { padding: 0 12px; }
+    .balad-cats__head { margin-bottom: 8px; padding-bottom: 6px; }
+    .balad-cats__heading { font-size: 13.5px; }
+    .balad-cats__subheading { font-size: 11.5px; margin-top: 4px; }
+    .balad-cats__discover { font-size: 11px; }
+    .balad-cats__rail { grid-auto-columns: calc((100% - 16px) / 2.3); gap: 8px; padding-bottom: 2px; }
+  }
+</style>
+
+<script>
+  (() => {
+    const root = document.querySelector('[data-cats-section="{{ section.id }}"]');
+    const rail = root && root.querySelector('[data-cats-rail]');
+    if (!rail) return;
+
+    let down = false, moved = false, startX = 0, startLeft = 0;
+
+    rail.addEventListener('mousedown', (e) => {
+      down = true; moved = false;
+      startX = e.pageX;
+      startLeft = rail.scrollLeft;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!down) return;
+      const walk = e.pageX - startX;
+      if (Math.abs(walk) > 4) { moved = true; rail.classList.add('is-dragging'); }
+      if (moved) rail.scrollLeft = startLeft - walk;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!down) return;
+      down = false;
+      rail.classList.remove('is-dragging');
+      setTimeout(() => { moved = false; }, 80);
+    });
+
+    rail.addEventListener('click', (e) => {
+      if (moved) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Category Scroll",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shop by Category" },
+    { "type": "text", "id": "subheading", "label": "Subheading", "default": "Browse our curated collections" },
+    { "type": "text", "id": "discover_more_label", "label": "Discover More Label", "default": "Discover More" },
+    { "type": "url", "id": "discover_more_link", "label": "Discover More Link" },
+    {
+      "type": "collection_list",
+      "id": "collection_list",
+      "label": "Collections",
+      "info": "Pick the categories to display. If empty, store collections are shown automatically.",
+      "limit": 20
+    },
+    { "type": "checkbox", "id": "hide_empty_collections", "label": "Hide empty collections", "default": false },
+    {
+      "type": "range",
+      "id": "image_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Card border radius",
+      "default": 24
+    },
+    { "type": "color", "id": "background", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#111111" },
+    { "type": "color", "id": "muted_text_color", "label": "Muted text color", "default": "#6b7280" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme" }
+  ],
+  "presets": [
+    { "name": "Category Scroll" }
+  ]
+}
+{% endschema %}

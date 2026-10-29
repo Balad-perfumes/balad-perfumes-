@@ -10,7 +10,7 @@
 {
   "sections": {
     "hero_slider": {
-      "type": "stagmenfashion-minimal-hero",
+      "type": "balad-minimal-hero",
       "blocks": {
         "slide_TQLMdc": {
           "type": "slide",
@@ -83,7 +83,7 @@
       }
     },
     "shop_by_category": {
-      "type": "stagmenfashion-category-scroll",
+      "type": "balad-category-scroll",
       "disabled": true,
       "settings": {
         "heading": "Shop by Category",
@@ -91,9 +91,7 @@
         "discover_more_label": "Discover More",
         "discover_more_link": "shopify://collections",
         "collection_list": [],
-        "show_product_count": true,
         "hide_empty_collections": false,
-        "card_radius": 5,
         "background": "#ffffff",
         "text_color": "#111111",
         "muted_text_color": "#6b7280",
@@ -101,7 +99,7 @@
       }
     },
     "category_scroll": {
-      "type": "stagmenfashion-latest-items",
+      "type": "balad-latest-items",
       "settings": {
         "heading": "DISCOVER OUR BESTSELLERS",
         "subheading": "Shop our most-loved perfumes and signature scents.",
@@ -129,8 +127,8 @@
             "desc_color": "",
             "custom_class": "",
             "background_color": "",
-            "padding_top": 36,
-            "padding_bottom": 36,
+            "padding_top": 0,
+            "padding_bottom": 0,
             "padding_left_right": 0
           }
         }
@@ -167,62 +165,112 @@
         "remove_horizontal_padding": true
       }
     },
-    "banner_slider": {
-      "type": "stagmenfashion-banner-slider",
+    "promo_cards_two_up": {
+      "type": "balad-promo-cards",
       "blocks": {
-        "slide_1": {
-          "type": "slide",
+        "promo_1": {
+          "type": "promo_card",
           "settings": {
-            "collection": "co-ords",
             "image": "shopify://shop_images/IMG_6343.png",
-            "mobile_image": "shopify://shop_images/IMG_6343.png",
-            "subheading": "New Season",
-            "heading": "SIGNATURE SCENTS & SETS",
+            "subheading": "",
+            "heading": "",
+            "description": "",
+            "button_label": "",
             "button_link": "shopify://collections/all",
+            "text_align": "center",
             "content_position": "bottom-center",
-            "text_alignment": "center"
+            "overlay_color": "#000000",
+            "overlay_opacity": 20
           }
         },
-        "slide_3": {
-          "type": "slide",
+        "promo_2": {
+          "type": "promo_card",
           "settings": {
-            "collection": "new-in",
             "image": "shopify://shop_images/ffb0e3da-2549-436a-9c06-5bba86ee039f.png",
-            "mobile_image": "shopify://shop_images/606f9946-6826-42e0-803a-0094d26de3ec.png",
-            "subheading": "Fresh Drop",
-            "heading": "NEW IN ARRIVALS",
+            "subheading": "",
+            "heading": "",
+            "description": "",
+            "button_label": "",
             "button_link": "shopify://collections/new-in",
+            "text_align": "center",
             "content_position": "bottom-center",
-            "text_alignment": "center"
+            "overlay_color": "#000000",
+            "overlay_opacity": 20
           }
         }
       },
       "block_order": [
-        "slide_1",
-        "slide_3"
+        "promo_1",
+        "promo_2"
       ],
       "settings": {
-        "layout_mode": "full_bleed",
-        "border_radius": 0,
-        "desktop_height": "650px",
-        "mobile_height": "450px",
-        "autoplay_speed": 5,
-        "show_pagination": true,
-        "show_arrows": false,
-        "heading_size": "compact",
+        "heading": "",
+        "subheading": "",
         "color_scheme": "scheme-1",
-        "overlay_color": "#000000",
-        "overlay_opacity": 20,
-        "padding_top": 0,
-        "padding_bottom": 0
+        "mobile_columns": "2",
+        "gap": 12,
+        "padding_top": 20,
+        "padding_bottom": 20,
+        "height_desktop": 380,
+        "height_mobile": 170
       }
     },
-    "stagmenfashion_category_scroll_iGAtgb": {
-      "type": "stagmenfashion-category-scroll",
+    "feature_cards": {
+      "type": "balad-home-benefits",
+      "blocks": {
+        "benefit_1": {
+          "type": "benefit",
+          "settings": {
+            "icon": "clock",
+            "heading": "Long-Lasting Fragrance",
+            "text": "Enjoy captivating scents that stay with you throughout the day."
+          }
+        },
+        "benefit_2": {
+          "type": "benefit",
+          "settings": {
+            "icon": "quality",
+            "heading": "Premium Quality",
+            "text": "Carefully crafted fragrances made to leave a lasting impression."
+          }
+        },
+        "benefit_3": {
+          "type": "benefit",
+          "settings": {
+            "icon": "mood",
+            "heading": "Scents for Every Mood",
+            "text": "Discover distinctive fragrances for every occasion and personality."
+          }
+        },
+        "benefit_4": {
+          "type": "benefit",
+          "settings": {
+            "icon": "gift",
+            "heading": "Elegant Gift Choices",
+            "text": "Beautiful fragrances thoughtfully selected for gifting and special moments."
+          }
+        }
+      },
+      "block_order": [
+        "benefit_1",
+        "benefit_2",
+        "benefit_3",
+        "benefit_4"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "separate_cards": true,
+        "notice_label": "",
+        "notice_text": "",
+        "background": "#ffffff"
+      }
+    },
+    "balad_category_scroll_iGAtgb": {
+      "type": "balad-category-scroll",
       "name": "Category Scroll",
       "settings": {
         "heading": "Shop Our Collections",
-        "subheading": "Explore our carefully curated fragrance collections, crafted to suit every mood, moment, and style.",
+        "subheading": "Fragrances for every mood.",
         "discover_more_label": "Discover more",
         "discover_more_link": "shopify://collections/all",
         "collection_list": [
@@ -230,9 +278,7 @@
           "for-him",
           "unisex"
         ],
-        "show_product_count": true,
         "hide_empty_collections": false,
-        "card_radius": 6,
         "background": "#ffffff",
         "text_color": "#111111",
         "muted_text_color": "#6b7280",
@@ -240,7 +286,7 @@
       }
     },
     "category_products_scroll": {
-      "type": "stagmenfashion-category-products-scroll",
+      "type": "balad-category-products-scroll",
       "settings": {
         "heading": "Discover Your Signature Scent",
         "subheading": "Explore captivating fragrances, from fresh everyday scents to rich and unforgettable blends.",
@@ -250,12 +296,12 @@
         "discover_more_link": "shopify://collections/all",
         "background": "#f0f1f4",
         "section_background": "rgba(0,0,0,0)",
-        "shell_radius": 12,
+        "shell_radius": 16,
         "color_scheme": "scheme-1"
       }
     },
     "trending_now": {
-      "type": "stagmenfashion-trending-now",
+      "type": "balad-trending-now",
       "disabled": true,
       "settings": {
         "heading": "Trending Now",
@@ -269,7 +315,7 @@
       }
     },
     "our_stores": {
-      "type": "stagmenfashion-our-stores",
+      "type": "balad-our-stores",
       "blocks": {
         "store_1": {
           "type": "store",
@@ -311,7 +357,7 @@
       }
     },
     "testimonials": {
-      "type": "stagmenfashion-home-testimonials",
+      "type": "balad-home-testimonials",
       "blocks": {
         "testimonial_HVBwMC": {
           "type": "testimonial",
@@ -369,55 +415,6 @@
         "content_source": "static",
         "judgeme_widget_type": "featured_carousel",
         "judgeme_product": ""
-      }
-    },
-    "benefits": {
-      "type": "stagmenfashion-home-benefits",
-      "blocks": {
-        "benefit_1": {
-          "type": "benefit",
-          "settings": {
-            "icon": "clock",
-            "heading": "Long-Lasting Fragrance",
-            "text": "Enjoy captivating scents that stay with you throughout the day."
-          }
-        },
-        "benefit_2": {
-          "type": "benefit",
-          "settings": {
-            "icon": "quality",
-            "heading": "Premium Quality",
-            "text": "Carefully crafted fragrances made to leave a lasting impression."
-          }
-        },
-        "benefit_3": {
-          "type": "benefit",
-          "settings": {
-            "icon": "mood",
-            "heading": "Scents for Every Mood",
-            "text": "Discover distinctive fragrances for every occasion and personality."
-          }
-        },
-        "benefit_4": {
-          "type": "benefit",
-          "settings": {
-            "icon": "gift",
-            "heading": "Elegant Gift Choices",
-            "text": "Beautiful fragrances thoughtfully selected for gifting and special moments."
-          }
-        }
-      },
-      "block_order": [
-        "benefit_1",
-        "benefit_2",
-        "benefit_3",
-        "benefit_4"
-      ],
-      "settings": {
-        "color_scheme": "scheme-1",
-        "notice_label": "Bulk order note",
-        "notice_text": "For Bulk Orders — WhatsApp us at +91 94474 25555 or email hello@baladperfume.com",
-        "background": "#ffffff"
       }
     },
     "real_life_images": {
@@ -495,7 +492,7 @@
       "disabled": true,
       "settings": {
         "color_scheme": "",
-        "heading": "Club Stag Men Fashion / AS Seen in real life",
+        "heading": "Club Balad Perfumes / AS Seen in real life",
         "subheading": "Curated fits and real styles from our community.",
         "background": "#ffffff",
         "text_color": "#111111",
@@ -506,7 +503,7 @@
       }
     },
     "promo_cards": {
-      "type": "stagmenfashion-promo-cards",
+      "type": "balad-promo-cards",
       "blocks": {
         "promo_1": {
           "type": "promo_card",
@@ -549,12 +546,12 @@
         "gap": 20,
         "padding_top": 40,
         "padding_bottom": 40,
-        "height_desktop": 380,
+        "height_desktop": 350,
         "height_mobile": 280
       }
     },
     "spotlight": {
-      "type": "stagmenfashion-spotlight",
+      "type": "balad-spotlight",
       "disabled": true,
       "settings": {
         "collection_list": [],
@@ -989,16 +986,16 @@
   },
   "order": [
     "hero_slider",
+    "balad_category_scroll_iGAtgb",
     "shop_by_category",
     "category_scroll",
     "1790060856d032d058",
-    "banner_slider",
-    "stagmenfashion_category_scroll_iGAtgb",
+    "promo_cards_two_up",
+    "feature_cards",
     "category_products_scroll",
     "trending_now",
     "our_stores",
     "testimonials",
-    "benefits",
     "real_life_images",
     "promo_cards",
     "spotlight",

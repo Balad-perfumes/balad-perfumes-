@@ -172,8 +172,8 @@
         "enable_animations": true
       }
     },
-    "stagmenfashion_home_benefits_tpYMCn": {
-      "type": "stagmenfashion-home-benefits",
+    "balad_home_benefits_tpYMCn": {
+      "type": "balad-home-benefits",
       "blocks": {
         "benefit_t4Y6QR": {
           "type": "benefit",
@@ -222,8 +222,8 @@
         "background": "#ffffff"
       }
     },
-    "stagmenfashion_our_stores_7YD4et": {
-      "type": "stagmenfashion-our-stores",
+    "balad_our_stores_7YD4et": {
+      "type": "balad-our-stores",
       "blocks": {
         "store_rbtFGV": {
           "type": "store",
@@ -266,7 +266,7 @@
       }
     },
     "testimonials": {
-      "type": "stagmenfashion-home-testimonials",
+      "type": "balad-home-testimonials",
       "blocks": {
         "review_1": {
           "type": "testimonial",
@@ -292,7 +292,7 @@
           "type": "testimonial",
           "settings": {
             "rating": 5,
-            "quote": "\"Stag Men Fashion has redefined daily fits for men. The attention to drop shoulders, neckline ribbing, and fabric weight is unmatched.\"",
+            "quote": "\"Balad Perfumes has redefined daily fits for men. The attention to drop shoulders, neckline ribbing, and fabric weight is unmatched.\"",
             "name": "Tanya K.",
             "initials": "TK",
             "role": "Stylist & Model"
@@ -302,7 +302,7 @@
           "type": "testimonial",
           "settings": {
             "rating": 5,
-            "quote": "\"Obsessed with the boxy tees and hoodies! Constantly getting compliments whenever I step out wearing Stag Men Fashion.\"",
+            "quote": "\"Obsessed with the boxy tees and hoodies! Constantly getting compliments whenever I step out wearing Balad Perfumes.\"",
             "name": "Riya P.",
             "initials": "RP",
             "role": "Verified Buyer"
@@ -334,8 +334,8 @@
     "about_values",
     "about_quote_banner_ARn7Rr",
     "about_faq",
-    "stagmenfashion_home_benefits_tpYMCn",
-    "stagmenfashion_our_stores_7YD4et",
+    "balad_home_benefits_tpYMCn",
+    "balad_our_stores_7YD4et",
     "testimonials"
   ]
 }

@@ -1,0 +1,865 @@
+{{ 'balad-product-card.css' | asset_url | stylesheet_tag }}
+{% liquid
+  assign current_prod = product
+  assign active_collection = blank
+
+  # Check if custom collection is explicitly chosen in settings
+  if section.settings.collection != blank
+    assign active_collection = section.settings.collection
+  endif
+
+  # If not set, find current product's main collection (excluding 'all' or 'frontpage' if possible)
+  if active_collection == blank and current_prod != blank and current_prod.collections.size > 0
+    for col in current_prod.collections
+      if col.handle != 'all' and col.handle != 'frontpage' and col.products_count > 1
+        assign active_collection = col
+        break
+      endif
+    endfor
+    if active_collection == blank
+      for col in current_prod.collections
+        if col.handle != 'all' and col.handle != 'frontpage'
+          assign active_collection = col
+          break
+        endif
+      endfor
+    endif
+    if active_collection == blank
+      assign active_collection = current_prod.collections.first
+    endif
+  endif
+
+  # Count eligible similar products from this collection (excluding current product)
+  assign eligible_similar_count = 0
+  if active_collection != blank and active_collection.products.size > 0
+    for prod in active_collection.products
+      if current_prod == blank or prod.id != current_prod.id
+        assign eligible_similar_count = eligible_similar_count | plus: 1
+      endif
+    endfor
+  endif
+
+  assign limit_count = section.settings.products_to_show | default: 12
+  assign heading_text = section.settings.heading | default: 'Similar Products'
+  assign discover_url = section.settings.discover_more_link
+  if discover_url == blank and active_collection != blank
+    assign discover_url = active_collection.url
+  endif
+%}
+
+{% if eligible_similar_count > 0 %}
+<section
+  class="balad-similar color-{{ section.settings.color_scheme }}"
+  data-section-id="{{ section.id }}"
+>
+  <div class="balad-similar__shell">
+    <div class="balad-similar__head">
+      <div class="balad-similar__heading-wrap">
+        <h2 class="balad-similar__heading">{{ heading_text }}</h2>
+        {% if section.settings.subheading != blank %}
+          <p class="balad-similar__subheading">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </div>
+
+      {% if section.settings.discover_more_label != blank and discover_url != blank %}
+        <a href="{{ discover_url }}" class="balad-similar__discover-more">
+          {{ section.settings.discover_more_label }}
+        </a>
+      {% endif %}
+    </div>
+
+    <div class="balad-similar-grid">
+      {% assign rendered_count = 0 %}
+      {% for prod in active_collection.products %}
+        {% if current_prod != blank and prod.id == current_prod.id %}
+          {% continue %}
+        {% endif %}
+        {% if rendered_count >= limit_count %}
+          {% break %}
+        {% endif %}
+        {% assign rendered_count = rendered_count | plus: 1 %}
+
+        {% liquid
+          assign images = prod.images
+          assign image_count = images.size
+          assign first_image = prod.featured_image | default: images.first
+          assign sizes_list = ''
+          for opt in prod.options_with_values
+            assign opt_name_down = opt.name | downcase
+            if opt_name_down contains 'size' or opt.name == 'Size'
+              assign sizes_list = opt.values | join: ','
+            endif
+          endfor
+          if sizes_list == ''
+            assign sizes_check = '|'
+            for v in prod.variants
+              assign sz = v.option1 | strip
+              unless sz == blank or sz == 'Default Title'
+                assign check_sz = '|' | append: sz | append: '|'
+                unless sizes_check contains check_sz
+                  assign sizes_check = sizes_check | append: check_sz
+                  if sizes_list != ''
+                    assign sizes_list = sizes_list | append: ','
+                  endif
+                  assign sizes_list = sizes_list | append: sz
+                endunless
+              endunless
+            endfor
+          endif
+        %}
+
+        <div class="balad-similar-grid__card" data-product-card>
+          {% render 'balad-product-card', product: prod, limit: 6, eager: forloop.first, direct_add: true %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const initSectionSimilar = (scope = document) => {
+      scope.querySelectorAll('[data-similar-add]').forEach((button) => {
+        if (button.dataset.readySimilarAdd === 'true') return;
+        button.dataset.readySimilarAdd = 'true';
+
+        button.addEventListener('click', async (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          const variantId = button.dataset.variantId;
+          if (!variantId || button.disabled) return;
+
+          const originalLabel = button.getAttribute('aria-label') || 'Add to cart';
+          button.disabled = true;
+
+          try {
+            const cartAddUrl = window.Shopify?.routes?.root
+              ? `${window.Shopify.routes.root}cart/add.js`
+              : '/cart/add.js';
+            const response = await fetch(cartAddUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+              },
+              body: JSON.stringify({ items: [{ id: Number(variantId), quantity: 1 }] })
+            });
+            const responseData = await response.json();
+            if (!response.ok) throw new Error(responseData.description || 'Unable to add this product to cart');
+
+            const cartResponse = await fetch(window.Shopify?.routes?.root
+              ? `${window.Shopify.routes.root}cart.js`
+              : '/cart.js');
+            const cart = cartResponse.ok ? await cartResponse.json() : responseData;
+            document.dispatchEvent(new CustomEvent('cart:update', {
+              bubbles: true,
+              detail: { data: cart, resource: cart, metadata: { itemCount: cart.item_count } }
+            }));
+
+            button.setAttribute('aria-label', 'Added to cart');
+            button.dataset.added = 'true';
+            window.setTimeout(() => {
+              button.disabled = false;
+              button.setAttribute('aria-label', originalLabel);
+              delete button.dataset.added;
+            }, 1200);
+          } catch (error) {
+            console.error('Similar product add-to-cart failed:', error);
+            button.disabled = false;
+            button.setAttribute('aria-label', originalLabel);
+          }
+        });
+      });
+
+      // Carousels inside section
+      scope.querySelectorAll('[data-carousel]').forEach((carousel) => {
+        if (carousel.dataset.readySimilar === 'true') return;
+        carousel.dataset.readySimilar = 'true';
+
+        const slides = [...carousel.querySelectorAll('[data-carousel-slide]')];
+        const dots = [...carousel.querySelectorAll('[data-carousel-dot]')];
+        if (slides.length <= 1) return;
+
+        let currentIndex = 0;
+
+        const updateSlides = (newIndex) => {
+          if (!slides.length) return;
+          slides[currentIndex]?.classList.remove('is-active');
+          dots[currentIndex]?.classList.remove('is-active');
+          currentIndex = (newIndex + slides.length) % slides.length;
+          slides[currentIndex]?.classList.add('is-active');
+          dots[currentIndex]?.classList.add('is-active');
+        };
+
+        // Desktop Hover: Show next image on hover, restore first image on leave
+        const cardEl = carousel.closest('[data-product-card]') || carousel;
+        cardEl.addEventListener('mouseenter', () => {
+          if (slides.length > 1) {
+            updateSlides(1);
+          }
+        });
+
+        cardEl.addEventListener('mouseleave', () => {
+          if (slides.length > 1) {
+            updateSlides(0);
+          }
+        });
+
+        dots.forEach((dot) => {
+          dot.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            updateSlides(parseInt(dot.dataset.index, 10));
+          });
+        });
+
+        // Touch & Swipe Support
+        // Touch & Pointer Swipe Support
+        carousel.addEventListener('dragstart', (e) => e.preventDefault());
+
+        let startX = 0;
+        let startY = 0;
+        let diffX = 0;
+        let diffY = 0;
+        let isPointerActive = false;
+        let wasSwiped = false;
+        let swipeCooldown = null;
+        let lastSwipeTime = 0;
+
+        const triggerSwipe = (direction) => {
+          const now = Date.now();
+          if (now - lastSwipeTime < 250) return;
+          lastSwipeTime = now;
+          wasSwiped = true;
+          if (swipeCooldown) clearTimeout(swipeCooldown);
+          swipeCooldown = setTimeout(() => {
+            wasSwiped = false;
+          }, 350);
+
+          if (direction === 'next') {
+            updateSlides(currentIndex + 1);
+          } else {
+            updateSlides(currentIndex - 1);
+          }
+        };
+
+        const onPointerDown = (e) => {
+          if (e.target.closest('button')) return;
+          if (e.pointerType === 'mouse' && e.button !== 0) return;
+          startX = e.clientX;
+          startY = e.clientY;
+          diffX = 0;
+          diffY = 0;
+          isPointerActive = true;
+          try {
+            carousel.setPointerCapture(e.pointerId);
+          } catch (_) {}
+        };
+
+        const onPointerMove = (e) => {
+          if (!isPointerActive) return;
+          diffX = e.clientX - startX;
+          diffY = e.clientY - startY;
+        };
+
+        const onPointerUp = (e) => {
+          if (!isPointerActive) return;
+          isPointerActive = false;
+          try {
+            carousel.releasePointerCapture(e.pointerId);
+          } catch (_) {}
+
+          if (e.clientX !== undefined) {
+            diffX = e.clientX - startX;
+            diffY = e.clientY - startY;
+          }
+
+          const threshold = 20;
+          if (Math.abs(diffX) >= threshold && Math.abs(diffX) > Math.abs(diffY)) {
+            triggerSwipe(diffX < 0 ? 'next' : 'prev');
+          }
+        };
+
+        const onPointerCancel = (e) => {
+          isPointerActive = false;
+          try {
+            carousel.releasePointerCapture(e.pointerId);
+          } catch (_) {}
+        };
+
+        carousel.addEventListener('pointerdown', onPointerDown);
+        carousel.addEventListener('pointermove', onPointerMove);
+        carousel.addEventListener('pointerup', onPointerUp);
+        carousel.addEventListener('pointercancel', onPointerCancel);
+
+        // Touch events fallback for older mobile browsers / WebViews
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        carousel.addEventListener('touchstart', (e) => {
+          if (e.target.closest('button')) return;
+          if (e.touches && e.touches[0]) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            touchEndX = touchStartX;
+            touchEndY = touchStartY;
+          }
+        }, { passive: true });
+
+        carousel.addEventListener('touchmove', (e) => {
+          if (e.touches && e.touches[0]) {
+            touchEndX = e.touches[0].clientX;
+            touchEndY = e.touches[0].clientY;
+          }
+        }, { passive: true });
+
+        carousel.addEventListener('touchend', (e) => {
+          if (e.changedTouches && e.changedTouches[0]) {
+            touchEndX = e.changedTouches[0].clientX;
+            touchEndY = e.changedTouches[0].clientY;
+          }
+          const tDiffX = touchEndX - touchStartX;
+          const tDiffY = touchEndY - touchStartY;
+          const threshold = 20;
+
+          if (Math.abs(tDiffX) >= threshold && Math.abs(tDiffX) > Math.abs(tDiffY)) {
+            triggerSwipe(tDiffX < 0 ? 'next' : 'prev');
+          }
+        }, { passive: true });
+
+        // Prevent product link navigation when a swipe occurs
+        carousel.addEventListener('click', (e) => {
+          if (e.target.closest('button')) return;
+          if (wasSwiped) {
+            e.preventDefault();
+            e.stopPropagation();
+            wasSwiped = false;
+          }
+        });
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => initSectionSimilar());
+    document.addEventListener('shopify:section:load', (e) => initSectionSimilar(e.target));
+  })();
+</script>
+
+<style>
+  .balad-similar {
+    background: #ffffff;
+    padding-top: 0;
+    padding-bottom: clamp(16px, 3.5vw, 24px);
+  }
+
+  .balad-similar__shell {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 36px;
+    padding-top: clamp(16px, 3.5vw, 10px);
+  }
+
+  .balad-similar__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: clamp(14px, 2.5vw, 22px);
+  }
+
+  .balad-similar__heading-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .balad-similar__heading {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--color-foreground-heading, #111111);
+  }
+
+  .balad-similar__subheading {
+    margin: 0;
+    font-size: 13px;
+    color: #666666;
+  }
+
+  .balad-similar__discover-more {
+    display: inline-flex;
+    align-items: center;
+    background: transparent;
+    color: #111111;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 0;
+    border: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.25s ease;
+  }
+
+  .balad-similar__discover-more:hover {
+    color: var(--color-primary, #000000);
+  }
+
+  /* ── Product Grid ────────────────────────────────────────────── */
+  .balad-similar-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+  }
+
+  .balad-similar-grid__card {
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    border-radius: 0;
+    overflow: hidden;
+    border: none;
+    box-shadow: none;
+  }
+
+  /* ── Media / Carousel ────────────────────────────────────────── */
+  .balad-similar-grid__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    border-radius: 4px;
+    background: #f4f5fa;
+    text-decoration: none;
+    touch-action: pan-x pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    cursor: pointer;
+  }
+
+  .balad-similar-grid__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-drag: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .balad-similar-grid__image.is-active {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .balad-similar-grid__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #fafafa;
+  }
+
+  /* ── Clean Minimal Bookmark Button ───────────────────────────── */
+  .balad-similar-grid__heart {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 5;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #111111;
+    opacity: 0.8;
+    cursor: pointer;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.95)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.12));
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, color 0.2s ease;
+  }
+
+  .balad-similar-grid__heart:hover {
+    opacity: 1;
+    transform: scale(1.15);
+    color: #111111;
+  }
+
+  .balad-similar-grid__heart svg {
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+    display: block;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    fill: none;
+    transition: fill 0.2s ease, stroke 0.2s ease;
+  }
+
+  .balad-similar-grid__heart.is-saved,
+  .balad-similar-grid__heart.is-active,
+  .balad-similar-grid__heart[aria-pressed="true"] {
+    opacity: 1;
+    color: #111111;
+  }
+
+  .balad-similar-grid__heart.is-saved svg,
+  .balad-similar-grid__heart.is-active svg,
+  .balad-similar-grid__heart[aria-pressed="true"] svg,
+  .balad-similar-grid__heart.is-saved svg path,
+  .balad-similar-grid__heart.is-active svg path,
+  .balad-similar-grid__heart[aria-pressed="true"] svg path {
+    fill: #111111 !important;
+    stroke: #111111 !important;
+  }
+
+  /* ── Dot Indicators ──────────────────────────────────────────── */
+  .balad-similar-grid__dots {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 6px;
+    background: rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-radius: 999px;
+  }
+
+  .balad-similar-grid__dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .balad-similar-grid__dot:hover {
+    background: rgba(255, 255, 255, 0.85);
+  }
+
+  .balad-similar-grid__dot.is-active {
+    background: #ffffff;
+    width: 10px;
+    border-radius: 999px;
+  }
+
+  /* ── Card Info ───────────────────────────────────────────────── */
+  .balad-similar-grid__info {
+    padding: 8px 0 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .balad-similar-grid__details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .balad-similar-grid__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .balad-similar-grid__title-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    position: relative;
+    line-height: 1;
+  }
+
+  .balad-similar-grid__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 3.5px;
+    flex-shrink: 0;
+    line-height: 1;
+    white-space: nowrap;
+    padding: 1px 0;
+  }
+
+  .balad-similar-grid__stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5px;
+    color: #ffb400;
+    font-size: 14.5px;
+    line-height: 1;
+  }
+
+  .balad-similar-grid__star {
+    display: inline-block;
+    color: #ffb400;
+    font-size: 14.5px;
+    line-height: 1;
+  }
+
+  .balad-similar-grid__star.is-dim {
+    color: #dedede;
+  }
+
+  .balad-similar-grid__rating-score {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111111;
+    line-height: 1;
+    margin-left: 2px;
+  }
+
+  .balad-similar-grid__rating-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666666;
+    line-height: 1;
+  }
+
+  /* Judge.me preview badge sizing overrides */
+  .balad-similar-grid__rating .jdgm-preview-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3.5px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+
+  .balad-similar-grid__rating .jdgm-prev-badge__stars {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 1.5px !important;
+    color: #ffb400 !important;
+    font-size: 14.5px !important;
+    line-height: 1 !important;
+  }
+
+  .balad-similar-grid__rating .jdgm-star {
+    font-size: 14.5px !important;
+    color: #ffb400 !important;
+    line-height: 1 !important;
+  }
+
+  .balad-similar-grid__rating .jdgm-prev-badge__text {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #666666 !important;
+    line-height: 1 !important;
+    margin-left: 2px !important;
+  }
+
+  .balad-similar-grid__title {
+    margin: 0;
+    font-family: var(--font-heading--family, inherit);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--color-foreground, #111111);
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    position: relative;
+  }
+
+  .balad-similar-grid__title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1.5px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left bottom;
+    transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .balad-similar-grid__title-link:hover .balad-similar-grid__title::after {
+    transform: scaleX(1);
+  }
+
+  .balad-similar-grid__price {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgb(var(--color-foreground-rgb, 17 17 17) / 0.7);
+    letter-spacing: 0.01em;
+  }
+
+  .balad-similar-grid__plus-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #111111;
+    opacity: 0.55;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    text-decoration: none;
+  }
+
+  .balad-similar-grid__plus-btn:hover { opacity: 1; transform: scale(1.15); }
+  .balad-similar-grid__plus-btn svg { width: 18px; height: 18px; }
+
+  /* ── Tablet ─────────────────────────────────────────────────── */
+  @media screen and (max-width: 1200px) {
+    .balad-similar-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+  }
+
+  @media screen and (max-width: 989px) {
+    .balad-similar__shell {
+      padding: 0 24px;
+      padding-top: clamp(16px, 3.5vw, 24px);
+    }
+
+    .balad-similar-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+  }
+
+  /* ── Mobile ─────────────────────────────────────────────────── */
+  @media screen and (max-width: 749px) {
+    .balad-similar {
+      padding-top: 0;
+      padding-bottom: 12px;
+    }
+
+    .balad-similar__shell {
+      padding: 0 12px;
+      padding-top: 12px;
+    }
+
+    .balad-similar__head {
+      margin-bottom: 12px;
+    }
+
+    .balad-similar__heading {
+      font-size: 13px;
+    }
+
+    .balad-similar__subheading {
+      font-size: 12px;
+    }
+
+    .balad-similar__discover-more {
+      font-size: 10px;
+    }
+
+    .balad-similar-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .balad-similar-grid__heart {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      min-height: 32px;
+      top: 4px;
+      right: 4px;
+      padding: 0;
+    }
+
+    .balad-similar-grid__heart svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+</style>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Similar Category Products",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Similar Products"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Explore more styles from this category"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Specific Collection (Optional)",
+      "info": "Leave empty to automatically pull products from the current product's category."
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Products to show",
+      "min": 6,
+      "max": 24,
+      "step": 6,
+      "default": 12
+    },
+    {
+      "type": "text",
+      "id": "discover_more_label",
+      "label": "Discover More Label",
+      "default": "Discover more"
+    },
+    {
+      "type": "url",
+      "id": "discover_more_link",
+      "label": "Discover More Link (Optional)"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Similar Category Products"
+    }
+  ]
+}
+{% endschema %}

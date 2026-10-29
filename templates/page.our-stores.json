@@ -10,7 +10,7 @@
 {
   "sections": {
     "all_stores": {
-      "type": "stagmenfashion-our-stores",
+      "type": "balad-our-stores",
       "blocks": {
         "store_1": {
           "type": "store",

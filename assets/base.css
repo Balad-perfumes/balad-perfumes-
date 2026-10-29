@@ -4614,7 +4614,7 @@ product-recommendations:has([data-has-recommendations='false']) {
   }
 }
 
-/* stagmenfashion stationery polish */
+/* balad stationery polish */
 .product-card {
   border-radius: 0;
 }
@@ -4723,7 +4723,7 @@ product-recommendations:has([data-has-recommendations='false']) {
 
 /* ── Home page: normalize all section headings on mobile ─────────────────
    Ensures every section's main h2 title renders at 14px on small screens,
-   matching the pattern set by the custom stagmenfashion sections.
+   matching the pattern set by the custom balad sections.
    Card-level text (h3-h6, accordion headers, body text) stays below 14px
    to preserve the visual hierarchy.                                     */
 @media screen and (max-width: 749px) {

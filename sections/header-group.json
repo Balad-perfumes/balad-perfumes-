@@ -11,6 +11,29 @@
   "type": "header",
   "name": "Header",
   "sections": {
+    "announcement_bar": {
+      "type": "announcement-bar",
+      "blocks": {
+        "m1": {
+          "type": "message",
+          "settings": {
+            "text": "Free Shipping Across India on Every Order!",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "m1"
+      ],
+      "settings": {
+        "enable": true,
+        "speed": 50,
+        "pause_on_hover": true,
+        "bg_start": "#13173a",
+        "bg_end": "#632266",
+        "text_color": "#ffffff"
+      }
+    },
     "pf_header": {
       "type": "header",
       "settings": {
@@ -46,6 +69,7 @@
     }
   },
   "order": [
+    "announcement_bar",
     "pf_header"
   ]
 }

@@ -164,7 +164,7 @@
       }
     },
     "testimonials": {
-      "type": "stagmenfashion-home-testimonials",
+      "type": "balad-home-testimonials",
       "blocks": {
         "review_1": {
           "type": "testimonial",

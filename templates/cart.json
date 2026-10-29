@@ -65,7 +65,7 @@
       }
     },
     "cart_fragrance_recommendations": {
-      "type": "stagmenfashion-latest-items",
+      "type": "balad-latest-items",
       "settings": {
         "heading": "Fragrance picks for you",
         "subheading": "Discover your next signature scent",

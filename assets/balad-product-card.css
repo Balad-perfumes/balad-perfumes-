@@ -1,0 +1,460 @@
+/* Balad product card — white frame, image panel with dock, grey info panel */
+
+.bpc {
+  --bpc-ink: #111;
+  --bpc-muted: #8a8a8a;
+  --bpc-panel: #f3f3f2;
+  --bpc-media-bg: #ece9e4;
+  --bpc-pad: 8px;
+  --bpc-radius: 24px;
+  --bpc-inner-radius: calc(var(--bpc-radius) - var(--bpc-pad));
+
+  container-type: inline-size;
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--bpc-pad);
+  min-width: 0;
+  padding: var(--bpc-pad);
+  border-radius: var(--bpc-radius);
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.05);
+  color: var(--bpc-ink);
+}
+
+/* ── Image panel ─────────────────────────── */
+.bpc__media {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--bpc-inner-radius);
+  background: var(--bpc-media-bg);
+  overflow: hidden;
+  isolation: isolate;
+  color: inherit;
+  text-decoration: none;
+}
+
+.bpc__media::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 40%;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.22), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bpc__image,
+.bpc__placeholder {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bpc__image {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.bpc__image.is-active {
+  opacity: 1;
+}
+
+/* ── Badges ──────────────────────────────── */
+.bpc__badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: calc(100% - 62px);
+}
+
+.bpc__badge {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.92);
+  color: var(--bpc-ink);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.bpc__badge--sold {
+  background: var(--bpc-ink);
+  color: #fff;
+}
+
+/* ── Wishlist ────────────────────────────── */
+.bpc__wish {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--bpc-ink);
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.bpc__wish svg {
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  display: block;
+  transition: fill 0.2s ease;
+}
+
+.bpc__wish:hover {
+  transform: scale(1.06);
+}
+
+.bpc__wish.is-saved,
+.bpc__wish[aria-pressed='true'] {
+  background: var(--bpc-ink);
+  color: #fff;
+}
+
+/* ── Buy now + price dock ────────────────── */
+.bpc__dock {
+  position: absolute;
+  inset: auto 8px 8px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bpc__buy {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  height: 40px;
+  padding: 0 5px 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(32 28 25 / 0.42);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: box-shadow 0.6s ease;
+}
+
+/* Theme gradient that slowly spreads from the start of the button to the end on hover.
+   The layer grows from the left edge (transform, so it always animates smoothly) and the
+   last part of its gradient fades out, which gives the spreading edge a soft feel. */
+.bpc__buy::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    to right,
+    #13173a 0%,
+    #2a1b46 18%,
+    #521f5a 36%,
+    #632266 54%,
+    rgb(99 34 102 / 0.85) 66%,
+    rgb(99 34 102 / 0.5) 80%,
+    rgb(99 34 102 / 0.15) 92%,
+    rgb(99 34 102 / 0) 100%
+  );
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.65s cubic-bezier(0.33, 0.85, 0.4, 1);
+  will-change: transform;
+  pointer-events: none;
+}
+
+.bpc__buy:hover {
+  background: rgb(32 28 25 / 0.58);
+}
+
+.bpc__buy-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bpc__buy-arrow {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--bpc-ink);
+  transition: transform 0.25s ease;
+}
+
+.bpc__buy-arrow svg {
+  width: 15px;
+  height: 15px;
+}
+
+.bpc__buy:hover .bpc__buy-arrow {
+  transform: translateX(2px);
+}
+
+/* ── Hover animation (devices with a real hover only) ── */
+@media (hover: hover) {
+  .bpc:hover .bpc__buy::before,
+  .bpc:focus-within .bpc__buy::before {
+    transform: scaleX(1.85);
+  }
+
+  .bpc:hover .bpc__buy {
+    box-shadow: 0 6px 18px rgb(99 34 102 / 0.35);
+  }
+
+  .bpc:hover .bpc__buy-arrow {
+    transform: translateX(2px);
+  }
+}
+
+.bpc__buy-arrow {
+  transition: transform 0.25s ease;
+}
+
+.bpc__buy[data-added] .bpc__buy-arrow {
+  background: #2da45c;
+  color: #fff;
+}
+
+.bpc__buy:disabled {
+  cursor: default;
+}
+
+.bpc__buy:disabled:not([data-added]) {
+  opacity: 0.7;
+}
+
+.bpc__price {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: #000;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.bpc__compare {
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.55;
+}
+
+/* ── Info panel ──────────────────────────── */
+.bpc__info {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: start;
+  align-items: baseline;
+  column-gap: 12px;
+  row-gap: 4px;
+  padding: 14px 16px 15px;
+  border-radius: var(--bpc-inner-radius);
+  background: var(--bpc-panel);
+  color: var(--bpc-ink);
+  text-decoration: none;
+}
+
+.bpc__title {
+  grid-column: 1;
+  grid-row: 1;
+  display: block;
+  margin: 0;
+  overflow: hidden;
+  font-size: clamp(14px, 6.4cqw, 17px);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.bpc__size {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: 12px;
+  line-height: 1.3;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  white-space: nowrap;
+}
+
+.bpc__meta {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 0;
+  color: var(--bpc-muted);
+  font-size: clamp(11px, 5.2cqw, 13px);
+  line-height: 1.3;
+}
+
+.bpc__stars {
+  position: relative;
+  grid-column: 1 / -1;
+  display: inline-block;
+  width: max-content;
+  line-height: 0;
+}
+
+.bpc__stars-row {
+  display: flex;
+  gap: 1px;
+  white-space: nowrap;
+}
+
+.bpc__stars-row svg {
+  flex: none;
+}
+
+.bpc__stars-row--base {
+  color: #d3d3d1;
+}
+
+.bpc__stars-row--fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  color: #f5a623;
+}
+
+/* ── Focus ───────────────────────────────── */
+.bpc a:focus-visible,
+.bpc button:focus-visible {
+  outline: 2px solid var(--bpc-ink);
+  outline-offset: 2px;
+}
+
+.bpc__buy:focus-visible,
+.bpc__wish:focus-visible {
+  outline-color: #fff;
+  outline-offset: -3px;
+}
+
+/* ── Price repeated inside the info panel (only used on very narrow cards) ── */
+.bpc__price-alt {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.bpc__price-alt s {
+  color: var(--bpc-muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* ── Narrower cards: same layout, tighter sizes. "Buy now" always keeps its label ── */
+@container (max-width: 230px) {
+  .bpc__dock {
+    gap: 5px;
+  }
+
+  .bpc__buy {
+    height: 38px;
+    padding: 0 4px 0 14px;
+    font-size: 12px;
+  }
+
+  .bpc__buy-arrow {
+    width: 28px;
+    height: 28px;
+  }
+
+  .bpc__price {
+    height: 38px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .bpc__compare {
+    display: none;
+  }
+
+  .bpc__wish {
+    top: 6px;
+    right: 6px;
+    width: 34px;
+    height: 34px;
+  }
+
+
+  .bpc__info {
+    padding: 12px 14px 13px;
+    column-gap: 8px;
+  }
+
+  .bpc__size {
+    font-size: 11px;
+  }
+}
+
+/* Too narrow for both pills: the buy button gets the full dock, price moves below the image */
+@container (max-width: 172px) {
+  .bpc__price {
+    display: none;
+  }
+
+  .bpc__price-alt {
+    display: flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bpc *,
+  .bpc *:not(.bpc__buy)::before,
+  .bpc *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

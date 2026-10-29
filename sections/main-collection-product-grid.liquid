@@ -1,3 +1,4 @@
+{{ 'balad-product-card.css' | asset_url | stylesheet_tag }}
 {% liquid
   assign current_sort = collection.sort_by | default: collection.default_sort_by
   assign columns_desktop = section.settings.columns_desktop | default: 6
@@ -27,28 +28,28 @@
 %}
 
 <section
-  class="stagmenfashion-collection color-{{ section.settings.color_scheme }}"
+  class="balad-collection color-{{ section.settings.color_scheme }}"
   data-section-id="{{ section.id }}"
 >
-  <div class="stagmenfashion-collection__shell">
+  <div class="balad-collection__shell">
     
     <!-- ── Top Toolbar ─────────────────────────────────────────── -->
-    <div class="stagmenfashion-collection-head">
-      <div class="stagmenfashion-collection-head__left">
-        <h1 class="stagmenfashion-collection-head__title">{{ collection.title }}</h1>
+    <div class="balad-collection-head">
+      <div class="balad-collection-head__left">
+        <h1 class="balad-collection-head__title">{{ collection.title }}</h1>
       </div>
 
-      <div class="stagmenfashion-collection-head__right">
+      <div class="balad-collection-head__right">
         <!-- View grid icon (6 vs 12) -->
         <button
           type="button"
-          class="stagmenfashion-view-icon-btn"
+          class="balad-view-icon-btn"
           data-grid-toggle
           aria-label="Toggle 6 or 12 column grid layout"
           title="Toggle grid layout"
         >
           <!-- 6 Grid Icon (Default) -->
-          <svg class="stagmenfashion-grid-icon stagmenfashion-grid-icon--6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="balad-grid-icon balad-grid-icon--6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2.5" y="3.5" width="4.8" height="7" rx="1"></rect>
             <rect x="9.6" y="3.5" width="4.8" height="7" rx="1"></rect>
             <rect x="16.7" y="3.5" width="4.8" height="7" rx="1"></rect>
@@ -57,7 +58,7 @@
             <rect x="16.7" y="13.5" width="4.8" height="7" rx="1"></rect>
           </svg>
           <!-- 12 Grid Icon (12 Items) -->
-          <svg class="stagmenfashion-grid-icon stagmenfashion-grid-icon--12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="balad-grid-icon balad-grid-icon--12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="3.5" width="2.8" height="6.5" rx="0.6"></rect>
             <rect x="5.6" y="3.5" width="2.8" height="6.5" rx="0.6"></rect>
             <rect x="9.2" y="3.5" width="2.8" height="6.5" rx="0.6"></rect>
@@ -76,7 +77,7 @@
         <!-- Advance Filters Button -->
         <button
           type="button"
-          class="stagmenfashion-advance-filters-btn"
+          class="balad-advance-filters-btn"
           data-open-filter-drawer
           aria-label="Open advance filters"
         >
@@ -101,7 +102,7 @@
     <!-- ── Product Grid ────────────────────────────────────────── -->
     {% paginate collection.products by section.settings.products_per_page %}
       <div
-        class="stagmenfashion-collection-grid"
+        class="balad-collection-grid"
         style="--col-desktop: {{ columns_desktop }}; --col-tablet: {{ columns_tablet }}; --col-mobile: {{ columns_mobile }};"
       >
         {% for product in collection.products %}
@@ -133,98 +134,40 @@
               endfor
             endif
           %}
-          <div class="stagmenfashion-collection-grid__card" data-product-card>
-            <a href="{{ product.url }}" class="stagmenfashion-collection-grid__media" data-carousel>
-              {% unless product.available %}
-                <span class="stagmenfashion-collection-grid__badge">Sold Out</span>
-              {% endunless %}
-
-              {% if image_count > 0 %}
-                {% for image in images limit: 6 %}
-                  <img
-                    class="stagmenfashion-collection-grid__image{% if forloop.first %} is-active{% endif %}"
-                    src="{{ image | image_url: width: 600 }}"
-                    alt="{{ image.alt | default: product.title | escape }}"
-                    width="600"
-                    height="750"
-                    loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
-                    data-carousel-slide
-                  >
-                {% endfor %}
-              {% else %}
-                {{ 'product-1' | placeholder_svg_tag: 'stagmenfashion-collection-grid__placeholder' }}
-              {% endif %}
-
-              <!-- Heart / Wishlist button -->
-              <button
-                type="button"
-                class="stagmenfashion-collection-grid__heart"
-                data-wishlist-heart
-                data-product-id="{{ product.id }}"
-                data-product-title="{{ product.title | escape }}"
-                data-product-price="{{ product.price | money_without_currency | remove: ',' }}"
-                data-product-compare-price="{{ product.compare_at_price | money_without_currency | remove: ',' }}"
-                data-product-url="{{ product.url }}"
-                data-product-image="{{ first_image | image_url: width: 400 }}"
-                data-product-sizes="{{ sizes_list | split: ',' | join: ',' }}"
-                data-product-available="{{ product.available }}"
-                aria-label="Add {{ product.title | escape }} to wishlist"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                </svg>
-              </button>
-
-              {% if image_count > 1 %}
-                <div class="stagmenfashion-collection-grid__dots" data-carousel-dots>
-                  {% for image in images limit: 6 %}
-                    <span class="stagmenfashion-collection-grid__dot{% if forloop.first %} is-active{% endif %}" data-carousel-dot data-index="{{ forloop.index0 }}"></span>
-                  {% endfor %}
-                </div>
-              {% endif %}
-            </a>
-
-            <div class="stagmenfashion-collection-grid__info">
-              <div class="stagmenfashion-collection-grid__details">
-                <a href="{{ product.url }}" class="stagmenfashion-collection-grid__title-link">
-                  <h3 class="stagmenfashion-collection-grid__title">{{ product.title }}</h3>
-                </a>
-                <span class="stagmenfashion-collection-grid__price">{% render 'format-price', price: product.price %}</span>
-              </div>
-              <button
-                type="button"
-                class="stagmenfashion-collection-grid__plus-btn"
-                data-quick-add
-                data-qa-title="{{ product.title | escape }}"
-                data-qa-price="{{ product.price | money_without_currency | remove: ',' }}"
-                data-qa-url="{{ product.url }}"
-                data-qa-id="{{ product.id }}"
-                data-qa-image="{{ first_image | image_url: width: 400 }}"
-                data-qa-sizes="{{ sizes_list | split: ',' | join: ',' }}"
-                data-qa-first-variant="{{ product.selected_or_first_available_variant.id }}"
-                data-qa-variants="{% for v in product.variants %}{% unless v.option1 == 'Default Title' %}{{ v.option1 }}:{{ v.id }},{% endunless %}{% endfor %}"
-                data-qa-available="{{ product.available }}"
-                data-qa-variant-availability="{% for v in product.variants %}{% unless v.option1 == 'Default Title' %}{{ v.option1 }}:{{ v.available }},{% endunless %}{% endfor %}"
-                aria-label="Quick add {{ product.title | escape }}"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-              </button>
-            </div>
+          <div class="balad-collection-grid__card" data-product-card>
+            {% render 'balad-product-card', product: product, limit: 6, eager: forloop.first %}
           </div>
         {% endfor %}
 
         {% if collection.products.size == 0 %}
-          <p class="stagmenfashion-collection__empty">No products found in this collection.</p>
+          <p class="balad-collection__empty">No products found in this collection.</p>
         {% endif %}
       </div>
 
       {% if paginate.pages > 1 %}
-        <div class="stagmenfashion-collection__pagination">
-          {{ paginate | default_pagination }}
-        </div>
+        <nav class="balad-collection__pagination" aria-label="Pagination">
+          {%- if paginate.previous -%}
+            <a href="{{ paginate.previous.url }}" class="bcp__item bcp__item--nav" aria-label="Previous page">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+            </a>
+          {%- endif -%}
+
+          {%- for part in paginate.parts -%}
+            {%- if part.is_link -%}
+              <a href="{{ part.url }}" class="bcp__item" aria-label="Page {{ part.title }}">{{ part.title }}</a>
+            {%- elsif part.title == paginate.current_page -%}
+              <span class="bcp__item is-current" aria-current="page">{{ part.title }}</span>
+            {%- else -%}
+              <span class="bcp__item bcp__item--dots" aria-hidden="true">&hellip;</span>
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- if paginate.next -%}
+            <a href="{{ paginate.next.url }}" class="bcp__item bcp__item--nav" aria-label="Next page">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+            </a>
+          {%- endif -%}
+        </nav>
       {% endif %}
     {% endpaginate %}
   </div>
@@ -233,17 +176,17 @@
 <!-- ══════════════════════════════════════════════════════════════
      FILTER DRAWER (SLIDE-IN MODAL)
      ══════════════════════════════════════════════════════════════ -->
-<div class="stagmenfashion-filter-drawer" data-filter-drawer>
-  <div class="stagmenfashion-filter-drawer__backdrop" data-close-filter-drawer></div>
-  <div class="stagmenfashion-filter-drawer__panel">
+<div class="balad-filter-drawer" data-filter-drawer>
+  <div class="balad-filter-drawer__backdrop" data-close-filter-drawer></div>
+  <div class="balad-filter-drawer__panel">
     
     <!-- Drawer Header -->
-    <div class="stagmenfashion-filter-drawer__header">
-      <div class="stagmenfashion-filter-drawer__header-copy">
-        <h2 class="stagmenfashion-filter-drawer__title">FILTER</h2>
-        <span class="stagmenfashion-filter-drawer__count">{{ collection.products_count }} PRODUCTS</span>
+    <div class="balad-filter-drawer__header">
+      <div class="balad-filter-drawer__header-copy">
+        <h2 class="balad-filter-drawer__title">FILTER</h2>
+        <span class="balad-filter-drawer__count">{{ collection.products_count }} PRODUCTS</span>
       </div>
-      <button type="button" class="stagmenfashion-filter-drawer__close" data-close-filter-drawer aria-label="Close Filter">
+      <button type="button" class="balad-filter-drawer__close" data-close-filter-drawer aria-label="Close Filter">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -252,28 +195,28 @@
     </div>
 
     <!-- Drawer Body / Filter Form -->
-    <form method="get" action="{{ collection.url }}" id="CollectionFilterDrawerForm" class="stagmenfashion-filter-drawer__form">
+    <form method="get" action="{{ collection.url }}" id="CollectionFilterDrawerForm" class="balad-filter-drawer__form">
       <input type="hidden" name="sort_by" id="FilterSortByInput" value="{{ current_sort }}">
 
-      <div class="stagmenfashion-filter-drawer__body">
+      <div class="balad-filter-drawer__body">
         <!-- ── Category Filter Group ── -->
-        <div class="stagmenfashion-filter-group">
-          <h3 class="stagmenfashion-filter-group__heading">Category</h3>
-          <div class="stagmenfashion-filter-pills">
-            <a href="/collections/all" class="stagmenfashion-filter-pill{% if collection.handle == 'all' %} is-active{% endif %}">
-              <span class="stagmenfashion-filter-pill__text">View all</span>
+        <div class="balad-filter-group">
+          <h3 class="balad-filter-group__heading">Category</h3>
+          <div class="balad-filter-pills">
+            <a href="/collections/all" class="balad-filter-pill{% if collection.handle == 'all' %} is-active{% endif %}">
+              <span class="balad-filter-pill__text">View all</span>
             </a>
             {% if section.settings.category_list != blank %}
               {% for coll in section.settings.category_list %}
-                <a href="{{ coll.url }}" class="stagmenfashion-filter-pill{% if coll.handle == collection.handle %} is-active{% endif %}">
-                  <span class="stagmenfashion-filter-pill__text">{{ coll.title }}</span>
+                <a href="{{ coll.url }}" class="balad-filter-pill{% if coll.handle == collection.handle %} is-active{% endif %}">
+                  <span class="balad-filter-pill__text">{{ coll.title }}</span>
                 </a>
               {% endfor %}
             {% else %}
               {% for coll in collections limit: 20 %}
                 {% unless coll.handle == 'all' or coll.handle == 'frontpage' %}
-                  <a href="{{ coll.url }}" class="stagmenfashion-filter-pill{% if coll.handle == collection.handle %} is-active{% endif %}">
-                    <span class="stagmenfashion-filter-pill__text">{{ coll.title }}</span>
+                  <a href="{{ coll.url }}" class="balad-filter-pill{% if coll.handle == collection.handle %} is-active{% endif %}">
+                    <span class="balad-filter-pill__text">{{ coll.title }}</span>
                   </a>
                 {% endunless %}
               {% endfor %}
@@ -283,14 +226,14 @@
 
         {% if collection.filters.size > 0 %}
           {% for filter in collection.filters %}
-            <div class="stagmenfashion-filter-group">
-              <h3 class="stagmenfashion-filter-group__heading">{{ filter.label }}</h3>
+            <div class="balad-filter-group">
+              <h3 class="balad-filter-group__heading">{{ filter.label }}</h3>
 
               {% case filter.type %}
                 {% when 'list', 'boolean' %}
-                  <div class="stagmenfashion-filter-pills">
+                  <div class="balad-filter-pills">
                     {% for value in filter.values %}
-                      <label class="stagmenfashion-filter-pill{% if value.active %} is-active{% endif %}{% if value.count == 0 and value.active == false %} is-disabled{% endif %}">
+                      <label class="balad-filter-pill{% if value.active %} is-active{% endif %}{% if value.count == 0 and value.active == false %} is-disabled{% endif %}">
                         <input
                           type="checkbox"
                           name="{{ value.param_name }}"
@@ -299,21 +242,21 @@
                           class="visually-hidden"
                           data-filter-checkbox
                         >
-                        <span class="stagmenfashion-filter-pill__text">{{ value.label }}</span>
+                        <span class="balad-filter-pill__text">{{ value.label }}</span>
                         {% if filter.label == 'Color' or filter.label == 'Colour' or value.swatch != blank %}
-                          <span class="stagmenfashion-filter-pill__color-dots stagmenfashion-color-{{ value.label | handle }}"><i></i><i></i><i></i><i></i></span>
+                          <span class="balad-filter-pill__color-dots balad-color-{{ value.label | handle }}"><i></i><i></i><i></i><i></i></span>
                         {% endif %}
                       </label>
                     {% endfor %}
                   </div>
 
                 {% when 'price_range' %}
-                  <div class="stagmenfashion-filter-price-range">
-                    <div class="stagmenfashion-filter-price-field">
+                  <div class="balad-filter-price-range">
+                    <div class="balad-filter-price-field">
                       <span>Min</span>
                       <input type="number" name="{{ filter.min_value.param_name }}" value="{{ filter.min_value.value | default: '' }}" placeholder="0">
                     </div>
-                    <div class="stagmenfashion-filter-price-field">
+                    <div class="balad-filter-price-field">
                       <span>Max</span>
                       <input type="number" name="{{ filter.max_value.param_name }}" value="{{ filter.max_value.value | default: '' }}" placeholder="9999">
                     </div>
@@ -323,113 +266,113 @@
           {% endfor %}
         {% else %}
           <!-- Fallback filter pills if collection.filters is not configured yet in Search & Discovery -->
-          <div class="stagmenfashion-filter-group">
-            <h3 class="stagmenfashion-filter-group__heading">Size</h3>
-            <div class="stagmenfashion-filter-pills">
+          <div class="balad-filter-group">
+            <h3 class="balad-filter-group__heading">Size</h3>
+            <div class="balad-filter-pills">
               {% assign demo_sizes = 'XXXS,XXS,XS,S,M,L,XL,XXL,XXXL' | split: ',' %}
               {% for s in demo_sizes %}
-                <label class="stagmenfashion-filter-pill">
+                <label class="balad-filter-pill">
                   <input type="checkbox" name="filter.v.option.size" value="{{ s }}" class="visually-hidden" data-filter-checkbox>
-                  <span class="stagmenfashion-filter-pill__text">{{ s }}</span>
+                  <span class="balad-filter-pill__text">{{ s }}</span>
                 </label>
               {% endfor %}
             </div>
           </div>
 
-          <div class="stagmenfashion-filter-group">
-            <h3 class="stagmenfashion-filter-group__heading">Availability</h3>
-            <div class="stagmenfashion-filter-pills">
-              <label class="stagmenfashion-filter-pill">
+          <div class="balad-filter-group">
+            <h3 class="balad-filter-group__heading">Availability</h3>
+            <div class="balad-filter-pills">
+              <label class="balad-filter-pill">
                 <input type="checkbox" name="filter.v.availability" value="1" class="visually-hidden" data-filter-checkbox>
-                <span class="stagmenfashion-filter-pill__text">In stock</span>
+                <span class="balad-filter-pill__text">In stock</span>
               </label>
-              <label class="stagmenfashion-filter-pill">
+              <label class="balad-filter-pill">
                 <input type="checkbox" name="filter.v.availability" value="0" class="visually-hidden" data-filter-checkbox>
-                <span class="stagmenfashion-filter-pill__text">Out of stock</span>
+                <span class="balad-filter-pill__text">Out of stock</span>
               </label>
             </div>
           </div>
 
-          <div class="stagmenfashion-filter-group">
-            <h3 class="stagmenfashion-filter-group__heading">Type</h3>
-            <div class="stagmenfashion-filter-pills">
-              <label class="stagmenfashion-filter-pill">
+          <div class="balad-filter-group">
+            <h3 class="balad-filter-group__heading">Type</h3>
+            <div class="balad-filter-pills">
+              <label class="balad-filter-pill">
                 <input type="checkbox" name="filter.v.type" value="Coats & jackets" class="visually-hidden" data-filter-checkbox>
-                <span class="stagmenfashion-filter-pill__text">Coats & jackets</span>
+                <span class="balad-filter-pill__text">Coats & jackets</span>
               </label>
             </div>
           </div>
 
-          <div class="stagmenfashion-filter-group">
-            <h3 class="stagmenfashion-filter-group__heading">Color</h3>
-            <div class="stagmenfashion-filter-pills">
-              <label class="stagmenfashion-filter-pill">
+          <div class="balad-filter-group">
+            <h3 class="balad-filter-group__heading">Color</h3>
+            <div class="balad-filter-pills">
+              <label class="balad-filter-pill">
                 <input type="checkbox" name="filter.v.option.color" value="Blues" class="visually-hidden" data-filter-checkbox>
-                <span class="stagmenfashion-filter-pill__text">Blues</span>
-                <span class="stagmenfashion-filter-pill__color-dots stagmenfashion-color-blues"><i></i><i></i><i></i><i></i></span>
+                <span class="balad-filter-pill__text">Blues</span>
+                <span class="balad-filter-pill__color-dots balad-color-blues"><i></i><i></i><i></i><i></i></span>
               </label>
-              <label class="stagmenfashion-filter-pill">
+              <label class="balad-filter-pill">
                 <input type="checkbox" name="filter.v.option.color" value="Browns" class="visually-hidden" data-filter-checkbox>
-                <span class="stagmenfashion-filter-pill__text">Browns</span>
-                <span class="stagmenfashion-filter-pill__color-dots stagmenfashion-color-browns"><i></i><i></i><i></i><i></i></span>
+                <span class="balad-filter-pill__text">Browns</span>
+                <span class="balad-filter-pill__color-dots balad-color-browns"><i></i><i></i><i></i><i></i></span>
               </label>
-              <label class="stagmenfashion-filter-pill">
+              <label class="balad-filter-pill">
                 <input type="checkbox" name="filter.v.option.color" value="Greens" class="visually-hidden" data-filter-checkbox>
-                <span class="stagmenfashion-filter-pill__text">Greens</span>
-                <span class="stagmenfashion-filter-pill__color-dots stagmenfashion-color-greens"><i></i><i></i><i></i><i></i></span>
+                <span class="balad-filter-pill__text">Greens</span>
+                <span class="balad-filter-pill__color-dots balad-color-greens"><i></i><i></i><i></i><i></i></span>
               </label>
-              <label class="stagmenfashion-filter-pill">
+              <label class="balad-filter-pill">
                 <input type="checkbox" name="filter.v.option.color" value="Neutrals" class="visually-hidden" data-filter-checkbox>
-                <span class="stagmenfashion-filter-pill__text">Neutrals</span>
-                <span class="stagmenfashion-filter-pill__color-dots stagmenfashion-color-neutrals"><i></i><i></i><i></i><i></i></span>
+                <span class="balad-filter-pill__text">Neutrals</span>
+                <span class="balad-filter-pill__color-dots balad-color-neutrals"><i></i><i></i><i></i><i></i></span>
               </label>
-              <label class="stagmenfashion-filter-pill">
+              <label class="balad-filter-pill">
                 <input type="checkbox" name="filter.v.option.color" value="Purples" class="visually-hidden" data-filter-checkbox>
-                <span class="stagmenfashion-filter-pill__text">Purples</span>
-                <span class="stagmenfashion-filter-pill__color-dots stagmenfashion-color-purples"><i></i><i></i><i></i><i></i></span>
+                <span class="balad-filter-pill__text">Purples</span>
+                <span class="balad-filter-pill__color-dots balad-color-purples"><i></i><i></i><i></i><i></i></span>
               </label>
-              <label class="stagmenfashion-filter-pill">
+              <label class="balad-filter-pill">
                 <input type="checkbox" name="filter.v.option.color" value="Reds" class="visually-hidden" data-filter-checkbox>
-                <span class="stagmenfashion-filter-pill__text">Reds</span>
-                <span class="stagmenfashion-filter-pill__color-dots stagmenfashion-color-reds"><i></i><i></i><i></i><i></i></span>
+                <span class="balad-filter-pill__text">Reds</span>
+                <span class="balad-filter-pill__color-dots balad-color-reds"><i></i><i></i><i></i><i></i></span>
               </label>
             </div>
           </div>
         {% endif %}
 
         <!-- ── Sort By Accordion in Drawer ── -->
-        <div class="stagmenfashion-filter-group stagmenfashion-filter-group--sort">
-          <button type="button" class="stagmenfashion-sort-accordion-btn" data-toggle-sort-accordion aria-expanded="false">
-            <span class="stagmenfashion-sort-accordion-title">Sort by:</span>
-            <span class="stagmenfashion-sort-accordion-value" data-sort-active-label>{{ current_sort_label }}</span>
-            <svg class="stagmenfashion-sort-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <div class="balad-filter-group balad-filter-group--sort">
+          <button type="button" class="balad-sort-accordion-btn" data-toggle-sort-accordion aria-expanded="false">
+            <span class="balad-sort-accordion-title">Sort by:</span>
+            <span class="balad-sort-accordion-value" data-sort-active-label>{{ current_sort_label }}</span>
+            <svg class="balad-sort-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
 
-          <div class="stagmenfashion-sort-accordion-options" data-sort-options-list>
-            <button type="button" class="stagmenfashion-sort-option{% if current_sort == 'manual' %} is-selected{% endif %}" data-sort-val="manual" data-sort-name="Featured">
+          <div class="balad-sort-accordion-options" data-sort-options-list>
+            <button type="button" class="balad-sort-option{% if current_sort == 'manual' %} is-selected{% endif %}" data-sort-val="manual" data-sort-name="Featured">
               Featured
             </button>
-            <button type="button" class="stagmenfashion-sort-option{% if current_sort == 'best-selling' %} is-selected{% endif %}" data-sort-val="best-selling" data-sort-name="Best selling">
+            <button type="button" class="balad-sort-option{% if current_sort == 'best-selling' %} is-selected{% endif %}" data-sort-val="best-selling" data-sort-name="Best selling">
               Best selling
             </button>
-            <button type="button" class="stagmenfashion-sort-option{% if current_sort == 'title-ascending' %} is-selected{% endif %}" data-sort-val="title-ascending" data-sort-name="A–Z">
+            <button type="button" class="balad-sort-option{% if current_sort == 'title-ascending' %} is-selected{% endif %}" data-sort-val="title-ascending" data-sort-name="A–Z">
               A–Z
             </button>
-            <button type="button" class="stagmenfashion-sort-option{% if current_sort == 'title-descending' %} is-selected{% endif %}" data-sort-val="title-descending" data-sort-name="Z–A">
+            <button type="button" class="balad-sort-option{% if current_sort == 'title-descending' %} is-selected{% endif %}" data-sort-val="title-descending" data-sort-name="Z–A">
               Z–A
             </button>
-            <button type="button" class="stagmenfashion-sort-option{% if current_sort == 'price-ascending' %} is-selected{% endif %}" data-sort-val="price-ascending" data-sort-name="Price: low–high">
+            <button type="button" class="balad-sort-option{% if current_sort == 'price-ascending' %} is-selected{% endif %}" data-sort-val="price-ascending" data-sort-name="Price: low–high">
               Price: low–high
             </button>
-            <button type="button" class="stagmenfashion-sort-option{% if current_sort == 'price-descending' %} is-selected{% endif %}" data-sort-val="price-descending" data-sort-name="Price: high–low">
+            <button type="button" class="balad-sort-option{% if current_sort == 'price-descending' %} is-selected{% endif %}" data-sort-val="price-descending" data-sort-name="Price: high–low">
               Price: high–low
             </button>
-            <button type="button" class="stagmenfashion-sort-option{% if current_sort == 'created-descending' %} is-selected{% endif %}" data-sort-val="created-descending" data-sort-name="Newest">
+            <button type="button" class="balad-sort-option{% if current_sort == 'created-descending' %} is-selected{% endif %}" data-sort-val="created-descending" data-sort-name="Newest">
               Newest
             </button>
-            <button type="button" class="stagmenfashion-sort-option{% if current_sort == 'created-ascending' %} is-selected{% endif %}" data-sort-val="created-ascending" data-sort-name="Oldest">
+            <button type="button" class="balad-sort-option{% if current_sort == 'created-ascending' %} is-selected{% endif %}" data-sort-val="created-ascending" data-sort-name="Oldest">
               Oldest
             </button>
           </div>
@@ -437,11 +380,11 @@
       </div>
 
       <!-- Drawer Footer Actions -->
-      <div class="stagmenfashion-filter-drawer__footer">
-        <a href="{{ collection.url }}" class="stagmenfashion-filter-btn stagmenfashion-filter-btn--remove">
+      <div class="balad-filter-drawer__footer">
+        <a href="{{ collection.url }}" class="balad-filter-btn balad-filter-btn--remove">
           REMOVE ALL
         </a>
-        <button type="submit" class="stagmenfashion-filter-btn stagmenfashion-filter-btn--apply">
+        <button type="submit" class="balad-filter-btn balad-filter-btn--apply">
           APPLY
         </button>
       </div>
@@ -450,71 +393,71 @@
 </div>
 
 <!-- Wishlist Modal -->
-<div class="stagmenfashion-wishlist-modal" data-wishlist-modal style="display:none;" hidden>
-  <div class="stagmenfashion-wishlist-modal__backdrop" data-wishlist-close></div>
-  <div class="stagmenfashion-wishlist-modal__card">
-    <button type="button" class="stagmenfashion-wishlist-modal__close" data-wishlist-close aria-label="Close">
+<div class="balad-wishlist-modal" data-wishlist-modal style="display:none;" hidden>
+  <div class="balad-wishlist-modal__backdrop" data-wishlist-close></div>
+  <div class="balad-wishlist-modal__card">
+    <button type="button" class="balad-wishlist-modal__close" data-wishlist-close aria-label="Close">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
     </button>
 
-    <div class="stagmenfashion-wishlist-modal__header">
-      <div class="stagmenfashion-wishlist-modal__product-img" data-wishlist-img></div>
-      <div class="stagmenfashion-wishlist-modal__product-info">
-        <h3 class="stagmenfashion-wishlist-modal__title" data-wishlist-title></h3>
-        <div class="stagmenfashion-wishlist-modal__price-wrap">
-          <span class="stagmenfashion-wishlist-modal__price" data-wishlist-price></span>
-          <span class="stagmenfashion-wishlist-modal__compare-price" data-wishlist-compare-price></span>
+    <div class="balad-wishlist-modal__header">
+      <div class="balad-wishlist-modal__product-img" data-wishlist-img></div>
+      <div class="balad-wishlist-modal__product-info">
+        <h3 class="balad-wishlist-modal__title" data-wishlist-title></h3>
+        <div class="balad-wishlist-modal__price-wrap">
+          <span class="balad-wishlist-modal__price" data-wishlist-price></span>
+          <span class="balad-wishlist-modal__compare-price" data-wishlist-compare-price></span>
         </div>
       </div>
     </div>
 
-    <div class="stagmenfashion-wishlist-modal__sizes">
-      <div class="stagmenfashion-wishlist-modal__sizes-top">
-        <span class="stagmenfashion-wishlist-modal__label" data-wishlist-size-label>Size</span>
+    <div class="balad-wishlist-modal__sizes">
+      <div class="balad-wishlist-modal__sizes-top">
+        <span class="balad-wishlist-modal__label" data-wishlist-size-label>Size</span>
       </div>
-      <div class="stagmenfashion-wishlist-modal__size-grid" data-wishlist-sizes></div>
+      <div class="balad-wishlist-modal__size-grid" data-wishlist-sizes></div>
     </div>
 
-    <button type="button" class="stagmenfashion-wishlist-modal__add-btn" data-wishlist-add>
+    <button type="button" class="balad-wishlist-modal__add-btn" data-wishlist-add>
       Add To List
     </button>
   </div>
 </div>
 
 <!-- Quick Add Modal -->
-<div class="stagmenfashion-qa-modal" data-qa-modal style="display:none;" hidden>
-  <div class="stagmenfashion-qa-modal__backdrop" data-qa-close></div>
-  <div class="stagmenfashion-qa-modal__card">
-    <button type="button" class="stagmenfashion-qa-modal__close" data-qa-close aria-label="Close">
+<div class="balad-qa-modal" data-qa-modal style="display:none;" hidden>
+  <div class="balad-qa-modal__backdrop" data-qa-close></div>
+  <div class="balad-qa-modal__card">
+    <button type="button" class="balad-qa-modal__close" data-qa-close aria-label="Close">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
     </button>
 
-    <div class="stagmenfashion-qa-modal__header">
-      <div class="stagmenfashion-qa-modal__product-img" data-qa-img></div>
-      <div class="stagmenfashion-qa-modal__product-info">
-        <h3 class="stagmenfashion-qa-modal__title" data-qa-title></h3>
-        <span class="stagmenfashion-qa-modal__price" data-qa-price></span>
+    <div class="balad-qa-modal__header">
+      <div class="balad-qa-modal__product-img" data-qa-img></div>
+      <div class="balad-qa-modal__product-info">
+        <h3 class="balad-qa-modal__title" data-qa-title></h3>
+        <span class="balad-qa-modal__price" data-qa-price></span>
       </div>
     </div>
 
-    <div class="stagmenfashion-qa-modal__sizes">
-      <div class="stagmenfashion-qa-modal__sizes-top">
-        <span class="stagmenfashion-qa-modal__label">Size</span>
+    <div class="balad-qa-modal__sizes">
+      <div class="balad-qa-modal__sizes-top">
+        <span class="balad-qa-modal__label">Size</span>
       </div>
-      <div class="stagmenfashion-qa-modal__size-grid" data-qa-sizes></div>
+      <div class="balad-qa-modal__size-grid" data-qa-sizes></div>
     </div>
 
-    <div class="stagmenfashion-qa-modal__actions" data-qa-actions>
-      <button type="button" class="stagmenfashion-qa-modal__btn stagmenfashion-qa-modal__btn--bag" data-qa-add-bag>Add To Bag</button>
-      <button type="button" class="stagmenfashion-qa-modal__btn stagmenfashion-qa-modal__btn--buy" data-qa-buy-now>Buy Now</button>
+    <div class="balad-qa-modal__actions" data-qa-actions>
+      <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--bag" data-qa-add-bag>Add To Bag</button>
+      <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--buy" data-qa-buy-now>Buy Now</button>
     </div>
-    <div class="stagmenfashion-qa-modal__sold-out" data-qa-sold-out style="display:none;">
+    <div class="balad-qa-modal__sold-out" data-qa-sold-out style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
         <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
@@ -556,7 +499,7 @@
       });
 
       // Filter Pill toggles
-      drawer.querySelectorAll('.stagmenfashion-filter-pill').forEach((pill) => {
+      drawer.querySelectorAll('.balad-filter-pill').forEach((pill) => {
         const checkbox = pill.querySelector('[data-filter-checkbox]');
         if (!checkbox) return;
         pill.addEventListener('click', (e) => {
@@ -575,9 +518,9 @@
           sortAccordionBtn.setAttribute('aria-expanded', isOpen);
         });
 
-        sortOptionsList.querySelectorAll('.stagmenfashion-sort-option').forEach((optBtn) => {
+        sortOptionsList.querySelectorAll('.balad-sort-option').forEach((optBtn) => {
           optBtn.addEventListener('click', () => {
-            sortOptionsList.querySelectorAll('.stagmenfashion-sort-option').forEach(b => b.classList.remove('is-selected'));
+            sortOptionsList.querySelectorAll('.balad-sort-option').forEach(b => b.classList.remove('is-selected'));
             optBtn.classList.add('is-selected');
             const sortVal = optBtn.dataset.sortVal;
             const sortName = optBtn.dataset.sortName;
@@ -682,7 +625,7 @@
         sizesEl.innerHTML = sizes.map((size, i) => {
           const isSelected = i === 0 ? ' is-selected' : '';
           if (i === 0) selectedSize = size;
-          return '<button type="button" class="stagmenfashion-wishlist-modal__size' + isSelected + '" data-size-btn data-size="' + size + '">' + size + '</button>';
+          return '<button type="button" class="balad-wishlist-modal__size' + isSelected + '" data-size-btn data-size="' + size + '">' + size + '</button>';
         }).join('');
 
         sizesEl.querySelectorAll('[data-size-btn]').forEach((sizeBtn) => {
@@ -696,7 +639,7 @@
         sizeLabel.textContent = 'Default';
         sizesEl.parentElement.style.display = 'block';
         selectedSize = 'Default';
-        sizesEl.innerHTML = '<button type="button" class="stagmenfashion-wishlist-modal__size is-selected" data-size-btn data-size="Default">Default</button>';
+        sizesEl.innerHTML = '<button type="button" class="balad-wishlist-modal__size is-selected" data-size-btn data-size="Default">Default</button>';
       }
 
       addBtn.dataset.productId = productId;
@@ -888,13 +831,13 @@
           const isSelected = i === firstAvailIdx ? ' is-selected' : '';
           const isUnavailable = variantAvailMap[size] === false ? ' is-unavailable' : '';
           if (i === firstAvailIdx) qaSelectedSize = size;
-          return '<button type="button" class="stagmenfashion-qa-modal__size' + isSelected + isUnavailable + '" data-qa-size-btn data-size="' + size + '">' + size + '</button>';
+          return '<button type="button" class="balad-qa-modal__size' + isSelected + isUnavailable + '" data-qa-size-btn data-size="' + size + '">' + size + '</button>';
         }).join('');
         if (productAvailable && variantAvailMap[qaSelectedSize] === false) {
           setQASoldOut(true);
         }
       } else {
-        sizesEl.innerHTML = '<button type="button" class="stagmenfashion-qa-modal__size is-selected" data-qa-size-btn data-size="Default">Default</button>';
+        sizesEl.innerHTML = '<button type="button" class="balad-qa-modal__size is-selected" data-qa-size-btn data-size="Default">Default</button>';
         qaSelectedSize = 'Default';
       }
 
@@ -990,14 +933,14 @@
         };
 
         document.addEventListener('click', (e) => {
-          const unitBtn = e.target.closest('.stagmenfashion-unit-btn');
+          const unitBtn = e.target.closest('.balad-unit-btn');
           if (unitBtn) {
             e.preventDefault();
             e.stopPropagation();
             const unit = unitBtn.dataset.unit;
             const modal = unitBtn.closest('[data-qa-size-guide-modal]');
             if (!unit || !modal) return;
-            const allUnitBtns = modal.querySelectorAll('.stagmenfashion-unit-btn');
+            const allUnitBtns = modal.querySelectorAll('.balad-unit-btn');
             const table = modal.querySelector('[data-qa-size-table]');
             allUnitBtns.forEach((b) => {
               const active = b === unitBtn;
@@ -1253,14 +1196,14 @@
     };
 
     /* ── Grid View Layout Toggle (6 vs 12 Items Per Row) ────────── */
-    const STORAGE_GRID_KEY = 'stagmenfashion_grid_view';
+    const STORAGE_GRID_KEY = 'balad_grid_view';
 
     const setGridView = (isTwelve) => {
-      document.querySelectorAll('.stagmenfashion-collection-grid').forEach((grid) => {
+      document.querySelectorAll('.balad-collection-grid').forEach((grid) => {
         grid.classList.toggle('is-grid-12', isTwelve);
         grid.classList.toggle('is-grid-6', isTwelve);
       });
-      document.querySelectorAll('[data-grid-toggle], .stagmenfashion-view-icon-btn').forEach((btn) => {
+      document.querySelectorAll('[data-grid-toggle], .balad-view-icon-btn').forEach((btn) => {
         btn.classList.toggle('is-grid-12-active', isTwelve);
         btn.classList.toggle('is-grid-6-active', isTwelve);
         btn.setAttribute('aria-pressed', isTwelve ? 'true' : 'false');
@@ -1282,11 +1225,11 @@
     if (!document._gridToggleDelegated) {
       document._gridToggleDelegated = true;
       document.addEventListener('click', (e) => {
-        const toggleBtn = e.target.closest('[data-grid-toggle], .stagmenfashion-view-icon-btn');
+        const toggleBtn = e.target.closest('[data-grid-toggle], .balad-view-icon-btn');
         if (toggleBtn) {
           e.preventDefault();
           e.stopPropagation();
-          const grid = document.querySelector('.stagmenfashion-collection-grid');
+          const grid = document.querySelector('.balad-collection-grid');
           const isCurrentTwelve = grid ? (grid.classList.contains('is-grid-12') || grid.classList.contains('is-grid-6')) : false;
           setGridView(!isCurrentTwelve);
         }
@@ -1313,7 +1256,7 @@
 
 <style>
   /* ── Collection Section ──────────────────────────────────────── */
-  .stagmenfashion-collection {
+  .balad-collection {
     background: #ffffff;
     padding-top: 0;
     padding-bottom: clamp(10px, 3.5vw, 12px);
@@ -1321,7 +1264,7 @@
     --col-card-price-size: 11px;
   }
 
-  .stagmenfashion-collection__shell {
+  .balad-collection__shell {
     width: 100%;
     max-width: 100%;
     margin: 0;
@@ -1329,14 +1272,14 @@
   }
 
   /* ── Top Header Row ──────────────────────────────────────────── */
-  .stagmenfashion-collection-head {
+  .balad-collection-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: clamp(10px, 2vw, 16px);
   }
 
-  .stagmenfashion-collection-head__title {
+  .balad-collection-head__title {
     margin: 0;
     font-family: var(--font-heading--family);
     font-size: clamp(16px, 2.2vw, 20px);
@@ -1346,13 +1289,13 @@
     text-transform: capitalize;
   }
 
-  .stagmenfashion-collection-head__right {
+  .balad-collection-head__right {
     display: flex;
     align-items: center;
     gap: 12px;
   }
 
-  .stagmenfashion-view-icon-btn {
+  .balad-view-icon-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1367,38 +1310,38 @@
     transition: color 0.2s ease, background-color 0.2s ease;
   }
 
-  .stagmenfashion-view-icon-btn:hover {
+  .balad-view-icon-btn:hover {
     color: #111111;
     background-color: #f3f4f6;
   }
 
-  .stagmenfashion-grid-icon {
+  .balad-grid-icon {
     width: 18px;
     height: 18px;
   }
 
-  .stagmenfashion-view-icon-btn .stagmenfashion-grid-icon--12 {
+  .balad-view-icon-btn .balad-grid-icon--12 {
     display: none;
   }
-  .stagmenfashion-view-icon-btn .stagmenfashion-grid-icon--6 {
+  .balad-view-icon-btn .balad-grid-icon--6 {
     display: block;
   }
 
-  .stagmenfashion-view-icon-btn.is-grid-12-active .stagmenfashion-grid-icon--6,
-  .stagmenfashion-view-icon-btn.is-grid-6-active .stagmenfashion-grid-icon--6 {
+  .balad-view-icon-btn.is-grid-12-active .balad-grid-icon--6,
+  .balad-view-icon-btn.is-grid-6-active .balad-grid-icon--6 {
     display: none;
   }
-  .stagmenfashion-view-icon-btn.is-grid-12-active .stagmenfashion-grid-icon--12,
-  .stagmenfashion-view-icon-btn.is-grid-6-active .stagmenfashion-grid-icon--12 {
+  .balad-view-icon-btn.is-grid-12-active .balad-grid-icon--12,
+  .balad-view-icon-btn.is-grid-6-active .balad-grid-icon--12 {
     display: block;
   }
 
-  .stagmenfashion-advance-filters-btn {
+  .balad-advance-filters-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 8px 18px;
-    border-radius: 5px;
+    border-radius: 16px;
     border: 1px solid #d1d5db;
     background: #ffffff;
     color: #111111;
@@ -1409,18 +1352,18 @@
     transition: all 0.2s ease;
   }
 
-  .stagmenfashion-advance-filters-btn:hover {
+  .balad-advance-filters-btn:hover {
     border-color: #111111;
     background: #f9fafb;
   }
 
-  .stagmenfashion-advance-filters-btn svg {
+  .balad-advance-filters-btn svg {
     width: 15px;
     height: 15px;
   }
 
   /* ── Category / Subcategory Pills Navigation ────────────────── */
-  .stagmenfashion-collection-nav-scroll {
+  .balad-collection-nav-scroll {
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -1428,18 +1371,18 @@
     padding-bottom: 2px;
   }
 
-  .stagmenfashion-collection-nav-scroll::-webkit-scrollbar {
+  .balad-collection-nav-scroll::-webkit-scrollbar {
     display: none;
   }
 
-  .stagmenfashion-collection-nav-pills {
+  .balad-collection-nav-pills {
     display: flex;
     gap: 6px;
     white-space: nowrap;
     align-items: center;
   }
 
-  .stagmenfashion-nav-pill {
+  .balad-nav-pill {
     display: inline-flex;
     align-items: center;
     padding: 5px 12px;
@@ -1454,19 +1397,19 @@
     transition: all 0.2s ease;
   }
 
-  .stagmenfashion-nav-pill:hover {
+  .balad-nav-pill:hover {
     border-color: #111111;
     color: #111111;
   }
 
-  .stagmenfashion-nav-pill.is-active {
+  .balad-nav-pill.is-active {
     background: #111111;
     border-color: #111111;
     color: #ffffff;
   }
 
   /* ── Product Grid ────────────────────────────────────────────── */
-  .stagmenfashion-collection-grid {
+  .balad-collection-grid {
     display: grid;
     grid-template-columns: repeat(var(--col-desktop, 6), 1fr);
     gap: 8px;
@@ -1474,23 +1417,23 @@
   }
 
   /* 12-Column / Dense Grid Toggle */
-  .stagmenfashion-collection-grid.is-grid-12,
-  .stagmenfashion-collection-grid.is-grid-6 {
+  .balad-collection-grid.is-grid-12,
+  .balad-collection-grid.is-grid-6 {
     grid-template-columns: repeat(12, 1fr) !important;
     gap: 4px !important;
   }
 
-  .stagmenfashion-collection-grid.is-grid-12 .stagmenfashion-collection-grid__title,
-  .stagmenfashion-collection-grid.is-grid-6 .stagmenfashion-collection-grid__title {
+  .balad-collection-grid.is-grid-12 .balad-collection-grid__title,
+  .balad-collection-grid.is-grid-6 .balad-collection-grid__title {
     font-size: 11px;
   }
 
-  .stagmenfashion-collection-grid.is-grid-12 .stagmenfashion-collection-grid__price,
-  .stagmenfashion-collection-grid.is-grid-6 .stagmenfashion-collection-grid__price {
+  .balad-collection-grid.is-grid-12 .balad-collection-grid__price,
+  .balad-collection-grid.is-grid-6 .balad-collection-grid__price {
     font-size: 10px;
   }
 
-  .stagmenfashion-collection-grid__card {
+  .balad-collection-grid__card {
     display: flex;
     flex-direction: column;
     background: transparent;
@@ -1500,17 +1443,17 @@
     box-shadow: none;
   }
 
-  .stagmenfashion-collection-grid__card:hover {
+  .balad-collection-grid__card:hover {
     box-shadow: none;
   }
 
   /* ── Media / Carousel ────────────────────────────────────────── */
-  .stagmenfashion-collection-grid__media {
+  .balad-collection-grid__media {
     position: relative;
     display: block;
     aspect-ratio: 2 / 3;
     overflow: hidden;
-    border-radius: 4px;
+    border-radius: 16px;
     background: #111111;
     text-decoration: none;
     touch-action: pan-y;
@@ -1520,7 +1463,7 @@
     cursor: pointer;
   }
 
-  .stagmenfashion-collection-grid__badge {
+  .balad-collection-grid__badge {
     position: absolute;
     top: 10px;
     left: 10px;
@@ -1535,7 +1478,7 @@
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
   }
 
-  .stagmenfashion-collection-grid__image {
+  .balad-collection-grid__image {
     position: absolute;
     top: 0;
     left: 0;
@@ -1550,12 +1493,12 @@
     transition: opacity 0.3s ease;
   }
 
-  .stagmenfashion-collection-grid__image.is-active {
+  .balad-collection-grid__image.is-active {
     opacity: 1;
     z-index: 2;
   }
 
-  .stagmenfashion-collection-grid__placeholder {
+  .balad-collection-grid__placeholder {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -1563,7 +1506,7 @@
   }
 
   /* ── Clean Minimal Bookmark Button ───────────────────────────── */
-  .stagmenfashion-collection-grid__heart {
+  .balad-collection-grid__heart {
     position: absolute;
     top: 6px;
     right: 6px;
@@ -1583,13 +1526,13 @@
     transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, color 0.2s ease;
   }
 
-  .stagmenfashion-collection-grid__heart:hover {
+  .balad-collection-grid__heart:hover {
     opacity: 1;
     transform: scale(1.15);
     color: #111111;
   }
 
-  .stagmenfashion-collection-grid__heart svg {
+  .balad-collection-grid__heart svg {
     width: 18px;
     height: 18px;
     pointer-events: none;
@@ -1600,25 +1543,25 @@
     transition: fill 0.2s ease, stroke 0.2s ease;
   }
 
-  .stagmenfashion-collection-grid__heart.is-saved,
-  .stagmenfashion-collection-grid__heart.is-active,
-  .stagmenfashion-collection-grid__heart[aria-pressed="true"] {
+  .balad-collection-grid__heart.is-saved,
+  .balad-collection-grid__heart.is-active,
+  .balad-collection-grid__heart[aria-pressed="true"] {
     opacity: 1;
     color: #111111;
   }
 
-  .stagmenfashion-collection-grid__heart.is-saved svg,
-  .stagmenfashion-collection-grid__heart.is-active svg,
-  .stagmenfashion-collection-grid__heart[aria-pressed="true"] svg,
-  .stagmenfashion-collection-grid__heart.is-saved svg path,
-  .stagmenfashion-collection-grid__heart.is-active svg path,
-  .stagmenfashion-collection-grid__heart[aria-pressed="true"] svg path {
+  .balad-collection-grid__heart.is-saved svg,
+  .balad-collection-grid__heart.is-active svg,
+  .balad-collection-grid__heart[aria-pressed="true"] svg,
+  .balad-collection-grid__heart.is-saved svg path,
+  .balad-collection-grid__heart.is-active svg path,
+  .balad-collection-grid__heart[aria-pressed="true"] svg path {
     fill: #111111 !important;
     stroke: #111111 !important;
   }
 
   /* ── Dot Indicators ──────────────────────────────────────────── */
-  .stagmenfashion-collection-grid__dots {
+  .balad-collection-grid__dots {
     position: absolute;
     bottom: 8px;
     left: 50%;
@@ -1634,7 +1577,7 @@
     border-radius: 999px;
   }
 
-  .stagmenfashion-collection-grid__dot {
+  .balad-collection-grid__dot {
     width: 4px;
     height: 4px;
     border-radius: 50%;
@@ -1643,18 +1586,18 @@
     transition: all 0.2s ease;
   }
 
-  .stagmenfashion-collection-grid__dot:hover {
+  .balad-collection-grid__dot:hover {
     background: rgba(255, 255, 255, 0.85);
   }
 
-  .stagmenfashion-collection-grid__dot.is-active {
+  .balad-collection-grid__dot.is-active {
     background: #ffffff;
     width: 10px;
     border-radius: 999px;
   }
 
   /* ── Card Info ───────────────────────────────────────────────── */
-  .stagmenfashion-collection-grid__info {
+  .balad-collection-grid__info {
     padding: 8px 0 10px 0;
     display: flex;
     justify-content: space-between;
@@ -1662,7 +1605,7 @@
     gap: 8px;
   }
 
-  .stagmenfashion-collection-grid__details {
+  .balad-collection-grid__details {
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -1670,7 +1613,7 @@
     flex: 1;
   }
 
-  .stagmenfashion-collection-grid__title-link {
+  .balad-collection-grid__title-link {
     text-decoration: none;
     color: inherit;
     display: inline-block;
@@ -1680,7 +1623,7 @@
     line-height: 1;
   }
 
-  .stagmenfashion-collection-grid__title {
+  .balad-collection-grid__title {
     margin: 0;
     font-family: var(--font-heading--family);
     font-size: var(--col-card-title-size);
@@ -1695,7 +1638,7 @@
     position: relative;
   }
 
-  .stagmenfashion-collection-grid__title::after {
+  .balad-collection-grid__title::after {
     content: '';
     position: absolute;
     left: 0;
@@ -1708,18 +1651,18 @@
     transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
-  .stagmenfashion-collection-grid__title-link:hover .stagmenfashion-collection-grid__title::after {
+  .balad-collection-grid__title-link:hover .balad-collection-grid__title::after {
     transform: scaleX(1);
   }
 
-  .stagmenfashion-collection-grid__price {
+  .balad-collection-grid__price {
     font-size: var(--col-card-price-size);
     font-weight: 600;
     color: rgb(var(--color-foreground-rgb) / 0.7);
     letter-spacing: 0.01em;
   }
 
-  .stagmenfashion-collection-grid__plus-btn {
+  .balad-collection-grid__plus-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1736,11 +1679,11 @@
     text-decoration: none;
   }
 
-  .stagmenfashion-collection-grid__plus-btn:hover { opacity: 1; transform: scale(1.15); }
-  .stagmenfashion-collection-grid__plus-btn svg { width: 18px; height: 18px; }
+  .balad-collection-grid__plus-btn:hover { opacity: 1; transform: scale(1.15); }
+  .balad-collection-grid__plus-btn svg { width: 18px; height: 18px; }
 
   /* ── Empty & Pagination ─────────────────────────────────────── */
-  .stagmenfashion-collection__empty {
+  .balad-collection__empty {
     grid-column: 1 / -1;
     text-align: center;
     padding: 48px 0;
@@ -1748,59 +1691,116 @@
     font-size: 15px;
   }
 
-  .stagmenfashion-collection__pagination {
-    margin-top: 32px;
+  .balad-collection__pagination {
+    margin: 36px 0 12px;
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
   }
 
-  .stagmenfashion-collection__pagination a,
-  .stagmenfashion-collection__pagination span {
+  .balad-collection__pagination .bcp__item {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 34px;
-    height: 34px;
-    padding: 0 10px;
-    border-radius: 5px;
+    box-sizing: border-box;
+    min-width: 38px;
+    height: 38px;
+    padding: 0 12px;
     border: 1px solid #e5e7eb;
+    border-radius: 999px;
     background: #ffffff;
     color: #111111;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
+    line-height: 1;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
   }
 
-  .stagmenfashion-collection__pagination a:hover {
+  .balad-collection__pagination a.bcp__item:hover {
     border-color: #111111;
-    background: #f9fafb;
+    background: #f3f3f2;
   }
 
-  .stagmenfashion-collection__pagination .current,
-  .stagmenfashion-collection__pagination span.is-active {
-    background: #111111;
-    border-color: #111111;
+  .balad-collection__pagination .bcp__item.is-current {
+    border-color: transparent;
+    background: linear-gradient(135deg, #13173a 0%, #2a1b46 34%, #521f5a 68%, #632266 100%);
     color: #ffffff;
+  }
+
+  .balad-collection__pagination .bcp__item--dots {
+    min-width: 0;
+    padding: 0 4px;
+    border-color: transparent;
+    background: transparent;
+    color: #8a8a8a;
+  }
+
+  @media screen and (max-width: 749px) {
+    .balad-collection__pagination {
+      gap: 6px;
+    }
+
+    .balad-collection__pagination .bcp__item {
+      min-width: 34px;
+      height: 34px;
+      padding: 0 10px;
+      font-size: 12px;
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     SMOOTH HOVER (product cards) — same as the home page
+     ══════════════════════════════════════════════════════════════ */
+  .balad-collection-grid__card {
+    overflow: visible;
+  }
+
+  .balad-collection-grid .bpc__image {
+    transform: scale(1);
+    transform-origin: center center;
+    transition:
+      opacity 0.5s ease,
+      transform 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+  }
+
+  .balad-collection-grid .bpc__buy-arrow {
+    transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+  }
+
+  .balad-collection-grid .bpc__wish {
+    transition:
+      transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1),
+      background-color 0.4s ease,
+      color 0.4s ease !important;
+  }
+
+  .balad-collection-grid .bpc__media::after {
+    transition: opacity 0.6s ease;
+  }
+
+  .balad-collection-grid .balad-collection-grid__card:hover .bpc__image.is-active,
+  .balad-collection-grid .balad-collection-grid__card:focus-within .bpc__image.is-active {
+    transform: scale(1.06) !important;
   }
 
   /* ══════════════════════════════════════════════════════════════
      FILTER DRAWER (MINIMAL / NON-BULKY)
      ══════════════════════════════════════════════════════════════ */
-  .stagmenfashion-filter-drawer {
+  .balad-filter-drawer {
     display: none;
     position: fixed;
     inset: 0;
     z-index: 99999;
   }
 
-  .stagmenfashion-filter-drawer.is-open {
+  .balad-filter-drawer.is-open {
     display: block;
   }
 
-  .stagmenfashion-filter-drawer__backdrop {
+  .balad-filter-drawer__backdrop {
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.4);
@@ -1810,7 +1810,7 @@
     animation: fadeIn 0.2s ease-out;
   }
 
-  .stagmenfashion-filter-drawer__panel {
+  .balad-filter-drawer__panel {
     position: absolute;
     top: 0;
     right: 0;
@@ -1836,7 +1836,7 @@
   }
 
   /* ── Drawer Header ── */
-  .stagmenfashion-filter-drawer__header {
+  .balad-filter-drawer__header {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1847,11 +1847,11 @@
     flex-shrink: 0;
   }
 
-  .stagmenfashion-filter-drawer__header-copy {
+  .balad-filter-drawer__header-copy {
     text-align: center;
   }
 
-  .stagmenfashion-filter-drawer__title {
+  .balad-filter-drawer__title {
     margin: 0;
     font-size: 13px;
     font-weight: 600;
@@ -1860,7 +1860,7 @@
     text-transform: uppercase;
   }
 
-  .stagmenfashion-filter-drawer__count {
+  .balad-filter-drawer__count {
     display: block;
     margin-top: 2px;
     font-size: 10px;
@@ -1870,7 +1870,7 @@
     text-transform: uppercase;
   }
 
-  .stagmenfashion-filter-drawer__close {
+  .balad-filter-drawer__close {
     position: absolute;
     right: 14px;
     top: 50%;
@@ -1889,35 +1889,35 @@
     transition: opacity 0.2s ease;
   }
 
-  .stagmenfashion-filter-drawer__close:hover {
+  .balad-filter-drawer__close:hover {
     opacity: 0.7;
   }
 
-  .stagmenfashion-filter-drawer__close svg {
+  .balad-filter-drawer__close svg {
     width: 18px;
     height: 18px;
   }
 
   /* ── Drawer Form & Body ── */
-  .stagmenfashion-filter-drawer__form {
+  .balad-filter-drawer__form {
     display: flex;
     flex-direction: column;
     height: calc(100% - 58px);
     overflow: hidden;
   }
 
-  .stagmenfashion-filter-drawer__body {
+  .balad-filter-drawer__body {
     flex: 1;
     overflow-y: auto;
     padding: 0 16px;
   }
 
-  .stagmenfashion-filter-group {
+  .balad-filter-group {
     padding: 14px 0 16px;
     border-bottom: 1px solid #e0e0e0;
   }
 
-  .stagmenfashion-filter-group__heading {
+  .balad-filter-group__heading {
     margin: 0 0 10px 0;
     font-size: 13px;
     font-weight: 400;
@@ -1926,13 +1926,13 @@
   }
 
   /* ── Pill Buttons in Drawer ── */
-  .stagmenfashion-filter-pills {
+  .balad-filter-pills {
     display: flex;
     flex-wrap: wrap;
     gap: 7px;
   }
 
-  .stagmenfashion-filter-pill {
+  .balad-filter-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1953,30 +1953,30 @@
     text-align: center;
   }
 
-  .stagmenfashion-filter-pill:hover {
+  .balad-filter-pill:hover {
     background: #d6d9df;
     color: #000000;
   }
 
-  .stagmenfashion-filter-pill.is-active {
+  .balad-filter-pill.is-active {
     background: #111111;
     color: #ffffff;
   }
 
-  .stagmenfashion-filter-pill.is-disabled {
+  .balad-filter-pill.is-disabled {
     opacity: 0.35;
     cursor: not-allowed;
   }
 
   /* ── Color Swatches Dots Strip ── */
-  .stagmenfashion-filter-pill__color-dots {
+  .balad-filter-pill__color-dots {
     display: inline-flex;
     align-items: center;
     gap: 2px;
     margin-left: 2px;
   }
 
-  .stagmenfashion-filter-pill__color-dots i {
+  .balad-filter-pill__color-dots i {
     display: inline-block;
     width: 6.5px;
     height: 6.5px;
@@ -1985,43 +1985,43 @@
   }
 
   /* Dot Palettes */
-  .stagmenfashion-color-blues i:nth-child(1) { background: #60a5fa; }
-  .stagmenfashion-color-blues i:nth-child(2) { background: #3b82f6; }
-  .stagmenfashion-color-blues i:nth-child(3) { background: #2563eb; }
-  .stagmenfashion-color-blues i:nth-child(4) { background: #1e3a8a; }
+  .balad-color-blues i:nth-child(1) { background: #60a5fa; }
+  .balad-color-blues i:nth-child(2) { background: #3b82f6; }
+  .balad-color-blues i:nth-child(3) { background: #2563eb; }
+  .balad-color-blues i:nth-child(4) { background: #1e3a8a; }
 
-  .stagmenfashion-color-browns i:nth-child(1) { background: #e5ccb3; }
-  .stagmenfashion-color-browns i:nth-child(2) { background: #b08968; }
-  .stagmenfashion-color-browns i:nth-child(3) { background: #7f4f24; }
-  .stagmenfashion-color-browns i:nth-child(4) { background: #3c2415; }
+  .balad-color-browns i:nth-child(1) { background: #e5ccb3; }
+  .balad-color-browns i:nth-child(2) { background: #b08968; }
+  .balad-color-browns i:nth-child(3) { background: #7f4f24; }
+  .balad-color-browns i:nth-child(4) { background: #3c2415; }
 
-  .stagmenfashion-color-greens i:nth-child(1) { background: #4ade80; }
-  .stagmenfashion-color-greens i:nth-child(2) { background: #22c55e; }
-  .stagmenfashion-color-greens i:nth-child(3) { background: #16a34a; }
-  .stagmenfashion-color-greens i:nth-child(4) { background: #14532d; }
+  .balad-color-greens i:nth-child(1) { background: #4ade80; }
+  .balad-color-greens i:nth-child(2) { background: #22c55e; }
+  .balad-color-greens i:nth-child(3) { background: #16a34a; }
+  .balad-color-greens i:nth-child(4) { background: #14532d; }
 
-  .stagmenfashion-color-neutrals i:nth-child(1) { background: #ffffff; box-shadow: inset 0 0 0 1px #d1d5db; }
-  .stagmenfashion-color-neutrals i:nth-child(2) { background: #d1d5db; }
-  .stagmenfashion-color-neutrals i:nth-child(3) { background: #4b5563; }
-  .stagmenfashion-color-neutrals i:nth-child(4) { background: #111111; }
+  .balad-color-neutrals i:nth-child(1) { background: #ffffff; box-shadow: inset 0 0 0 1px #d1d5db; }
+  .balad-color-neutrals i:nth-child(2) { background: #d1d5db; }
+  .balad-color-neutrals i:nth-child(3) { background: #4b5563; }
+  .balad-color-neutrals i:nth-child(4) { background: #111111; }
 
-  .stagmenfashion-color-purples i:nth-child(1) { background: #fbcfe8; }
-  .stagmenfashion-color-purples i:nth-child(2) { background: #e879f9; }
-  .stagmenfashion-color-purples i:nth-child(3) { background: #a855f7; }
-  .stagmenfashion-color-purples i:nth-child(4) { background: #6b21a8; }
+  .balad-color-purples i:nth-child(1) { background: #fbcfe8; }
+  .balad-color-purples i:nth-child(2) { background: #e879f9; }
+  .balad-color-purples i:nth-child(3) { background: #a855f7; }
+  .balad-color-purples i:nth-child(4) { background: #6b21a8; }
 
-  .stagmenfashion-color-reds i:nth-child(1) { background: #facc15; }
-  .stagmenfashion-color-reds i:nth-child(2) { background: #fb923c; }
-  .stagmenfashion-color-reds i:nth-child(3) { background: #ef4444; }
-  .stagmenfashion-color-reds i:nth-child(4) { background: #991b1b; }
+  .balad-color-reds i:nth-child(1) { background: #facc15; }
+  .balad-color-reds i:nth-child(2) { background: #fb923c; }
+  .balad-color-reds i:nth-child(3) { background: #ef4444; }
+  .balad-color-reds i:nth-child(4) { background: #991b1b; }
 
   /* ── Price Range ── */
-  .stagmenfashion-filter-price-range {
+  .balad-filter-price-range {
     display: flex;
     gap: 8px;
   }
 
-  .stagmenfashion-filter-price-field {
+  .balad-filter-price-field {
     flex: 1;
     display: flex;
     align-items: center;
@@ -2033,7 +2033,7 @@
     font-size: 12px;
   }
 
-  .stagmenfashion-filter-price-field input {
+  .balad-filter-price-field input {
     width: 100%;
     border: none;
     background: transparent;
@@ -2042,13 +2042,13 @@
   }
 
   /* ── Sort Accordion in Drawer ── */
-  .stagmenfashion-filter-group--sort {
+  .balad-filter-group--sort {
     border-bottom: none;
     padding-top: 14px;
     padding-bottom: 14px;
   }
 
-  .stagmenfashion-sort-accordion-btn {
+  .balad-sort-accordion-btn {
     width: 100%;
     display: flex;
     align-items: center;
@@ -2059,13 +2059,13 @@
     color: #111111;
   }
 
-  .stagmenfashion-sort-accordion-title {
+  .balad-sort-accordion-title {
     font-size: 13px;
     font-weight: 400;
     color: #111111;
   }
 
-  .stagmenfashion-sort-accordion-value {
+  .balad-sort-accordion-value {
     margin-left: auto;
     margin-right: 10px;
     font-size: 13px;
@@ -2073,29 +2073,29 @@
     color: #111111;
   }
 
-  .stagmenfashion-sort-accordion-chevron {
+  .balad-sort-accordion-chevron {
     width: 14px;
     height: 14px;
     transition: transform 0.2s ease;
     color: #111111;
   }
 
-  .stagmenfashion-sort-accordion-btn.is-open .stagmenfashion-sort-accordion-chevron {
+  .balad-sort-accordion-btn.is-open .balad-sort-accordion-chevron {
     transform: rotate(180deg);
   }
 
-  .stagmenfashion-sort-accordion-options {
+  .balad-sort-accordion-options {
     display: none;
     flex-direction: column;
     gap: 2px;
     padding-top: 10px;
   }
 
-  .stagmenfashion-sort-accordion-options.is-open {
+  .balad-sort-accordion-options.is-open {
     display: flex;
   }
 
-  .stagmenfashion-sort-option {
+  .balad-sort-option {
     display: flex;
     align-items: center;
     padding: 7px 10px;
@@ -2110,19 +2110,19 @@
     transition: all 0.15s ease;
   }
 
-  .stagmenfashion-sort-option:hover {
+  .balad-sort-option:hover {
     background: #e2e4e8;
     color: #111111;
   }
 
-  .stagmenfashion-sort-option.is-selected {
+  .balad-sort-option.is-selected {
     background: #111111;
     color: #ffffff;
     font-weight: 500;
   }
 
   /* ── Drawer Footer Actions ── */
-  .stagmenfashion-filter-drawer__footer {
+  .balad-filter-drawer__footer {
     display: flex;
     gap: 10px;
     padding: 12px 16px;
@@ -2131,13 +2131,13 @@
     flex-shrink: 0;
   }
 
-  .stagmenfashion-filter-btn {
+  .balad-filter-btn {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 11px 16px;
-    border-radius: 5px;
+    border-radius: 16px;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.05em;
@@ -2147,30 +2147,30 @@
     text-transform: uppercase;
   }
 
-  .stagmenfashion-filter-btn--remove {
+  .balad-filter-btn--remove {
     background: #ebebeb;
     color: #111111;
     border: 1px solid #d5d5d5;
   }
 
-  .stagmenfashion-filter-btn--remove:hover {
+  .balad-filter-btn--remove:hover {
     background: #dedede;
   }
 
-  .stagmenfashion-filter-btn--apply {
+  .balad-filter-btn--apply {
     background: #000000;
     color: #ffffff;
     border: 1px solid #000000;
   }
 
-  .stagmenfashion-filter-btn--apply:hover {
+  .balad-filter-btn--apply:hover {
     background: #222222;
   }
 
   /* ══════════════════════════════════════════════════════════════
      WISHLIST & QUICK ADD MODALS
      ══════════════════════════════════════════════════════════════ */
-  .stagmenfashion-wishlist-modal {
+  .balad-wishlist-modal {
     display: none;
     position: fixed;
     inset: 0;
@@ -2179,9 +2179,9 @@
     justify-content: center;
   }
 
-  .stagmenfashion-wishlist-modal.is-open { display: flex; }
+  .balad-wishlist-modal.is-open { display: flex; }
 
-  .stagmenfashion-wishlist-modal__backdrop {
+  .balad-wishlist-modal__backdrop {
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.45);
@@ -2190,13 +2190,13 @@
     cursor: pointer;
   }
 
-  .stagmenfashion-wishlist-modal__card {
+  .balad-wishlist-modal__card {
     position: relative;
     z-index: 1;
     width: 90%;
     max-width: 380px;
     background: #ffffff;
-    border-radius: 5px;
+    border-radius: 16px;
     padding: 20px 20px 18px;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
     animation: modalSlideUp 0.25s ease-out;
@@ -2207,7 +2207,7 @@
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  .stagmenfashion-wishlist-modal__close {
+  .balad-wishlist-modal__close {
     position: absolute;
     top: 12px;
     right: 12px;
@@ -2225,17 +2225,17 @@
     transition: background 0.2s ease, color 0.2s ease;
   }
 
-  .stagmenfashion-wishlist-modal__close:hover { background: rgb(0 0 0 / 0.06); color: #111111; }
-  .stagmenfashion-wishlist-modal__close svg { width: 16px; height: 16px; }
+  .balad-wishlist-modal__close:hover { background: rgb(0 0 0 / 0.06); color: #111111; }
+  .balad-wishlist-modal__close svg { width: 16px; height: 16px; }
 
-  .stagmenfashion-wishlist-modal__header {
+  .balad-wishlist-modal__header {
     display: flex;
     gap: 12px;
     align-items: center;
     margin-bottom: 16px;
   }
 
-  .stagmenfashion-wishlist-modal__product-img {
+  .balad-wishlist-modal__product-img {
     width: 56px;
     height: 56px;
     border-radius: 4px;
@@ -2244,10 +2244,10 @@
     background: #f5f5f5;
   }
 
-  .stagmenfashion-wishlist-modal__product-img img { width: 100%; height: 100%; object-fit: cover; }
-  .stagmenfashion-wishlist-modal__product-info { flex: 1; min-width: 0; }
+  .balad-wishlist-modal__product-img img { width: 100%; height: 100%; object-fit: cover; }
+  .balad-wishlist-modal__product-info { flex: 1; min-width: 0; }
 
-  .stagmenfashion-wishlist-modal__title {
+  .balad-wishlist-modal__title {
     margin: 0 0 2px 0;
     font-family: var(--font-heading--family);
     font-size: 14px;
@@ -2256,20 +2256,20 @@
     line-height: 1.3;
   }
 
-  .stagmenfashion-wishlist-modal__price-wrap { display: flex; align-items: center; gap: 8px; }
-  .stagmenfashion-wishlist-modal__price { font-size: 13px; font-weight: 500; color: #666666; }
-  .stagmenfashion-wishlist-modal__compare-price { font-size: 12px; font-weight: 400; color: #999999; text-decoration: line-through; }
+  .balad-wishlist-modal__price-wrap { display: flex; align-items: center; gap: 8px; }
+  .balad-wishlist-modal__price { font-size: 13px; font-weight: 500; color: #666666; }
+  .balad-wishlist-modal__compare-price { font-size: 12px; font-weight: 400; color: #999999; text-decoration: line-through; }
 
-  .stagmenfashion-wishlist-modal__sizes { margin-bottom: 16px; }
+  .balad-wishlist-modal__sizes { margin-bottom: 16px; }
 
-  .stagmenfashion-wishlist-modal__sizes-top {
+  .balad-wishlist-modal__sizes-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
   }
 
-  .stagmenfashion-wishlist-modal__label {
+  .balad-wishlist-modal__label {
     display: block;
     font-size: 12px;
     font-weight: 600;
@@ -2279,7 +2279,7 @@
     margin-bottom: 0;
   }
 
-  .stagmenfashion-wishlist-modal__size-guide {
+  .balad-wishlist-modal__size-guide {
     padding: 0 0 1px 0;
     border-radius: 0;
     border: none;
@@ -2294,13 +2294,13 @@
     line-height: 1.2;
   }
 
-  .stagmenfashion-wishlist-modal__size-guide:hover {
+  .balad-wishlist-modal__size-guide:hover {
     opacity: 0.65;
   }
 
-  .stagmenfashion-wishlist-modal__size-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .balad-wishlist-modal__size-grid { display: flex; flex-wrap: wrap; gap: 6px; }
 
-  .stagmenfashion-wishlist-modal__size {
+  .balad-wishlist-modal__size {
     padding: 6px 14px;
     border-radius: 5px;
     border: 1px solid rgb(0 0 0 / 0.15);
@@ -2312,13 +2312,13 @@
     transition: all 0.2s ease;
   }
 
-  .stagmenfashion-wishlist-modal__size:hover { border-color: #111111; }
-  .stagmenfashion-wishlist-modal__size.is-selected { background: #111111; color: #ffffff; border-color: #111111; }
+  .balad-wishlist-modal__size:hover { border-color: #111111; }
+  .balad-wishlist-modal__size.is-selected { background: #111111; color: #ffffff; border-color: #111111; }
 
-  .stagmenfashion-wishlist-modal__add-btn {
+  .balad-wishlist-modal__add-btn {
     width: 100%;
     padding: 10px 16px;
-    border-radius: 5px;
+    border-radius: 16px;
     border: none;
     background: #111111;
     color: #ffffff;
@@ -2330,11 +2330,11 @@
     transition: background 0.2s ease, transform 0.15s ease;
   }
 
-  .stagmenfashion-wishlist-modal__add-btn:hover { background: #000000; }
-  .stagmenfashion-wishlist-modal__add-btn:active { transform: scale(0.98); }
+  .balad-wishlist-modal__add-btn:hover { background: #000000; }
+  .balad-wishlist-modal__add-btn:active { transform: scale(0.98); }
 
   /* ── Quick Add Modal ── */
-  .stagmenfashion-qa-modal {
+  .balad-qa-modal {
     display: none;
     position: fixed;
     inset: 0;
@@ -2343,9 +2343,9 @@
     justify-content: center;
   }
 
-  .stagmenfashion-qa-modal.is-open { display: flex; }
+  .balad-qa-modal.is-open { display: flex; }
 
-  .stagmenfashion-qa-modal__backdrop {
+  .balad-qa-modal__backdrop {
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.45);
@@ -2354,13 +2354,13 @@
     cursor: pointer;
   }
 
-  .stagmenfashion-qa-modal__card {
+  .balad-qa-modal__card {
     position: relative;
     z-index: 1;
     width: 90%;
     max-width: 380px;
     background: #ffffff;
-    border-radius: 5px;
+    border-radius: 16px;
     padding: 20px 20px 18px;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
     animation: qaSlideUp 0.25s ease-out;
@@ -2371,7 +2371,7 @@
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  .stagmenfashion-qa-modal__close {
+  .balad-qa-modal__close {
     position: absolute;
     top: 12px;
     right: 12px;
@@ -2389,17 +2389,17 @@
     transition: background 0.2s ease, color 0.2s ease;
   }
 
-  .stagmenfashion-qa-modal__close:hover { background: rgb(0 0 0 / 0.06); color: #111111; }
-  .stagmenfashion-qa-modal__close svg { width: 16px; height: 16px; }
+  .balad-qa-modal__close:hover { background: rgb(0 0 0 / 0.06); color: #111111; }
+  .balad-qa-modal__close svg { width: 16px; height: 16px; }
 
-  .stagmenfashion-qa-modal__header {
+  .balad-qa-modal__header {
     display: flex;
     gap: 12px;
     align-items: center;
     margin-bottom: 16px;
   }
 
-  .stagmenfashion-qa-modal__product-img {
+  .balad-qa-modal__product-img {
     width: 56px;
     height: 56px;
     border-radius: 4px;
@@ -2408,10 +2408,10 @@
     background: #f5f5f5;
   }
 
-  .stagmenfashion-qa-modal__product-img img { width: 100%; height: 100%; object-fit: cover; }
-  .stagmenfashion-qa-modal__product-info { flex: 1; min-width: 0; }
+  .balad-qa-modal__product-img img { width: 100%; height: 100%; object-fit: cover; }
+  .balad-qa-modal__product-info { flex: 1; min-width: 0; }
 
-  .stagmenfashion-qa-modal__title {
+  .balad-qa-modal__title {
     margin: 0 0 2px 0;
     font-family: var(--font-heading--family);
     font-size: 14px;
@@ -2420,18 +2420,18 @@
     line-height: 1.3;
   }
 
-  .stagmenfashion-qa-modal__price { font-size: 13px; font-weight: 500; color: #666666; }
+  .balad-qa-modal__price { font-size: 13px; font-weight: 500; color: #666666; }
 
-  .stagmenfashion-qa-modal__sizes { margin-bottom: 16px; }
+  .balad-qa-modal__sizes { margin-bottom: 16px; }
 
-  .stagmenfashion-qa-modal__sizes-top {
+  .balad-qa-modal__sizes-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
   }
 
-  .stagmenfashion-qa-modal__label {
+  .balad-qa-modal__label {
     font-size: 12px;
     font-weight: 600;
     color: #111111;
@@ -2439,7 +2439,7 @@
     letter-spacing: 0.04em;
   }
 
-  .stagmenfashion-qa-modal__size-guide {
+  .balad-qa-modal__size-guide {
     padding: 0 0 1px 0;
     border-radius: 0;
     border: none;
@@ -2454,16 +2454,16 @@
     line-height: 1.2;
   }
 
-  .stagmenfashion-qa-modal__size-guide:hover {
+  .balad-qa-modal__size-guide:hover {
     opacity: 0.65;
   }
 
-  .stagmenfashion-qa-modal__size-guide:active {
+  .balad-qa-modal__size-guide:active {
     opacity: 0.45;
   }
 
   /* ── Size Guide Modal ────────────────────────────────────────── */
-  .stagmenfashion-size-guide-modal {
+  .balad-size-guide-modal {
     position: fixed;
     inset: 0;
     z-index: 100000;
@@ -2477,14 +2477,14 @@
     transition: opacity 0.22s ease, visibility 0.22s ease;
   }
 
-  .stagmenfashion-size-guide-modal.is-open {
+  .balad-size-guide-modal.is-open {
     display: flex !important;
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
   }
 
-  .stagmenfashion-size-guide-modal__backdrop {
+  .balad-size-guide-modal__backdrop {
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.55);
@@ -2492,7 +2492,7 @@
     -webkit-backdrop-filter: blur(4px);
   }
 
-  .stagmenfashion-size-guide-modal__card {
+  .balad-size-guide-modal__card {
     position: relative;
     z-index: 1;
     background: #ffffff;
@@ -2507,11 +2507,11 @@
     transition: transform 0.22s ease;
   }
 
-  .stagmenfashion-size-guide-modal.is-open .stagmenfashion-size-guide-modal__card {
+  .balad-size-guide-modal.is-open .balad-size-guide-modal__card {
     transform: translateY(0) scale(1);
   }
 
-  .stagmenfashion-size-guide-modal__header {
+  .balad-size-guide-modal__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2520,7 +2520,7 @@
     border-bottom: 1px solid #eeeeee;
   }
 
-  .stagmenfashion-size-guide-modal__title {
+  .balad-size-guide-modal__title {
     font-size: 16px;
     font-weight: 700;
     color: #111111;
@@ -2528,7 +2528,7 @@
     font-family: var(--font-heading--family), sans-serif;
   }
 
-  .stagmenfashion-size-guide__unit-toggle {
+  .balad-size-guide__unit-toggle {
     display: inline-flex;
     align-items: center;
     background: #f1f3f5;
@@ -2539,7 +2539,7 @@
     margin-right: 8px;
   }
 
-  .stagmenfashion-unit-btn {
+  .balad-unit-btn {
     appearance: none;
     border: none;
     background: transparent;
@@ -2553,18 +2553,18 @@
     line-height: 1;
   }
 
-  .stagmenfashion-unit-btn:hover {
+  .balad-unit-btn:hover {
     color: #111111;
   }
 
-  .stagmenfashion-unit-btn.is-active {
+  .balad-unit-btn.is-active {
     background: #ffffff;
     color: #111111;
     font-weight: 700;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   }
 
-  .stagmenfashion-size-guide-modal__close {
+  .balad-size-guide-modal__close {
     appearance: none;
     background: transparent;
     border: none;
@@ -2578,59 +2578,59 @@
     transition: color 0.18s ease;
   }
 
-  .stagmenfashion-size-guide-modal__close:hover {
+  .balad-size-guide-modal__close:hover {
     color: #000000;
   }
 
-  .stagmenfashion-size-guide-modal__close svg {
+  .balad-size-guide-modal__close svg {
     width: 18px;
     height: 18px;
   }
 
-  .stagmenfashion-size-guide-subtitle {
+  .balad-size-guide-subtitle {
     font-size: 12px;
     color: #666666;
     margin: 0 0 14px;
   }
 
-  .stagmenfashion-size-table-wrapper {
+  .balad-size-table-wrapper {
     overflow-x: auto;
     border: 1px solid #e8e8e8;
     border-radius: 4px;
   }
 
-  .stagmenfashion-size-table {
+  .balad-size-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 12.5px;
   }
 
-  .stagmenfashion-size-table th,
-  .stagmenfashion-size-table td {
+  .balad-size-table th,
+  .balad-size-table td {
     padding: 9px 12px;
     text-align: center;
     border-bottom: 1px solid #f0f0f0;
   }
 
-  .stagmenfashion-size-table th {
+  .balad-size-table th {
     background: #f7f7f7;
     font-weight: 600;
     color: #333333;
   }
 
-  .stagmenfashion-size-table tr:last-child td {
+  .balad-size-table tr:last-child td {
     border-bottom: none;
   }
 
-  .stagmenfashion-size-note {
+  .balad-size-note {
     font-size: 11px;
     color: #888888;
     margin: 12px 0 0;
   }
 
-  .stagmenfashion-qa-modal__size-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .balad-qa-modal__size-grid { display: flex; flex-wrap: wrap; gap: 6px; }
 
-  .stagmenfashion-qa-modal__size {
+  .balad-qa-modal__size {
     padding: 6px 14px;
     border-radius: 5px;
     border: 1px solid rgb(0 0 0 / 0.15);
@@ -2642,15 +2642,15 @@
     transition: all 0.2s ease;
   }
 
-  .stagmenfashion-qa-modal__size:hover { border-color: #111111; }
-  .stagmenfashion-qa-modal__size.is-selected { background: #111111; color: #ffffff; border-color: #111111; }
-  .stagmenfashion-qa-modal__size.is-unavailable { opacity: 0.35; text-decoration: line-through; cursor: not-allowed; }
+  .balad-qa-modal__size:hover { border-color: #111111; }
+  .balad-qa-modal__size.is-selected { background: #111111; color: #ffffff; border-color: #111111; }
+  .balad-qa-modal__size.is-unavailable { opacity: 0.35; text-decoration: line-through; cursor: not-allowed; }
 
-  .stagmenfashion-qa-modal__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .balad-qa-modal__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-  .stagmenfashion-qa-modal__btn {
+  .balad-qa-modal__btn {
     padding: 10px 16px;
-    border-radius: 5px;
+    border-radius: 16px;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -2659,19 +2659,19 @@
     text-transform: uppercase;
   }
 
-  .stagmenfashion-qa-modal__btn--bag { border: 1.5px solid #111111; background: #ffffff; color: #111111; }
-  .stagmenfashion-qa-modal__btn--bag:hover { background: #111111; color: #ffffff; }
-  .stagmenfashion-qa-modal__btn--buy { border: 1.5px solid #111111; background: #111111; color: #ffffff; }
-  .stagmenfashion-qa-modal__btn--buy:hover { background: #000000; border-color: #000000; }
-  .stagmenfashion-qa-modal__btn:active { transform: scale(0.98); }
+  .balad-qa-modal__btn--bag { border: 1.5px solid #111111; background: #ffffff; color: #111111; }
+  .balad-qa-modal__btn--bag:hover { background: #111111; color: #ffffff; }
+  .balad-qa-modal__btn--buy { border: 1.5px solid #111111; background: #111111; color: #ffffff; }
+  .balad-qa-modal__btn--buy:hover { background: #000000; border-color: #000000; }
+  .balad-qa-modal__btn:active { transform: scale(0.98); }
 
-  .stagmenfashion-qa-modal__sold-out {
+  .balad-qa-modal__sold-out {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
     padding: 10px 16px;
-    border-radius: 5px;
+    border-radius: 16px;
     background: #f5f5f5;
     border: 1.5px solid #e0e0e0;
     color: #999;
@@ -2681,32 +2681,32 @@
     text-transform: uppercase;
   }
 
-  .stagmenfashion-qa-modal__sold-out svg { width: 15px; height: 15px; stroke: #999; }
+  .balad-qa-modal__sold-out svg { width: 15px; height: 15px; stroke: #999; }
 
   /* ── Responsive ──────────────────────────────────────────────── */
   @media screen and (max-width: 1400px) {
-    .stagmenfashion-collection-grid.is-grid-12,
-    .stagmenfashion-collection-grid.is-grid-6 {
+    .balad-collection-grid.is-grid-12,
+    .balad-collection-grid.is-grid-6 {
       grid-template-columns: repeat(8, 1fr) !important;
       gap: 4px !important;
     }
   }
 
   @media screen and (max-width: 1024px) {
-    .stagmenfashion-collection-grid {
+    .balad-collection-grid {
       grid-template-columns: repeat(var(--col-tablet, 4), 1fr);
       gap: 8px;
     }
 
-    .stagmenfashion-collection-grid.is-grid-12,
-    .stagmenfashion-collection-grid.is-grid-6 {
+    .balad-collection-grid.is-grid-12,
+    .balad-collection-grid.is-grid-6 {
       grid-template-columns: repeat(6, 1fr) !important;
       gap: 5px !important;
     }
   }
 
   @media screen and (max-width: 749px) {
-    .stagmenfashion-collection {
+    .balad-collection {
       padding-top: 0;
       padding-bottom: clamp(10px, 3.5vw, 12px);
       padding-left: 0;
@@ -2715,43 +2715,43 @@
       --col-card-price-size: 11px;
     }
 
-    .stagmenfashion-collection__shell {
+    .balad-collection__shell {
       padding: 10px 10px 0;
     }
 
-    .stagmenfashion-collection-head {
+    .balad-collection-head {
       margin-bottom: 10px;
     }
 
-    .stagmenfashion-collection-head__title {
+    .balad-collection-head__title {
       font-size: 16px;
     }
 
-    .stagmenfashion-advance-filters-btn {
+    .balad-advance-filters-btn {
       padding: 6px 14px;
       font-size: 12px;
     }
 
-    .stagmenfashion-nav-pill {
+    .balad-nav-pill {
       padding: 5px 12px;
       font-size: 12px;
     }
 
-    .stagmenfashion-collection-grid {
+    .balad-collection-grid {
       grid-template-columns: repeat(var(--col-mobile, 2), 1fr);
       gap: 8px;
     }
 
-    .stagmenfashion-collection-grid.is-grid-12,
-    .stagmenfashion-collection-grid.is-grid-6 {
+    .balad-collection-grid.is-grid-12,
+    .balad-collection-grid.is-grid-6 {
       grid-template-columns: repeat(3, 1fr) !important;
       gap: 6px !important;
     }
 
-    .stagmenfashion-collection-grid__arrow { width: 32px; height: 32px; }
-    .stagmenfashion-collection-grid__arrow svg { width: 16px; height: 16px; }
-    .stagmenfashion-collection-grid__arrow--prev { left: 8px; }
-    .stagmenfashion-collection-grid__heart {
+    .balad-collection-grid__arrow { width: 32px; height: 32px; }
+    .balad-collection-grid__arrow svg { width: 16px; height: 16px; }
+    .balad-collection-grid__arrow--prev { left: 8px; }
+    .balad-collection-grid__heart {
       width: 32px;
       height: 32px;
       min-width: 32px;
@@ -2760,29 +2760,29 @@
       right: 4px;
       padding: 0;
     }
-    .stagmenfashion-collection-grid__heart svg { width: 16px; height: 16px; }
-    .stagmenfashion-collection-grid__dot { width: 3px; height: 3px; }
+    .balad-collection-grid__heart svg { width: 16px; height: 16px; }
+    .balad-collection-grid__dot { width: 3px; height: 3px; }
 
-    .stagmenfashion-filter-drawer__panel {
+    .balad-filter-drawer__panel {
       width: 100%;
       max-width: 100%;
     }
 
-    .stagmenfashion-wishlist-modal__card { padding: 16px 16px 14px; border-radius: 5px; }
-    .stagmenfashion-wishlist-modal__product-img { width: 48px; height: 48px; border-radius: 4px; }
-    .stagmenfashion-wishlist-modal__title { font-size: 13px; }
-    .stagmenfashion-wishlist-modal__price { font-size: 12px; }
-    .stagmenfashion-wishlist-modal__compare-price { font-size: 11px; }
-    .stagmenfashion-wishlist-modal__size { padding: 5px 12px; font-size: 11px; border-radius: 5px; }
-    .stagmenfashion-wishlist-modal__add-btn { padding: 9px 12px; font-size: 10px; border-radius: 5px; }
+    .balad-wishlist-modal__card { padding: 16px 16px 14px; border-radius: 16px; }
+    .balad-wishlist-modal__product-img { width: 48px; height: 48px; border-radius: 4px; }
+    .balad-wishlist-modal__title { font-size: 13px; }
+    .balad-wishlist-modal__price { font-size: 12px; }
+    .balad-wishlist-modal__compare-price { font-size: 11px; }
+    .balad-wishlist-modal__size { padding: 5px 12px; font-size: 11px; border-radius: 5px; }
+    .balad-wishlist-modal__add-btn { padding: 9px 12px; font-size: 10px; border-radius: 16px; }
 
-    .stagmenfashion-qa-modal__card { padding: 16px 16px 14px; border-radius: 5px; }
-    .stagmenfashion-qa-modal__product-img { width: 48px; height: 48px; border-radius: 4px; }
-    .stagmenfashion-qa-modal__title { font-size: 13px; }
-    .stagmenfashion-qa-modal__price { font-size: 12px; }
-    .stagmenfashion-qa-modal__size { padding: 5px 12px; font-size: 11px; border-radius: 5px; }
-    .stagmenfashion-qa-modal__btn { padding: 9px 12px; font-size: 10px; border-radius: 5px; }
-    .stagmenfashion-qa-modal__sold-out { padding: 9px 12px; font-size: 10px; border-radius: 5px; }
+    .balad-qa-modal__card { padding: 16px 16px 14px; border-radius: 16px; }
+    .balad-qa-modal__product-img { width: 48px; height: 48px; border-radius: 4px; }
+    .balad-qa-modal__title { font-size: 13px; }
+    .balad-qa-modal__price { font-size: 12px; }
+    .balad-qa-modal__size { padding: 5px 12px; font-size: 11px; border-radius: 5px; }
+    .balad-qa-modal__btn { padding: 9px 12px; font-size: 10px; border-radius: 16px; }
+    .balad-qa-modal__sold-out { padding: 9px 12px; font-size: 10px; border-radius: 16px; }
   }
 </style>
 

@@ -575,7 +575,7 @@
         window.dispatchEvent(new CustomEvent('cart:update', { detail: { resource: item } }));
         
         // Trigger cart drawer if available
-        const cartDrawerTrigger = document.querySelector('[data-testid="cart-drawer-trigger"], [data-open-cart-drawer], .stagmenfashion-header__cart-button');
+        const cartDrawerTrigger = document.querySelector('[data-testid="cart-drawer-trigger"], [data-open-cart-drawer], .balad-header__cart-button');
         if (cartDrawerTrigger) {
           setTimeout(() => {
             closeDrawer();

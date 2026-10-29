@@ -202,10 +202,10 @@ export class QuickAddComponent extends Component {
    * @returns {Element | null}
    */
   #buildPremiumQuickAddGrid(html) {
-    const premiumProduct = html.querySelector('.stagmenfashion-premium-product');
+    const premiumProduct = html.querySelector('.balad-premium-product');
     if (!premiumProduct) return null;
 
-    const titleText = premiumProduct.querySelector('.stagmenfashion-premium-product__title')?.textContent?.trim() || '';
+    const titleText = premiumProduct.querySelector('.balad-premium-product__title')?.textContent?.trim() || '';
     const productUrl = this.productPageUrl;
 
     const grid = document.createElement('div');
@@ -215,7 +215,7 @@ export class QuickAddComponent extends Component {
 
     const mediaWrapper = document.createElement('div');
     mediaWrapper.className = 'product-information__media';
-    const mainMedia = premiumProduct.querySelector('.stagmenfashion-premium-product__main-media');
+    const mainMedia = premiumProduct.querySelector('.balad-premium-product__main-media');
     if (mainMedia) {
       mediaWrapper.appendChild(mainMedia.cloneNode(true));
     }
@@ -242,7 +242,7 @@ export class QuickAddComponent extends Component {
     titleLink.setAttribute('aria-label', titleText || this.dataset.productTitle || 'Product');
     title.appendChild(titleLink);
 
-    const priceLine = premiumProduct.querySelector('.stagmenfashion-premium-product__price-line');
+    const priceLine = premiumProduct.querySelector('.balad-premium-product__price-line');
     const productPrice = document.createElement('product-price');
     if (priceLine) {
       productPrice.innerHTML = priceLine.innerHTML;
@@ -252,7 +252,7 @@ export class QuickAddComponent extends Component {
     buyButtons.className = 'buy-buttons-block';
 
     const productFormComponent = document.createElement('product-form-component');
-    const form = premiumProduct.querySelector('.stagmenfashion-premium-product__form');
+    const form = premiumProduct.querySelector('.balad-premium-product__form');
     if (form) {
       productFormComponent.appendChild(form.cloneNode(true));
     }

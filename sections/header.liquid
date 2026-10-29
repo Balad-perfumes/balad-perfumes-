@@ -1058,7 +1058,7 @@
     overflow: hidden !important;
   }
 
-  body.story-modal-open .stagmenfashion-mobile-nav {
+  body.story-modal-open .balad-mobile-nav {
     display: none !important;
   }
 
@@ -1503,12 +1503,12 @@
   }
 
   /* Completely hide mobile bottom nav bar when drawer is open */
-  body.pf-drawer-open .stagmenfashion-mobile-nav,
-  body.pf-drawer-open .stagmenfashion-mobile-tabs,
-  .pf-header__drawer:not([hidden]) ~ .stagmenfashion-mobile-nav,
-  .pf-header__drawer:not([hidden]) ~ .stagmenfashion-mobile-tabs,
-  html:has(.pf-header__drawer:not([hidden])) .stagmenfashion-mobile-nav,
-  html:has(.pf-header__drawer:not([hidden])) .stagmenfashion-mobile-tabs {
+  body.pf-drawer-open .balad-mobile-nav,
+  body.pf-drawer-open .balad-mobile-tabs,
+  .pf-header__drawer:not([hidden]) ~ .balad-mobile-nav,
+  .pf-header__drawer:not([hidden]) ~ .balad-mobile-tabs,
+  html:has(.pf-header__drawer:not([hidden])) .balad-mobile-nav,
+  html:has(.pf-header__drawer:not([hidden])) .balad-mobile-tabs {
     display: none !important;
     opacity: 0 !important;
     pointer-events: none !important;
@@ -1815,7 +1815,7 @@
     };
 
     const toggleMobileNav = (hide) => {
-      const mobileNavs = document.querySelectorAll('[data-stagmenfashion-mobile-nav], .stagmenfashion-mobile-nav, .stagmenfashion-mobile-tabs');
+      const mobileNavs = document.querySelectorAll('[data-balad-mobile-nav], .balad-mobile-nav, .balad-mobile-tabs');
       mobileNavs.forEach((nav) => {
         if (hide) {
           nav.setAttribute('data-hidden', 'true');

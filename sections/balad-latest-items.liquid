@@ -1,0 +1,1704 @@
+{{ 'balad-product-card.css' | asset_url | stylesheet_tag }}
+{% liquid
+  assign coll_handle = section.settings.collection
+  if coll_handle != blank
+    assign active_collection = collections[coll_handle]
+  endif
+  if active_collection == blank
+    assign active_collection = collections['new-in']
+  endif
+  if active_collection == blank
+    assign active_collection = collections['all']
+  endif
+  assign sizes_list = ''
+%}
+
+<section
+  class="balad-latest balad-latest--rows-{{ section.settings.rows | default: 2 }} color-{{ section.settings.color_scheme }}"
+  style="--latest-bg: {{ section.settings.background | default: '#ffffff' }};"
+>
+  <div class="balad-latest__shell">
+    <div class="balad-latest__head">
+      <div class="balad-latest__heading-wrap">
+        {% if section.settings.heading != blank %}
+          <h2 class="balad-latest__heading">
+            {% assign heading_upper = section.settings.heading | upcase %}
+            {% if heading_upper contains 'BESTSELLERS' %}
+              Discover <span class="balad-latest__highlight">Our Bestsellers</span>
+            {% elsif heading_upper contains 'NEW ARRIVALS' %}
+              New <span class="balad-latest__highlight">Arrivals</span>
+            {% else %}
+              {{ section.settings.heading | downcase }}
+            {% endif %}
+          </h2>
+        {% endif %}
+        {% if section.settings.subheading != blank %}
+          <p class="balad-latest__subheading">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </div>
+
+      <div class="balad-latest__head-right">
+        {% assign discover_url = section.settings.discover_more_link | default: active_collection.url %}
+        {% if section.settings.discover_more_label != blank and discover_url != blank %}
+          <a href="{{ discover_url }}" class="balad-latest__discover-more">
+            {{ section.settings.discover_more_label }}
+          </a>
+        {% endif %}
+        <div class="balad-latest__nav-arrows">
+          <button type="button" class="balad-latest__nav-arrow balad-latest__nav-arrow--prev" data-slider-prev aria-label="Previous products">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <button type="button" class="balad-latest__nav-arrow balad-latest__nav-arrow--next" data-slider-next aria-label="Next products">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="balad-latest-grid" data-slider-track>
+      {% for product in active_collection.products limit: 12 %}
+        {% liquid
+          assign images = product.images
+          assign image_count = images.size
+          assign first_image = product.featured_image | default: images.first
+          assign sizes_list = ''
+          for opt in product.options_with_values
+            assign opt_name_down = opt.name | downcase
+            if opt_name_down contains 'size' or opt.name == 'Size'
+              assign sizes_list = opt.values | join: ','
+            endif
+          endfor
+          if sizes_list == ''
+            assign sizes_check = '|'
+            for v in product.variants
+              assign sz = v.option1 | strip
+              unless sz == blank or sz == 'Default Title'
+                assign check_sz = '|' | append: sz | append: '|'
+                unless sizes_check contains check_sz
+                  assign sizes_check = sizes_check | append: check_sz
+                  if sizes_list != ''
+                    assign sizes_list = sizes_list | append: ','
+                  endif
+                  assign sizes_list = sizes_list | append: sz
+                endunless
+              endunless
+            endfor
+          endif
+
+          assign size_array = sizes_list | split: ','
+
+          assign fragrance_descriptor = ''
+          assign tags_string = product.tags | join: ' ' | downcase
+          if tags_string contains 'woody'
+            assign fragrance_descriptor = 'WOODY | ALLDAY | UNISEX'
+          elsif tags_string contains 'floral'
+            assign fragrance_descriptor = 'FLORAL | ALLDAY | UNISEX'
+          elsif tags_string contains 'fresh'
+            assign fragrance_descriptor = 'FRESH | ALLDAY | MEN'
+          elsif tags_string contains 'oriental'
+            assign fragrance_descriptor = 'ORIENTAL | NIGHT | MEN'
+          elsif tags_string contains 'fruity'
+            assign fragrance_descriptor = 'FRUITY | ALLDAY | UNISEX'
+          else
+            assign fragrance_descriptor = product.vendor | default: 'EAU DE PARFUM' | upcase
+          endif
+        %}
+        <div class="balad-latest-grid__card" data-product-card>
+          {% render 'balad-product-card', product: product, limit: 4, badge_first: forloop.first, show_rating: section.settings.show_rating %}
+        </div>
+      {% endfor %}
+
+      {% if active_collection.products.size == 0 %}
+        {% for i in (1..6) %}
+          <div class="balad-latest-grid__card balad-latest-grid__card--placeholder">
+            <div class="balad-latest-grid__media">
+              {{ 'product-1' | placeholder_svg_tag: 'balad-latest-grid__placeholder' }}
+            </div>
+            <div class="balad-latest-grid__info">
+              <div class="balad-latest-grid__title-row">
+                <h3 class="balad-latest-grid__title">Product {{ i }}</h3>
+                <div class="balad-latest-grid__price-wrap">
+                  <span class="balad-latest-grid__price">₹0</span>
+                </div>
+              </div>
+              <div class="balad-latest-grid__rating">
+                <span class="balad-latest-grid__stars">
+                  <span class="balad-latest-grid__star is-dim">★</span>
+                  <span class="balad-latest-grid__star is-dim">★</span>
+                  <span class="balad-latest-grid__star is-dim">★</span>
+                  <span class="balad-latest-grid__star is-dim">★</span>
+                  <span class="balad-latest-grid__star is-dim">★</span>
+                </span>
+                <span class="balad-latest-grid__rating-count">(0)</span>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Wishlist Modal -->
+  <div class="balad-wishlist-modal" data-wishlist-modal style="display:none;" hidden>
+    <div class="balad-wishlist-modal__backdrop" data-wishlist-close></div>
+    <div class="balad-wishlist-modal__card">
+      <button type="button" class="balad-wishlist-modal__close" data-wishlist-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="balad-wishlist-modal__header">
+        <div class="balad-wishlist-modal__product-img" data-wishlist-img></div>
+        <div class="balad-wishlist-modal__product-info">
+          <h3 class="balad-wishlist-modal__title" data-wishlist-title></h3>
+          <div class="balad-wishlist-modal__price-wrap">
+            <span class="balad-wishlist-modal__price" data-wishlist-price></span>
+            <span class="balad-wishlist-modal__compare-price" data-wishlist-compare-price></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="balad-wishlist-modal__sizes">
+        <div class="balad-wishlist-modal__sizes-top">
+          <span class="balad-wishlist-modal__label" data-wishlist-size-label>Size</span>
+        </div>
+        <div class="balad-wishlist-modal__size-grid" data-wishlist-sizes></div>
+      </div>
+
+      <button type="button" class="balad-wishlist-modal__add-btn" data-wishlist-add>
+        Add To List
+      </button>
+    </div>
+  </div>
+
+  <!-- Quick Add Modal -->
+  <div class="balad-qa-modal" data-qa-modal style="display:none;" hidden>
+    <div class="balad-qa-modal__backdrop" data-qa-close></div>
+    <div class="balad-qa-modal__card">
+      <button type="button" class="balad-qa-modal__close" data-qa-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="balad-qa-modal__header">
+        <div class="balad-qa-modal__product-img" data-qa-img></div>
+        <div class="balad-qa-modal__product-info">
+          <h3 class="balad-qa-modal__title" data-qa-title></h3>
+          <span class="balad-qa-modal__price" data-qa-price></span>
+        </div>
+      </div>
+
+      <div class="balad-qa-modal__sizes">
+        <div class="balad-qa-modal__sizes-top">
+          <span class="balad-qa-modal__label">Size</span>
+        </div>
+        <div class="balad-qa-modal__size-grid" data-qa-sizes></div>
+      </div>
+
+      <div class="balad-qa-modal__actions" data-qa-actions>
+        <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--bag" data-qa-add-bag>Add To Bag</button>
+        <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--buy" data-qa-buy-now>Buy Now</button>
+      </div>
+      <div class="balad-qa-modal__sold-out" data-qa-sold-out style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+        </svg>
+        <span>Sold Out</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const STORAGE_KEY = 'wishlist';
+    let selectedSize = null;
+    let currentProductId = '';
+
+    const getWishlist = () => {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch(e) { return []; }
+    };
+
+    const saveWishlist = (list) => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      } catch(e) {
+        console.warn('Wishlist save failed:', e);
+      }
+    };
+
+    const updateHeartStates = (scope) => {
+      const wishlist = getWishlist();
+      scope.querySelectorAll('[data-wishlist-heart]').forEach((btn) => {
+        const handle = extractHandle(btn.dataset.productUrl);
+        const isInList = wishlist.some((item) => item.handle === handle);
+        btn.classList.toggle('is-saved', isInList);
+        const svg = btn.querySelector('svg');
+        if (svg) {
+          svg.setAttribute('fill', isInList ? 'currentColor' : 'none');
+        }
+      });
+    };
+
+    const openModal = (btn) => {
+      const modal = document.querySelector('[data-wishlist-modal]');
+      if (!modal) return;
+      const titleEl = modal.querySelector('[data-wishlist-title]');
+      const priceEl = modal.querySelector('[data-wishlist-price]');
+      const comparePriceEl = modal.querySelector('[data-wishlist-compare-price]');
+      const imgEl = modal.querySelector('[data-wishlist-img]');
+      const sizesEl = modal.querySelector('[data-wishlist-sizes]');
+      const sizeLabel = modal.querySelector('[data-wishlist-size-label]');
+      const addBtn = modal.querySelector('[data-wishlist-add]');
+
+      const title = btn.dataset.productTitle || '';
+      const price = btn.dataset.productPrice || '0';
+      const comparePrice = btn.dataset.productComparePrice || '';
+      const productId = String(btn.dataset.productId || '').trim();
+      const productUrl = btn.dataset.productUrl || '#';
+      const productImage = btn.dataset.productImage || '';
+      const sizesRaw = btn.dataset.productSizes || '';
+      const sizes = sizesRaw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+      currentProductId = productId;
+
+      if (titleEl) titleEl.textContent = title;
+      if (priceEl) priceEl.textContent = 'INR ' + price;
+
+      if (comparePriceEl) {
+        if (comparePrice && comparePrice !== price && comparePrice !== '0') {
+          comparePriceEl.textContent = 'INR ' + comparePrice;
+          comparePriceEl.style.display = 'inline';
+        } else {
+          comparePriceEl.textContent = '';
+          comparePriceEl.style.display = 'none';
+        }
+      }
+
+      if (imgEl) {
+        if (productImage) {
+          imgEl.innerHTML = '<img src="' + productImage + '" alt="' + title.replace(/"/g, '&quot;') + '" />';
+          imgEl.style.display = 'flex';
+        } else {
+          imgEl.innerHTML = '';
+          imgEl.style.display = 'none';
+        }
+      }
+
+      selectedSize = null;
+
+      if (sizesEl) {
+        if (sizes.length > 0) {
+          if (sizeLabel) sizeLabel.textContent = 'Size';
+          sizesEl.parentElement.style.display = 'block';
+          sizesEl.innerHTML = sizes.map((size, i) => {
+            const isSelected = i === 0 ? ' is-selected' : '';
+            if (i === 0) selectedSize = size;
+            return '<button type="button" class="balad-wishlist-modal__size' + isSelected + '" data-size-btn data-size="' + size + '">' + size + '</button>';
+          }).join('');
+
+          sizesEl.querySelectorAll('[data-size-btn]').forEach((sizeBtn) => {
+            sizeBtn.addEventListener('click', () => {
+              sizesEl.querySelectorAll('[data-size-btn]').forEach(b => b.classList.remove('is-selected'));
+              sizeBtn.classList.add('is-selected');
+              selectedSize = sizeBtn.dataset.size;
+            });
+          });
+        } else {
+          if (sizeLabel) sizeLabel.textContent = 'Default';
+          sizesEl.parentElement.style.display = 'block';
+          selectedSize = 'Default';
+          sizesEl.innerHTML = '<button type="button" class="balad-wishlist-modal__size is-selected" data-size-btn data-size="Default">Default</button>';
+        }
+      }
+
+      if (addBtn) {
+        addBtn.dataset.productId = productId;
+        addBtn.dataset.productTitle = title;
+        addBtn.dataset.productPrice = price;
+        addBtn.dataset.productUrl = productUrl;
+        addBtn.dataset.productImage = productImage;
+      }
+
+      modal.style.display = 'flex';
+      modal.removeAttribute('hidden');
+      requestAnimationFrame(() => {
+        modal.classList.add('is-open');
+      });
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeModal = () => {
+      const modal = document.querySelector('[data-wishlist-modal]');
+      if (!modal) return;
+      modal.classList.remove('is-open');
+      setTimeout(() => {
+        if (!modal.classList.contains('is-open')) {
+          modal.style.display = 'none';
+          modal.setAttribute('hidden', '');
+        }
+      }, 220);
+      document.body.style.overflow = '';
+    };
+
+    const removeFromWishlist = (handle) => {
+      let wishlist = getWishlist();
+      wishlist = wishlist.filter((item) => item.handle !== handle);
+      saveWishlist(wishlist);
+      document.dispatchEvent(new CustomEvent('wishlist:update'));
+    };
+
+    const addToWishlist = (handle, id, title, price, image, size) => {
+      const wishlist = getWishlist();
+      const exists = wishlist.some((item) => item.handle === handle);
+      if (!exists) {
+        wishlist.push({ handle, id, title, price, image, size: size || '' });
+        saveWishlist(wishlist);
+        document.dispatchEvent(new CustomEvent('wishlist:update'));
+      }
+    };
+
+    const extractHandle = (url) => {
+      if (!url) return '';
+      const parts = url.split('/');
+      return parts[parts.length - 1] || parts[parts.length - 2] || '';
+    };
+
+    const toggleWishlist = (btn) => {
+      const handle = extractHandle(btn.dataset.productUrl);
+      const wishlist = getWishlist();
+      const isInList = wishlist.some((item) => item.handle === handle);
+
+      if (isInList) {
+        removeFromWishlist(handle);
+        updateHeartStates(document);
+        return;
+      }
+      openModal(btn);
+    };
+
+    const initSection = (scope = document) => {
+      scope.querySelectorAll('[data-wishlist-heart]').forEach((btn) => {
+        if (btn.dataset.ready === 'true') return;
+        btn.dataset.ready = 'true';
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleWishlist(btn);
+        });
+      });
+
+      // Track Arrow Navigation
+      scope.querySelectorAll('[data-slider-track]').forEach((track) => {
+        const parentSection = track.closest('.balad-latest');
+        if (!parentSection) return;
+        const prevBtn = parentSection.querySelector('[data-slider-prev]');
+        const nextBtn = parentSection.querySelector('[data-slider-next]');
+
+        if (prevBtn && !prevBtn.dataset.ready) {
+          prevBtn.dataset.ready = 'true';
+          prevBtn.addEventListener('click', () => {
+            const card = track.querySelector('.balad-latest-grid__card');
+            const gap = parseInt(getComputedStyle(track).columnGap) || 12;
+            const amount = card ? (card.offsetWidth + gap) * 2 : 320;
+            track.scrollBy({ left: -amount, behavior: 'smooth' });
+          });
+        }
+
+        /* Mouse drag-to-scroll with momentum (touch scrolls natively) */
+        if (!track.dataset.dragReady) {
+          track.dataset.dragReady = 'true';
+          let isDown = false, moved = false, startX = 0, startScroll = 0;
+          let lastX = 0, lastT = 0, velocity = 0, rafId = 0;
+
+          const stopMomentum = () => { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } };
+
+          const momentum = () => {
+            velocity *= 0.95;
+            if (Math.abs(velocity) < 0.15) { rafId = 0; return; }
+            track.scrollLeft -= velocity;
+            rafId = requestAnimationFrame(momentum);
+          };
+
+          track.addEventListener('pointerdown', (e) => {
+            if (e.pointerType !== 'mouse' || e.button !== 0) return;
+            if (e.target.closest('button')) return;
+            stopMomentum();
+            isDown = true;
+            moved = false;
+            startX = lastX = e.clientX;
+            lastT = performance.now();
+            startScroll = track.scrollLeft;
+            velocity = 0;
+          });
+
+          window.addEventListener('pointermove', (e) => {
+            if (!isDown) return;
+            const dx = e.clientX - startX;
+            if (!moved && Math.abs(dx) > 5) {
+              moved = true;
+              track.classList.add('is-dragging');
+            }
+            if (!moved) return;
+            const now = performance.now();
+            const dt = Math.max(now - lastT, 1);
+            velocity = ((e.clientX - lastX) / dt) * 16;
+            lastX = e.clientX;
+            lastT = now;
+            track.scrollLeft = startScroll - dx;
+          });
+
+          const endDrag = () => {
+            if (!isDown) return;
+            isDown = false;
+            if (moved) {
+              track.classList.remove('is-dragging');
+              rafId = requestAnimationFrame(momentum);
+              setTimeout(() => { moved = false; }, 0);
+            }
+          };
+          window.addEventListener('pointerup', endDrag);
+          window.addEventListener('pointercancel', endDrag);
+
+          track.addEventListener('wheel', stopMomentum, { passive: true });
+          track.addEventListener('click', (e) => {
+            if (moved) { e.preventDefault(); e.stopPropagation(); }
+          }, true);
+          track.addEventListener('dragstart', (e) => e.preventDefault());
+        }
+
+        if (nextBtn && !nextBtn.dataset.ready) {
+          nextBtn.dataset.ready = 'true';
+          nextBtn.addEventListener('click', () => {
+            const card = track.querySelector('.balad-latest-grid__card');
+            const gap = parseInt(getComputedStyle(track).columnGap) || 12;
+            const amount = card ? (card.offsetWidth + gap) * 2 : 320;
+            track.scrollBy({ left: amount, behavior: 'smooth' });
+          });
+        }
+      });
+
+      // Card size pills selection
+      scope.querySelectorAll('[data-card-size-pills]').forEach((pillsContainer) => {
+        const card = pillsContainer.closest('[data-product-card]');
+        const qaBtn = card ? card.querySelector('[data-quick-add]') : null;
+
+        pillsContainer.querySelectorAll('.balad-latest-grid__size-pill').forEach((pill) => {
+          if (pill.dataset.ready === 'true') return;
+          pill.dataset.ready = 'true';
+          pill.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            pillsContainer.querySelectorAll('.balad-latest-grid__size-pill').forEach(p => p.classList.remove('is-selected'));
+            pill.classList.add('is-selected');
+            if (qaBtn) {
+              qaBtn.dataset.qaSelectedSize = pill.dataset.sizeValue;
+            }
+          });
+        });
+      });
+
+      updateHeartStates(scope);
+    };
+
+    const initModal = () => {
+      document.querySelectorAll('[data-wishlist-close]').forEach((el) => {
+        el.addEventListener('click', closeModal);
+      });
+
+      const addBtn = document.querySelector('[data-wishlist-add]');
+      if (addBtn && !addBtn.dataset.ready) {
+        addBtn.dataset.ready = 'true';
+        addBtn.addEventListener('click', () => {
+          const productId = currentProductId;
+          const title = addBtn.dataset.productTitle || '';
+          const price = addBtn.dataset.productPrice || '0';
+          const url = addBtn.dataset.productUrl || '#';
+          const image = addBtn.dataset.productImage || '';
+          const handle = extractHandle(url);
+
+          if (!handle) return;
+
+          addToWishlist(handle, productId, title, price, image, selectedSize || '');
+          closeModal();
+          updateHeartStates(document);
+        });
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+      });
+    };
+
+    /* ── Quick Add Modal & Action ───────────────────────────────── */
+    let qaSelectedSize = null;
+    let qaProductUrl = '';
+
+    const getQAModal = () => document.querySelector('[data-qa-modal]');
+
+    const resolveVariantId = (modal) => {
+      const variantsData = modal?.dataset.qaVariants || '';
+      const firstVariant = modal?.dataset.qaFirstVariant || '';
+      let variantId = '';
+
+      if (variantsData && qaSelectedSize) {
+        const pairs = variantsData.split(',').filter(Boolean);
+        for (const pair of pairs) {
+          const [name, id] = pair.split(':');
+          if (name && id && name.trim() === qaSelectedSize.trim()) {
+            variantId = id.trim();
+            break;
+          }
+        }
+      }
+
+      if (!variantId && firstVariant) {
+        variantId = firstVariant;
+      }
+      return variantId;
+    };
+
+    const openQAModal = (btn) => {
+      const modal = getQAModal();
+      if (!modal) return;
+
+      const titleEl = modal.querySelector('[data-qa-title]');
+      const priceEl = modal.querySelector('[data-qa-price]');
+      const imgEl = modal.querySelector('[data-qa-img]');
+      const sizesEl = modal.querySelector('[data-qa-sizes]');
+      const actionsEl = modal.querySelector('[data-qa-actions]');
+      const soldOutEl = modal.querySelector('[data-qa-sold-out]');
+
+      const title = btn.dataset.qaTitle || '';
+      const price = btn.dataset.qaPrice || '0';
+      qaProductUrl = btn.dataset.qaUrl || '';
+      const image = btn.dataset.qaImage || '';
+      const sizesRaw = btn.dataset.qaSizes || '';
+      const firstVariant = btn.dataset.qaFirstVariant || '';
+      const variantsData = btn.dataset.qaVariants || '';
+      const isAvailable = btn.dataset.qaAvailable === 'true';
+      const presetSize = btn.dataset.qaSelectedSize || null;
+
+      modal.dataset.qaFirstVariant = firstVariant;
+      modal.dataset.qaVariants = variantsData;
+
+      if (titleEl) titleEl.textContent = title;
+      if (priceEl) priceEl.textContent = '₹' + Number(price || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+
+      if (imgEl) {
+        if (image) {
+          imgEl.innerHTML = '<img src="' + image + '" alt="' + title.replace(/"/g, '&quot;') + '" />';
+          imgEl.style.display = 'block';
+        } else {
+          imgEl.innerHTML = '';
+          imgEl.style.display = 'none';
+        }
+      }
+
+      const sizes = sizesRaw.split(',').map(s => s.trim()).filter(Boolean);
+      qaSelectedSize = presetSize || (sizes.length > 0 ? sizes[0] : null);
+
+      if (sizesEl) {
+        if (sizes.length > 0) {
+          sizesEl.parentElement.style.display = 'block';
+          sizesEl.innerHTML = sizes.map((sz) => {
+            const isSel = (sz === qaSelectedSize) ? ' is-selected' : '';
+            return '<button type="button" class="balad-qa-modal__size' + isSel + '" data-qa-size-btn data-size="' + sz + '">' + sz + '</button>';
+          }).join('');
+
+          sizesEl.querySelectorAll('[data-qa-size-btn]').forEach((sb) => {
+            sb.addEventListener('click', () => {
+              sizesEl.querySelectorAll('[data-qa-size-btn]').forEach(b => b.classList.remove('is-selected'));
+              sb.classList.add('is-selected');
+              qaSelectedSize = sb.dataset.size;
+            });
+          });
+        } else {
+          sizesEl.parentElement.style.display = 'none';
+        }
+      }
+
+      if (!isAvailable) {
+        if (actionsEl) actionsEl.style.display = 'none';
+        if (soldOutEl) soldOutEl.style.display = 'flex';
+      } else {
+        if (actionsEl) actionsEl.style.display = 'grid';
+        if (soldOutEl) soldOutEl.style.display = 'none';
+      }
+
+      modal.style.display = 'flex';
+      modal.removeAttribute('hidden');
+      requestAnimationFrame(() => modal.classList.add('is-open'));
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeQAModal = () => {
+      const modal = getQAModal();
+      if (!modal) return;
+      modal.classList.remove('is-open');
+      setTimeout(() => {
+        if (!modal.classList.contains('is-open')) {
+          modal.style.display = 'none';
+          modal.setAttribute('hidden', '');
+        }
+      }, 220);
+      document.body.style.overflow = '';
+    };
+
+    const addToCartAndRedirect = async (variantId, shouldRedirect = false) => {
+      if (!variantId) return;
+
+      try {
+        const response = await fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ items: [{ id: parseInt(variantId, 10), quantity: 1 }] }),
+        });
+
+        if (!response.ok) throw new Error('Failed to add item to cart');
+
+        if (shouldRedirect) {
+          window.location.href = '/checkout';
+          return;
+        }
+
+        closeQAModal();
+
+        // Dispatch theme cart updates
+        document.dispatchEvent(new CustomEvent('cart:updated', { bubbles: true }));
+        document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
+
+        const cartDrawer = document.querySelector('cart-drawer') || document.querySelector('#CartDrawer');
+        if (cartDrawer && typeof cartDrawer.open === 'function') {
+          cartDrawer.open();
+        } else {
+          window.location.href = '/cart';
+        }
+      } catch (err) {
+        console.error('Add to cart error:', err);
+        if (qaProductUrl) window.location.href = qaProductUrl;
+      }
+    };
+
+    const initQAModal = (scope = document) => {
+      scope.querySelectorAll('[data-quick-add]').forEach((btn) => {
+        if (btn.dataset.qaReady === 'true') return;
+        btn.dataset.qaReady = 'true';
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openQAModal(btn);
+        });
+      });
+
+      const modal = getQAModal();
+      if (modal && !modal.dataset.qaEventsBound) {
+        modal.dataset.qaEventsBound = 'true';
+
+        modal.querySelectorAll('[data-qa-close]').forEach((el) => {
+          el.addEventListener('click', closeQAModal);
+        });
+
+        const bagBtn = modal.querySelector('[data-qa-add-bag]');
+        if (bagBtn) {
+          bagBtn.addEventListener('click', () => {
+            const vId = resolveVariantId(modal);
+            addToCartAndRedirect(vId, false);
+          });
+        }
+
+        const buyBtn = modal.querySelector('[data-qa-buy-now]');
+        if (buyBtn) {
+          buyBtn.addEventListener('click', () => {
+            const vId = resolveVariantId(modal);
+            addToCartAndRedirect(vId, true);
+          });
+        }
+      }
+    };
+
+    // Carousel init with mobile finger swipe support
+    const initCarousels = (scope = document) => {
+      scope.querySelectorAll('[data-carousel]').forEach((carousel) => {
+        if (carousel.dataset.ready === 'true') return;
+        carousel.dataset.ready = 'true';
+
+        const slides = carousel.querySelectorAll('[data-carousel-slide]');
+        const dots = carousel.querySelectorAll('[data-carousel-dot]');
+
+        if (slides.length <= 1) return;
+
+        let currentIndex = 0;
+
+        const goTo = (index) => {
+          if (index < 0) index = slides.length - 1;
+          if (index >= slides.length) index = 0;
+          slides[currentIndex].classList.remove('is-active');
+          dots[currentIndex]?.classList.remove('is-active');
+          currentIndex = index;
+          slides[currentIndex].classList.add('is-active');
+          dots[currentIndex]?.classList.add('is-active');
+        };
+
+        const cardEl = carousel.closest('[data-product-card]') || carousel;
+        cardEl.addEventListener('mouseenter', () => {
+          if (slides.length > 1) goTo(1);
+        });
+
+        cardEl.addEventListener('mouseleave', () => {
+          if (slides.length > 1) goTo(0);
+        });
+
+        /* Touch swipes now scroll the product row instead of flipping images. */
+
+        dots.forEach((dot) => {
+          dot.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            goTo(parseInt(dot.dataset.index, 10));
+          });
+        });
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCarousels();
+      initSection();
+      initModal();
+      initQAModal();
+    });
+    document.addEventListener('shopify:section:load', (event) => {
+      initCarousels(event.target);
+      initSection(event.target);
+      initQAModal(event.target);
+    });
+  })();
+</script>
+
+<style>
+  /* ══════════════════════════════════════════════════════════════
+     SECTION CONTAINER & HEADER (matches "Shop Our Collections")
+     ══════════════════════════════════════════════════════════════ */
+  .balad-latest {
+    background: var(--latest-bg, #ffffff);
+    padding-top: clamp(10px, 1.4vw, 16px);
+    padding-bottom: clamp(4px, 0.8vw, 8px);
+  }
+
+  .balad-latest__shell {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 36px;
+    box-sizing: border-box;
+  }
+
+  .balad-latest__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgb(17 17 17 / 0.08);
+  }
+
+  .balad-latest__heading-wrap {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .balad-latest__heading {
+    margin: 0;
+    color: #111111;
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
+    font-size: 18px;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    text-transform: capitalize;
+  }
+
+  .balad-latest__highlight {
+    color: inherit;
+  }
+
+  .balad-latest__subheading {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.4;
+    font-weight: 400;
+  }
+
+  .balad-latest__head-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .balad-latest__discover-more {
+    display: inline-flex;
+    align-items: center;
+    color: #111111;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: opacity 0.2s ease;
+  }
+
+  .balad-latest__discover-more:hover {
+    opacity: 0.7;
+  }
+
+  .balad-latest__nav-arrows {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .balad-latest__nav-arrow {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid #e0e0e0;
+    background: #ffffff;
+    color: #111111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+  }
+
+  .balad-latest__nav-arrow:hover {
+    border-color: #111111;
+    background: #111111;
+    color: #ffffff;
+  }
+
+  .balad-latest__nav-arrow svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     PRODUCT SLIDER TRACK (6 CARDS DESKTOP, SWIPE / DRAG TO SCROLL)
+     ══════════════════════════════════════════════════════════════ */
+  .balad-latest-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - (5 * 12px)) / 6);
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0 0 4px;
+    margin: 0;
+    cursor: grab;
+    /* free, momentum-based scrolling (no snap fighting the finger) */
+    scroll-snap-type: none;
+    touch-action: pan-x pan-y;
+    will-change: scroll-position;
+  }
+
+  .balad-latest-grid.is-dragging {
+    cursor: grabbing;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .balad-latest-grid.is-dragging a,
+  .balad-latest-grid.is-dragging img,
+  .balad-latest-grid.is-dragging button {
+    pointer-events: none;
+  }
+
+  .balad-latest-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .balad-latest-grid__card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    box-sizing: border-box;
+  }
+
+  @media screen and (min-width: 1025px) and (max-width: 1400px) {
+    .balad-latest-grid {
+      grid-auto-columns: calc((100% - (5 * 10px)) / 6);
+      gap: 10px;
+    }
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .balad-latest__shell {
+      padding: 0 20px;
+    }
+
+    .balad-latest-grid {
+      grid-auto-columns: calc((100% - 30px) / 4);
+      gap: 10px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .balad-latest {
+      padding-top: 8px;
+      padding-bottom: 4px;
+    }
+
+    .balad-latest__shell {
+      padding: 0 12px;
+    }
+
+    .balad-latest__head {
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+    }
+
+    .balad-latest__heading {
+      font-size: 13.5px;
+    }
+
+    .balad-latest__subheading {
+      font-size: 11.5px;
+      margin-top: 4px;
+    }
+
+    .balad-latest__discover-more {
+      font-size: 11px;
+    }
+
+    .balad-latest__nav-arrows {
+      display: none;
+    }
+
+    .balad-latest-grid {
+      grid-auto-columns: calc((100% - 16px) / 2.3);
+      gap: 8px;
+      padding-bottom: 2px;
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     CARD MEDIA
+     ══════════════════════════════════════════════════════════════ */
+  .balad-latest-grid__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #f4f3f1;
+    text-decoration: none;
+    touch-action: pan-x pan-y;
+    isolation: isolate;
+  }
+
+  .balad-latest-grid__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    z-index: 1;
+    transform: scale(1);
+    transition: opacity 0.35s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+    -webkit-user-drag: none;
+  }
+
+  .balad-latest-grid__image.is-active {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  @media (hover: hover) {
+    .balad-latest-grid__card:hover .balad-latest-grid__image.is-active {
+      transform: scale(1.05);
+    }
+  }
+
+  .balad-latest-grid__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #efece6;
+  }
+
+  /* Badges (stacked, top-left) */
+  .balad-card-badges {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    pointer-events: none;
+  }
+
+  .balad-card-badge {
+    background: #ffffff;
+    color: #111111;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 5px 10px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    line-height: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .balad-card-badge--sold {
+    background: #ffffff;
+    color: #8a8a8a;
+  }
+
+  .balad-card-badge--off {
+    background: #111111;
+    color: #ffffff;
+    box-shadow: none;
+  }
+
+  /* Wishlist heart */
+  .balad-latest-grid__heart {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 5;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: #ffffff;
+    border-radius: 50%;
+    color: #111111;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .balad-latest-grid__heart:hover {
+    transform: scale(1.1);
+  }
+
+  .balad-latest-grid__heart svg {
+    width: 15px;
+    height: 15px;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    fill: none;
+  }
+
+  .balad-latest-grid__heart.is-saved svg {
+    fill: #111111 !important;
+  }
+
+  /* Image dots */
+  .balad-latest-grid__dots {
+    position: absolute;
+    bottom: 14px;
+    left: 12px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 7px;
+    background: rgba(0, 0, 0, 0.32);
+    border-radius: 999px;
+    transition: opacity 0.2s ease;
+  }
+
+  .balad-latest-grid__dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .balad-latest-grid__dot.is-active {
+    background: #ffffff;
+    width: 11px;
+    border-radius: 999px;
+  }
+
+  /* Quick add — floating pill inside the image */
+  .balad-latest-grid__quick-add-btn {
+    position: absolute;
+    z-index: 6;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 14px;
+    border: none;
+    border-radius: 16px;
+    background: #111111;
+    color: #ffffff;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), background 0.2s ease;
+  }
+
+  .balad-latest-grid__qa-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .balad-latest-grid__quick-add-btn:hover {
+    background: #000000;
+  }
+
+  .balad-latest-grid__quick-add-btn:active {
+    transform: scale(0.97);
+  }
+
+  @media (hover: hover) and (min-width: 750px) {
+    .balad-latest-grid__card:hover .balad-latest-grid__quick-add-btn,
+    .balad-latest-grid__quick-add-btn:focus-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .balad-latest-grid__card:hover .balad-latest-grid__dots {
+      opacity: 0;
+    }
+  }
+
+  /* Touch / small screens: always-visible round bag button */
+  @media (hover: none), (max-width: 749px) {
+    .balad-latest-grid__quick-add-btn {
+      left: auto;
+      right: 8px;
+      bottom: 8px;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      opacity: 1;
+      transform: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .balad-latest-grid__qa-label {
+      display: none;
+    }
+
+    .balad-latest-grid__qa-icon {
+      width: 17px;
+      height: 17px;
+    }
+
+    .balad-latest-grid__dots {
+      bottom: 14px;
+      left: 8px;
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     CARD DETAILS — minimal
+     ══════════════════════════════════════════════════════════════ */
+  .balad-latest-grid__info {
+    padding: 12px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .balad-latest-grid__title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .balad-latest-grid__title-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .balad-latest-grid__title {
+    margin: 0;
+    font-family: var(--font-heading--family, inherit);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #111111;
+    text-transform: none;
+    letter-spacing: 0;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Price — right side of the title row */
+  .balad-latest-grid__price-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+    flex-shrink: 0;
+  }
+
+  .balad-latest-grid__price {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #111111;
+    line-height: 1.35;
+    white-space: nowrap;
+  }
+
+  .balad-latest-grid__compare {
+    font-size: 11px;
+    font-weight: 400;
+    color: #a8a8a8;
+    text-decoration: line-through;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* Review stars — under the title */
+  .balad-latest-grid__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .balad-latest-grid__stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+  }
+
+  .balad-latest-grid__star {
+    color: #f5a300;
+    font-size: 12px;
+    line-height: 1;
+  }
+
+  .balad-latest-grid__star.is-dim {
+    color: #dcdcdc;
+  }
+
+  .balad-latest-grid__rating-score {
+    font-size: 11px;
+    font-weight: 600;
+    color: #111111;
+  }
+
+  .balad-latest-grid__rating-count {
+    font-size: 11px;
+    font-weight: 400;
+    color: #8f8f8f;
+  }
+
+  @media screen and (max-width: 749px) {
+    .balad-latest-grid__media { border-radius: 16px; }
+    .balad-latest-grid__info { padding-top: 10px; gap: 4px; }
+    .balad-latest-grid__title-row { gap: 6px; }
+    .balad-latest-grid__title { font-size: 12.5px; }
+    .balad-latest-grid__price { font-size: 12.5px; }
+    .balad-latest-grid__compare { font-size: 10px; }
+    .balad-latest-grid__star { font-size: 10.5px; }
+    .balad-latest-grid__rating { gap: 4px; }
+    .balad-latest-grid__rating-score,
+    .balad-latest-grid__rating-count { font-size: 10px; }
+    .balad-latest-grid__heart { width: 28px; height: 28px; top: 8px; right: 8px; }
+    .balad-card-badges { top: 8px; left: 8px; }
+    .balad-card-badge { font-size: 9px; padding: 4px 8px; }
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     MODALS
+     ══════════════════════════════════════════════════════════════ */
+  .balad-wishlist-modal,
+  .balad-qa-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .balad-wishlist-modal.is-open,
+  .balad-qa-modal.is-open {
+    display: flex;
+  }
+
+  .balad-wishlist-modal__backdrop,
+  .balad-qa-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    cursor: pointer;
+  }
+
+  .balad-wishlist-modal__card,
+  .balad-qa-modal__card {
+    position: relative;
+    z-index: 1;
+    width: 90%;
+    max-width: 380px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+  }
+
+  .balad-wishlist-modal__close,
+  .balad-qa-modal__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #666666;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+
+  .balad-wishlist-modal__header,
+  .balad-qa-modal__header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .balad-wishlist-modal__product-img,
+  .balad-qa-modal__product-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f5f5f5;
+  }
+
+  .balad-wishlist-modal__product-img img,
+  .balad-qa-modal__product-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .balad-wishlist-modal__title,
+  .balad-qa-modal__title {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #111111;
+  }
+
+  .balad-wishlist-modal__price,
+  .balad-qa-modal__price {
+    font-size: 13px;
+    font-weight: 600;
+    color: #666666;
+  }
+
+  .balad-wishlist-modal__size-grid,
+  .balad-qa-modal__size-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+  }
+
+  .balad-wishlist-modal__size,
+  .balad-qa-modal__size {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid #e2e2e2;
+    background: #ffffff;
+    color: #111111;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .balad-wishlist-modal__size.is-selected,
+  .balad-qa-modal__size.is-selected {
+    background: #111111;
+    color: #ffffff;
+    border-color: #111111;
+  }
+
+  .balad-wishlist-modal__add-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 16px;
+    border: none;
+    background: #111111;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .balad-qa-modal__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .balad-qa-modal__btn {
+    padding: 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+  }
+
+  .balad-qa-modal__btn--bag {
+    background: #ffffff;
+    color: #111111;
+    border: 1px solid #111111;
+  }
+
+  .balad-qa-modal__btn--buy {
+    background: #111111;
+    color: #ffffff;
+  }
+
+  .balad-qa-modal__sold-out {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: #f5f5f5;
+    color: #888888;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     SMOOTH HOVER (product cards)
+     ══════════════════════════════════════════════════════════════ */
+  .balad-latest .bpc__image {
+    transform: scale(1);
+    transform-origin: center center;
+    transition:
+      opacity 0.5s ease,
+      transform 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+  }
+
+  .balad-latest .bpc__buy {
+    transition: background-color 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+  }
+
+  .balad-latest .bpc__buy-arrow {
+    transition:
+      transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+      background-color 0.5s ease,
+      color 0.5s ease !important;
+  }
+
+  .balad-latest .bpc__wish {
+    transition:
+      transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1),
+      background-color 0.4s ease,
+      color 0.4s ease !important;
+  }
+
+
+  .balad-latest .bpc__media::after {
+    transition: opacity 0.6s ease;
+  }
+
+  .balad-latest .balad-latest-grid__card:hover .bpc__image.is-active,
+  .balad-latest .balad-latest-grid__card:focus-within .bpc__image.is-active {
+    transform: scale(1.06) !important;
+  }
+
+  /* ── Rows setting: 2 rows (default) ── */
+  .balad-latest--rows-2 .balad-latest-grid {
+    grid-template-rows: repeat(2, auto);
+  }
+
+  @media screen and (min-width: 1025px) {
+    .balad-latest--rows-2 .balad-latest-grid {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-rows: none;
+      grid-auto-columns: auto;
+      overflow: visible;
+      cursor: default;
+      padding-bottom: 0;
+    }
+
+    .balad-latest--rows-2 .balad-latest__nav-arrows {
+      display: none;
+    }
+  }
+
+  /* ── Tablet & mobile: fixed grid, NO horizontal scroll ── */
+  @media screen and (max-width: 1024px) {
+    .balad-latest--rows-2 .balad-latest-grid {
+      grid-auto-flow: row;
+      grid-template-rows: none;
+      grid-auto-columns: auto;
+      overflow: visible;
+      overscroll-behavior-x: auto;
+      cursor: default;
+      touch-action: auto;
+      will-change: auto;
+      padding-bottom: 0;
+    }
+
+    .balad-latest--rows-2 .balad-latest__nav-arrows {
+      display: none;
+    }
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .balad-latest--rows-2 .balad-latest-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .balad-latest--rows-2 .balad-latest-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Latest Items Scroll",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "DISCOVER OUR BESTSELLERS"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Explore our curated fragrance collection"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection",
+      "info": "Products shown from this collection."
+    },
+    {
+      "type": "text",
+      "id": "discover_more_label",
+      "label": "Discover More Label",
+      "default": "Discover more"
+    },
+    {
+      "type": "url",
+      "id": "discover_more_link",
+      "label": "Discover More Link (Optional)"
+    },
+    {
+      "type": "select",
+      "id": "rows",
+      "label": "Rows",
+      "options": [
+        { "value": "1", "label": "1 row (scrolls sideways)" },
+        { "value": "2", "label": "2 rows" }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "label": "Show Review Rating & Count",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "New Arrivals Scroll"
+    }
+  ]
+}
+{% endschema %}
