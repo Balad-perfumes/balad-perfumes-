@@ -29,8 +29,8 @@
         "enable": true,
         "speed": 50,
         "pause_on_hover": true,
-        "bg_start": "#13173a",
-        "bg_end": "#632266",
+        "bg_start": "#111115",
+        "bg_end": "#2a2933",
         "text_color": "#ffffff"
       }
     },
@@ -46,7 +46,7 @@
         "show_search": true,
         "show_account": true,
         "show_wishlist": true,
-        "header_background": "#ffffff",
+        "header_background": "#f6f3ee",
         "header_text_color": "#111111",
         "transparent_on_home": true,
         "enable_mobile_nav": true,

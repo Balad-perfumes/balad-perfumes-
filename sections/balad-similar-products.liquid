@@ -109,7 +109,7 @@
         %}
 
         <div class="balad-similar-grid__card" data-product-card>
-          {% render 'balad-product-card', product: prod, limit: 6, eager: forloop.first, direct_add: true %}
+          {% render 'balad-product-card', product: prod, limit: 6, eager: forloop.first, direct_add: true, show_buy_now: section.settings.show_buy_now %}
         </div>
       {% endfor %}
     </div>
@@ -811,6 +811,12 @@
     "groups": ["header", "footer"]
   },
   "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_buy_now",
+      "label": "Show 'Buy now' button on product cards",
+      "default": false
+    },
     {
       "type": "text",
       "id": "heading",

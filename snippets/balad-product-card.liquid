@@ -9,6 +9,7 @@
   @param {boolean} [eager] - Load the first image eagerly
   @param {boolean} [badge_first] - Show the "Selling fast" badge on this card
   @param {boolean} [show_rating] - Show the rating next to the subtitle (default true)
+  @param {boolean} [show_buy_now] - Show the "Buy now" button on the image (default true). Pass false to hide it
   @param {boolean} [direct_add] - "Buy now" adds the first variant straight to the cart (data-similar-add) instead of opening quick-add
 {%- enddoc -%}
 
@@ -128,6 +129,20 @@
       {{ 'product-1' | placeholder_svg_tag: 'bpc__placeholder' }}
     {%- endif -%}
 
+    {%- liquid
+      assign dot_count = image_count
+      if dot_count > img_limit
+        assign dot_count = img_limit
+      endif
+    -%}
+    {%- if dot_count > 1 -%}
+      <div class="bpc__dots{% unless show_buy_now == false %} bpc__dots--lifted{% endunless %}" aria-hidden="true">
+        {%- for i in (1..dot_count) -%}
+          <span class="bpc__dot{% if forloop.first %} is-active{% endif %}" data-carousel-dot data-index="{{ forloop.index0 }}"></span>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
     <div class="bpc__badges">
       {%- if product.available == false -%}
         <span class="bpc__badge bpc__badge--sold">Sold out</span>
@@ -158,6 +173,7 @@
       </svg>
     </button>
 
+    {%- unless show_buy_now == false -%}
     <div class="bpc__dock">
       <button
         type="button"
@@ -190,6 +206,7 @@
         </span>
       </button>
     </div>
+    {%- endunless -%}
   </a>
 
   <a href="{{ product.url }}" class="bpc__info">

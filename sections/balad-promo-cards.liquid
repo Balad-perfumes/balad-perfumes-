@@ -6,6 +6,9 @@
 <section
   class="balad-promo-cards balad-promo-cards--mobile-{{ section.settings.mobile_columns | default: '1' }} color-{{ section.settings.color_scheme }}"
   id="balad-promo-cards-{{ section.id }}"
+  data-promo-cards
+  data-autoplay="{{ section.settings.autoplay }}"
+  data-autoplay-speed="{{ section.settings.autoplay_speed | default: 5 }}"
   style="
     padding-top: clamp(10px, 1.4vw, 16px);
     padding-bottom: clamp(4px, 0.8vw, 8px);
@@ -25,7 +28,8 @@
       </div>
     {% endif %}
 
-    <div class="balad-promo-cards__grid" style="--grid-gap: {{ section.settings.gap }}px;">
+    <div class="balad-promo-cards__slider" data-promo-slider>
+    <div class="balad-promo-cards__grid" data-promo-track style="--grid-gap: {{ section.settings.gap }}px;">
       {% for block in section.blocks %}
         {% liquid
           assign overlay_opacity = block.settings.overlay_opacity | divided_by: 100.0
@@ -34,6 +38,7 @@
         <div
           class="balad-promo-card block-{{ block.id }} text-align-{{ block.settings.text_align }} content-pos-{{ block.settings.content_position }}"
           style="--overlay-opacity: {{ overlay_opacity }}; --overlay-color: {{ overlay_color }};"
+          data-promo-slide
           {{ block.shopify_attributes }}
         >
           <div class="balad-promo-card__media">
@@ -84,6 +89,22 @@
           </div>
         </div>
       {% endfor %}
+    </div>
+
+    {% if section.blocks.size > 1 %}
+      <div class="balad-promo-cards__dots" role="tablist" aria-label="Choose image">
+        {% for block in section.blocks %}
+          <button
+            type="button"
+            class="balad-promo-cards__dot{% if forloop.first %} is-active{% endif %}"
+            data-promo-dot
+            role="tab"
+            aria-label="Show image {{ forloop.index }} of {{ section.blocks.size }}"
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+          ></button>
+        {% endfor %}
+      </div>
+    {% endif %}
     </div>
   </div>
 </section>
@@ -185,15 +206,28 @@
     }
   }
 
-  /* ── Mobile: horizontal swipe scroll instead of a stacked grid ── */
+  /* ── Dots (only shown in the mobile slider) ── */
+  .balad-promo-cards__dots {
+    display: none;
+  }
+
+  /* ── Mobile: ONE fixed card, swipe changes the image inside it ── */
   @media screen and (max-width: 749px) {
-    .balad-promo-cards .balad-promo-cards__grid,
-    .balad-promo-cards--mobile-2 .balad-promo-cards__grid {
-      display: grid;
-      grid-auto-flow: column;
+    .balad-promo-cards--mobile-1 .balad-promo-cards__slider {
+      position: relative;
+      height: var(--mobile-card-height, 350px);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgb(17 17 17 / 0.08);
+      background: #f5f5f5;
+      isolation: isolate;
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-cards__grid {
+      display: flex;
       grid-template-columns: none;
-      grid-auto-columns: 100%;
-      gap: 12px;
+      gap: 0;
+      height: 100%;
       overflow-x: auto;
       overflow-y: hidden;
       overscroll-behavior-x: contain;
@@ -201,16 +235,73 @@
       scroll-snap-type: x mandatory;
       scrollbar-width: none;
       -ms-overflow-style: none;
-      padding-bottom: 2px;
     }
 
-    .balad-promo-cards__grid::-webkit-scrollbar {
+    .balad-promo-cards--mobile-1 .balad-promo-cards__grid::-webkit-scrollbar {
       display: none;
     }
 
-    .balad-promo-cards__grid > .balad-promo-card {
+    /* each "card" becomes a slide of the single frame */
+    .balad-promo-cards--mobile-1 .balad-promo-card {
+      flex: 0 0 100%;
       min-width: 0;
+      height: 100%;
+      border: 0;
+      border-radius: 0;
       scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-card:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-card:hover .balad-promo-card__image {
+      transform: none;
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-card__content {
+      padding-bottom: 38px; /* keep text / button clear of the dots */
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-cards__dots {
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgb(0 0 0 / 0.28);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+    }
+
+    .balad-promo-cards__dot {
+      position: relative;
+      width: 7px;
+      height: 7px;
+      padding: 0;
+      border: 0;
+      border-radius: 999px;
+      background: rgb(255 255 255 / 0.55);
+      cursor: pointer;
+      transition: width 0.3s ease, background 0.3s ease;
+    }
+
+    .balad-promo-cards__dot::after {
+      content: '';
+      position: absolute;
+      inset: -8px -4px;
+    }
+
+    .balad-promo-cards__dot.is-active {
+      width: 20px;
+      background: #ffffff;
     }
   }
 
@@ -261,6 +352,7 @@
     background-color: var(--overlay-color, #000000);
     opacity: var(--overlay-opacity, 0.3);
     transition: opacity 0.4s ease;
+    pointer-events: none;
   }
 
   .balad-promo-card__link {
@@ -373,6 +465,95 @@
   }
 </style>
 
+<script>
+  (function () {
+    function initPromoSliders(root) {
+      (root || document).querySelectorAll('[data-promo-slider]').forEach(function (slider) {
+        if (slider.dataset.sliderReady === 'true') return;
+
+        var track = slider.querySelector('[data-promo-track]');
+        var slides = slider.querySelectorAll('[data-promo-slide]');
+        var dots = slider.querySelectorAll('[data-promo-dot]');
+        if (!track || slides.length < 2) return;
+        slider.dataset.sliderReady = 'true';
+
+        var total = slides.length;
+        var section = slider.closest('[data-promo-cards]');
+        var raf = null;
+        var pausedUntil = 0;
+
+        function current() {
+          var w = track.clientWidth || 1;
+          return Math.max(0, Math.min(total - 1, Math.round(track.scrollLeft / w)));
+        }
+
+        function paint(index) {
+          dots.forEach(function (dot, i) {
+            var on = i === index;
+            dot.classList.toggle('is-active', on);
+            dot.setAttribute('aria-selected', on ? 'true' : 'false');
+          });
+        }
+
+        function goTo(index, smooth) {
+          index = (index + total) % total;
+          track.scrollTo({ left: index * track.clientWidth, behavior: smooth === false ? 'auto' : 'smooth' });
+        }
+
+        function isSliderMode() {
+          return track.scrollWidth > track.clientWidth + 1;
+        }
+
+        track.addEventListener('scroll', function () {
+          if (raf) return;
+          raf = requestAnimationFrame(function () {
+            raf = null;
+            paint(current());
+          });
+        }, { passive: true });
+
+        dots.forEach(function (dot, i) {
+          dot.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            goTo(i);
+            pausedUntil = Date.now() + 8000;
+          });
+        });
+
+        var resizeTimer = null;
+        window.addEventListener('resize', function () {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(function () {
+            if (isSliderMode()) goTo(current(), false);
+          }, 120);
+        });
+
+        track.addEventListener('touchstart', function () { pausedUntil = Date.now() + 8000; }, { passive: true });
+
+        /* optional auto-rotate (section setting) */
+        var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (section && section.dataset.autoplay === 'true' && !reduceMotion) {
+          var speed = (parseInt(section.dataset.autoplaySpeed, 10) || 5) * 1000;
+          var visible = true;
+          if ('IntersectionObserver' in window) {
+            new IntersectionObserver(function (entries) {
+              visible = entries[0].isIntersecting;
+            }, { threshold: 0.25 }).observe(slider);
+          }
+          setInterval(function () {
+            if (!visible || document.hidden || !isSliderMode() || Date.now() < pausedUntil) return;
+            goTo(current() + 1);
+          }, speed);
+        }
+      });
+    }
+
+    initPromoSliders(document);
+    document.addEventListener('shopify:section:load', function (e) { initPromoSliders(e.target); });
+  })();
+</script>
+
 {% schema %}
 {
   "name": "Promo Cards Grid",
@@ -406,6 +587,22 @@
         { "value": "2", "label": "2" }
       ],
       "default": "1"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto-rotate images (mobile slider)",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Auto-rotate speed",
+      "default": 5
     },
     {
       "type": "range",

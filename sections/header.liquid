@@ -53,7 +53,7 @@
   class="pf-header{% if section.settings.transparent_on_home and template.name == 'index' %} pf-header--home pf-header--transparent{% endif %}"
   data-pf-header
   data-scrolled="false"
-  style="--pf-header-bg: {{ section.settings.header_background | default: '#ffffff' }}; --pf-header-fg: {{ section.settings.header_text_color | default: '#111111' }};"
+  style="--pf-header-bg: {{ section.settings.header_background | default: '#f6f3ee' }}; --pf-header-fg: {{ section.settings.header_text_color | default: '#111111' }};"
 >
   <div class="pf-header__inner">
     <!-- Left Column: Desktop Navigation -->
@@ -643,13 +643,13 @@
     --pf-hover-bg: rgba(17, 17, 17, 0.06);
     --pf-badge-bg: #111111;
     --pf-badge-fg: #ffffff;
-    --pf-badge-ring: var(--pf-header-bg, #ffffff);
+    --pf-badge-ring: var(--pf-header-bg, #f6f3ee);
     position: sticky;
     top: 0;
     z-index: 100;
     width: 100%;
     color: var(--pf-fg-now);
-    background: var(--pf-header-bg, #ffffff);
+    background: var(--pf-header-bg, #f6f3ee);
     border-bottom: 1px solid rgba(17, 17, 17, 0.07);
     font-family: inherit;
     -webkit-font-smoothing: antialiased;
@@ -668,8 +668,8 @@
     --pf-hover-bg: rgba(17, 17, 17, 0.06);
     --pf-badge-bg: #111111;
     --pf-badge-fg: #ffffff;
-    --pf-badge-ring: rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.78);
+    --pf-badge-ring: rgba(246, 243, 238, 0.9);
+    background: rgba(246, 243, 238, 0.82);
     -webkit-backdrop-filter: saturate(180%) blur(22px);
     backdrop-filter: saturate(180%) blur(22px);
     border-bottom-color: rgba(17, 17, 17, 0.06);
@@ -810,7 +810,7 @@
     padding: 8px;
     border: 1px solid rgba(17, 17, 17, 0.07);
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.96);
+    background: rgba(249, 247, 242, 0.97);
     -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
     box-shadow: 0 24px 60px -20px rgba(17, 17, 17, 0.28), 0 2px 8px rgba(17, 17, 17, 0.04);
@@ -1545,7 +1545,7 @@
   .pf-header__drawer-panel {
     position: relative !important;
     z-index: 2 !important;
-    background: #ffffff !important;
+    background: #f6f3ee !important;
     border-right: 0 !important;
     border-radius: 0 28px 28px 0 !important;
     box-shadow: 24px 0 70px -10px rgba(0, 0, 0, 0.25) !important;
@@ -2369,7 +2369,7 @@
       "type": "color",
       "id": "header_background",
       "label": "Header background",
-      "default": "#ffffff"
+      "default": "#f6f3ee"
     },
     {
       "type": "color",

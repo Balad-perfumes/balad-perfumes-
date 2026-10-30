@@ -108,7 +108,7 @@
           endif
         %}
         <div class="balad-latest-grid__card" data-product-card>
-          {% render 'balad-product-card', product: product, limit: 4, badge_first: forloop.first, show_rating: section.settings.show_rating %}
+          {% render 'balad-product-card', product: product, limit: 4, badge_first: forloop.first, show_rating: section.settings.show_rating, show_buy_now: section.settings.show_buy_now %}
         </div>
       {% endfor %}
 
@@ -1637,6 +1637,12 @@
     "groups": ["header", "footer"]
   },
   "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_buy_now",
+      "label": "Show 'Buy now' button on product cards",
+      "default": false
+    },
     {
       "type": "text",
       "id": "heading",

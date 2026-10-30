@@ -4,6 +4,7 @@
 
 /* Theme-wide typography overrides */
 :root {
+  --page-bg: #f6f3ee; /* soft page background - change this one value to re-tint the site */
   --font-body--family: "Poppins", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-subheading--family: "Poppins", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-heading--family: "ChunkFive", "ChunkFive Regular", Georgia, serif;
@@ -12,7 +13,7 @@
 
 body {
   color: var(--color-foreground);
-  background: #ffffff;
+  background: var(--page-bg);
   display: flex;
   flex-direction: column;
   margin: 0;
@@ -58,7 +59,7 @@ html {
 body,
 #MainContent,
 .content-for-layout {
-  background: #ffffff;
+  background: var(--page-bg);
 }
 
 html[scroll-lock] {

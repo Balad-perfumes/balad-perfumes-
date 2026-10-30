@@ -135,7 +135,7 @@
             endif
           %}
           <div class="balad-collection-grid__card" data-product-card>
-            {% render 'balad-product-card', product: product, limit: 6, eager: forloop.first %}
+            {% render 'balad-product-card', product: product, limit: 6, eager: forloop.first, show_buy_now: section.settings.show_buy_now %}
           </div>
         {% endfor %}
 
@@ -2790,6 +2790,12 @@
 {
   "name": "Collection grid",
   "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_buy_now",
+      "label": "Show 'Buy now' button on product cards",
+      "default": false
+    },
     {
       "type": "collection_list",
       "id": "category_list",

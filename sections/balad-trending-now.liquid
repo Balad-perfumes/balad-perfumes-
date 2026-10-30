@@ -73,7 +73,7 @@
           endif
         %}
         <div class="balad-trending-grid__card" data-product-card>
-          {% render 'balad-product-card', product: product, limit: 6 %}
+          {% render 'balad-product-card', product: product, limit: 6, show_buy_now: section.settings.show_buy_now %}
         </div>
       {% endfor %}
 
@@ -1954,6 +1954,12 @@
     "groups": ["header", "footer"]
   },
   "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_buy_now",
+      "label": "Show 'Buy now' button on product cards",
+      "default": false
+    },
     {
       "type": "text",
       "id": "heading",
