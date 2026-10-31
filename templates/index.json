@@ -125,13 +125,13 @@
       "type": "balad-latest-items",
       "settings": {
         "heading": "DISCOVER OUR BESTSELLERS",
-        "subheading": "Shop our most-loved perfumes and signature scents.",
+        "subheading": "Most-loved signature scents.",
         "collection": "new-in",
         "discover_more_label": "",
         "discover_more_link": "shopify://collections/new-in",
         "rows": "2",
         "show_rating": true,
-        "background": "#f6f3ee",
+        "background": "#ffffff",
         "color_scheme": "scheme-1"
       }
     },
@@ -172,7 +172,7 @@
         "section_width": "full-width",
         "section_height": "",
         "section_height_custom": 50,
-        "color_scheme": "",
+        "color_scheme": "scheme-1",
         "background_media": "none",
         "video_position": "cover",
         "background_image_position": "cover",
@@ -236,7 +236,8 @@
         "padding_top": 20,
         "padding_bottom": 20,
         "height_desktop": 380,
-        "height_mobile": 260
+        "height_mobile": 260,
+        "background": "#ffffff"
       }
     },
     "feature_cards": {
@@ -294,13 +295,13 @@
       "settings": {
         "rows": 2,
         "heading": "Discover Your Signature Scent",
-        "subheading": "Explore captivating fragrances, from fresh everyday scents to rich and unforgettable blends.",
+        "subheading": "From fresh to rich blends.",
         "collection": "all",
         "products_to_show": 12,
         "discover_more_label": "Shop All Fragrances →",
         "discover_more_link": "shopify://collections/all",
-        "background": "#efebe4",
-        "section_background": "rgba(0,0,0,0)",
+        "background": "#ffffff",
+        "section_background": "#ffffff",
         "shell_radius": 16,
         "color_scheme": "scheme-1"
       }
@@ -310,7 +311,7 @@
       "disabled": true,
       "settings": {
         "heading": "Trending Now",
-        "subheading": "Most popular picks added to the collection",
+        "subheading": "Most popular picks",
         "collection": "trending",
         "products_to_show": 12,
         "discover_more_label": "Discover more",
@@ -353,7 +354,7 @@
         "color_scheme": "scheme-1",
         "header_alignment": "left",
         "heading": "Our Stores",
-        "subheading": "Visit Balad Perfumes in person and explore our fragrance collection across Kerala.",
+        "subheading": "Visit us across Kerala.",
         "discover_more_label": "",
         "discover_more_link": "/pages/our-stores",
         "padding_top": 16,
@@ -415,8 +416,8 @@
         "color_scheme": "scheme-1",
         "eyebrow": "Community Voices",
         "heading": "Why They Choose Balad",
-        "subheading": "Real feedback from fragrance lovers who appreciate our premium scents and lasting impressions.",
-        "background": "#efebe4",
+        "subheading": "Loved by fragrance lovers.",
+        "background": "#ffffff",
         "content_source": "static",
         "judgeme_widget_type": "featured_carousel",
         "judgeme_product": ""
@@ -498,7 +499,7 @@
       "settings": {
         "color_scheme": "",
         "heading": "Club Balad Perfumes / AS Seen in real life",
-        "subheading": "Curated fits and real styles from our community.",
+        "subheading": "Real styles from our community.",
         "background": "#f6f3ee",
         "text_color": "#111111",
         "muted_text_color": "#6b7280",
@@ -569,7 +570,7 @@
         "filter_price_label": "Price Range",
         "sort_label": "Sort by",
         "heading": "Capsule Spotlight",
-        "subtext": "<p>Explore our latest minimal drops, engineered cuts, and styling options.</p>",
+        "subtext": "<p>Explore our latest drops.</p>",
         "see_all_text": "See All",
         "color_scheme": "scheme-1"
       }
@@ -913,7 +914,8 @@
         "padding-block-start": 0,
         "padding-block-end": 0,
         "remove_horizontal_padding": false
-      }
+      },
+      "disabled": true
     },
     "17895396654d2f4c4d": {
       "type": "_blocks",
@@ -944,7 +946,8 @@
         "padding-block-start": 0,
         "padding-block-end": 0,
         "remove_horizontal_padding": false
-      }
+      },
+      "disabled": true
     },
     "1790070845fab6f0c6": {
       "type": "_blocks",

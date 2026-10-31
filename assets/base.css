@@ -1,3 +1,8 @@
+html,
+body {
+  overflow-x: clip;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -20,7 +25,7 @@ body {
   min-height: 100svh;
   font-variation-settings: 'slnt' 0;
   font-family: var(--font-body--family);
-  font-size: clamp(15px, 0.35vw + 14px, 16px);
+  font-size: clamp(15.5px, 0.4vw + 14.5px, 16.5px);
   line-height: 1.55;
 }
 
@@ -4678,26 +4683,39 @@ product-recommendations:has([data-has-recommendations='false']) {
   border-radius: 999px;
 }
 
+/* Equalize left and right page margin across desktop, tablet, and mobile */
+.section,
+.page-width {
+  --page-margin: 36px;
+}
+
+@media screen and (min-width: 750px) and (max-width: 1024px) {
+  .section,
+  .page-width {
+    --page-margin: 20px;
+  }
+}
+
 @media screen and (max-width: 749px) {
   body {
-    font-size: 15px;
+    font-size: 16px;
   }
 
   .section,
   .page-width {
-    --page-margin: 10px;
+    --page-margin: 12px;
   }
 
   .product-information :is(h1, .h1) {
-    font-size: clamp(1.75rem, 9vw, 2.45rem);
+    font-size: clamp(1.85rem, 9vw, 2.5rem);
   }
 
   .product-grid__card {
-    gap: 7px;
+    gap: 8px;
   }
 
   .product-card :is(h3, h4, .h4, product-title, .price) {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
 }
 
@@ -4723,14 +4741,15 @@ product-recommendations:has([data-has-recommendations='false']) {
 }
 
 /* ── Home page: normalize all section headings on mobile ─────────────────
-   Ensures every section's main h2 title renders at 14px on small screens,
+   Ensures every section's main h2 title renders at 18px on small screens,
    matching the pattern set by the custom balad sections.
-   Card-level text (h3-h6, accordion headers, body text) stays below 14px
-   to preserve the visual hierarchy.                                     */
+   Card-level text (h3-h6, accordion headers) renders at 14px and body text
+   at 13.5px-14px for clear readability.                                */
 @media screen and (max-width: 749px) {
   .shopify-section h2,
   .shopify-section .h2 {
-    font-size: 14px !important;
+    font-size: 18px !important;
+    line-height: 1.25 !important;
   }
 
   /* Accordion headers (FAQ) and card-level headings */
@@ -4742,19 +4761,22 @@ product-recommendations:has([data-has-recommendations='false']) {
   .shopify-section .h5,
   .shopify-section h6,
   .shopify-section .h6 {
-    font-size: 12px !important;
+    font-size: 14px !important;
+    line-height: 1.35 !important;
   }
 
   /* FAQ accordion question text (rendered inside <summary>) */
   .shopify-section accordion-custom summary,
   .shopify-section details > summary {
-    font-size: 12px !important;
+    font-size: 14px !important;
+    line-height: 1.35 !important;
   }
 
   /* Body/paragraph text in native sections (FAQ answers, etc.) */
   .shopify-section p,
   .shopify-section .rte p {
-    font-size: 10px !important;
+    font-size: 13.5px !important;
+    line-height: 1.5 !important;
   }
 }
 

@@ -214,13 +214,13 @@
 <style>
   /* ── Section & Styled Shell with Background, Margin & Border Radius ── */
   .balad-catprod {
-    background: var(--catprod-section-bg, transparent);
+    background: var(--catprod-section-bg, #ffffff) !important;
     padding-top: clamp(14px, 2vw, 22px);
     padding-bottom: 0;
-    --catprod-heading-size: 18px;
+    --catprod-heading-size: 20px;
     --catprod-discover-more-size: 13px;
-    --catprod-card-title-size: 13px;
-    --catprod-card-price-size: 11px;
+    --catprod-card-title-size: 14px;
+    --catprod-card-price-size: 12px;
     width: 100%;
     box-sizing: border-box;
   }
@@ -229,7 +229,7 @@
     width: auto;
     max-width: 100%;
     margin: 0 36px;
-    background: var(--catprod-bg, #ffffff);
+    background: var(--catprod-bg, #ffffff) !important;
     border-radius: var(--catprod-radius, 16px);
     padding: clamp(14px, 1.6vw, 20px) clamp(12px, 1.4vw, 20px) clamp(14px, 1.6vw, 20px);
     box-sizing: border-box;
@@ -263,7 +263,7 @@
 
   .balad-catprod__subheading {
     margin: 6px 0 0;
-    font-size: 13px;
+    font-size: 14px;
     color: #6b7280;
     line-height: 1.4;
     font-weight: 400;
@@ -348,6 +348,7 @@
   }
 
   @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .balad-catprod__shell { margin: 0 20px; }
     .balad-catprod__rail { --catprod-cols: 4; }
     .balad-catprod__card:nth-child(n + {{ section.settings.rows | default: 2 | times: 4 | plus: 1 }}) { display: none; }
     .balad-catprod__card:nth-child(-n + {{ section.settings.rows | default: 2 | times: 4 }}) { display: flex; }
@@ -355,14 +356,14 @@
 
   @media screen and (max-width: 749px) {
     .balad-catprod {
-      --catprod-heading-size: 15px;
-      --catprod-card-title-size: 11.5px;
-      --catprod-card-price-size: 11px;
-      --catprod-discover-more-size: 11px;
+      --catprod-heading-size: 18px;
+      --catprod-card-title-size: 14px;
+      --catprod-card-price-size: 12px;
+      --catprod-discover-more-size: 12.5px;
     }
 
     .balad-catprod__shell {
-      margin: 0 10px;
+      margin: 0 12px;
       border-radius: 16px;
       padding: 12px 10px 14px;
     }

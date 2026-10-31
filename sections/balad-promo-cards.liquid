@@ -10,6 +10,7 @@
   data-autoplay="{{ section.settings.autoplay }}"
   data-autoplay-speed="{{ section.settings.autoplay_speed | default: 5 }}"
   style="
+    --promo-cards-bg: {{ section.settings.background | default: '#ffffff' }};
     padding-top: clamp(10px, 1.4vw, 16px);
     padding-bottom: clamp(4px, 0.8vw, 8px);
     --desktop-card-height: {{ section.settings.height_desktop }}px;
@@ -111,7 +112,7 @@
 
 <style>
   .balad-promo-cards {
-    background: #ffffff;
+    background: var(--promo-cards-bg, #ffffff) !important;
     width: 100%;
   }
 
@@ -129,7 +130,7 @@
 
   .balad-promo-cards__subheading {
     display: block;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -154,9 +155,15 @@
     gap: var(--grid-gap, 20px);
   }
 
+    @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .balad-promo-cards__shell {
+      padding: 0 20px;
+    }
+  }
+
   @media screen and (max-width: 749px) {
     .balad-promo-cards__shell {
-      padding: 10px 10px 10px;
+      padding: 10px 12px 10px;
     }
 
     .balad-promo-cards__grid {
@@ -165,7 +172,7 @@
     }
 
     .balad-promo-cards--mobile-2 .balad-promo-cards__shell {
-      padding: 10px;
+      padding: 10px 12px;
     }
 
     .balad-promo-cards--mobile-2 .balad-promo-cards__grid {
@@ -180,29 +187,29 @@
     .balad-promo-cards--mobile-2 .balad-promo-card__button {
       min-height: 34px;
       padding: 0 12px;
-      font-size: 0.7rem;
+      font-size: 0.8rem;
     }
 
     /* Section-level heading & subheading */
     .balad-promo-cards__main-heading {
-      font-size: 14px !important;
+      font-size: 18px !important;
     }
 
     .balad-promo-cards__subheading {
-      font-size: 10px !important;
+      font-size: 13.5px !important;
     }
 
     /* Card-level text */
     .balad-promo-card__heading {
-      font-size: 14px !important;
+      font-size: 16px !important;
     }
 
     .balad-promo-card__subheading {
-      font-size: 10px !important;
+      font-size: 12.5px !important;
     }
 
     .balad-promo-card__description {
-      font-size: 10px !important;
+      font-size: 13px !important;
     }
   }
 
@@ -562,6 +569,12 @@
     "groups": ["header", "footer"]
   },
   "settings": [
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
     {
       "type": "text",
       "id": "heading",

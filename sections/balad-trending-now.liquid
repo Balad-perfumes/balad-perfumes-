@@ -904,10 +904,10 @@
     padding-top: clamp(14px, 2vw, 22px);
     padding-bottom: clamp(14px, 2vw, 22px);
     margin-bottom: 0;
-    --trending-heading-size: 18px;
+    --trending-heading-size: 20px;
     --trending-discover-more-size: 13px;
-    --trending-grid-card-title-size: 13px;
-    --trending-grid-card-price-size: 11px;
+    --trending-grid-card-title-size: 14px;
+    --trending-grid-card-price-size: 12px;
   }
 
   .balad-trending__shell {
@@ -945,7 +945,7 @@
 
   .balad-trending__subheading {
     margin: 6px 0 0;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--pf-real-life-muted, #6b7280);
     line-height: 1.4;
     font-weight: 400;
@@ -1308,18 +1308,24 @@
     }
   }
 
+  @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .balad-trending__shell {
+      padding: 0 20px clamp(10px, 3.5vw, 12px);
+    }
+  }
+
   /* ── Mobile ─────────────────────────────────────────────────── */
   @media screen and (max-width: 749px) {
     .balad-trending {
-      --trending-heading-size: 14px;
-      --trending-grid-card-title-size: 12px;
-      --trending-grid-card-price-size: 11px;
-      --trending-discover-more-size: 10px;
+      --trending-heading-size: 18px;
+      --trending-grid-card-title-size: 14px;
+      --trending-grid-card-price-size: 12px;
+      --trending-discover-more-size: 12.5px;
       padding: 0;
     }
 
     .balad-trending__shell {
-      padding: 10px 10px 10px;
+      padding: 10px 12px 10px;
     }
 
     .balad-trending__head {
@@ -1332,7 +1338,7 @@
     }
 
     .balad-trending__subheading {
-      font-size: 12px;
+      font-size: 14px;
     }
 
     .balad-trending__discover-more {

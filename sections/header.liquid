@@ -657,9 +657,8 @@
       background-color 0.45s var(--pf-ease),
       border-color 0.45s var(--pf-ease),
       box-shadow 0.45s var(--pf-ease),
-      color 0.3s ease,
-      backdrop-filter 0.45s var(--pf-ease),
-      -webkit-backdrop-filter 0.45s var(--pf-ease);
+      color 0.3s ease;
+      
   }
 
   /* ---------- Scrolled: frosted glass ---------- */
@@ -1801,16 +1800,37 @@
       document.body.appendChild(drawer);
     }
 
+    let currentScrolledState = null;
+    let headerScrollTicking = false;
+
+    const updateHeaderMetrics = () => {
+      if (!header) return;
+      const h = header.offsetHeight;
+      if (h > 0) {
+        document.documentElement.style.setProperty('--header-height', h + 'px');
+        document.documentElement.style.setProperty('--header-height-mobile', h + 'px');
+        document.documentElement.style.setProperty('--header-group-height', h + 'px');
+      }
+    };
+
     const setScrollState = () => {
       if (!header) return;
       const isScrolled = window.scrollY > 10;
-      header.dataset.scrolled = isScrolled ? 'true' : 'false';
-      header.setAttribute('data-scrolled', isScrolled ? 'true' : 'false');
-      const h = header.offsetHeight;
-      if (h > 0) {
-        document.documentElement.style.setProperty('--header-height', `${h}px`);
-        document.documentElement.style.setProperty('--header-height-mobile', `${h}px`);
-        document.documentElement.style.setProperty('--header-group-height', `${h}px`);
+      if (currentScrolledState !== isScrolled) {
+        currentScrolledState = isScrolled;
+        const stateStr = isScrolled ? 'true' : 'false';
+        header.dataset.scrolled = stateStr;
+        header.setAttribute('data-scrolled', stateStr);
+      }
+    };
+
+    const onHeaderScroll = () => {
+      if (!headerScrollTicking) {
+        window.requestAnimationFrame(() => {
+          setScrollState();
+          headerScrollTicking = false;
+        });
+        headerScrollTicking = true;
       }
     };
 
@@ -1896,9 +1916,13 @@
       updateCartCount(count);
     });
 
+    updateHeaderMetrics();
     setScrollState();
-    window.addEventListener('scroll', setScrollState, { passive: true });
-    window.addEventListener('resize', setScrollState, { passive: true });
+    window.addEventListener('scroll', onHeaderScroll, { passive: true });
+    window.addEventListener('resize', () => {
+      updateHeaderMetrics();
+      setScrollState();
+    }, { passive: true });
 
     // -------------------------------------------------------------
     // Desktop dropdowns: open on hover, close on leave / outside click / Esc

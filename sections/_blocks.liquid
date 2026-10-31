@@ -9,11 +9,18 @@
     {% if section.settings.remove_horizontal_padding %}
       padding-inline: 0px !important;
     {% else %}
-      padding-inline: clamp(20px, 4vw, 42px) !important;
+      padding-inline: 36px !important;
     {% endif %}
     max-width: 1440px !important;
     margin-inline: auto !important;
     box-sizing: border-box !important;
+  }
+  @media screen and (min-width: 750px) and (max-width: 1024px) {
+    #shopify-section-{{ section.id }} .section.section--page-width {
+      {% unless section.settings.remove_horizontal_padding %}
+        padding-inline: 20px !important;
+      {% endunless %}
+    }
   }
   @media screen and (max-width: 749px) {
     #shopify-section-{{ section.id }} .section.section--page-width {
@@ -21,7 +28,7 @@
       margin-inline: 0 !important;
     }
     #shopify-section-{{ section.id }} .section-content-wrapper {
-      padding-inline: 20px !important;
+      padding-inline: 12px !important;
     }
   }
 </style>

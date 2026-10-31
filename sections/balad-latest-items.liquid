@@ -794,7 +794,7 @@
      SECTION CONTAINER & HEADER (matches "Shop Our Collections")
      ══════════════════════════════════════════════════════════════ */
   .balad-latest {
-    background: var(--latest-bg, #ffffff);
+    background: var(--latest-bg, #ffffff) !important;
     padding-top: clamp(10px, 1.4vw, 16px);
     padding-bottom: clamp(4px, 0.8vw, 8px);
   }
@@ -826,7 +826,7 @@
     color: #111111;
     font-family: var(--font-heading--family);
     font-style: var(--font-heading--style);
-    font-size: 18px;
+    font-size: 20px;
     line-height: 1.15;
     letter-spacing: -0.02em;
     font-weight: 700;
@@ -839,7 +839,7 @@
 
   .balad-latest__subheading {
     margin: 6px 0 0;
-    font-size: 13px;
+    font-size: 14px;
     color: #6b7280;
     line-height: 1.4;
     font-weight: 400;
@@ -919,8 +919,7 @@
     /* free, momentum-based scrolling (no snap fighting the finger) */
     scroll-snap-type: none;
     touch-action: pan-x pan-y;
-    will-change: scroll-position;
-  }
+      }
 
   .balad-latest-grid.is-dragging {
     cursor: grabbing;
@@ -980,16 +979,16 @@
     }
 
     .balad-latest__heading {
-      font-size: 13.5px;
+      font-size: 18px;
     }
 
     .balad-latest__subheading {
-      font-size: 11.5px;
+      font-size: 14px;
       margin-top: 4px;
     }
 
     .balad-latest__discover-more {
-      font-size: 11px;
+      font-size: 12.5px;
     }
 
     .balad-latest__nav-arrows {
@@ -1267,7 +1266,7 @@
   .balad-latest-grid__title {
     margin: 0;
     font-family: var(--font-heading--family, inherit);
-    font-size: 13.5px;
+    font-size: 14.5px;
     font-weight: 600;
     color: #111111;
     text-transform: none;
@@ -1345,7 +1344,7 @@
     .balad-latest-grid__media { border-radius: 16px; }
     .balad-latest-grid__info { padding-top: 10px; gap: 4px; }
     .balad-latest-grid__title-row { gap: 6px; }
-    .balad-latest-grid__title { font-size: 12.5px; }
+    .balad-latest-grid__title { font-size: 13.5px; }
     .balad-latest-grid__price { font-size: 12.5px; }
     .balad-latest-grid__compare { font-size: 10px; }
     .balad-latest-grid__star { font-size: 10.5px; }

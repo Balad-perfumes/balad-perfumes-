@@ -823,25 +823,28 @@
     .pdp-glance strong { font-size: 13px; }
   }
 
-  /* Section 4: size (buttons stretch to fill the row: 1 size = full width, several sizes share the row equally) */
+  /* Section 4: size. The selected size uses a gold outline, soft gold fill and a tick,
+     so it never looks like the solid black Buy Now button. A single size stays a compact box. */
   .pdp-option { margin: 0; padding: 16px 0; border-bottom: 1px solid #ebe8e2; }
   .pdp-sizes[hidden] { display: none; }
   .pdp-option__label { display: block; margin-bottom: 12px; font-size: 13px; font-weight: 500; color: var(--pf-ink); }
   .pdp-option__label strong { font-weight: 700; color: var(--pf-gold); }
   .pdp-sizes {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(104px, 132px));
     gap: 10px;
   }
   .pdp-size {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
     width: 100%;
     min-width: 0;
-    height: 46px;
+    height: 44px;
     padding: 0 16px;
-    border: 1px solid #e3dfd7;
+    border: 1.5px solid #e3dfd7;
     border-radius: var(--pf-radius-sm);
     background: #fff;
     font-family: inherit;
@@ -852,11 +855,30 @@
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.12s ease;
   }
-  .pdp-size:hover { border-color: var(--pf-ink); }
+  .pdp-size:hover { border-color: var(--pf-gold); }
   .pdp-size:active { transform: scale(0.97); }
-  .pdp-size.is-active { background: var(--pf-ink); border-color: var(--pf-ink); color: #fff; }
+
+  /* Selected size: gold outline + soft gold fill + tick (clearly different from the black Buy Now button) */
+  .pdp-size.is-active {
+    background: var(--pf-gold-soft);
+    border-color: var(--pf-gold);
+    color: var(--pf-ink);
+    font-weight: 700;
+  }
+  .pdp-size.is-active::before {
+    content: '';
+    width: 5px;
+    height: 9px;
+    margin-top: -2px;
+    border: solid var(--pf-gold);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
   .pdp-size.is-out { color: #a3a3a3; text-decoration: line-through; background: #faf9f7; }
-  .pdp-size.is-out.is-active { color: #d0d0d0; background: var(--pf-ink); }
+  .pdp-size.is-out.is-active { color: #a3a3a3; background: #faf9f7; border-color: var(--pf-gold); }
+  .pdp-size.is-out.is-active::before { border-color: #c9c4b8; }
   .pdp-size:focus-visible { outline: 2px solid var(--pf-gold); outline-offset: 2px; }
 
   .pdp-stock { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; margin: 0; padding: 6px 11px; border-radius: 999px; font-size: 12px; font-weight: 500; line-height: 1.2; white-space: nowrap; }
@@ -1332,14 +1354,8 @@
   .pf-sticky-btn--buy { background: var(--pf-ink); color: #fff; }
   .pf-sticky-btn--buy:hover:not(:disabled) { background: #000; }
 
-  @media screen and (max-width: 1024px) {
-    .pf-product-template { padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px)); }
-  }
-
   /* Phones: slim one-row bar at the bottom edge. It only appears after the main buttons scroll out of view (see script). */
   @media screen and (max-width: 749px) {
-    .pf-product-template { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
-
     .pf-product-template__sticky-bar {
       left: 0;
       right: 0;
@@ -1371,11 +1387,16 @@
       padding: 20px 28px 48px;
     }
 
-    .pf-product-template__media { grid-column: 1; grid-row: 1; align-self: start; }
+    /* Stretch to the full row height (same as the details column) so the photos have room to stay pinned while long details scroll */
+    .pf-product-template__media { grid-column: 1; grid-row: 1; align-self: stretch; }
 
     .pdp-gallery {
       --pdp-frame-h: clamp(420px, calc(100vh - var(--header-group-height, var(--header-height, 66px)) - 32px), 780px);
       display: block;
+      /* Photos stay in view while the details scroll. If the photos are taller than the window, they scroll until their end shows, then stay.
+         The exact top value is set by the script below (--pdp-gallery-top). */
+      position: sticky;
+      top: var(--pdp-gallery-top, calc(var(--header-group-height, var(--header-height, 66px)) + 12px));
     }
 
     .pdp-gallery__thumbs { display: none; }
@@ -1577,6 +1598,23 @@
       placeInfo();
       window.addEventListener('resize', placeInfo);
       if ('ResizeObserver' in window) new ResizeObserver(placeInfo).observe(infoPanel);
+    }
+
+    // ── Desktop: pin the photo block too. When the details are taller than the photos, the photos stay in view
+    //    (at the top, or at the bottom edge if they are taller than the window) until the details end. ──
+    const galleryEl = root.querySelector('[data-pf-gallery]');
+    if (galleryEl) {
+      const placeGallery = () => {
+        if (!desktopQuery.matches) { galleryEl.style.removeProperty('--pdp-gallery-top'); return; }
+        const header = parseFloat(getComputedStyle(root).getPropertyValue('--header-group-height')) || 66;
+        const base = header + 12;
+        const fit = window.innerHeight - galleryEl.offsetHeight - 16;
+        galleryEl.style.setProperty('--pdp-gallery-top', Math.min(base, fit) + 'px');
+      };
+      placeGallery();
+      window.addEventListener('resize', placeGallery);
+      window.addEventListener('load', placeGallery);
+      if ('ResizeObserver' in window) new ResizeObserver(placeGallery).observe(galleryEl);
     }
 
     // ── Estimated delivery date (calculated from today in the visitor's browser) ──

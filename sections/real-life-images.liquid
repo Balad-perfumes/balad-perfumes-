@@ -280,6 +280,12 @@
     }
   }
 
+  @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .pf-real-life {
+      padding: 0 20px clamp(10px, 3.5vw, 12px);
+    }
+  }
+
   /* ── Mobile ────────────────────────────────────────────────────────── */
   @media screen and (max-width: 749px) {
     .pf-real-life {
@@ -288,7 +294,7 @@
     }
 
     .pf-real-life__shell {
-      padding: 10px 10px 10px;
+      padding: 10px 12px 10px;
     }
 
     .pf-real-life__header {
@@ -297,11 +303,11 @@
     }
 
     .pf-real-life__heading {
-      font-size: 13px;
+      font-size: 18px;
     }
 
     .pf-real-life__subheading {
-      font-size: 12px;
+      font-size: 14px;
     }
 
     .pf-real-life__mosaic {

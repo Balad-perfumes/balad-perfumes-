@@ -2,7 +2,10 @@
   /* Shoppable Video & App Section Container & Alignment */
   [id*="1790060856d032d058"],
   .shopify-section[id*="1790060856"],
-  [class*="shoppable-video"] {
+  [class*="shoppable-video"],
+  [id*="1790060856d032d058"] .section,
+  [id*="1790060856d032d058"] .section-background {
+    background: #f6f3ee !important;
     width: 100% !important;
     max-width: 100% !important;
     padding-left: 36px !important;
@@ -142,6 +145,13 @@
       padding-bottom: 4px !important;
     }
 
+    [id*="1790060856d032d058"] .section-content-wrapper,
+    .shopify-section[id*="1790060856"] .section-content-wrapper {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      padding-inline: 0 !important;
+    }
+
     .flickityrf-page-dots,
     [id*="1790060856d032d058"] .flickity-page-dots {
       margin-top: 10px !important;
@@ -164,12 +174,21 @@
     }
 
     .pf-app-ig-title {
-      font-size: 13.5px !important;
+      font-size: 18px !important;
     }
 
     .pf-app-ig-sub {
-      font-size: 11.5px !important;
+      font-size: 14px !important;
       margin-top: 4px !important;
+    }
+
+    /* Remove the app's own left/right inset so the first card lines up with the heading & other sections */
+    [id*="1790060856d032d058"] [class*="flickity"],
+    [id*="1790060856d032d058"] [class*="reelfy"][class*="wrapper"],
+    [id*="1790060856d032d058"] [class*="reelfy"][class*="container"],
+    [id*="1790060856d032d058"] [class*="reelfy"][class*="slider"] {
+      padding-left: 0 !important;
+      margin-left: 0;
     }
   }
 
@@ -214,6 +233,43 @@
         }
       }
     };
+
+    // Mobile: line the first video card up with the heading (same left edge as other sections)
+    const alignInstagramCards = () => {
+      const section = document.querySelector('[id*="1790060856d032d058"]') || document.querySelector('.shopify-section[id*="1790060856"]');
+      if (!section) return;
+      const viewport = section.querySelector('.flickity-viewport');
+      const slider = section.querySelector('.flickity-slider');
+      const header = section.querySelector('.pf-app-ig-header');
+      const firstCell = slider && slider.firstElementChild;
+      if (!viewport || !slider || !header || !firstCell) return;
+
+      const isMobile = window.matchMedia('(max-width: 749px)').matches;
+      if (!isMobile) {
+        if (viewport.dataset.pfShift) {
+          viewport.style.marginLeft = '';
+          delete viewport.dataset.pfShift;
+          
+        }
+        return;
+      }
+      if (viewport.dataset.pfShift) return; // already corrected
+
+      // Only measure while the slider sits at the first card
+      const tx = new DOMMatrix(getComputedStyle(slider).transform).m41;
+      if (Math.abs(tx) > 1) return;
+
+      const gap = firstCell.getBoundingClientRect().left - header.getBoundingClientRect().left;
+      if (Math.abs(gap) > 0.5 && Math.abs(gap) < 40) {
+        viewport.style.marginLeft = (-gap) + 'px';
+        viewport.dataset.pfShift = String(gap);
+        // layout updated without global resize storm
+      }
+    };
+
+    window.addEventListener('resize', () => setTimeout(alignInstagramCards, 150));
+    [600, 1200, 2200, 3500].forEach((t) => setTimeout(alignInstagramCards, t));
+    window.addEventListener('load', alignInstagramCards);
 
     document.addEventListener('DOMContentLoaded', enhanceShoppableVideoAppSection);
     window.addEventListener('load', enhanceShoppableVideoAppSection);

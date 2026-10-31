@@ -34,13 +34,15 @@
     {%- render 'color-schemes' -%}
     {%- render 'shoppable-video-enhancer' -%}
 
-    {% comment %} Lenis Smooth Scroll Inline CSS (Zero Render Blocking) {% endcomment %}
+    {% comment %} Smooth Scroll & Viewport Overflow Protection {% endcomment %}
     <style>
-      html.lenis, html.lenis body { height: auto; }
-      .lenis.lenis-smooth { scroll-behavior: auto !important; }
-      .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
-      .lenis.lenis-stopped { overflow: hidden; }
-      .lenis.lenis-smooth iframe { pointer-events: none; }
+      html {
+        scroll-behavior: smooth;
+        overflow-x: clip;
+      }
+      body {
+        overflow-x: clip;
+      }
       #instareel-block-AQU54REdJdUNCbFdOS__instareel_ig_reels_instagram_reels_feed_mAaTPW,
       [id*="instareel-block"] {
         padding-top: 0 !important;
@@ -168,71 +170,6 @@
       {% render 'quick-add-modal' %}
     {% endif %}
 
-    {% comment %} Lenis Smooth Scroll - Butter smooth scrolling (Deferred) {% endcomment %}
-    {% unless request.design_mode %}
-    <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" defer></script>
-    <script>
-      (function() {
-        function initLenis() {
-          if (typeof Lenis === 'undefined') {
-            window.addEventListener('load', initLenis, { once: true });
-            return;
-          }
-          // Skip on mobile/touch devices for better native scroll
-          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-            || (navigator.maxTouchPoints > 0 && window.innerWidth < 768);
-          if (isMobile) return;
-
-          const lenis = new Lenis({
-            duration: 1.8,
-            easing: function(t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
-            orientation: 'vertical',
-            gestureOrientation: 'vertical',
-            smoothWheel: true,
-            wheelMultiplier: 0.8,
-            touchMultiplier: 2,
-            infinite: false,
-          });
-
-          // Store globally so other scripts can access it
-          window.__lenis = lenis;
-
-          function raf(time) {
-            lenis.raf(time);
-            requestAnimationFrame(raf);
-          }
-          requestAnimationFrame(raf);
-
-          // Pause Lenis when modals/drawers are open
-          const observer = new MutationObserver(function() {
-            const hasOpenOverlay = document.querySelector(
-              '[open][is="cart-drawer"], [open][is="wishlist-drawer"], dialog[open], .shopify-section-header-sticky'
-            );
-            const bodyOverflow = getComputedStyle(document.body).overflow;
-            if (hasOpenOverlay || bodyOverflow === 'hidden') {
-              lenis.stop();
-            } else {
-              lenis.start();
-            }
-          });
-          observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['open', 'style', 'class'] });
-        }
-
-        function start() {
-          if (typeof window.requestIdleCallback === 'function') {
-            window.requestIdleCallback(initLenis);
-          } else {
-            initLenis();
-          }
-        }
-
-        if (document.readyState === 'complete') {
-          start();
-        } else {
-          window.addEventListener('load', start, { once: true });
-        }
-      })();
-    </script>
-    {% endunless %}
+    {% comment %} Native smooth scroll active {% endcomment %}
   </body>
 </html>

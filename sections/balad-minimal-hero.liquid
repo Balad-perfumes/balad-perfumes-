@@ -18,6 +18,7 @@
   data-layout="{{ layout_mode }}"
   data-autoplay="{{ autoplay_ms }}"
   data-slide-count="{{ slide_count }}"
+  {% if mobile_h == 'fit_screen' or mobile_h == '100vh' %}data-mobile-full{% endif %}
   style="
     --hero-overlay-opacity: {{ overlay_opacity }};
     --hero-overlay-color: {{ section.settings.overlay_color | default: '#000000' }};
@@ -418,6 +419,19 @@
       height: var(--hero-mobile-height-final, var(--hero-calc-mobile));
       min-height: var(--hero-mobile-height-final, var(--hero-calc-mobile));
       max-height: var(--hero-mobile-height-final, var(--hero-calc-mobile));
+    }
+  }
+
+  /* Mobile "100vh" = exactly the visible screen (excludes browser URL bar + announcement bar) */
+  @supports (height: 100svh) {
+    @media (max-width: 989px) {
+      .balad-min-hero[data-mobile-full] .balad-min-hero__viewport,
+      .balad-min-hero[data-mobile-full] .balad-min-hero__lookbook-wrap,
+      .balad-min-hero[data-mobile-full] .balad-min-hero__lookbook-card {
+        height: calc(100svh - var(--hero-announce-h, 0px));
+        min-height: calc(100svh - var(--hero-announce-h, 0px));
+        max-height: calc(100svh - var(--hero-announce-h, 0px));
+      }
     }
   }
 
@@ -1370,6 +1384,15 @@
       document.querySelectorAll('[data-balad-min-hero]').forEach((hero) => {
         if (hero.dataset.initialized === 'true') return;
         hero.dataset.initialized = 'true';
+
+        // Subtract announcement bar height so the mobile hero fits the visible screen exactly
+        const setAnnounceH = () => {
+          const bar = document.querySelector('.balad-announce');
+          hero.style.setProperty('--hero-announce-h', (bar ? bar.offsetHeight : 0) + 'px');
+        };
+        setAnnounceH();
+        window.addEventListener('resize', setAnnounceH);
+        window.addEventListener('load', setAnnounceH);
 
         const viewport = hero.querySelector('.balad-min-hero__viewport');
         const track = hero.querySelector('[data-track]');
