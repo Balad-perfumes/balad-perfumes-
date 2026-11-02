@@ -11,7 +11,12 @@
   @param {boolean} [show_rating] - Show the rating next to the subtitle (default true)
   @param {boolean} [show_buy_now] - Show the "Buy now" button on the image (default true). Pass false to hide it
   @param {boolean} [direct_add] - "Buy now" adds the first variant straight to the cart (data-similar-add) instead of opening quick-add
+  @param {boolean} [skeleton] - Render a placeholder skeleton loading card
 {%- enddoc -%}
+
+{%- if product == blank or skeleton == true -%}
+  {% render 'balad-product-card-skeleton', show_buy_now: show_buy_now %}
+{%- else -%}
 
 {%- liquid
   assign images = product.images
@@ -110,6 +115,7 @@
 
 <article class="bpc">
   <a href="{{ product.url }}" class="bpc__media" data-carousel>
+    <div class="bpc__skeleton" aria-hidden="true"></div>
     {%- if image_count > 0 -%}
       {%- for image in images limit: img_limit -%}
         <img
@@ -122,6 +128,7 @@
           height="750"
           loading="{% if eager and forloop.first %}eager{% else %}lazy{% endif %}"
           decoding="async"
+          onload="this.classList.add('is-loaded'); this.closest('.bpc__media')?.classList.add('is-loaded');"
           data-carousel-slide
         >
       {%- endfor -%}
@@ -220,3 +227,27 @@
     </span>
   </a>
 </article>
+{%- endif -%}
+
+<script>
+  if (!window.__bpcSkeletonInit) {
+    window.__bpcSkeletonInit = true;
+    (function () {
+      function markBpcLoaded(scope) {
+        (scope || document).querySelectorAll('.bpc__image').forEach(function (img) {
+          if (img.complete && img.naturalWidth > 0) {
+            img.classList.add('is-loaded');
+            var m = img.closest('.bpc__media');
+            if (m) m.classList.add('is-loaded');
+          }
+        });
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () { markBpcLoaded(); });
+      } else {
+        markBpcLoaded();
+      }
+      document.addEventListener('shopify:section:load', function (e) { markBpcLoaded(e.target); });
+    })();
+  }
+</script>

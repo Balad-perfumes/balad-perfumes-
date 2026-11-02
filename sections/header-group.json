@@ -48,7 +48,7 @@
         "show_wishlist": true,
         "header_background": "#f6f3ee",
         "header_text_color": "#111111",
-        "transparent_on_home": true,
+        "transparent_on_home": false,
         "enable_mobile_nav": true,
         "mobile_nav_style": "modern_glass",
         "mobile_nav_show_home": true,

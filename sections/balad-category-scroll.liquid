@@ -1,19 +1,56 @@
 {%- liquid
   assign hide_empty = section.settings.hide_empty_collections
   assign discover_url = section.settings.discover_more_link | default: routes.collections_url
-  assign has_cards = false
+  assign bg_image = section.settings.background_image
+  assign use_parallax = false
+  if section.settings.enable_parallax and bg_image != blank
+    assign use_parallax = true
+  endif
+  assign slack = section.settings.parallax_strength | default: 15
+  assign bg_height = slack | times: 2 | plus: 100
+
+  # Use the picked collections; if none are picked, fall back to the store's collections
+  assign use_picked = false
+  if section.settings.collection_list != blank
+    assign use_picked = true
+  endif
+  assign cols_desktop = section.settings.columns_desktop | default: 4
 -%}
 
 <section
-  class="balad-cats{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  class="balad-cats{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}{% if use_parallax %} balad-cats--parallax{% endif %}"
   data-cats-section="{{ section.id }}"
+  {% if use_parallax %}data-cats-parallax="{{ slack }}"{% endif %}
   style="
     --cats-bg: {{ section.settings.background | default: '#ffffff' }};
     --cats-text: {{ section.settings.text_color | default: '#111111' }};
     --cats-muted: {{ section.settings.muted_text_color | default: '#6b7280' }};
-    --cats-radius: {{ section.settings.image_radius | default: 24 }}px;
+    --cats-radius: {{ section.settings.image_radius | default: 20 }}px;
+    --cats-cols: {{ cols_desktop }};
+    {% case section.settings.card_size %}
+      {% when 'medium' %}
+        --cats-aspect: 1 / 1.22;
+        --cats-aspect-mobile: 1 / 1.22;
+      {% when 'tall' %}
+        --cats-aspect: 3 / 4;
+        --cats-aspect-mobile: 3 / 4;
+      {% else %}
+        --cats-aspect: 1 / 1.12;
+        --cats-aspect-mobile: 1 / 1.15;
+    {% endcase %}
+    {% if use_parallax %}
+    --cats-overlay: {{ section.settings.overlay_opacity | default: 45 | divided_by: 100.0 }};
+    --cats-slack: {{ slack }}%;
+    --cats-bg-height: {{ bg_height }}%;
+    {% endif %}
   "
 >
+  {%- if use_parallax -%}
+    <div class="balad-cats__bg" aria-hidden="true">
+      {{ bg_image | image_url: width: 2400 | image_tag: class: 'balad-cats__bg-img', loading: 'lazy', alt: '', widths: '800, 1200, 1600, 2400', sizes: '100vw' }}
+    </div>
+  {%- endif -%}
+
   <div class="balad-cats__shell">
     <div class="balad-cats__head">
       <div class="balad-cats__heading-wrap">
@@ -29,98 +66,59 @@
       {% endif %}
     </div>
 
-    <div class="balad-cats__rail" data-cats-rail>
-        {%- for coll in section.settings.collection_list -%}
-          {%- liquid
-            assign skip = false
-            if hide_empty and coll.products_count == 0
-              assign skip = true
+    <div class="balad-cats__grid">
+      {%- if use_picked -%}
+        {%- assign coll_source = section.settings.collection_list -%}
+      {%- else -%}
+        {%- assign coll_source = collections -%}
+      {%- endif -%}
+
+      {%- for coll in coll_source limit: 12 -%}
+        {%- liquid
+          unless use_picked
+            if coll.handle == 'all' or coll.handle == 'frontpage'
+              continue
             endif
-            assign img = coll.image
-            if img == blank
-              assign img = coll.products.first.featured_image
-            endif
-          -%}
-          {%- unless skip -%}
-            {%- assign has_cards = true -%}
-            <div class="balad-cc">
-              <div class="balad-cc__card">
-                <div class="balad-cc__media">
-                  <a href="{{ coll.url }}" class="balad-cc__cover" draggable="false" aria-label="{{ coll.title | escape }}"></a>
-                  {%- if img != blank -%}
-                    {{
-                      img
-                      | image_url: width: 700
-                      | image_tag:
-                        loading: 'lazy',
-                        widths: '240, 360, 480, 700',
-                        sizes: '(min-width: 1025px) 16vw, (min-width: 750px) 24vw, 44vw',
-                        alt: coll.title,
-                        class: 'balad-cc__image',
-                        draggable: 'false'
-                    }}
-                  {%- else -%}
-                    {{ 'collection-1' | placeholder_svg_tag: 'balad-cc__image balad-cc__placeholder' }}
-                  {%- endif -%}
+          endunless
+          if hide_empty and coll.products_count == 0
+            continue
+          endif
+          assign img = coll.image
+          if img == blank
+            assign img = coll.products.first.featured_image
+          endif
+        -%}
+        <a href="{{ coll.url }}" class="balad-cc" draggable="false">
+          <span class="balad-cc__media">
+            {%- if img != blank -%}
+              {{
+                img
+                | image_url: width: 900
+                | image_tag:
+                  loading: 'lazy',
+                  widths: '360, 540, 720, 900',
+                  sizes: '(min-width: 1200px) 25vw, (min-width: 750px) 33vw, 50vw',
+                  alt: coll.title,
+                  class: 'balad-cc__image',
+                  draggable: 'false'
+              }}
+            {%- else -%}
+              {{ 'collection-1' | placeholder_svg_tag: 'balad-cc__image balad-cc__placeholder' }}
+            {%- endif -%}
+            <span class="balad-cc__overlay" aria-hidden="true"></span>
+          </span>
 
-                  <div class="balad-cc__dock">
-                    <a href="{{ coll.url }}" class="balad-cc__buy" draggable="false">
-                      <span class="balad-cc__buy-label">{{ coll.title }}</span>
-                      <span class="balad-cc__buy-arrow" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                      </span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          {%- endunless -%}
-        {%- endfor -%}
-
-        {%- unless has_cards -%}
-          {%- for coll in collections limit: 12 -%}
-            {%- liquid
-              if coll.handle == 'all' or coll.handle == 'frontpage'
-                continue
-              endif
-              if hide_empty and coll.products_count == 0
-                continue
-              endif
-              assign img = coll.image | default: coll.products.first.featured_image
-            -%}
-            <div class="balad-cc">
-              <div class="balad-cc__card">
-                <div class="balad-cc__media">
-                  <a href="{{ coll.url }}" class="balad-cc__cover" draggable="false" aria-label="{{ coll.title | escape }}"></a>
-                  {%- if img != blank -%}
-                    {{
-                      img
-                      | image_url: width: 700
-                      | image_tag:
-                        loading: 'lazy',
-                        widths: '240, 360, 480, 700',
-                        sizes: '(min-width: 1025px) 16vw, (min-width: 750px) 24vw, 44vw',
-                        alt: coll.title,
-                        class: 'balad-cc__image',
-                        draggable: 'false'
-                    }}
-                  {%- else -%}
-                    {{ 'collection-1' | placeholder_svg_tag: 'balad-cc__image balad-cc__placeholder' }}
-                  {%- endif -%}
-
-                  <div class="balad-cc__dock">
-                    <a href="{{ coll.url }}" class="balad-cc__buy" draggable="false">
-                      <span class="balad-cc__buy-label">{{ coll.title }}</span>
-                      <span class="balad-cc__buy-arrow" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                      </span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          {%- endfor -%}
-        {%- endunless -%}
+          <span class="balad-cc__info">
+            <span class="balad-cc__text">
+              <span class="balad-cc__title">{{ coll.title }}</span>
+              <span class="balad-cc__count">{{ coll.products_count }} {{ coll.products_count | pluralize: 'product', 'products' }}</span>
+            </span>
+            <span class="balad-cc__arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </span>
+          </span>
+        </a>
+      {%- endfor -%}
     </div>
   </div>
 </section>
@@ -129,13 +127,14 @@
   .balad-cats {
     background: var(--cats-bg, #ffffff) !important;
     padding-top: 20px;
-    padding-bottom: 10px;
+    padding-bottom: 24px;
     width: 100%;
     box-sizing: border-box;
   }
 
   .balad-cats__shell {
     width: 100%;
+    max-width: 100%;
     margin: 0;
     padding: 0 36px;
     box-sizing: border-box;
@@ -146,7 +145,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 16px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     padding-bottom: 8px;
     border-bottom: 1px solid rgb(17 17 17 / 0.08);
   }
@@ -183,66 +182,41 @@
   }
   .balad-cats__discover:hover { opacity: 0.7; }
 
-  /* ── Rail (same track as the product sliders) ── */
-  .balad-cats__rail {
+  /* ── Grid: 4 per row on desktop, 2 per row on mobile ── */
+  .balad-cats__grid {
     display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: calc((100% - (5 * 12px)) / 6);
-    gap: 12px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    overscroll-behavior-x: contain;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding: 0 0 4px;
-    margin: 0;
-    cursor: grab;
-    scroll-snap-type: none;
-    touch-action: pan-x pan-y;
+    grid-template-columns: repeat(var(--cats-cols, 4), minmax(0, 1fr));
+    column-gap: 16px;
+    row-gap: 20px;
   }
-  .balad-cats__rail::-webkit-scrollbar { display: none; }
-  .balad-cats__rail.is-dragging { cursor: grabbing; user-select: none; -webkit-user-select: none; }
-  .balad-cats__rail.is-dragging a,
-  .balad-cats__rail.is-dragging img { pointer-events: none; }
 
-  /* ── Collection card (self-contained: does not use the product card styles) ── */
-  .balad-cc { min-width: 0; display: flex; flex-direction: column; }
-
-  .balad-cc .balad-cc__card {
-    --cc-pad: 8px;
-    --cc-border: rgb(0 0 0 / 0.08);
-    container-type: inline-size;
+  /* ── Collection item: image card with content and gradient overlay inside ── */
+  .balad-cc {
     position: relative;
     display: flex;
-    flex: 1 1 auto;
     flex-direction: column;
-    min-width: 0;
-    padding: var(--cc-pad);
-    background: #fff;
-    box-shadow: 0 0 0 1px var(--cc-border);
-    border-radius: var(--cats-radius, 24px);
-    color: #111;
-  }
-
-  .balad-cc .balad-cc__media {
-    position: relative;
-    display: block;
-    aspect-ratio: 4 / 5;
-    background: #ece9e4;
+    justify-content: flex-end;
+    aspect-ratio: var(--cats-aspect, 1 / 1.12);
+    border-radius: var(--cats-radius, 20px);
     overflow: hidden;
     isolation: isolate;
-    border-radius: max(calc(var(--cats-radius, 24px) - var(--cc-pad, 8px)), 0px);
+    text-decoration: none;
+    background: #1c1a17;
+    box-shadow: 0 6px 20px -6px rgba(0, 0, 0, 0.16);
+    transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.35s ease;
+    -webkit-user-drag: none;
   }
 
-  .balad-cc .balad-cc__media::after {
-    content: '';
+  .balad-cc:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 28px -8px rgba(0, 0, 0, 0.26);
+  }
+
+  .balad-cc__media {
     position: absolute;
-    inset: auto 0 0;
-    height: 40%;
-    background: linear-gradient(to top, rgb(0 0 0 / 0.22), transparent);
-    pointer-events: none;
+    inset: 0;
     z-index: 1;
+    overflow: hidden;
   }
 
   .balad-cc .balad-cc__image {
@@ -253,177 +227,246 @@
     object-fit: cover;
     transform: scale(1);
     transform-origin: center center;
-    transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
     will-change: transform;
     -webkit-user-drag: none;
   }
 
   .balad-cc:hover .balad-cc__image,
-  .balad-cc:focus-within .balad-cc__image {
-    transform: scale(1.1);
+  .balad-cc:focus-visible .balad-cc__image {
+    transform: scale(1.06);
   }
 
-  .balad-cc__cover {
+  /* Gradient overlay: smooth bottom-to-top dark fade for optimal text legibility */
+  .balad-cc__overlay {
     position: absolute;
     inset: 0;
     z-index: 2;
-    -webkit-user-drag: none;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.82) 0%,
+      rgba(0, 0, 0, 0.52) 28%,
+      rgba(0, 0, 0, 0.16) 55%,
+      rgba(0, 0, 0, 0) 80%
+    );
+    transition: background 0.3s ease;
   }
 
-  .balad-cc .balad-cc__dock {
-    position: absolute;
-    inset: auto 10px 10px;
+  .balad-cc:hover .balad-cc__overlay {
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.88) 0%,
+      rgba(0, 0, 0, 0.6) 32%,
+      rgba(0, 0, 0, 0.22) 60%,
+      rgba(0, 0, 0, 0) 85%
+    );
+  }
+
+  /* Content inside the image at the bottom */
+  .balad-cc__info {
+    position: relative;
     z-index: 3;
     display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .balad-cc .balad-cc__buy {
-    display: flex;
-    flex: 1 1 auto;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
+    gap: 10px;
     min-width: 0;
-    height: 40px;
-    padding: 0 5px 0 16px;
-    border-radius: 999px;
-    background: rgb(32 28 25 / 0.42);
-    -webkit-backdrop-filter: blur(14px) saturate(1.2);
-    backdrop-filter: blur(14px) saturate(1.2);
-    color: #fff;
-    font-size: 13px;
-    font-weight: 500;
-    line-height: 1;
-    text-align: left;
-    text-decoration: none;
-    text-transform: none;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
+    padding: clamp(12px, 1.4vw, 16px);
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  /* Theme gradient that spreads slowly from the start of the button to the end on hover */
-  .balad-cc .balad-cc__buy::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: linear-gradient(
-      to right,
-      #13173a 0%,
-      #2a1b46 18%,
-      #521f5a 36%,
-      #632266 54%,
-      rgb(99 34 102 / 0.85) 66%,
-      rgb(99 34 102 / 0.5) 80%,
-      rgb(99 34 102 / 0.15) 92%,
-      rgb(99 34 102 / 0) 100%
-    );
-    transform: scaleX(0);
-    transform-origin: left center;
-    transition: transform 0.65s cubic-bezier(0.33, 0.85, 0.4, 1);
-    will-change: transform;
-    pointer-events: none;
+  .balad-cc__text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    flex: 1;
   }
 
-  .balad-cats__shell .balad-cc:hover .balad-cc__buy::before,
-  .balad-cats__shell .balad-cc:focus-within .balad-cc__buy::before {
-    transform: scaleX(1.85);
-  }
-
-  .balad-cc .balad-cc__buy-label {
+  .balad-cc__title {
+    color: #ffffff !important;
+    font-family: var(--font-heading--family, -apple-system, BlinkMacSystemFont, sans-serif);
+    font-size: clamp(14px, 1.1vw, 17px);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   }
 
-  .balad-cc .balad-cc__buy-arrow {
-    display: grid;
+  .balad-cc__count {
+    color: rgba(255, 255, 255, 0.82) !important;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Circular frosted arrow badge */
+  .balad-cc__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex: none;
-    place-items: center;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: #fff;
-    color: #111;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.16);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    color: #ffffff !important;
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
   }
 
-  .balad-cc .balad-cc__buy-arrow svg {
-    width: 15px;
-    height: 15px;
+  .balad-cc__arrow svg { width: 13px; height: 13px; }
+
+  .balad-cc:hover .balad-cc__arrow,
+  .balad-cc:focus-visible .balad-cc__arrow {
+    background: #ffffff;
+    border-color: #ffffff;
+    color: #111111 !important;
+    transform: translateX(3px);
   }
 
-  .balad-cc .balad-cc__buy-arrow {
-    transition: transform 0.25s ease;
-  }
-
-  .balad-cats__shell .balad-cc:hover .balad-cc__buy-arrow {
-    transform: translateX(2px);
-  }
-
-  .balad-cc a:focus-visible {
-    outline: 2px solid #fff;
-    outline-offset: -3px;
-  }
-
-  @container (max-width: 230px) {
-    .balad-cc__buy { height: 38px; padding: 0 4px 0 14px; font-size: 12px; }
-    .balad-cc__buy-arrow { width: 28px; height: 28px; }
-  }
-
-  @media screen and (min-width: 1025px) and (max-width: 1400px) {
-    .balad-cats__rail { grid-auto-columns: calc((100% - (5 * 10px)) / 6); gap: 10px; }
+  .balad-cc:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 4px;
   }
 
   @media screen and (min-width: 750px) and (max-width: 1024px) {
     .balad-cats__shell { padding: 0 20px; }
-    .balad-cats__rail { grid-auto-columns: calc((100% - 30px) / 4); gap: 10px; }
+    .balad-cats__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: 14px;
+      row-gap: 18px;
+    }
+    .balad-cc {
+      aspect-ratio: var(--cats-aspect, 1 / 1.12);
+    }
+    .balad-cc__title { font-size: 15px; }
+    .balad-cc__arrow { width: 30px; height: 30px; }
+    .balad-cc__arrow svg { width: 12px; height: 12px; }
   }
 
   @media screen and (max-width: 749px) {
-    .balad-cats { padding-top: 20px; padding-bottom: 10px; }
+    .balad-cats { padding-top: 16px; padding-bottom: 20px; }
     .balad-cats__shell { padding: 0 12px; }
-    .balad-cats__head { margin-bottom: 8px; padding-bottom: 6px; }
+    .balad-cats__head { margin-bottom: 12px; padding-bottom: 6px; }
     .balad-cats__heading { font-size: 18px; }
-    .balad-cats__subheading { font-size: 14px; margin-top: 4px; }
+    .balad-cats__subheading { font-size: 13px; margin-top: 4px; }
     .balad-cats__discover { font-size: 12.5px; }
-    .balad-cats__rail { grid-auto-columns: calc((100% - 16px) / 2.3); gap: 8px; padding-bottom: 2px; }
+
+    .balad-cats__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 10px;
+      row-gap: 12px;
+    }
+
+    .balad-cc {
+      aspect-ratio: var(--cats-aspect-mobile, 1 / 1.15);
+      border-radius: clamp(12px, var(--cats-radius, 20px), 16px);
+    }
+
+    .balad-cc__info {
+      padding: 10px 9px;
+      gap: 6px;
+    }
+
+    .balad-cc__title { font-size: 13.5px; }
+    .balad-cc__count { font-size: 11px; }
+    .balad-cc__arrow { width: 26px; height: 26px; }
+    .balad-cc__arrow svg { width: 11px; height: 11px; }
+  }
+
+  /* ── Parallax background (optional) ── */
+  .balad-cats--parallax {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    padding-top: clamp(28px, 3.6vw, 48px);
+    padding-bottom: clamp(24px, 3vw, 40px);
+  }
+
+  .balad-cats__bg {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    overflow: hidden;
+  }
+
+  .balad-cats__bg-img {
+    position: absolute;
+    left: 0;
+    top: calc(var(--cats-slack, 15%) * -1);
+    width: 100%;
+    height: var(--cats-bg-height, 130%);
+    object-fit: cover;
+    will-change: transform;
+    transform: translate3d(0, var(--cats-shift, 0px), 0);
+  }
+
+  .balad-cats--parallax::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgb(0 0 0 / calc(var(--cats-overlay, 0.45) + 0.12)) 0%,
+      rgb(0 0 0 / var(--cats-overlay, 0.45)) 55%,
+      rgb(0 0 0 / calc(var(--cats-overlay, 0.45) + 0.18)) 100%
+    );
+  }
+
+  .balad-cats--parallax .balad-cats__head { border-bottom-color: rgb(255 255 255 / 0.22); }
+  .balad-cats--parallax .balad-cats__heading,
+  .balad-cats--parallax .balad-cats__discover,
+  .balad-cats--parallax .balad-cc,
+  .balad-cats--parallax .balad-cc__title,
+  .balad-cats--parallax .balad-cc__arrow { color: #ffffff; }
+  .balad-cats--parallax .balad-cats__subheading,
+  .balad-cats--parallax .balad-cc__count { color: rgb(255 255 255 / 0.82); }
+  .balad-cats--parallax .balad-cc:hover .balad-cc__arrow,
+  .balad-cats--parallax .balad-cc:focus-visible .balad-cc__arrow { background: #ffffff; color: #111111; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .balad-cats__bg-img { transform: none; }
+    .balad-cc .balad-cc__image { transition: none; }
   }
 </style>
 
 <script>
   (() => {
-    const root = document.querySelector('[data-cats-section="{{ section.id }}"]');
-    const rail = root && root.querySelector('[data-cats-rail]');
-    if (!rail) return;
+    const root = document.querySelector('[data-cats-section="{{ section.id }}"][data-cats-parallax]');
+    if (!root) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const img = root.querySelector('.balad-cats__bg-img');
+    if (!img) return;
+    let ticking = false;
 
-    let down = false, moved = false, startX = 0, startLeft = 0;
+    const apply = () => {
+      ticking = false;
+      const vh = window.innerHeight || 800;
+      const rect = root.getBoundingClientRect();
+      if (rect.bottom < -200 || rect.top > vh + 200) return;
+      const slack = parseFloat(root.dataset.catsParallax || '15') / 100;
+      const max = rect.height * slack * 0.95;
+      let progress = ((rect.top + rect.height / 2) - vh / 2) / (vh / 2 + rect.height / 2);
+      progress = Math.max(-1, Math.min(1, progress));
+      img.style.setProperty('--cats-shift', (-progress * max).toFixed(1) + 'px');
+    };
+    const request = () => { if (!ticking) { ticking = true; requestAnimationFrame(apply); } };
 
-    rail.addEventListener('mousedown', (e) => {
-      down = true; moved = false;
-      startX = e.pageX;
-      startLeft = rail.scrollLeft;
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (!down) return;
-      const walk = e.pageX - startX;
-      if (Math.abs(walk) > 4) { moved = true; rail.classList.add('is-dragging'); }
-      if (moved) rail.scrollLeft = startLeft - walk;
-    });
-
-    window.addEventListener('mouseup', () => {
-      if (!down) return;
-      down = false;
-      rail.classList.remove('is-dragging');
-      setTimeout(() => { moved = false; }, 80);
-    });
-
-    rail.addEventListener('click', (e) => {
-      if (moved) { e.preventDefault(); e.stopPropagation(); }
-    }, true);
+    window.addEventListener('scroll', request, { passive: true });
+    window.addEventListener('resize', request);
+    window.addEventListener('load', request);
+    apply();
   })();
 </script>
 
@@ -449,6 +492,26 @@
     { "type": "checkbox", "id": "hide_empty_collections", "label": "Hide empty collections", "default": false },
     {
       "type": "range",
+      "id": "columns_desktop",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "label": "Cards per row on desktop",
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "card_size",
+      "label": "Card size",
+      "options": [
+        { "value": "compact", "label": "Compact (Recommended)" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "tall", "label": "Tall" }
+      ],
+      "default": "compact"
+    },
+    {
+      "type": "range",
       "id": "image_radius",
       "min": 0,
       "max": 40,
@@ -457,6 +520,35 @@
       "label": "Card border radius",
       "default": 24
     },
+    { "type": "header", "content": "Parallax background" },
+    { "type": "checkbox", "id": "enable_parallax", "label": "Enable parallax background", "default": false },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image",
+      "info": "Needed for the parallax effect. Wide image, 2400px or more works best."
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Dark overlay",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 45
+    },
+    {
+      "type": "range",
+      "id": "parallax_strength",
+      "label": "Parallax strength",
+      "min": 5,
+      "max": 30,
+      "step": 5,
+      "unit": "%",
+      "default": 15
+    },
+    { "type": "header", "content": "Colors" },
     { "type": "color", "id": "background", "label": "Background", "default": "#ffffff" },
     { "type": "color", "id": "text_color", "label": "Text color", "default": "#111111" },
     { "type": "color", "id": "muted_text_color", "label": "Muted text color", "default": "#6b7280" },

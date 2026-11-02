@@ -65,9 +65,9 @@
       "settings": {
         "layout_mode": "full_bleed",
         "show_text": false,
-        "enable_container": false,
-        "corner_radius": 0,
-        "padding_bottom": 0,
+        "enable_container": true,
+        "corner_radius": 16,
+        "padding_bottom": 12,
         "desktop_height": "100vh",
         "mobile_height": "100vh",
         "heading_size": "medium",
@@ -94,11 +94,17 @@
         "collection_list": [
           "for-her",
           "for-him",
-          "unisex"
+          "unisex",
+          "new-in"
         ],
         "hide_empty_collections": false,
+        "columns_desktop": 4,
+        "card_size": "compact",
         "image_radius": 24,
-        "background": "#f6f3ee",
+        "enable_parallax": true,
+        "overlay_opacity": 45,
+        "parallax_strength": 15,
+        "background": "#ffffff",
         "text_color": "#111111",
         "muted_text_color": "#6b7280",
         "color_scheme": ""
@@ -115,7 +121,9 @@
         "collection_list": [],
         "hide_empty_collections": false,
         "image_radius": 24,
-        "background": "#f6f3ee",
+        "overlay_opacity": 45,
+        "parallax_strength": 15,
+        "background": "#ffffff",
         "text_color": "#111111",
         "muted_text_color": "#6b7280",
         "color_scheme": "scheme-1"
@@ -132,6 +140,26 @@
         "rows": "2",
         "show_rating": true,
         "background": "#ffffff",
+        "color_scheme": "scheme-1"
+      }
+    },
+    "for_her_grid": {
+      "type": "balad-for-her-grid",
+      "settings": {
+        "eyebrow": "For Her",
+        "heading": "Fragrances for Her",
+        "subheading": "Elegant florals, soft musks and warm signatures.",
+        "collection": "for-her",
+        "show_count": true,
+        "columns": "6",
+        "products_to_show": 12,
+        "show_rating": true,
+        "show_buy_now": false,
+        "button_label": "Shop all for her",
+        "button_link": "shopify://collections/for-her",
+        "overlay_opacity": 20,
+        "parallax_strength": 15,
+        "background": "#1a1a1a",
         "color_scheme": "scheme-1"
       }
     },
@@ -228,16 +256,39 @@
         "promo_2"
       ],
       "settings": {
+        "background": "#ffffff",
         "heading": "",
         "subheading": "",
         "color_scheme": "scheme-1",
+        "desktop_columns": "1",
         "mobile_columns": "1",
+        "show_arrows": true,
+        "show_dots": true,
         "gap": 12,
         "padding_top": 20,
         "padding_bottom": 20,
-        "height_desktop": 380,
-        "height_mobile": 260,
-        "background": "#ffffff"
+        "height_desktop": 600,
+        "height_mobile": 440
+      }
+    },
+    "for_him_grid": {
+      "type": "balad-for-him-grid",
+      "settings": {
+        "eyebrow": "For Him",
+        "heading": "Fragrances for Him",
+        "subheading": "Bold woods, rich spices and fresh signatures.",
+        "collection": "for-him",
+        "show_count": true,
+        "columns": "6",
+        "products_to_show": 12,
+        "show_rating": true,
+        "show_buy_now": false,
+        "button_label": "Shop all for him",
+        "button_link": "shopify://collections/for-him",
+        "overlay_opacity": 20,
+        "parallax_strength": 15,
+        "background": "#1a1a1a",
+        "color_scheme": "scheme-1"
       }
     },
     "feature_cards": {
@@ -500,7 +551,7 @@
         "color_scheme": "",
         "heading": "Club Balad Perfumes / AS Seen in real life",
         "subheading": "Real styles from our community.",
-        "background": "#f6f3ee",
+        "background": "#1a1a1a",
         "text_color": "#111111",
         "muted_text_color": "#6b7280",
         "accent_color": "#0800cf",
@@ -549,12 +600,13 @@
         "heading": "",
         "subheading": "",
         "color_scheme": "scheme-1",
+        "desktop_columns": "1",
         "mobile_columns": "1",
         "gap": 20,
         "padding_top": 40,
         "padding_bottom": 40,
-        "height_desktop": 350,
-        "height_mobile": 240
+        "height_desktop": 600,
+        "height_mobile": 440
       }
     },
     "spotlight": {
@@ -887,6 +939,7 @@
       "block_order": [
         "ai_gen_block_5864f4b_KtWEBD"
       ],
+      "disabled": true,
       "settings": {
         "content_direction": "column",
         "vertical_on_mobile": true,
@@ -914,11 +967,11 @@
         "padding-block-start": 0,
         "padding-block-end": 0,
         "remove_horizontal_padding": false
-      },
-      "disabled": true
+      }
     },
     "17895396654d2f4c4d": {
       "type": "_blocks",
+      "disabled": true,
       "settings": {
         "content_direction": "column",
         "vertical_on_mobile": true,
@@ -946,8 +999,7 @@
         "padding-block-start": 0,
         "padding-block-end": 0,
         "remove_horizontal_padding": false
-      },
-      "disabled": true
+      }
     },
     "1790070845fab6f0c6": {
       "type": "_blocks",
@@ -998,10 +1050,12 @@
     "balad_category_scroll_iGAtgb",
     "shop_by_category",
     "category_scroll",
+    "for_her_grid",
     "1790060856d032d058",
     "promo_cards_two_up",
     "feature_cards",
     "category_products_scroll",
+    "for_him_grid",
     "trending_now",
     "our_stores",
     "testimonials",

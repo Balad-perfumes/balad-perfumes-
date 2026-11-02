@@ -79,22 +79,8 @@
 
       {% if sorted_products.size == 0 %}
         {% for i in (1..limit_count) %}
-          <div class="balad-trending-grid__card balad-trending-grid__card--placeholder">
-            <div class="balad-trending-grid__media">
-              {{ 'product-1' | placeholder_svg_tag: 'balad-trending-grid__placeholder' }}
-            </div>
-            <div class="balad-trending-grid__info">
-              <div class="balad-trending-grid__details">
-                <h3 class="balad-trending-grid__title">Trending Item {{ i }}</h3>
-              <span class="balad-trending-grid__price">₹0</span>
-              </div>
-              <span class="balad-trending-grid__plus-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-              </span>
-            </div>
+          <div class="balad-trending-grid__card" data-product-card>
+            {% render 'balad-product-card-skeleton', show_buy_now: section.settings.show_buy_now %}
           </div>
         {% endfor %}
       {% endif %}

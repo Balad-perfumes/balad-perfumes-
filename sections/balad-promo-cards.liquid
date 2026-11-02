@@ -4,7 +4,7 @@
 %}
 
 <section
-  class="balad-promo-cards balad-promo-cards--mobile-{{ section.settings.mobile_columns | default: '1' }} color-{{ section.settings.color_scheme }}"
+  class="balad-promo-cards balad-promo-cards--desktop-{{ section.settings.desktop_columns | default: '1' }} balad-promo-cards--mobile-{{ section.settings.mobile_columns | default: '1' }} color-{{ section.settings.color_scheme }}"
   id="balad-promo-cards-{{ section.id }}"
   data-promo-cards
   data-autoplay="{{ section.settings.autoplay }}"
@@ -13,8 +13,8 @@
     --promo-cards-bg: {{ section.settings.background | default: '#ffffff' }};
     padding-top: clamp(10px, 1.4vw, 16px);
     padding-bottom: clamp(4px, 0.8vw, 8px);
-    --desktop-card-height: {{ section.settings.height_desktop }}px;
-    --mobile-card-height: {{ section.settings.height_mobile }}px;
+    --desktop-card-height: {{ section.settings.height_desktop | default: 600 }}px;
+    --mobile-card-height: {{ section.settings.height_mobile | default: 440 }}px;
   "
 >
   <div class="balad-promo-cards__shell">
@@ -29,83 +29,106 @@
       </div>
     {% endif %}
 
-    <div class="balad-promo-cards__slider" data-promo-slider>
-    <div class="balad-promo-cards__grid" data-promo-track style="--grid-gap: {{ section.settings.gap }}px;">
-      {% for block in section.blocks %}
-        {% liquid
-          assign overlay_opacity = block.settings.overlay_opacity | divided_by: 100.0
-          assign overlay_color = block.settings.overlay_color | default: '#000000'
-        %}
-        <div
-          class="balad-promo-card block-{{ block.id }} text-align-{{ block.settings.text_align }} content-pos-{{ block.settings.content_position }}"
-          style="--overlay-opacity: {{ overlay_opacity }}; --overlay-color: {{ overlay_color }};"
-          data-promo-slide
-          {{ block.shopify_attributes }}
+    <div class="balad-promo-cards__slider" data-promo-slider tabindex="0" role="region" aria-label="Promo card slider">
+      {% if section.blocks.size > 1 and section.settings.show_arrows != false %}
+        <button
+          type="button"
+          class="balad-promo-cards__nav balad-promo-cards__nav--prev"
+          data-promo-prev
+          aria-label="Previous promo"
         >
-          <div class="balad-promo-card__media">
-            {% if block.settings.image != blank %}
-              {{
-                block.settings.image
-                | image_url: width: 1200
-                | image_tag:
-                  class: 'balad-promo-card__image',
-                  widths: '480, 720, 960, 1200',
-                  loading: 'lazy',
-                  alt: block.settings.heading | default: 'Promo card image'
-              }}
-            {% else %}
-              {{ 'lifestyle-1' | placeholder_svg_tag: 'balad-promo-card__placeholder' }}
-            {% endif %}
-            
-            <div class="balad-promo-card__overlay"></div>
-          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="balad-promo-cards__nav balad-promo-cards__nav--next"
+          data-promo-next
+          aria-label="Next promo"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      {% endif %}
 
-          {% if block.settings.button_label == blank and block.settings.button_link != blank %}
-            <a class="balad-promo-card__link" href="{{ block.settings.button_link }}" aria-label="{{ block.settings.heading | default: 'Promo card' | escape }}"></a>
-          {% endif %}
-
-          <div class="balad-promo-card__content">
-            {% if block.settings.subheading != blank %}
-              <p class="balad-promo-card__subheading">{{ block.settings.subheading | escape }}</p>
-            {% endif %}
-
-            {% if block.settings.heading != blank %}
-              <h3 class="balad-promo-card__heading">{{ block.settings.heading | escape }}</h3>
-            {% endif %}
-
-            {% if block.settings.description != blank %}
-              <div class="balad-promo-card__description rte">
-                {{ block.settings.description }}
-              </div>
-            {% endif %}
-
-            {% if block.settings.button_label != blank %}
-              <a
-                class="balad-promo-card__button"
-                href="{{ block.settings.button_link | default: '#' }}"
-              >
-                {{ block.settings.button_label | escape }}
-              </a>
-            {% endif %}
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-
-    {% if section.blocks.size > 1 %}
-      <div class="balad-promo-cards__dots" role="tablist" aria-label="Choose image">
+      <div class="balad-promo-cards__grid" data-promo-track style="--grid-gap: {{ section.settings.gap }}px;">
         {% for block in section.blocks %}
-          <button
-            type="button"
-            class="balad-promo-cards__dot{% if forloop.first %} is-active{% endif %}"
-            data-promo-dot
-            role="tab"
-            aria-label="Show image {{ forloop.index }} of {{ section.blocks.size }}"
-            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
-          ></button>
+          {% liquid
+            assign overlay_opacity = block.settings.overlay_opacity | divided_by: 100.0
+            assign overlay_color = block.settings.overlay_color | default: '#000000'
+          %}
+          <div
+            class="balad-promo-card block-{{ block.id }} text-align-{{ block.settings.text_align }} content-pos-{{ block.settings.content_position }}"
+            style="--overlay-opacity: {{ overlay_opacity }}; --overlay-color: {{ overlay_color }};"
+            data-promo-slide
+            {{ block.shopify_attributes }}
+          >
+            <div class="balad-promo-card__media">
+              {% if block.settings.image != blank %}
+                {{
+                  block.settings.image
+                  | image_url: width: 1600
+                  | image_tag:
+                    class: 'balad-promo-card__image',
+                    widths: '480, 720, 960, 1200, 1600, 2000',
+                    loading: 'lazy',
+                    alt: block.settings.heading | default: 'Promo card image'
+                }}
+              {% else %}
+                {{ 'lifestyle-1' | placeholder_svg_tag: 'balad-promo-card__placeholder' }}
+              {% endif %}
+              
+              <div class="balad-promo-card__overlay"></div>
+            </div>
+
+            {% if block.settings.button_label == blank and block.settings.button_link != blank %}
+              <a class="balad-promo-card__link" href="{{ block.settings.button_link }}" aria-label="{{ block.settings.heading | default: 'Promo card' | escape }}"></a>
+            {% endif %}
+
+            <div class="balad-promo-card__content">
+              {% if block.settings.subheading != blank %}
+                <p class="balad-promo-card__subheading">{{ block.settings.subheading | escape }}</p>
+              {% endif %}
+
+              {% if block.settings.heading != blank %}
+                <h3 class="balad-promo-card__heading">{{ block.settings.heading | escape }}</h3>
+              {% endif %}
+
+              {% if block.settings.description != blank %}
+                <div class="balad-promo-card__description rte">
+                  {{ block.settings.description }}
+                </div>
+              {% endif %}
+
+              {% if block.settings.button_label != blank %}
+                <a
+                  class="balad-promo-card__button"
+                  href="{{ block.settings.button_link | default: '#' }}"
+                >
+                  {{ block.settings.button_label | escape }}
+                </a>
+              {% endif %}
+            </div>
+          </div>
         {% endfor %}
       </div>
-    {% endif %}
+
+      {% if section.blocks.size > 1 and section.settings.show_dots != false %}
+        <div class="balad-promo-cards__dots" role="tablist" aria-label="Choose image">
+          {% for block in section.blocks %}
+            <button
+              type="button"
+              class="balad-promo-cards__dot{% if forloop.first %} is-active{% endif %}"
+              data-promo-dot
+              role="tab"
+              aria-label="Show image {{ forloop.index }} of {{ section.blocks.size }}"
+              aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            ></button>
+          {% endfor %}
+        </div>
+      {% endif %}
     </div>
   </div>
 </section>
@@ -121,6 +144,7 @@
     max-width: 100%;
     margin: 0;
     padding: 0 36px;
+    box-sizing: border-box;
   }
 
   .balad-promo-cards__header {
@@ -149,35 +173,344 @@
     color: var(--color-foreground-heading);
   }
 
-  .balad-promo-cards__grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--grid-gap, 20px);
+  /* ── Desktop 1-Column: Full-Width Single Card Slider ── */
+  @media screen and (min-width: 750px) {
+    .balad-promo-cards--desktop-1 .balad-promo-cards__slider {
+      position: relative;
+      height: var(--desktop-card-height, 600px);
+      min-height: 480px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgb(17 17 17 / 0.08);
+      background: #f5f5f5;
+      isolation: isolate;
+      outline: none;
+    }
+
+    .balad-promo-cards--desktop-1 .balad-promo-cards__slider {
+      touch-action: pan-y;
+    }
+
+    .balad-promo-cards--desktop-1 .balad-promo-cards__grid {
+      display: flex;
+      flex-flow: row nowrap;
+      grid-template-columns: none;
+      gap: 0;
+      height: 100%;
+      min-height: 100%;
+      width: 100%;
+      overflow: visible;
+      transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      will-change: transform;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: pan-y;
+    }
+
+    .balad-promo-cards--desktop-1 .balad-promo-cards__slider.is-dragging,
+    .balad-promo-cards--desktop-1 .balad-promo-cards__slider.is-dragging .balad-promo-cards__grid {
+      cursor: grabbing !important;
+    }
+
+    .balad-promo-cards--desktop-1 .balad-promo-cards__slider.is-dragging .balad-promo-cards__grid {
+      transition: none !important;
+    }
+
+    .balad-promo-cards--desktop-1 .balad-promo-card {
+      flex: 0 0 100%;
+      width: 100%;
+      min-width: 100%;
+      max-width: 100%;
+      height: 100%;
+      min-height: 100%;
+      border: 0;
+      border-radius: 0;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .balad-promo-cards--desktop-1 .balad-promo-card:hover {
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .balad-promo-cards--desktop-1 .balad-promo-card:hover .balad-promo-card__image {
+      transform: none;
+    }
+
+    .balad-promo-cards--desktop-1 .balad-promo-card__content {
+      padding-bottom: clamp(34px, 4.5vw, 52px);
+    }
+
+    .balad-promo-cards--desktop-1 .balad-promo-cards__dots {
+      position: absolute;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgb(0 0 0 / 0.35);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+
+    .balad-promo-cards--desktop-1 .balad-promo-cards__nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.92);
+      color: #111111;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease, background 0.2s ease, color 0.2s ease;
+    }
+
+    .balad-promo-cards--desktop-1 .balad-promo-cards__nav--prev {
+      left: 18px;
+    }
+
+    .balad-promo-cards--desktop-1 .balad-promo-cards__nav--next {
+      right: 18px;
+    }
+
+    .balad-promo-cards--desktop-1 .balad-promo-cards__slider:hover .balad-promo-cards__nav,
+    .balad-promo-cards--desktop-1 .balad-promo-cards__slider:focus-within .balad-promo-cards__nav {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .balad-promo-cards--desktop-1 .balad-promo-cards__nav:hover {
+      background: #111111;
+      color: #ffffff;
+      transform: translateY(-50%) scale(1.06);
+    }
+
+    /* ── Desktop 2-Columns Grid Mode ── */
+    .balad-promo-cards--desktop-2 .balad-promo-cards__grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--grid-gap, 20px);
+    }
+
+    .balad-promo-cards--desktop-2 .balad-promo-cards__slider {
+      position: static;
+      height: auto;
+      border: 0;
+      border-radius: 0;
+      overflow: visible;
+      background: transparent;
+    }
+
+    .balad-promo-cards--desktop-2 .balad-promo-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      height: var(--desktop-card-height, 600px);
+      min-height: 480px;
+      display: flex;
+      box-shadow: none;
+      border: 1px solid rgb(17 17 17 / 0.08);
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .balad-promo-cards--desktop-2 .balad-promo-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .balad-promo-cards--desktop-2 .balad-promo-card:hover .balad-promo-card__image {
+      transform: scale(1.05);
+    }
+
+    .balad-promo-cards--desktop-2 .balad-promo-cards__dots,
+    .balad-promo-cards--desktop-2 .balad-promo-cards__nav {
+      display: none !important;
+    }
   }
 
-    @media screen and (min-width: 750px) and (max-width: 1024px) {
+  /* ── Dots Common Styles ── */
+  .balad-promo-cards__dots {
+    display: none;
+  }
+
+  .balad-promo-cards__dot {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.55);
+    cursor: pointer;
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease;
+  }
+
+  .balad-promo-cards__dot::after {
+    content: '';
+    position: absolute;
+    inset: -8px -4px;
+  }
+
+  .balad-promo-cards__dot.is-active {
+    width: 22px;
+    background: #ffffff;
+  }
+
+  .balad-promo-cards__nav {
+    display: none;
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 1024px) {
     .balad-promo-cards__shell {
       padding: 0 20px;
     }
+
+    .balad-promo-cards--desktop-1 .balad-promo-cards__slider {
+      height: clamp(440px, 48vw, 560px);
+      min-height: 440px;
+    }
   }
 
+  /* ── Mobile Layouts ── */
   @media screen and (max-width: 749px) {
     .balad-promo-cards__shell {
-      padding: 10px 12px 10px;
+      padding: 0 12px;
     }
 
-    .balad-promo-cards__grid {
-      grid-template-columns: 1fr;
-      gap: 16px;
+    .balad-promo-cards__nav {
+      display: none !important;
     }
 
-    .balad-promo-cards--mobile-2 .balad-promo-cards__shell {
-      padding: 10px 12px;
+    /* Mobile 1 column: Slider Frame */
+    .balad-promo-cards--mobile-1 .balad-promo-cards__slider {
+      position: relative;
+      height: var(--mobile-card-height, 440px);
+      min-height: 380px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgb(17 17 17 / 0.08);
+      background: #f5f5f5;
+      isolation: isolate;
+      outline: none;
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-cards__slider {
+      touch-action: pan-y;
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-cards__grid {
+      display: flex;
+      flex-flow: row nowrap;
+      grid-template-columns: none;
+      gap: 0;
+      height: 100%;
+      min-height: 100%;
+      width: 100%;
+      overflow: visible;
+      transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      will-change: transform;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: pan-y;
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-cards__slider.is-dragging,
+    .balad-promo-cards--mobile-1 .balad-promo-cards__slider.is-dragging .balad-promo-cards__grid {
+      cursor: grabbing !important;
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-cards__slider.is-dragging .balad-promo-cards__grid {
+      transition: none !important;
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-card {
+      flex: 0 0 100%;
+      width: 100%;
+      min-width: 100%;
+      max-width: 100%;
+      height: 100%;
+      min-height: 100%;
+      border: 0;
+      border-radius: 0;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-card:hover {
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-card:hover .balad-promo-card__image {
+      transform: none;
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-card__content {
+      padding-bottom: 38px;
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-cards__dots {
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgb(0 0 0 / 0.28);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-cards__dot {
+      width: 7px;
+      height: 7px;
+    }
+
+    .balad-promo-cards--mobile-1 .balad-promo-cards__dot.is-active {
+      width: 18px;
+    }
+
+    /* Mobile 2 columns: Grid */
+    .balad-promo-cards--mobile-2 .balad-promo-cards__slider {
+      position: static;
+      height: auto;
+      border: 0;
+      border-radius: 0;
+      overflow: visible;
+      background: transparent;
     }
 
     .balad-promo-cards--mobile-2 .balad-promo-cards__grid {
+      display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--grid-gap, 10px);
+    }
+
+    .balad-promo-cards--mobile-2 .balad-promo-card {
+      height: var(--mobile-card-height, 440px);
+      min-height: 300px;
+      border-radius: 16px;
+      border: 1px solid rgb(17 17 17 / 0.08);
     }
 
     .balad-promo-cards--mobile-2 .balad-promo-card__content {
@@ -188,6 +521,10 @@
       min-height: 34px;
       padding: 0 12px;
       font-size: 0.8rem;
+    }
+
+    .balad-promo-cards--mobile-2 .balad-promo-cards__dots {
+      display: none !important;
     }
 
     /* Section-level heading & subheading */
@@ -213,120 +550,13 @@
     }
   }
 
-  /* ── Dots (only shown in the mobile slider) ── */
-  .balad-promo-cards__dots {
-    display: none;
-  }
-
-  /* ── Mobile: ONE fixed card, swipe changes the image inside it ── */
-  @media screen and (max-width: 749px) {
-    .balad-promo-cards--mobile-1 .balad-promo-cards__slider {
-      position: relative;
-      height: var(--mobile-card-height, 350px);
-      border-radius: 16px;
-      overflow: hidden;
-      border: 1px solid rgb(17 17 17 / 0.08);
-      background: #f5f5f5;
-      isolation: isolate;
-    }
-
-    .balad-promo-cards--mobile-1 .balad-promo-cards__grid {
-      display: flex;
-      grid-template-columns: none;
-      gap: 0;
-      height: 100%;
-      overflow-x: auto;
-      overflow-y: hidden;
-      overscroll-behavior-x: contain;
-      -webkit-overflow-scrolling: touch;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-
-    .balad-promo-cards--mobile-1 .balad-promo-cards__grid::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* each "card" becomes a slide of the single frame */
-    .balad-promo-cards--mobile-1 .balad-promo-card {
-      flex: 0 0 100%;
-      min-width: 0;
-      height: 100%;
-      border: 0;
-      border-radius: 0;
-      scroll-snap-align: start;
-      scroll-snap-stop: always;
-    }
-
-    .balad-promo-cards--mobile-1 .balad-promo-card:hover {
-      transform: none;
-      box-shadow: none;
-    }
-
-    .balad-promo-cards--mobile-1 .balad-promo-card:hover .balad-promo-card__image {
-      transform: none;
-    }
-
-    .balad-promo-cards--mobile-1 .balad-promo-card__content {
-      padding-bottom: 38px; /* keep text / button clear of the dots */
-    }
-
-    .balad-promo-cards--mobile-1 .balad-promo-cards__dots {
-      position: absolute;
-      left: 50%;
-      bottom: 12px;
-      transform: translateX(-50%);
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 9px;
-      border-radius: 999px;
-      background: rgb(0 0 0 / 0.28);
-      -webkit-backdrop-filter: blur(6px);
-      backdrop-filter: blur(6px);
-    }
-
-    .balad-promo-cards__dot {
-      position: relative;
-      width: 7px;
-      height: 7px;
-      padding: 0;
-      border: 0;
-      border-radius: 999px;
-      background: rgb(255 255 255 / 0.55);
-      cursor: pointer;
-      transition: width 0.3s ease, background 0.3s ease;
-    }
-
-    .balad-promo-cards__dot::after {
-      content: '';
-      position: absolute;
-      inset: -8px -4px;
-    }
-
-    .balad-promo-cards__dot.is-active {
-      width: 20px;
-      background: #ffffff;
-    }
-  }
-
+  /* ── Base Card Elements ── */
   .balad-promo-card {
     position: relative;
     overflow: hidden;
-    border-radius: 16px;
-    height: var(--desktop-card-height, 480px);
     display: flex;
     box-shadow: none;
-    border: 1px solid rgb(17 17 17 / 0.08);
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-
-  @media screen and (max-width: 749px) {
-    .balad-promo-card {
-      height: var(--mobile-card-height, 350px);
-    }
+    box-sizing: border-box;
   }
 
   .balad-promo-card__media {
@@ -335,6 +565,8 @@
     z-index: 1;
     overflow: hidden;
     background: #f5f5f5;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .balad-promo-card__image {
@@ -342,6 +574,9 @@
     height: 100%;
     object-fit: cover;
     transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -webkit-user-drag: none;
+    user-drag: none;
+    pointer-events: none;
   }
 
   .balad-promo-card__placeholder {
@@ -378,13 +613,14 @@
     flex-direction: column;
     color: #ffffff;
     pointer-events: none;
+    box-sizing: border-box;
   }
 
   .balad-promo-card__content * {
     pointer-events: auto;
   }
 
-  /* Content position alignments (applied to flex container matching vertical/horizontal axes) */
+  /* Content position alignments */
   .content-pos-top-left { align-items: flex-start; justify-content: flex-start; }
   .content-pos-top-center { align-items: flex-start; justify-content: center; }
   .content-pos-top-right { align-items: flex-start; justify-content: flex-end; }
@@ -395,7 +631,7 @@
   .content-pos-bottom-center { align-items: flex-end; justify-content: center; }
   .content-pos-bottom-right { align-items: flex-end; justify-content: flex-end; }
 
-  /* Text alignments (aligned within the flex column box) */
+  /* Text alignments */
   .text-align-left .balad-promo-card__content { text-align: left; align-items: flex-start; }
   .text-align-center .balad-promo-card__content { text-align: center; align-items: center; }
   .text-align-right .balad-promo-card__content { text-align: right; align-items: flex-end; }
@@ -456,20 +692,6 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(8, 0, 207, 0.35);
   }
-
-  /* Hover effects on cards */
-  .balad-promo-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
-  }
-
-  .balad-promo-card:hover .balad-promo-card__image {
-    transform: scale(1.05);
-  }
-
-  .balad-promo-card:hover .balad-promo-card__overlay {
-    opacity: min(0.95, calc(var(--overlay-opacity, 0.3) + 0.1));
-  }
 </style>
 
 <script>
@@ -481,17 +703,22 @@
         var track = slider.querySelector('[data-promo-track]');
         var slides = slider.querySelectorAll('[data-promo-slide]');
         var dots = slider.querySelectorAll('[data-promo-dot]');
+        var prevBtn = slider.querySelector('[data-promo-prev]');
+        var nextBtn = slider.querySelector('[data-promo-next]');
         if (!track || slides.length < 2) return;
         slider.dataset.sliderReady = 'true';
 
         var total = slides.length;
         var section = slider.closest('[data-promo-cards]');
-        var raf = null;
-        var pausedUntil = 0;
+        var currentIndex = 0;
+        var autoplayTimer = null;
+        var autoplayPausedUntil = 0;
 
-        function current() {
-          var w = track.clientWidth || 1;
-          return Math.max(0, Math.min(total - 1, Math.round(track.scrollLeft / w)));
+        function isSliderMode() {
+          if (window.innerWidth >= 750) {
+            return slider.closest('.balad-promo-cards--desktop-1') !== null;
+          }
+          return slider.closest('.balad-promo-cards--mobile-1') !== null;
         }
 
         function paint(index) {
@@ -500,45 +727,201 @@
             dot.classList.toggle('is-active', on);
             dot.setAttribute('aria-selected', on ? 'true' : 'false');
           });
-        }
-
-        function goTo(index, smooth) {
-          index = (index + total) % total;
-          track.scrollTo({ left: index * track.clientWidth, behavior: smooth === false ? 'auto' : 'smooth' });
-        }
-
-        function isSliderMode() {
-          return track.scrollWidth > track.clientWidth + 1;
-        }
-
-        track.addEventListener('scroll', function () {
-          if (raf) return;
-          raf = requestAnimationFrame(function () {
-            raf = null;
-            paint(current());
+          slides.forEach(function (slide, i) {
+            var on = i === index;
+            slide.classList.toggle('is-active', on);
+            slide.setAttribute('aria-hidden', on ? 'false' : 'true');
           });
-        }, { passive: true });
+        }
 
-        dots.forEach(function (dot, i) {
+        function render(offsetPx) {
+          if (!isSliderMode()) {
+            track.style.transform = '';
+            return;
+          }
+          if (offsetPx) {
+            track.style.transform = 'translate3d(calc(' + (-currentIndex * 100) + '% + ' + offsetPx + 'px), 0, 0)';
+          } else {
+            track.style.transform = 'translate3d(' + (-currentIndex * 100) + '%, 0, 0)';
+          }
+        }
+
+        function goTo(index, resetAutoplay) {
+          if (!isSliderMode()) return;
+          currentIndex = (index + total) % total;
+          render(0);
+          paint(currentIndex);
+          if (resetAutoplay !== false) {
+            autoplayPausedUntil = Date.now() + 8000;
+          }
+        }
+
+        dots.forEach(function (dot) {
           dot.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            goTo(i);
-            pausedUntil = Date.now() + 8000;
+            var idx = parseInt(dot.getAttribute('data-dot'), 10);
+            if (isNaN(idx)) {
+              idx = Array.prototype.indexOf.call(dots, dot);
+            }
+            goTo(idx);
           });
         });
+
+        if (prevBtn) {
+          prevBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            goTo(currentIndex - 1);
+          });
+        }
+
+        if (nextBtn) {
+          nextBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            goTo(currentIndex + 1);
+          });
+        }
+
+        slider.addEventListener('keydown', function (e) {
+          if (!isSliderMode()) return;
+          if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            goTo(currentIndex - 1);
+          } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            goTo(currentIndex + 1);
+          }
+        });
+
+        /* ---- High-Performance Smooth Touch & Mouse Gesture Engine ---- */
+        var dragging = false;
+        var startX = 0;
+        var startY = 0;
+        var startTime = 0;
+        var dx = 0;
+        var axis = null;
+        var hasMoved = false;
+
+        function onDown(e) {
+          if (!isSliderMode()) return;
+          if (e.pointerType === 'mouse' && e.button !== 0) return;
+          if (e.button && e.button !== 0) return;
+          if (e.target.closest('[data-promo-prev], [data-promo-next], [data-promo-dot]')) return;
+
+          dragging = true;
+          hasMoved = false;
+          axis = null;
+          dx = 0;
+          startX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+          startY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+          startTime = Date.now();
+          autoplayPausedUntil = Date.now() + 10000;
+        }
+
+        function onMove(e) {
+          if (!dragging) return;
+          var clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+          var clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+          var mx = clientX - startX;
+          var my = clientY - startY;
+
+          if (axis === null && (Math.abs(mx) > 6 || Math.abs(my) > 6)) {
+            axis = Math.abs(mx) >= Math.abs(my) ? 'x' : 'y';
+            if (axis === 'x') {
+              slider.classList.add('is-dragging');
+            }
+          }
+
+          if (axis === 'y') {
+            dragging = false;
+            slider.classList.remove('is-dragging');
+            return;
+          }
+
+          if (axis !== 'x') return;
+
+          if (e.cancelable) {
+            e.preventDefault();
+          }
+
+          hasMoved = true;
+          dx = mx;
+
+          // Rubber-band resistance at edges
+          if ((currentIndex === 0 && dx > 0) || (currentIndex === total - 1 && dx < 0)) {
+            dx *= 0.35;
+          }
+
+          render(dx);
+        }
+
+        function onEnd() {
+          if (!dragging) return;
+          dragging = false;
+          slider.classList.remove('is-dragging');
+
+          if (axis !== 'x') {
+            dx = 0;
+            return;
+          }
+
+          var duration = Math.max(Date.now() - startTime, 1);
+          var velocity = Math.abs(dx) / duration;
+          var sliderW = slider.clientWidth || 300;
+          var threshold = Math.min(sliderW * 0.18, 110);
+
+          if ((dx < -threshold || (dx < -35 && velocity > 0.3)) && currentIndex < total - 1) {
+            goTo(currentIndex + 1);
+          } else if ((dx > threshold || (dx > 35 && velocity > 0.3)) && currentIndex > 0) {
+            goTo(currentIndex - 1);
+          } else {
+            render(0);
+          }
+
+          dx = 0;
+          if (hasMoved) {
+            setTimeout(function () {
+              hasMoved = false;
+            }, 80);
+          }
+        }
+
+        if (window.PointerEvent) {
+          slider.addEventListener('pointerdown', onDown);
+          window.addEventListener('pointermove', onMove, { passive: false });
+          window.addEventListener('pointerup', onEnd);
+          window.addEventListener('pointercancel', onEnd);
+        } else {
+          slider.addEventListener('touchstart', onDown, { passive: true });
+          window.addEventListener('touchmove', onMove, { passive: false });
+          window.addEventListener('touchend', onEnd);
+          slider.addEventListener('mousedown', onDown);
+          window.addEventListener('mousemove', onMove);
+          window.addEventListener('mouseup', onEnd);
+        }
+
+        slider.addEventListener('click', function (e) {
+          if (hasMoved) {
+            e.preventDefault();
+            e.stopPropagation();
+            hasMoved = false;
+          }
+        }, true);
 
         var resizeTimer = null;
         window.addEventListener('resize', function () {
           clearTimeout(resizeTimer);
           resizeTimer = setTimeout(function () {
-            if (isSliderMode()) goTo(current(), false);
-          }, 120);
+            render(0);
+          }, 100);
         });
 
-        track.addEventListener('touchstart', function () { pausedUntil = Date.now() + 8000; }, { passive: true });
+        // Initial setup
+        goTo(0, false);
 
-        /* optional auto-rotate (section setting) */
+        // Autoplay
         var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (section && section.dataset.autoplay === 'true' && !reduceMotion) {
           var speed = (parseInt(section.dataset.autoplaySpeed, 10) || 5) * 1000;
@@ -548,9 +931,9 @@
               visible = entries[0].isIntersecting;
             }, { threshold: 0.25 }).observe(slider);
           }
-          setInterval(function () {
-            if (!visible || document.hidden || !isSliderMode() || Date.now() < pausedUntil) return;
-            goTo(current() + 1);
+          autoplayTimer = setInterval(function () {
+            if (!visible || document.hidden || !isSliderMode() || Date.now() < autoplayPausedUntil) return;
+            goTo(currentIndex + 1, false);
           }, speed);
         }
       });
@@ -593,18 +976,40 @@
     },
     {
       "type": "select",
+      "id": "desktop_columns",
+      "label": "Cards per row (Desktop)",
+      "options": [
+        { "value": "1", "label": "1 (Single card slider)" },
+        { "value": "2", "label": "2 (Side-by-side grid)" }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "select",
       "id": "mobile_columns",
       "label": "Cards per row (Mobile)",
       "options": [
-        { "value": "1", "label": "1" },
+        { "value": "1", "label": "1 (Single card slider)" },
         { "value": "2", "label": "2" }
       ],
       "default": "1"
     },
     {
       "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show navigation arrows (Desktop)",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show pagination dots",
+      "default": true
+    },
+    {
+      "type": "checkbox",
       "id": "autoplay",
-      "label": "Auto-rotate images (mobile slider)",
+      "label": "Auto-rotate cards",
       "default": false
     },
     {
@@ -650,22 +1055,22 @@
     {
       "type": "range",
       "id": "height_desktop",
-      "min": 200,
-      "max": 800,
+      "min": 300,
+      "max": 1000,
       "step": 10,
       "unit": "px",
       "label": "Card height (Desktop)",
-      "default": 380
+      "default": 600
     },
     {
       "type": "range",
       "id": "height_mobile",
-      "min": 100,
-      "max": 600,
+      "min": 200,
+      "max": 800,
       "step": 10,
       "unit": "px",
       "label": "Card height (Mobile)",
-      "default": 280
+      "default": 440
     }
   ],
   "blocks": [
@@ -757,6 +1162,10 @@
   "presets": [
     {
       "name": "Promo Cards Grid",
+      "settings": {
+        "desktop_columns": "1",
+        "mobile_columns": "1"
+      },
       "blocks": [
         {
           "type": "promo_card"

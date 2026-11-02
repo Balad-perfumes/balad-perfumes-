@@ -101,32 +101,8 @@
 
         {% else %}
           {% for i in (1..6) %}
-            <div class="balad-catprod__card balad-catprod__card--placeholder">
-              <div class="balad-catprod__media-wrap">
-                <div class="balad-catprod__media">
-                  {{ 'product-1' | placeholder_svg_tag: 'balad-catprod__placeholder' }}
-                  <div class="balad-catprod__badges">
-                    <span class="balad-catprod__badge balad-catprod__badge--sale">-20%</span>
-                  </div>
-                </div>
-              </div>
-              <div class="balad-catprod__body">
-                <div class="balad-catprod__meta">
-                  <h3 class="balad-catprod__title">Stag Essential {{ i }}</h3>
-                  <div class="balad-catprod__price-row">
-                    <span class="balad-catprod__price">₹1,499</span>
-                    <span class="balad-catprod__compare-price">₹1,899</span>
-                    <span class="balad-catprod__discount-tag">20% OFF</span>
-                  </div>
-                </div>
-                <span class="balad-catprod__action-btn">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                  <span>Quick Add</span>
-                </span>
-              </div>
+            <div class="balad-catprod__card" data-product-card>
+              {% render 'balad-product-card-skeleton', show_buy_now: section.settings.show_buy_now %}
             </div>
           {% endfor %}
         {% endif %}
@@ -226,14 +202,14 @@
   }
 
   .balad-catprod__shell {
-    width: auto;
+    width: 100%;
     max-width: 100%;
-    margin: 0 36px;
-    background: var(--catprod-bg, #ffffff) !important;
-    border-radius: var(--catprod-radius, 16px);
-    padding: clamp(14px, 1.6vw, 20px) clamp(12px, 1.4vw, 20px) clamp(14px, 1.6vw, 20px);
+    margin: 0;
+    padding: 0 36px;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
     box-sizing: border-box;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
   }
 
   /* ── Header ── */
@@ -348,7 +324,7 @@
   }
 
   @media screen and (min-width: 750px) and (max-width: 1024px) {
-    .balad-catprod__shell { margin: 0 20px; }
+    .balad-catprod__shell { padding: 0 20px; margin: 0; }
     .balad-catprod__rail { --catprod-cols: 4; }
     .balad-catprod__card:nth-child(n + {{ section.settings.rows | default: 2 | times: 4 | plus: 1 }}) { display: none; }
     .balad-catprod__card:nth-child(-n + {{ section.settings.rows | default: 2 | times: 4 }}) { display: flex; }
@@ -363,9 +339,11 @@
     }
 
     .balad-catprod__shell {
-      margin: 0 12px;
-      border-radius: 16px;
-      padding: 12px 10px 14px;
+      margin: 0;
+      border-radius: 0 !important;
+      padding: 0 12px;
+      background: transparent !important;
+      box-shadow: none !important;
     }
 
     .balad-catprod__head {

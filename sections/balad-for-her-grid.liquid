@@ -1,0 +1,1615 @@
+{{ 'balad-product-card.css' | asset_url | stylesheet_tag }}
+{% liquid
+  assign coll_handle = section.settings.collection
+  if coll_handle != blank
+    assign active_collection = collections[coll_handle]
+  endif
+  if active_collection == blank
+    assign active_collection = collections['for-her']
+  endif
+  if active_collection == blank
+    assign active_collection = collections['all']
+  endif
+
+  assign cols = section.settings.columns | default: 6 | plus: 0
+  assign product_limit = section.settings.products_to_show | default: 12
+  assign cta_url = section.settings.button_link | default: active_collection.url
+  assign total_count = active_collection.products_count
+%}
+
+{%- liquid
+  # Collection metafields fallback for background image (custom.background_image or custom.banner)
+  assign meta_bg = active_collection.metafields.custom.background_image.value | default: active_collection.metafields.custom.background_image
+  if meta_bg == blank
+    assign meta_bg = active_collection.metafields.custom.banner.value | default: active_collection.metafields.custom.banner
+  endif
+  assign bg_image = section.settings.background_image | default: meta_bg | default: active_collection.image
+
+  # Collection metafields fallback for mobile background (custom.mobile_background_image or custom.mobile_banner)
+  assign meta_bg_mobile = active_collection.metafields.custom.mobile_background_image.value | default: active_collection.metafields.custom.mobile_background_image
+  if meta_bg_mobile == blank
+    assign meta_bg_mobile = active_collection.metafields.custom.mobile_banner.value | default: active_collection.metafields.custom.mobile_banner
+  endif
+  assign bg_image_mobile = section.settings.mobile_background_image | default: meta_bg_mobile
+
+  assign slack = section.settings.parallax_strength | default: 15
+  assign bg_height = slack | times: 2 | plus: 100
+-%}
+<section
+  class="balad-forher color-{{ section.settings.color_scheme }}"
+  data-forher
+  data-forher-parallax="{{ slack }}"
+  style="
+    --forher-bg: {{ section.settings.background | default: '#1a1a1a' }};
+    --forher-overlay: {{ section.settings.overlay_opacity | default: 20 | divided_by: 100.0 }};
+    --forher-slack: {{ slack }}%;
+    --forher-bg-height: {{ bg_height }}%;
+    --forher-cols: {{ cols }};
+  "
+>
+  <div class="balad-forher__bg" aria-hidden="true">
+    {%- if bg_image != blank -%}
+      <picture>
+        {%- if bg_image_mobile != blank -%}
+          <source
+            media="(max-width: 749px)"
+            srcset="{{ bg_image_mobile | image_url: width: 600 }} 600w, {{ bg_image_mobile | image_url: width: 900 }} 900w, {{ bg_image_mobile | image_url: width: 1200 }} 1200w"
+            sizes="100vw"
+          >
+        {%- endif -%}
+        <img
+          class="balad-forher__bg-img"
+          src="{{ bg_image | image_url: width: 2400 }}"
+          srcset="{{ bg_image | image_url: width: 1200 }} 1200w, {{ bg_image | image_url: width: 1600 }} 1600w, {{ bg_image | image_url: width: 2000 }} 2000w, {{ bg_image | image_url: width: 2400 }} 2400w"
+          sizes="100vw"
+          alt=""
+          loading="lazy"
+          decoding="async"
+        >
+      </picture>
+    {%- endif -%}
+  </div>
+
+  <div class="balad-forher__shell">
+    <div class="balad-forher__head">
+      <div class="balad-forher__intro">
+        <div class="balad-forher__title-row">
+          {% if section.settings.heading != blank %}
+            <h2 class="balad-forher__heading">{{ section.settings.heading }}</h2>
+          {% endif %}
+        </div>
+        {% if section.settings.subheading != blank %}
+          <p class="balad-forher__subheading">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </div>
+
+      {% if section.settings.button_label != blank and cta_url != blank %}
+        <div class="balad-forher__controls">
+          <a href="{{ cta_url }}" class="balad-forher__cta">{{ section.settings.button_label }}</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="balad-forher__track" data-forher-track>
+      {% for product in active_collection.products limit: product_limit %}
+        <div class="balad-forher__card" data-product-card>
+          {% render 'balad-product-card', product: product, limit: 4, badge_first: forloop.first, show_rating: section.settings.show_rating, show_buy_now: section.settings.show_buy_now %}
+        </div>
+      {% endfor %}
+
+      {% if active_collection.products.size == 0 %}
+        {% for i in (1..cols) %}
+          <div class="balad-forher__card" data-product-card>
+            {% render 'balad-product-card-skeleton', show_buy_now: section.settings.show_buy_now %}
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <div class="balad-forher__dots" data-forher-dots role="tablist" aria-label="Product navigation"></div>
+  </div>
+
+  <!-- Wishlist Modal -->
+  <div class="balad-wishlist-modal" data-wishlist-modal style="display:none;" hidden>
+    <div class="balad-wishlist-modal__backdrop" data-wishlist-close></div>
+    <div class="balad-wishlist-modal__card">
+      <button type="button" class="balad-wishlist-modal__close" data-wishlist-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="balad-wishlist-modal__header">
+        <div class="balad-wishlist-modal__product-img" data-wishlist-img></div>
+        <div class="balad-wishlist-modal__product-info">
+          <h3 class="balad-wishlist-modal__title" data-wishlist-title></h3>
+          <div class="balad-wishlist-modal__price-wrap">
+            <span class="balad-wishlist-modal__price" data-wishlist-price></span>
+            <span class="balad-wishlist-modal__compare-price" data-wishlist-compare-price></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="balad-wishlist-modal__sizes">
+        <div class="balad-wishlist-modal__sizes-top">
+          <span class="balad-wishlist-modal__label" data-wishlist-size-label>Size</span>
+        </div>
+        <div class="balad-wishlist-modal__size-grid" data-wishlist-sizes></div>
+      </div>
+
+      <button type="button" class="balad-wishlist-modal__add-btn" data-wishlist-add>
+        Add To List
+      </button>
+    </div>
+  </div>
+
+  <!-- Quick Add Modal -->
+  <div class="balad-qa-modal" data-qa-modal style="display:none;" hidden>
+    <div class="balad-qa-modal__backdrop" data-qa-close></div>
+    <div class="balad-qa-modal__card">
+      <button type="button" class="balad-qa-modal__close" data-qa-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="balad-qa-modal__header">
+        <div class="balad-qa-modal__product-img" data-qa-img></div>
+        <div class="balad-qa-modal__product-info">
+          <h3 class="balad-qa-modal__title" data-qa-title></h3>
+          <span class="balad-qa-modal__price" data-qa-price></span>
+        </div>
+      </div>
+
+      <div class="balad-qa-modal__sizes">
+        <div class="balad-qa-modal__sizes-top">
+          <span class="balad-qa-modal__label">Size</span>
+        </div>
+        <div class="balad-qa-modal__size-grid" data-qa-sizes></div>
+      </div>
+
+      <div class="balad-qa-modal__actions" data-qa-actions>
+        <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--bag" data-qa-add-bag>Add To Bag</button>
+        <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--buy" data-qa-buy-now>Buy Now</button>
+      </div>
+      <div class="balad-qa-modal__sold-out" data-qa-sold-out style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+        </svg>
+        <span>Sold Out</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const STORAGE_KEY = 'wishlist';
+    let selectedSize = null;
+    let currentProductId = '';
+
+    const getWishlist = () => {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch(e) { return []; }
+    };
+
+    const saveWishlist = (list) => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      } catch(e) {
+        console.warn('Wishlist save failed:', e);
+      }
+    };
+
+    const updateHeartStates = (scope) => {
+      const wishlist = getWishlist();
+      scope.querySelectorAll('[data-wishlist-heart]').forEach((btn) => {
+        const handle = extractHandle(btn.dataset.productUrl);
+        const isInList = wishlist.some((item) => item.handle === handle);
+        btn.classList.toggle('is-saved', isInList);
+        const svg = btn.querySelector('svg');
+        if (svg) {
+          svg.setAttribute('fill', isInList ? 'currentColor' : 'none');
+        }
+      });
+    };
+
+    const openModal = (btn) => {
+      const modal = document.querySelector('[data-wishlist-modal]');
+      if (!modal) return;
+      const titleEl = modal.querySelector('[data-wishlist-title]');
+      const priceEl = modal.querySelector('[data-wishlist-price]');
+      const comparePriceEl = modal.querySelector('[data-wishlist-compare-price]');
+      const imgEl = modal.querySelector('[data-wishlist-img]');
+      const sizesEl = modal.querySelector('[data-wishlist-sizes]');
+      const sizeLabel = modal.querySelector('[data-wishlist-size-label]');
+      const addBtn = modal.querySelector('[data-wishlist-add]');
+
+      const title = btn.dataset.productTitle || '';
+      const price = btn.dataset.productPrice || '0';
+      const comparePrice = btn.dataset.productComparePrice || '';
+      const productId = String(btn.dataset.productId || '').trim();
+      const productUrl = btn.dataset.productUrl || '#';
+      const productImage = btn.dataset.productImage || '';
+      const sizesRaw = btn.dataset.productSizes || '';
+      const sizes = sizesRaw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+      currentProductId = productId;
+
+      if (titleEl) titleEl.textContent = title;
+      if (priceEl) priceEl.textContent = 'INR ' + price;
+
+      if (comparePriceEl) {
+        if (comparePrice && comparePrice !== price && comparePrice !== '0') {
+          comparePriceEl.textContent = 'INR ' + comparePrice;
+          comparePriceEl.style.display = 'inline';
+        } else {
+          comparePriceEl.textContent = '';
+          comparePriceEl.style.display = 'none';
+        }
+      }
+
+      if (imgEl) {
+        if (productImage) {
+          imgEl.innerHTML = '<img src="' + productImage + '" alt="' + title.replace(/"/g, '&quot;') + '" />';
+          imgEl.style.display = 'flex';
+        } else {
+          imgEl.innerHTML = '';
+          imgEl.style.display = 'none';
+        }
+      }
+
+      selectedSize = null;
+
+      if (sizesEl) {
+        if (sizes.length > 0) {
+          if (sizeLabel) sizeLabel.textContent = 'Size';
+          sizesEl.parentElement.style.display = 'block';
+          sizesEl.innerHTML = sizes.map((size, i) => {
+            const isSelected = i === 0 ? ' is-selected' : '';
+            if (i === 0) selectedSize = size;
+            return '<button type="button" class="balad-wishlist-modal__size' + isSelected + '" data-size-btn data-size="' + size + '">' + size + '</button>';
+          }).join('');
+
+          sizesEl.querySelectorAll('[data-size-btn]').forEach((sizeBtn) => {
+            sizeBtn.addEventListener('click', () => {
+              sizesEl.querySelectorAll('[data-size-btn]').forEach(b => b.classList.remove('is-selected'));
+              sizeBtn.classList.add('is-selected');
+              selectedSize = sizeBtn.dataset.size;
+            });
+          });
+        } else {
+          if (sizeLabel) sizeLabel.textContent = 'Default';
+          sizesEl.parentElement.style.display = 'block';
+          selectedSize = 'Default';
+          sizesEl.innerHTML = '<button type="button" class="balad-wishlist-modal__size is-selected" data-size-btn data-size="Default">Default</button>';
+        }
+      }
+
+      if (addBtn) {
+        addBtn.dataset.productId = productId;
+        addBtn.dataset.productTitle = title;
+        addBtn.dataset.productPrice = price;
+        addBtn.dataset.productUrl = productUrl;
+        addBtn.dataset.productImage = productImage;
+      }
+
+      modal.style.display = 'flex';
+      modal.removeAttribute('hidden');
+      requestAnimationFrame(() => {
+        modal.classList.add('is-open');
+      });
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeModal = () => {
+      const modal = document.querySelector('[data-wishlist-modal]');
+      if (!modal) return;
+      modal.classList.remove('is-open');
+      setTimeout(() => {
+        if (!modal.classList.contains('is-open')) {
+          modal.style.display = 'none';
+          modal.setAttribute('hidden', '');
+        }
+      }, 220);
+      document.body.style.overflow = '';
+    };
+
+    const removeFromWishlist = (handle) => {
+      let wishlist = getWishlist();
+      wishlist = wishlist.filter((item) => item.handle !== handle);
+      saveWishlist(wishlist);
+      document.dispatchEvent(new CustomEvent('wishlist:update'));
+    };
+
+    const addToWishlist = (handle, id, title, price, image, size) => {
+      const wishlist = getWishlist();
+      const exists = wishlist.some((item) => item.handle === handle);
+      if (!exists) {
+        wishlist.push({ handle, id, title, price, image, size: size || '' });
+        saveWishlist(wishlist);
+        document.dispatchEvent(new CustomEvent('wishlist:update'));
+      }
+    };
+
+    const extractHandle = (url) => {
+      if (!url) return '';
+      const parts = url.split('/');
+      return parts[parts.length - 1] || parts[parts.length - 2] || '';
+    };
+
+    const toggleWishlist = (btn) => {
+      const handle = extractHandle(btn.dataset.productUrl);
+      const wishlist = getWishlist();
+      const isInList = wishlist.some((item) => item.handle === handle);
+
+      if (isInList) {
+        removeFromWishlist(handle);
+        updateHeartStates(document);
+        return;
+      }
+      openModal(btn);
+    };
+
+    const initSection = (scope = document) => {
+      scope.querySelectorAll('[data-wishlist-heart]').forEach((btn) => {
+        if (btn.dataset.ready === 'true') return;
+        btn.dataset.ready = 'true';
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleWishlist(btn);
+        });
+      });
+
+      // Track Arrow Navigation
+      scope.querySelectorAll('[data-slider-track]').forEach((track) => {
+        const parentSection = track.closest('.balad-latest');
+        if (!parentSection) return;
+        const prevBtn = parentSection.querySelector('[data-slider-prev]');
+        const nextBtn = parentSection.querySelector('[data-slider-next]');
+
+        if (prevBtn && !prevBtn.dataset.ready) {
+          prevBtn.dataset.ready = 'true';
+          prevBtn.addEventListener('click', () => {
+            const card = track.querySelector('.balad-latest-grid__card');
+            const gap = parseInt(getComputedStyle(track).columnGap) || 12;
+            const amount = card ? (card.offsetWidth + gap) * 2 : 320;
+            track.scrollBy({ left: -amount, behavior: 'smooth' });
+          });
+        }
+
+        /* Mouse drag-to-scroll with momentum (touch scrolls natively) */
+        if (!track.dataset.dragReady) {
+          track.dataset.dragReady = 'true';
+          let isDown = false, moved = false, startX = 0, startScroll = 0;
+          let lastX = 0, lastT = 0, velocity = 0, rafId = 0;
+
+          const stopMomentum = () => { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } };
+
+          const momentum = () => {
+            velocity *= 0.95;
+            if (Math.abs(velocity) < 0.15) { rafId = 0; return; }
+            track.scrollLeft -= velocity;
+            rafId = requestAnimationFrame(momentum);
+          };
+
+          track.addEventListener('pointerdown', (e) => {
+            if (e.pointerType !== 'mouse' || e.button !== 0) return;
+            if (e.target.closest('button')) return;
+            stopMomentum();
+            isDown = true;
+            moved = false;
+            startX = lastX = e.clientX;
+            lastT = performance.now();
+            startScroll = track.scrollLeft;
+            velocity = 0;
+          });
+
+          window.addEventListener('pointermove', (e) => {
+            if (!isDown) return;
+            const dx = e.clientX - startX;
+            if (!moved && Math.abs(dx) > 5) {
+              moved = true;
+              track.classList.add('is-dragging');
+            }
+            if (!moved) return;
+            const now = performance.now();
+            const dt = Math.max(now - lastT, 1);
+            velocity = ((e.clientX - lastX) / dt) * 16;
+            lastX = e.clientX;
+            lastT = now;
+            track.scrollLeft = startScroll - dx;
+          });
+
+          const endDrag = () => {
+            if (!isDown) return;
+            isDown = false;
+            if (moved) {
+              track.classList.remove('is-dragging');
+              rafId = requestAnimationFrame(momentum);
+              setTimeout(() => { moved = false; }, 0);
+            }
+          };
+          window.addEventListener('pointerup', endDrag);
+          window.addEventListener('pointercancel', endDrag);
+
+          track.addEventListener('wheel', stopMomentum, { passive: true });
+          track.addEventListener('click', (e) => {
+            if (moved) { e.preventDefault(); e.stopPropagation(); }
+          }, true);
+          track.addEventListener('dragstart', (e) => e.preventDefault());
+        }
+
+        if (nextBtn && !nextBtn.dataset.ready) {
+          nextBtn.dataset.ready = 'true';
+          nextBtn.addEventListener('click', () => {
+            const card = track.querySelector('.balad-latest-grid__card');
+            const gap = parseInt(getComputedStyle(track).columnGap) || 12;
+            const amount = card ? (card.offsetWidth + gap) * 2 : 320;
+            track.scrollBy({ left: amount, behavior: 'smooth' });
+          });
+        }
+      });
+
+      // Card size pills selection
+      scope.querySelectorAll('[data-card-size-pills]').forEach((pillsContainer) => {
+        const card = pillsContainer.closest('[data-product-card]');
+        const qaBtn = card ? card.querySelector('[data-quick-add]') : null;
+
+        pillsContainer.querySelectorAll('.balad-latest-grid__size-pill').forEach((pill) => {
+          if (pill.dataset.ready === 'true') return;
+          pill.dataset.ready = 'true';
+          pill.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            pillsContainer.querySelectorAll('.balad-latest-grid__size-pill').forEach(p => p.classList.remove('is-selected'));
+            pill.classList.add('is-selected');
+            if (qaBtn) {
+              qaBtn.dataset.qaSelectedSize = pill.dataset.sizeValue;
+            }
+          });
+        });
+      });
+
+      updateHeartStates(scope);
+    };
+
+    const initModal = () => {
+      document.querySelectorAll('[data-wishlist-close]').forEach((el) => {
+        el.addEventListener('click', closeModal);
+      });
+
+      const addBtn = document.querySelector('[data-wishlist-add]');
+      if (addBtn && !addBtn.dataset.ready) {
+        addBtn.dataset.ready = 'true';
+        addBtn.addEventListener('click', () => {
+          const productId = currentProductId;
+          const title = addBtn.dataset.productTitle || '';
+          const price = addBtn.dataset.productPrice || '0';
+          const url = addBtn.dataset.productUrl || '#';
+          const image = addBtn.dataset.productImage || '';
+          const handle = extractHandle(url);
+
+          if (!handle) return;
+
+          addToWishlist(handle, productId, title, price, image, selectedSize || '');
+          closeModal();
+          updateHeartStates(document);
+        });
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+      });
+    };
+
+    /* ── Quick Add Modal & Action ───────────────────────────────── */
+    let qaSelectedSize = null;
+    let qaProductUrl = '';
+
+    const getQAModal = () => document.querySelector('[data-qa-modal]');
+
+    const resolveVariantId = (modal) => {
+      const variantsData = modal?.dataset.qaVariants || '';
+      const firstVariant = modal?.dataset.qaFirstVariant || '';
+      let variantId = '';
+
+      if (variantsData && qaSelectedSize) {
+        const pairs = variantsData.split(',').filter(Boolean);
+        for (const pair of pairs) {
+          const [name, id] = pair.split(':');
+          if (name && id && name.trim() === qaSelectedSize.trim()) {
+            variantId = id.trim();
+            break;
+          }
+        }
+      }
+
+      if (!variantId && firstVariant) {
+        variantId = firstVariant;
+      }
+      return variantId;
+    };
+
+    const openQAModal = (btn) => {
+      const modal = getQAModal();
+      if (!modal) return;
+
+      const titleEl = modal.querySelector('[data-qa-title]');
+      const priceEl = modal.querySelector('[data-qa-price]');
+      const imgEl = modal.querySelector('[data-qa-img]');
+      const sizesEl = modal.querySelector('[data-qa-sizes]');
+      const actionsEl = modal.querySelector('[data-qa-actions]');
+      const soldOutEl = modal.querySelector('[data-qa-sold-out]');
+
+      const title = btn.dataset.qaTitle || '';
+      const price = btn.dataset.qaPrice || '0';
+      qaProductUrl = btn.dataset.qaUrl || '';
+      const image = btn.dataset.qaImage || '';
+      const sizesRaw = btn.dataset.qaSizes || '';
+      const firstVariant = btn.dataset.qaFirstVariant || '';
+      const variantsData = btn.dataset.qaVariants || '';
+      const isAvailable = btn.dataset.qaAvailable === 'true';
+      const presetSize = btn.dataset.qaSelectedSize || null;
+
+      modal.dataset.qaFirstVariant = firstVariant;
+      modal.dataset.qaVariants = variantsData;
+
+      if (titleEl) titleEl.textContent = title;
+      if (priceEl) priceEl.textContent = '₹' + Number(price || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+
+      if (imgEl) {
+        if (image) {
+          imgEl.innerHTML = '<img src="' + image + '" alt="' + title.replace(/"/g, '&quot;') + '" />';
+          imgEl.style.display = 'block';
+        } else {
+          imgEl.innerHTML = '';
+          imgEl.style.display = 'none';
+        }
+      }
+
+      const sizes = sizesRaw.split(',').map(s => s.trim()).filter(Boolean);
+      qaSelectedSize = presetSize || (sizes.length > 0 ? sizes[0] : null);
+
+      if (sizesEl) {
+        if (sizes.length > 0) {
+          sizesEl.parentElement.style.display = 'block';
+          sizesEl.innerHTML = sizes.map((sz) => {
+            const isSel = (sz === qaSelectedSize) ? ' is-selected' : '';
+            return '<button type="button" class="balad-qa-modal__size' + isSel + '" data-qa-size-btn data-size="' + sz + '">' + sz + '</button>';
+          }).join('');
+
+          sizesEl.querySelectorAll('[data-qa-size-btn]').forEach((sb) => {
+            sb.addEventListener('click', () => {
+              sizesEl.querySelectorAll('[data-qa-size-btn]').forEach(b => b.classList.remove('is-selected'));
+              sb.classList.add('is-selected');
+              qaSelectedSize = sb.dataset.size;
+            });
+          });
+        } else {
+          sizesEl.parentElement.style.display = 'none';
+        }
+      }
+
+      if (!isAvailable) {
+        if (actionsEl) actionsEl.style.display = 'none';
+        if (soldOutEl) soldOutEl.style.display = 'flex';
+      } else {
+        if (actionsEl) actionsEl.style.display = 'grid';
+        if (soldOutEl) soldOutEl.style.display = 'none';
+      }
+
+      modal.style.display = 'flex';
+      modal.removeAttribute('hidden');
+      requestAnimationFrame(() => modal.classList.add('is-open'));
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeQAModal = () => {
+      const modal = getQAModal();
+      if (!modal) return;
+      modal.classList.remove('is-open');
+      setTimeout(() => {
+        if (!modal.classList.contains('is-open')) {
+          modal.style.display = 'none';
+          modal.setAttribute('hidden', '');
+        }
+      }, 220);
+      document.body.style.overflow = '';
+    };
+
+    const addToCartAndRedirect = async (variantId, shouldRedirect = false) => {
+      if (!variantId) return;
+
+      try {
+        const response = await fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ items: [{ id: parseInt(variantId, 10), quantity: 1 }] }),
+        });
+
+        if (!response.ok) throw new Error('Failed to add item to cart');
+
+        if (shouldRedirect) {
+          window.location.href = '/checkout';
+          return;
+        }
+
+        closeQAModal();
+
+        // Dispatch theme cart updates
+        document.dispatchEvent(new CustomEvent('cart:updated', { bubbles: true }));
+        document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
+
+        const cartDrawer = document.querySelector('cart-drawer') || document.querySelector('#CartDrawer');
+        if (cartDrawer && typeof cartDrawer.open === 'function') {
+          cartDrawer.open();
+        } else {
+          window.location.href = '/cart';
+        }
+      } catch (err) {
+        console.error('Add to cart error:', err);
+        if (qaProductUrl) window.location.href = qaProductUrl;
+      }
+    };
+
+    const initQAModal = (scope = document) => {
+      scope.querySelectorAll('[data-quick-add]').forEach((btn) => {
+        if (btn.dataset.qaReady === 'true') return;
+        btn.dataset.qaReady = 'true';
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openQAModal(btn);
+        });
+      });
+
+      const modal = getQAModal();
+      if (modal && !modal.dataset.qaEventsBound) {
+        modal.dataset.qaEventsBound = 'true';
+
+        modal.querySelectorAll('[data-qa-close]').forEach((el) => {
+          el.addEventListener('click', closeQAModal);
+        });
+
+        const bagBtn = modal.querySelector('[data-qa-add-bag]');
+        if (bagBtn) {
+          bagBtn.addEventListener('click', () => {
+            const vId = resolveVariantId(modal);
+            addToCartAndRedirect(vId, false);
+          });
+        }
+
+        const buyBtn = modal.querySelector('[data-qa-buy-now]');
+        if (buyBtn) {
+          buyBtn.addEventListener('click', () => {
+            const vId = resolveVariantId(modal);
+            addToCartAndRedirect(vId, true);
+          });
+        }
+      }
+    };
+
+    // Carousel init with mobile finger swipe support
+    const initCarousels = (scope = document) => {
+      scope.querySelectorAll('[data-carousel]').forEach((carousel) => {
+        if (carousel.dataset.ready === 'true') return;
+        carousel.dataset.ready = 'true';
+
+        const slides = carousel.querySelectorAll('[data-carousel-slide]');
+        const dots = carousel.querySelectorAll('[data-carousel-dot]');
+
+        if (slides.length <= 1) return;
+
+        let currentIndex = 0;
+
+        const goTo = (index) => {
+          if (index < 0) index = slides.length - 1;
+          if (index >= slides.length) index = 0;
+          slides[currentIndex].classList.remove('is-active');
+          dots[currentIndex]?.classList.remove('is-active');
+          currentIndex = index;
+          slides[currentIndex].classList.add('is-active');
+          dots[currentIndex]?.classList.add('is-active');
+        };
+
+        const cardEl = carousel.closest('[data-product-card]') || carousel;
+        cardEl.addEventListener('mouseenter', () => {
+          if (slides.length > 1) goTo(1);
+        });
+
+        cardEl.addEventListener('mouseleave', () => {
+          if (slides.length > 1) goTo(0);
+        });
+
+        /* Touch swipes now scroll the product row instead of flipping images. */
+
+        dots.forEach((dot) => {
+          dot.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            goTo(parseInt(dot.dataset.index, 10));
+          });
+        });
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCarousels();
+      initSection();
+      initModal();
+      initQAModal();
+    });
+    document.addEventListener('shopify:section:load', (event) => {
+      initCarousels(event.target);
+      initSection(event.target);
+      initQAModal(event.target);
+    });
+  })();
+</script>
+
+<script>
+  (() => {
+    const init = (scope = document) => {
+      scope.querySelectorAll('[data-forher]').forEach((root) => {
+        if (root.dataset.forherReady === 'true') return;
+        root.dataset.forherReady = 'true';
+
+        const track = root.querySelector('[data-forher-track]');
+        const dotsContainer = root.querySelector('[data-forher-dots]');
+        if (!track) return;
+
+        let pages = [];
+        let dots = [];
+
+        const getPages = () => {
+          const cards = Array.from(track.querySelectorAll('.balad-forher__card'));
+          if (!cards.length) return [];
+          const max = track.scrollWidth - track.clientWidth;
+          if (max <= 4) return [];
+
+          const firstCard = cards[0];
+          const secondCard = cards[1];
+          const cardWidth = secondCard ? (secondCard.offsetLeft - firstCard.offsetLeft) : firstCard.offsetWidth;
+          const visibleCount = Math.max(1, Math.floor((track.clientWidth + 4) / cardWidth));
+          const step = Math.max(cardWidth, visibleCount * cardWidth);
+
+          const p = [0];
+          let current = step;
+          while (current < max - (cardWidth * 0.4)) {
+            p.push(current);
+            current += step;
+          }
+          if (p[p.length - 1] < max - 5) {
+            p.push(max);
+          }
+          return p;
+        };
+
+        const updateActiveDot = () => {
+          if (!dots.length || !pages.length) return;
+          const currentLeft = track.scrollLeft;
+          let activeIdx = 0;
+          let minDiff = Infinity;
+          for (let i = 0; i < pages.length; i++) {
+            const diff = Math.abs(currentLeft - pages[i]);
+            if (diff < minDiff) {
+              minDiff = diff;
+              activeIdx = i;
+            }
+          }
+          dots.forEach((dot, i) => {
+            const isActive = i === activeIdx;
+            dot.classList.toggle('is-active', isActive);
+            dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
+          });
+        };
+
+        const renderDots = () => {
+          if (!dotsContainer) return;
+          const newPages = getPages();
+          const samePages = newPages.length === pages.length && newPages.every((val, idx) => Math.abs(val - pages[idx]) < 2);
+          if (samePages && dots.length === newPages.length) {
+            updateActiveDot();
+            return;
+          }
+
+          pages = newPages;
+          dotsContainer.innerHTML = '';
+          if (pages.length <= 1) {
+            dotsContainer.style.display = 'none';
+            dots = [];
+            return;
+          }
+
+          dotsContainer.style.display = 'flex';
+          dots = pages.map((pageLeft, idx) => {
+            const dot = document.createElement('button');
+            dot.type = 'button';
+            dot.className = 'balad-forher__dot' + (idx === 0 ? ' is-active' : '');
+            dot.setAttribute('role', 'tab');
+            dot.setAttribute('aria-label', `Go to slide ${idx + 1}`);
+            dot.setAttribute('aria-selected', idx === 0 ? 'true' : 'false');
+            dot.addEventListener('click', (e) => {
+              e.preventDefault();
+              track.scrollTo({ left: pageLeft, behavior: 'smooth' });
+            });
+            dotsContainer.appendChild(dot);
+            return dot;
+          });
+          updateActiveDot();
+        };
+
+        const update = () => {
+          const max = track.scrollWidth - track.clientWidth;
+          const canScroll = max > 4;
+          root.classList.toggle('is-scrollable', canScroll);
+          renderDots();
+        };
+
+        track.addEventListener('scroll', () => {
+          requestAnimationFrame(updateActiveDot);
+        }, { passive: true });
+
+        window.addEventListener('resize', update);
+        if (window.ResizeObserver) new ResizeObserver(update).observe(track);
+
+        /* Mouse drag-to-scroll (touch scrolls natively) */
+        let down = false, moved = false, startX = 0, startLeft = 0;
+        track.addEventListener('pointerdown', (e) => {
+          if (e.pointerType !== 'mouse' || e.button !== 0) return;
+          if (e.target.closest('button')) return;
+          down = true; moved = false;
+          startX = e.clientX; startLeft = track.scrollLeft;
+        });
+        window.addEventListener('pointermove', (e) => {
+          if (!down) return;
+          const dx = e.clientX - startX;
+          if (!moved && Math.abs(dx) > 5) { moved = true; track.classList.add('is-dragging'); }
+          if (moved) track.scrollLeft = startLeft - dx;
+        });
+        const end = () => {
+          if (!down) return;
+          down = false;
+          track.classList.remove('is-dragging');
+          setTimeout(() => { moved = false; }, 0);
+        };
+        window.addEventListener('pointerup', end);
+        window.addEventListener('pointercancel', end);
+        track.addEventListener('click', (e) => {
+          if (moved) { e.preventDefault(); e.stopPropagation(); }
+        }, true);
+        track.addEventListener('dragstart', (e) => e.preventDefault());
+
+        update();
+      });
+    };
+
+    init();
+    document.addEventListener('DOMContentLoaded', () => init());
+    document.addEventListener('shopify:section:load', (e) => init(e.target));
+  })();
+</script>
+
+<script>
+  (() => {
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const roots = new Set();
+    let ticking = false;
+
+    const apply = () => {
+      ticking = false;
+      const vh = window.innerHeight || 800;
+      roots.forEach((root) => {
+        const img = root.querySelector('.balad-forher__bg-img');
+        if (!img) return;
+        const rect = root.getBoundingClientRect();
+        if (rect.bottom < -200 || rect.top > vh + 200) return;
+        const slack = parseFloat(root.dataset.forherParallax || '15') / 100;
+        const max = rect.height * slack * 0.95;
+        /* -1 (section below viewport) .. 1 (section above viewport) */
+        let progress = ((rect.top + rect.height / 2) - vh / 2) / (vh / 2 + rect.height / 2);
+        progress = Math.max(-1, Math.min(1, progress));
+        img.style.setProperty('--forher-shift', (-progress * max).toFixed(1) + 'px');
+      });
+    };
+
+    const request = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(apply);
+    };
+
+    const init = (scope = document) => {
+      if (reduce) return;
+      scope.querySelectorAll('[data-forher-parallax]').forEach((root) => roots.add(root));
+      apply();
+    };
+
+    window.addEventListener('scroll', request, { passive: true });
+    window.addEventListener('resize', request);
+    window.addEventListener('load', request);
+    init();
+    document.addEventListener('DOMContentLoaded', () => init());
+    document.addEventListener('shopify:section:load', (e) => init(e.target));
+  })();
+</script>
+
+<style>
+  /* ══════════════════════════════════════════════════════════════
+     FOR HER — parallax image band, one scrolling row (6 visible)
+     ══════════════════════════════════════════════════════════════ */
+  .balad-forher {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--forher-bg, #1a1a1a) !important;
+    padding-top: clamp(52px, 5.5vw, 88px);
+    padding-bottom: clamp(44px, 4.5vw, 72px);
+  }
+
+  .balad-forher__bg {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    overflow: hidden;
+  }
+
+  .balad-forher__bg picture {
+    display: contents;
+  }
+
+  .balad-forher__bg-img {
+    position: absolute;
+    left: 0;
+    top: calc(var(--forher-slack, 15%) * -1);
+    width: 100%;
+    height: var(--forher-bg-height, 130%);
+    object-fit: cover;
+    will-change: transform;
+    transform: translate3d(0, var(--forher-shift, 0px), 0);
+  }
+
+  .balad-forher::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgb(0 0 0 / calc(var(--forher-overlay, 0.20) + 0.35)) 0%,
+      rgb(0 0 0 / calc(var(--forher-overlay, 0.20) + 0.16)) 25%,
+      rgb(0 0 0 / var(--forher-overlay, 0.20)) 50%,
+      rgb(0 0 0 / var(--forher-overlay, 0.20)) 80%,
+      rgb(0 0 0 / calc(var(--forher-overlay, 0.20) + 0.10)) 100%
+    );
+  }
+
+  .balad-forher__shell {
+    width: 100%;
+    margin: 0;
+    padding: 0 36px;
+    box-sizing: border-box;
+  }
+
+  .balad-forher__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: clamp(18px, 2.4vw, 30px);
+  }
+
+  .balad-forher__intro {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .balad-forher__title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .balad-forher__heading {
+    margin: 0;
+    color: #ffffff;
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
+    font-size: 22px;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  }
+
+  .balad-forher__subheading {
+    margin: 6px 0 0;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #ffffff;
+    font-weight: 500;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .balad-forher__controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .balad-forher__cta {
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: opacity 0.2s ease;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .balad-forher__cta:hover {
+    opacity: 0.75;
+  }
+
+
+
+  /* One row: 6 visible, the rest scroll sideways */
+  .balad-forher__track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - ((var(--forher-cols, 6) - 1) * 12px)) / var(--forher-cols, 6));
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    cursor: grab;
+    padding: 0 0 6px;
+  }
+
+  .balad-forher__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .balad-forher__track.is-dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .balad-forher__track.is-dragging a,
+  .balad-forher__track.is-dragging img,
+  .balad-forher__track.is-dragging button {
+    pointer-events: none;
+  }
+
+  .balad-forher__card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    scroll-snap-align: start;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     SMOOTH HOVER (product cards) - matching "Discover Our Bestsellers"
+     Slow image zoom + soft crossfade to the 2nd photo, calm button / heart / dot transitions.
+     ══════════════════════════════════════════════════════════════ */
+  .balad-forher .bpc {
+    box-shadow: 0 14px 30px -14px rgb(0 0 0 / 0.55);
+    transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  .balad-forher .balad-forher__card:hover .bpc,
+  .balad-forher .bpc:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 36px -10px rgb(0 0 0 / 0.65);
+  }
+
+  .balad-forher .bpc__image {
+    transform: scale(1);
+    transform-origin: center center;
+    transition:
+      opacity 0.5s ease,
+      transform 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+  }
+
+  .balad-forher .bpc__buy {
+    transition: background-color 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+  }
+
+  .balad-forher .bpc__buy-arrow {
+    transition:
+      transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+      background-color 0.5s ease,
+      color 0.5s ease !important;
+  }
+
+  .balad-forher .bpc__wish {
+    transition:
+      transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1),
+      background-color 0.4s ease,
+      color 0.4s ease !important;
+  }
+
+  .balad-forher .bpc__media::after {
+    transition: opacity 0.6s ease;
+  }
+
+  .balad-forher .balad-forher__card:hover .bpc__image.is-active,
+  .balad-forher .balad-forher__card:focus-within .bpc__image.is-active,
+  .balad-forher .bpc:hover .bpc__image.is-active,
+  .balad-forher .bpc:focus-within .bpc__image.is-active {
+    transform: scale(1.06) !important;
+  }
+
+  @media (hover: hover) {
+    .balad-forher .balad-forher__card:hover .bpc__buy::before,
+    .balad-forher .balad-forher__card:focus-within .bpc__buy::before,
+    .balad-forher .bpc:hover .bpc__buy::before,
+    .balad-forher .bpc:focus-within .bpc__buy::before {
+      transform: scaleX(1.85);
+    }
+
+    .balad-forher .balad-forher__card:hover .bpc__buy,
+    .balad-forher .balad-forher__card:focus-within .bpc__buy,
+    .balad-forher .bpc:hover .bpc__buy,
+    .balad-forher .bpc:focus-within .bpc__buy {
+      box-shadow: 0 6px 18px rgb(99 34 102 / 0.35);
+    }
+
+    .balad-forher .balad-forher__card:hover .bpc__buy-arrow,
+    .balad-forher .balad-forher__card:focus-within .bpc__buy-arrow,
+    .balad-forher .bpc:hover .bpc__buy-arrow,
+    .balad-forher .bpc:focus-within .bpc__buy-arrow {
+      transform: translateX(2px);
+    }
+  }
+
+  /* Dots pagination */
+  .balad-forher__dots {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 18px;
+    padding: 0;
+  }
+
+  .balad-forher.is-scrollable .balad-forher__dots {
+    display: flex;
+  }
+
+  .balad-forher__dot {
+    appearance: none;
+    background: rgba(255, 255, 255, 0.35);
+    border: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    padding: 0;
+    cursor: pointer;
+    transition: width 0.25s cubic-bezier(0.2, 0, 0, 1), background 0.25s ease, opacity 0.25s ease;
+  }
+
+  .balad-forher__dot:hover {
+    background: rgba(255, 255, 255, 0.75);
+  }
+
+  .balad-forher__dot.is-active {
+    width: 22px;
+    background: #ffffff;
+  }
+
+  @media screen and (max-width: 749px) {
+    .balad-forher__dots {
+      margin-top: 14px;
+      gap: 6px;
+    }
+    .balad-forher__dot {
+      width: 5px;
+      height: 5px;
+    }
+    .balad-forher__dot.is-active {
+      width: 18px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .balad-forher__bg-img {
+      transform: none;
+    }
+  }
+
+  @media screen and (min-width: 1025px) and (max-width: 1400px) {
+    .balad-forher__track {
+      grid-auto-columns: calc((100% - ((var(--forher-cols, 6) - 1) * 10px)) / var(--forher-cols, 6));
+      gap: 10px;
+    }
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .balad-forher__shell {
+      padding: 0 20px;
+    }
+
+    .balad-forher__track {
+      grid-auto-columns: calc((100% - 30px) / 4);
+      gap: 10px;
+    }
+
+
+  }
+
+  @media screen and (max-width: 749px) {
+    .balad-forher {
+      padding-top: 38px;
+      padding-bottom: 30px;
+    }
+
+    .balad-forher__shell {
+      padding: 0 12px;
+    }
+
+    .balad-forher__head {
+      margin-bottom: 14px;
+    }
+
+    .balad-forher__heading {
+      font-size: 18px;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+    }
+
+    .balad-forher__subheading {
+      font-size: 13px;
+      margin-top: 4px;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .balad-forher__cta {
+      font-size: 12.5px;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+
+
+    .balad-forher__track {
+      grid-auto-columns: calc((100% - 8px) / 2);
+      gap: 8px;
+      scroll-snap-type: x mandatory;
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     MODALS
+     ══════════════════════════════════════════════════════════════ */
+  .balad-wishlist-modal,
+  .balad-qa-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .balad-wishlist-modal.is-open,
+  .balad-qa-modal.is-open {
+    display: flex;
+  }
+
+  .balad-wishlist-modal__backdrop,
+  .balad-qa-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    cursor: pointer;
+  }
+
+  .balad-wishlist-modal__card,
+  .balad-qa-modal__card {
+    position: relative;
+    z-index: 1;
+    width: 90%;
+    max-width: 380px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+  }
+
+  .balad-wishlist-modal__close,
+  .balad-qa-modal__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #666666;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+
+  .balad-wishlist-modal__header,
+  .balad-qa-modal__header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .balad-wishlist-modal__product-img,
+  .balad-qa-modal__product-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f5f5f5;
+  }
+
+  .balad-wishlist-modal__product-img img,
+  .balad-qa-modal__product-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .balad-wishlist-modal__title,
+  .balad-qa-modal__title {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #111111;
+  }
+
+  .balad-wishlist-modal__price,
+  .balad-qa-modal__price {
+    font-size: 13px;
+    font-weight: 600;
+    color: #666666;
+  }
+
+  .balad-wishlist-modal__size-grid,
+  .balad-qa-modal__size-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+  }
+
+  .balad-wishlist-modal__size,
+  .balad-qa-modal__size {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid #e2e2e2;
+    background: #ffffff;
+    color: #111111;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .balad-wishlist-modal__size.is-selected,
+  .balad-qa-modal__size.is-selected {
+    background: #111111;
+    color: #ffffff;
+    border-color: #111111;
+  }
+
+  .balad-wishlist-modal__add-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 16px;
+    border: none;
+    background: #111111;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .balad-qa-modal__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .balad-qa-modal__btn {
+    padding: 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+  }
+
+  .balad-qa-modal__btn--bag {
+    background: #ffffff;
+    color: #111111;
+    border: 1px solid #111111;
+  }
+
+  .balad-qa-modal__btn--buy {
+    background: #111111;
+    color: #ffffff;
+  }
+
+  .balad-qa-modal__sold-out {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: #f5f5f5;
+    color: #888888;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+</style>
+
+{% schema %}
+{
+  "name": "For Her Parallax",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Tag (small black label)",
+      "default": "For Her"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Fragrances for Her"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Elegant florals, soft musks and warm signatures."
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection",
+      "info": "Pick your 'For Her' collection. Falls back to the collection with handle 'for-her'."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_count",
+      "label": "Show product count",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "Products visible in the row (desktop)",
+      "options": [
+        { "value": "4", "label": "4" },
+        { "value": "5", "label": "5" },
+        { "value": "6", "label": "6" }
+      ],
+      "default": "6"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Total products (extra ones scroll)",
+      "min": 6,
+      "max": 24,
+      "step": 2,
+      "default": 12
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "label": "Show Review Rating & Count",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_buy_now",
+      "label": "Show 'Buy now' button on product cards",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Link label",
+      "default": "Shop all for her"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Link (optional)",
+      "info": "Leave empty to link to the selected collection."
+    },
+    {
+      "type": "header",
+      "content": "Parallax background"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Desktop background image",
+      "info": "Recommended: 2400 x 1200 px. If left empty, automatically checks collection metafield (custom.background_image) or collection image."
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_background_image",
+      "label": "Mobile background image (optional)",
+      "info": "Recommended: 800 x 1200 px. If empty, checks collection metafield (custom.mobile_background_image) or desktop image."
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Dark overlay",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "parallax_strength",
+      "label": "Parallax strength",
+      "min": 5,
+      "max": 30,
+      "step": 5,
+      "unit": "%",
+      "default": 15
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Fallback color (when no image)",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "For Her Parallax"
+    }
+  ]
+}
+{% endschema %}

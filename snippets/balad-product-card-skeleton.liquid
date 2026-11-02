@@ -1,0 +1,26 @@
+{%- doc -%}
+  Skeleton loading placeholder for Balad product card.
+  Matches the exact geometry, image aspect ratio, pills, and typography of the live card.
+  @param {boolean} [show_buy_now] - Whether to show the skeleton buy-now pill (default true)
+{%- enddoc -%}
+
+<article class="bpc bpc--skeleton" aria-hidden="true">
+  <div class="bpc__media">
+    <div class="bpc__skeleton"></div>
+    <div class="bpc__badges">
+      <span class="bpc__skeleton-badge"></span>
+    </div>
+    <div class="bpc__wish bpc__skeleton-wish"></div>
+    {%- unless show_buy_now == false -%}
+      <div class="bpc__dock">
+        <div class="bpc__buy bpc__skeleton-buy"></div>
+      </div>
+    {%- endunless -%}
+  </div>
+  <div class="bpc__info">
+    <div class="bpc__skeleton-line bpc__skeleton-line--title"></div>
+    <div class="bpc__skeleton-line bpc__skeleton-line--size"></div>
+    <div class="bpc__skeleton-line bpc__skeleton-line--price"></div>
+  </div>
+</article>
+

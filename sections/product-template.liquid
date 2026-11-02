@@ -377,10 +377,18 @@
           </div>
         {%- endform -%}
 
-        <!-- Secure payments (the delivery date now lives in the free delivery box; it only shows here if that box is turned off) -->
-        {%- if section.settings.show_secure_pay or section.settings.show_freeship == false -%}
-        <div class="pdp-meta-row">
-          {%- unless section.settings.show_freeship -%}
+        <!-- Payment icons & guaranteed safe checkout under Buy Now button -->
+        {%- if section.settings.show_secure_pay -%}
+          <div class="pdp-payment-methods">
+            <div class="pdp-payment-methods__badges" aria-label="Accepted payment methods">
+              {% render 'payment-icons' %}
+            </div>
+            <p class="pdp-payment-methods__sub">Pay safely with UPI, Credit / Debit Cards, Net Banking &amp; COD</p>
+          </div>
+        {%- endif -%}
+
+        {%- unless section.settings.show_freeship -%}
+          <div class="pdp-meta-row">
             <p class="pdp-delivery" data-pf-delivery
                data-dispatch="{{ section.settings.dispatch_days | default: 2 }}"
                data-min="{{ section.settings.delivery_min_days | default: 3 }}"
@@ -389,21 +397,8 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
               <span class="pdp-meta__text"><small>Estimated delivery</small><strong data-pf-delivery-range>{{ eta_min_date }} to {{ eta_max_date }}</strong></span>
             </p>
-          {%- endunless -%}
-          {%- if section.settings.show_secure_pay -%}
-            <div class="pdp-secure">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-              <span class="pdp-meta__text">
-                <strong>100% secure payments</strong>
-                <small>Pay safely with UPI, Cards or Net Banking</small>
-              </span>
-              <span class="pdp-secure__chips" aria-hidden="true">
-                <span>UPI</span><span>Cards</span><span>Net Banking</span>
-              </span>
-            </div>
-          {%- endif -%}
-        </div>
-        {%- endif -%}
+          </div>
+        {%- endunless -%}
 
         <!-- Purchase assurance (edit in the theme editor) -->
         {%- if section.settings.show_cod or section.settings.shipping_note != blank or section.settings.returns_note != blank -%}
@@ -940,6 +935,67 @@
   .pdp-btn--buy { background: var(--pf-ink); color: #fff; }
   .pdp-btn--buy:hover:not(:disabled) { background: #000; }
   .pdp-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* Payment methods & icons directly under Buy Now button */
+  .pdp-payment-methods {
+    margin: 12px 0 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .pdp-payment-methods__badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .pdp-payment-methods__badges .balad-payment-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 24px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .pdp-payment-methods__badges .balad-payment-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  }
+  .pdp-payment-methods__badges .balad-payment-badge svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .pdp-payment-methods__sub {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--pf-muted, #767676);
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+  }
+  @media screen and (max-width: 520px) {
+    .pdp-payment-methods {
+      margin-top: 10px;
+      padding: 0;
+      gap: 6px;
+    }
+    .pdp-payment-methods__badges {
+      gap: 5px;
+    }
+    .pdp-payment-methods__badges .balad-payment-badge {
+      width: 34px;
+      height: 21px;
+    }
+  }
 
   /* Estimated delivery + secure payments (already has top and bottom borders) */
   .pdp-meta-row {
@@ -2094,7 +2150,7 @@
     {
       "type": "checkbox",
       "id": "show_secure_pay",
-      "label": "Show 'Secure payments: UPI, Cards, Net Banking'",
+      "label": "Show payment icons & secure checkout under Buy Now",
       "default": true
     },
     {

@@ -976,7 +976,6 @@ summary::-webkit-details-marker {
 
 /* When header is transparent, pull the first main content section up to sit under the floating header */
 body:has(.header[transparent]) .content-for-layout > .shopify-section:first-child,
-body:has(.pf-header--home) .content-for-layout > .shopify-section:first-child,
 body:has(.pf-header--transparent) .content-for-layout > .shopify-section:first-child,
 body:has(.pf-header--about-page) .content-for-layout > .shopify-section:first-child {
   margin-top: calc(var(--header-group-height) * -1);
@@ -991,7 +990,6 @@ body:has(.pf-header--about-page) .content-for-layout > .shopify-section:first-ch
 }
 
 body:has(.header[transparent]) #header-group > .header-section,
-body:has(.pf-header--home) #header-group > .header-section,
 body:has(.pf-header--transparent) #header-group > .header-section,
 body:has(.pf-header--about-page) #header-group > .header-section {
   z-index: var(--layer-sticky);
@@ -1000,7 +998,6 @@ body:has(.pf-header--about-page) #header-group > .header-section {
 /* All other header group content should be beneath the floating header,
 but above the rest of the page content */
 body:has(.header[transparent]) #header-group > *:not(.header-section),
-body:has(.pf-header--home) #header-group > *:not(.header-section),
 body:has(.pf-header--transparent) #header-group > *:not(.header-section),
 body:has(.pf-header--about-page) #header-group > *:not(.header-section) {
   z-index: calc(var(--layer-sticky) - 1);

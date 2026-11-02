@@ -1,15 +1,20 @@
 <style>
-  /* Shoppable Video & App Section Container & Alignment */
+  /* ── Shoppable Video / Instagram Section: Uniform Page Margin & Padding ──
+     Matches balad-category-scroll, balad-latest-items, and real-life-images:
+     - Desktop: 36px left & right space
+     - Tablet (750px - 1024px): 20px left & right space
+     - Mobile (< 750px): 12px left & right space
+     Both section heading and card section share the exact same left and right space. */
   [id*="1790060856d032d058"],
   .shopify-section[id*="1790060856"],
-  [class*="shoppable-video"],
-  [id*="1790060856d032d058"] .section,
-  [id*="1790060856d032d058"] .section-background {
+  [class*="shoppable-video"] {
     background: #f6f3ee !important;
     width: 100% !important;
     max-width: 100% !important;
     padding-left: 36px !important;
     padding-right: 36px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
     box-sizing: border-box !important;
     margin-top: 0 !important;
     margin-bottom: 0 !important;
@@ -17,14 +22,29 @@
     padding-bottom: clamp(4px, 0.8vw, 8px) !important;
   }
 
-  /* Remove the app block's own extra top/bottom padding & gaps */
-  [id*="1790060856d032d058"] [class*="wrapper"],
-  [id*="1790060856d032d058"] [class*="container"],
-  [id*="1790060856d032d058"] [class*="section"] {
+  /* Reset all inner wrappers (excluding buttons) so they don't add extra/double padding */
+  [id*="1790060856d032d058"] .section,
+  [id*="1790060856d032d058"] .section-background,
+  [id*="1790060856d032d058"] .custom-section-content,
+  [id*="1790060856d032d058"] .section-content-wrapper,
+  [id*="1790060856d032d058"] .shopify-block,
+  [id*="1790060856d032d058"] div[class*="wrapper"]:not(button):not([class*="button"]),
+  [id*="1790060856d032d058"] div[class*="container"]:not(button):not([class*="button"]),
+  [id*="1790060856d032d058"] div[class*="section"]:not(button):not([class*="button"]) {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-inline: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-inline: 0 !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
     margin-top: 0 !important;
     margin-bottom: 0 !important;
+    box-sizing: border-box !important;
   }
 
   /* Reset inner app container top & bottom margins/padding */
@@ -45,11 +65,13 @@
     overflow: hidden !important;
   }
 
-  /* Custom Left-Aligned Header with clean gap before video cards */
+  /* Custom Left-Aligned Header: Spans full width of the padded container */
   .pf-app-ig-header {
     text-align: left !important;
+    width: 100% !important;
     margin: 0 0 12px 0 !important;
     padding: 0 0 8px 0 !important;
+    box-sizing: border-box !important;
     border-bottom: 1px solid rgb(17 17 17 / 0.08) !important;
   }
 
@@ -78,6 +100,98 @@
   [id*="1790060856d032d058"] [class*="title"]:not(.pf-app-ig-title),
   [id*="1790060856d032d058"] [class*="heading"] {
     text-align: left !important;
+  }
+
+  /* ── Carousel wrapper & Flickity viewport: full width of container (NOT buttons) ── */
+  [id*="1790060856d032d058"] .flickity-enabled,
+  [id*="1790060856d032d058"] .flickity-viewport,
+  [id*="1790060856d032d058"] .flickityrf-enabled,
+  [id*="1790060856d032d058"] .flickityrf-viewport,
+  [id*="1790060856d032d058"] div[class*="reelfy"][class*="wrapper"],
+  [id*="1790060856d032d058"] div[class*="reelfy"][class*="container"],
+  [id*="1790060856d032d058"] div[class*="reelfy"][class*="slider"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-inline: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* ── Flickity navigation buttons (flickityrf-button): compact circular arrow buttons ── */
+  [id*="1790060856d032d058"] .flickityrf-button,
+  [id*="1790060856d032d058"] .flickityrf-prev-next-button,
+  [id*="1790060856d032d058"] .flickity-button,
+  [id*="1790060856d032d058"] .flickity-prev-next-button {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    border-radius: 50% !important;
+    background: #ffffff !important;
+    color: #111111 !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14) !important;
+    cursor: pointer !important;
+    z-index: 20 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, background-color 0.2s ease !important;
+  }
+
+  [id*="1790060856d032d058"] .flickityrf-button:hover,
+  [id*="1790060856d032d058"] .flickityrf-prev-next-button:hover,
+  [id*="1790060856d032d058"] .flickity-button:hover,
+  [id*="1790060856d032d058"] .flickity-prev-next-button:hover {
+    background: #ffffff !important;
+    transform: translateY(-50%) scale(1.08) !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22) !important;
+  }
+
+  [id*="1790060856d032d058"] .flickityrf-button.previous,
+  [id*="1790060856d032d058"] .flickityrf-prev-next-button.previous,
+  [id*="1790060856d032d058"] .flickity-prev-next-button.previous {
+    left: 8px !important;
+    right: auto !important;
+  }
+
+  [id*="1790060856d032d058"] .flickityrf-button.next,
+  [id*="1790060856d032d058"] .flickityrf-prev-next-button.next,
+  [id*="1790060856d032d058"] .flickity-prev-next-button.next {
+    right: 8px !important;
+    left: auto !important;
+  }
+
+  [id*="1790060856d032d058"] .flickityrf-button:disabled,
+  [id*="1790060856d032d058"] .flickityrf-prev-next-button:disabled,
+  [id*="1790060856d032d058"] .flickity-prev-next-button:disabled {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    cursor: default !important;
+  }
+
+  [id*="1790060856d032d058"] .flickityrf-button svg,
+  [id*="1790060856d032d058"] .flickityrf-prev-next-button svg,
+  [id*="1790060856d032d058"] .flickity-prev-next-button svg,
+  [id*="1790060856d032d058"] .flickity-button-icon {
+    width: 14px !important;
+    height: 14px !important;
+    max-width: 14px !important;
+    max-height: 14px !important;
+    fill: #111111 !important;
+    color: #111111 !important;
   }
 
   /* ── Slider page dots (flickityrf) ──
@@ -123,6 +237,7 @@
     transform: scale(1.25) !important;
   }
 
+  /* Tablet: 20px side padding (matching other sections) */
   @media screen and (min-width: 750px) and (max-width: 1024px) {
     [id*="1790060856d032d058"],
     .shopify-section[id*="1790060856"],
@@ -130,46 +245,51 @@
       padding-left: 20px !important;
       padding-right: 20px !important;
     }
+
+    .pf-app-ig-header {
+      margin: 0 0 12px 0 !important;
+    }
   }
 
-  /* Mobile Responsive: Zero side white space for video slider & slightly reduced bottom spacing */
+  /* Mobile: 12px side padding (matching other sections) */
   @media screen and (max-width: 749px) {
     [id*="1790060856d032d058"],
     .shopify-section[id*="1790060856"],
     [class*="shoppable-video"] {
-      padding-left: 0 !important;
-      padding-right: 0 !important;
+      padding-left: 12px !important;
+      padding-right: 12px !important;
       margin-top: 0 !important;
       margin-bottom: 0 !important;
       padding-top: 8px !important;
       padding-bottom: 4px !important;
     }
 
-    [id*="1790060856d032d058"] .section-content-wrapper,
-    .shopify-section[id*="1790060856"] .section-content-wrapper {
-      padding-left: 0 !important;
-      padding-right: 0 !important;
-      padding-inline: 0 !important;
+    [id*="1790060856d032d058"] .flickityrf-button,
+    [id*="1790060856d032d058"] .flickityrf-prev-next-button,
+    [id*="1790060856d032d058"] .flickity-button,
+    [id*="1790060856d032d058"] .flickity-prev-next-button {
+      width: 32px !important;
+      min-width: 32px !important;
+      max-width: 32px !important;
+      height: 32px !important;
+      min-height: 32px !important;
+      max-height: 32px !important;
     }
 
-    .flickityrf-page-dots,
-    [id*="1790060856d032d058"] .flickity-page-dots {
-      margin-top: 10px !important;
+    [id*="1790060856d032d058"] .flickityrf-button.previous,
+    [id*="1790060856d032d058"] .flickityrf-prev-next-button.previous {
+      left: 6px !important;
     }
 
-    [id*="1790060856d032d058"] > div,
-    .shopify-section[id*="1790060856"] > div,
-    [id*="1790060856d032d058"] [class*="wrapper"],
-    [id*="1790060856d032d058"] [class*="container"] {
-      margin-bottom: 0 !important;
-      padding-bottom: 0 !important;
+    [id*="1790060856d032d058"] .flickityrf-button.next,
+    [id*="1790060856d032d058"] .flickityrf-prev-next-button.next {
+      right: 6px !important;
     }
 
-    /* Higher specificity so the "> div" reset above can't zero this header's bottom gap */
     [id*="1790060856d032d058"] > .pf-app-ig-header,
     .shopify-section[id*="1790060856"] > .pf-app-ig-header,
     .pf-app-ig-header {
-      margin: 0 12px 14px 12px !important;
+      margin: 0 0 12px 0 !important;
       padding: 0 0 8px 0 !important;
     }
 
@@ -182,18 +302,15 @@
       margin-top: 4px !important;
     }
 
-    /* Remove the app's own left/right inset so the first card lines up with the heading & other sections */
-    [id*="1790060856d032d058"] [class*="flickity"],
-    [id*="1790060856d032d058"] [class*="reelfy"][class*="wrapper"],
-    [id*="1790060856d032d058"] [class*="reelfy"][class*="container"],
-    [id*="1790060856d032d058"] [class*="reelfy"][class*="slider"] {
-      padding-left: 0 !important;
-      margin-left: 0;
+    .flickityrf-page-dots,
+    [id*="1790060856d032d058"] .flickity-page-dots {
+      margin-top: 10px !important;
     }
   }
 
   /* ── Instagram / Reelfy video cards: rounded corners ── */
   [id*="1790060856d032d058"] .flickity-slider > *,
+  [id*="1790060856d032d058"] .flickityrf-slider > *,
   [id*="1790060856d032d058"] [class*="reelfy"][class*="card"],
   [id*="1790060856d032d058"] [class*="reelfy"][class*="item"],
   [id*="1790060856d032d058"] [class*="reelfy"][class*="slide"],
@@ -203,8 +320,11 @@
   }
 
   [id*="1790060856d032d058"] .flickity-slider video,
+  [id*="1790060856d032d058"] .flickityrf-slider video,
   [id*="1790060856d032d058"] .flickity-slider img,
+  [id*="1790060856d032d058"] .flickityrf-slider img,
   [id*="1790060856d032d058"] .flickity-slider > * > *,
+  [id*="1790060856d032d058"] .flickityrf-slider > * > *,
   [id*="1790060856d032d058"] [class*="reelfy"] video,
   [id*="1790060856d032d058"] [class*="reelfy"] img:not([class*="icon"]) {
     border-radius: inherit !important;
@@ -234,40 +354,41 @@
       }
     };
 
-    // Mobile: line the first video card up with the heading (same left edge as other sections)
+    // Ensure first video card exactly aligns with the section heading left edge across all screen sizes
     const alignInstagramCards = () => {
       const section = document.querySelector('[id*="1790060856d032d058"]') || document.querySelector('.shopify-section[id*="1790060856"]');
       if (!section) return;
-      const viewport = section.querySelector('.flickity-viewport');
-      const slider = section.querySelector('.flickity-slider');
+      const viewport = section.querySelector('.flickity-viewport') || section.querySelector('.flickityrf-viewport');
+      const slider = section.querySelector('.flickity-slider') || section.querySelector('.flickityrf-slider');
       const header = section.querySelector('.pf-app-ig-header');
       const firstCell = slider && slider.firstElementChild;
       if (!viewport || !slider || !header || !firstCell) return;
 
-      const isMobile = window.matchMedia('(max-width: 749px)').matches;
-      if (!isMobile) {
-        if (viewport.dataset.pfShift) {
-          viewport.style.marginLeft = '';
-          delete viewport.dataset.pfShift;
-          
-        }
-        return;
-      }
-      if (viewport.dataset.pfShift) return; // already corrected
+      // Only measure while the slider is in its initial position (first card selected)
+      const matrix = new DOMMatrix(getComputedStyle(slider).transform);
+      if (Math.abs(matrix.m41) > 2) return;
 
-      // Only measure while the slider sits at the first card
-      const tx = new DOMMatrix(getComputedStyle(slider).transform).m41;
-      if (Math.abs(tx) > 1) return;
+      const headerRect = header.getBoundingClientRect();
+      const cardRect = firstCell.getBoundingClientRect();
+      const gap = cardRect.left - headerRect.left;
 
-      const gap = firstCell.getBoundingClientRect().left - header.getBoundingClientRect().left;
-      if (Math.abs(gap) > 0.5 && Math.abs(gap) < 40) {
-        viewport.style.marginLeft = (-gap) + 'px';
-        viewport.dataset.pfShift = String(gap);
-        // layout updated without global resize storm
+      if (Math.abs(gap) > 0.5 && Math.abs(gap) < 60) {
+        const currentShift = parseFloat(viewport.dataset.pfShift || 0);
+        const newShift = currentShift - gap;
+        viewport.style.marginLeft = newShift + 'px';
+        viewport.dataset.pfShift = String(newShift);
       }
     };
 
-    window.addEventListener('resize', () => setTimeout(alignInstagramCards, 150));
+    window.addEventListener('resize', () => {
+      const section = document.querySelector('[id*="1790060856d032d058"]') || document.querySelector('.shopify-section[id*="1790060856"]');
+      const viewport = section && (section.querySelector('.flickity-viewport') || section.querySelector('.flickityrf-viewport'));
+      if (viewport) {
+        viewport.style.marginLeft = '';
+        delete viewport.dataset.pfShift;
+      }
+      setTimeout(alignInstagramCards, 150);
+    });
     [600, 1200, 2200, 3500].forEach((t) => setTimeout(alignInstagramCards, t));
     window.addEventListener('load', alignInstagramCards);
 

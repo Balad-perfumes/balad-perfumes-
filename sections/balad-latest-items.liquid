@@ -114,28 +114,8 @@
 
       {% if active_collection.products.size == 0 %}
         {% for i in (1..6) %}
-          <div class="balad-latest-grid__card balad-latest-grid__card--placeholder">
-            <div class="balad-latest-grid__media">
-              {{ 'product-1' | placeholder_svg_tag: 'balad-latest-grid__placeholder' }}
-            </div>
-            <div class="balad-latest-grid__info">
-              <div class="balad-latest-grid__title-row">
-                <h3 class="balad-latest-grid__title">Product {{ i }}</h3>
-                <div class="balad-latest-grid__price-wrap">
-                  <span class="balad-latest-grid__price">₹0</span>
-                </div>
-              </div>
-              <div class="balad-latest-grid__rating">
-                <span class="balad-latest-grid__stars">
-                  <span class="balad-latest-grid__star is-dim">★</span>
-                  <span class="balad-latest-grid__star is-dim">★</span>
-                  <span class="balad-latest-grid__star is-dim">★</span>
-                  <span class="balad-latest-grid__star is-dim">★</span>
-                  <span class="balad-latest-grid__star is-dim">★</span>
-                </span>
-                <span class="balad-latest-grid__rating-count">(0)</span>
-              </div>
-            </div>
+          <div class="balad-latest-grid__card" data-product-card>
+            {% render 'balad-product-card-skeleton', show_buy_now: section.settings.show_buy_now %}
           </div>
         {% endfor %}
       {% endif %}

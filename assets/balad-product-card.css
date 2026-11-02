@@ -58,10 +58,50 @@
 .bpc__image {
   opacity: 0;
   transition: opacity 0.35s ease;
+  z-index: 2;
 }
 
-.bpc__image.is-active {
+.bpc__image.is-active.is-loaded,
+.bpc__media.is-loaded .bpc__image.is-active,
+.bpc__media.has-loaded .bpc__image.is-active {
   opacity: 1;
+}
+
+/* ── Skeleton loading shimmer ──────────────── */
+.bpc__skeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(236, 233, 228, 0.7) 0%,
+    rgba(255, 255, 255, 0.75) 40%,
+    rgba(247, 245, 242, 0.95) 50%,
+    rgba(255, 255, 255, 0.75) 60%,
+    rgba(236, 233, 228, 0.7) 100%
+  );
+  background-size: 200% 100%;
+  animation: bpc-shimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+.bpc__media.is-loaded .bpc__skeleton,
+.bpc__media.has-loaded .bpc__skeleton {
+  opacity: 0;
+  visibility: hidden;
+  animation: none;
+}
+
+@keyframes bpc-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* ── Badges ──────────────────────────────── */
@@ -482,10 +522,100 @@
   }
 }
 
+/* ── Full Skeleton Card ──────────────────── */
+.bpc--skeleton {
+  pointer-events: none;
+  user-select: none;
+}
+
+.bpc--skeleton .bpc__media {
+  background: var(--bpc-media-bg, #ece9e4);
+}
+
+.bpc__skeleton-badge {
+  display: inline-block;
+  width: 68px;
+  height: 22px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.65) 0%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(255, 255, 255, 0.65) 100%
+  );
+  background-size: 200% 100%;
+  animation: bpc-shimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  backdrop-filter: blur(4px);
+}
+
+.bpc__skeleton-wish {
+  pointer-events: none;
+  background: #ffffff;
+  opacity: 0.85;
+}
+
+.bpc__skeleton-buy {
+  pointer-events: none;
+  height: 40px;
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(32, 28, 25, 0.22) 0%,
+    rgba(45, 40, 36, 0.38) 50%,
+    rgba(32, 28, 25, 0.22) 100%
+  );
+  background-size: 200% 100%;
+  animation: bpc-shimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.bpc--skeleton .bpc__info {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  row-gap: 8px;
+}
+
+.bpc__skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(215, 212, 206, 0.5) 0%,
+    rgba(238, 235, 230, 0.85) 50%,
+    rgba(215, 212, 206, 0.5) 100%
+  );
+  background-size: 200% 100%;
+  animation: bpc-shimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.bpc__skeleton-line--title {
+  grid-column: 1;
+  width: 72%;
+  height: 15px;
+}
+
+.bpc__skeleton-line--size {
+  grid-column: 2;
+  width: 36px;
+  height: 12px;
+}
+
+.bpc__skeleton-line--price {
+  grid-column: 1 / -1;
+  width: 48%;
+  height: 13px;
+  margin-top: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bpc *,
   .bpc *:not(.bpc__buy)::before,
-  .bpc *::after {
+  .bpc *::after,
+  .bpc__skeleton,
+  .bpc__skeleton-badge,
+  .bpc__skeleton-buy,
+  .bpc__skeleton-line {
     transition: none !important;
     animation: none !important;
   }
