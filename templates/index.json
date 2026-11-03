@@ -69,7 +69,7 @@
         "corner_radius": 16,
         "padding_bottom": 12,
         "desktop_height": "100vh",
-        "mobile_height": "58vh",
+        "mobile_height": "75vh",
         "heading_size": "medium",
         "enable_zoom": false,
         "enable_overlay": false,
@@ -120,7 +120,10 @@
         "discover_more_link": "shopify://collections",
         "collection_list": [],
         "hide_empty_collections": false,
+        "columns_desktop": 4,
+        "card_size": "compact",
         "image_radius": 24,
+        "enable_parallax": false,
         "overlay_opacity": 45,
         "parallax_strength": 15,
         "background": "#ffffff",
@@ -132,6 +135,7 @@
     "category_scroll": {
       "type": "balad-latest-items",
       "settings": {
+        "show_buy_now": false,
         "heading": "DISCOVER OUR BESTSELLERS",
         "subheading": "Most-loved signature scents.",
         "collection": "new-in",
@@ -264,31 +268,13 @@
         "mobile_columns": "1",
         "show_arrows": true,
         "show_dots": true,
+        "autoplay": false,
+        "autoplay_speed": 5,
         "gap": 12,
         "padding_top": 20,
         "padding_bottom": 20,
         "height_desktop": 600,
         "height_mobile": 440
-      }
-    },
-    "for_him_grid": {
-      "type": "balad-for-him-grid",
-      "settings": {
-        "eyebrow": "For Him",
-        "heading": "Fragrances for Him",
-        "subheading": "Bold woods, rich spices and fresh signatures.",
-        "collection": "for-him",
-        "show_count": true,
-        "columns": "6",
-        "products_to_show": 12,
-        "show_rating": true,
-        "show_buy_now": false,
-        "button_label": "Shop all for him",
-        "button_link": "shopify://collections/for-him",
-        "overlay_opacity": 20,
-        "parallax_strength": 15,
-        "background": "#1a1a1a",
-        "color_scheme": "scheme-1"
       }
     },
     "feature_cards": {
@@ -344,6 +330,7 @@
     "category_products_scroll": {
       "type": "balad-category-products-scroll",
       "settings": {
+        "show_buy_now": false,
         "rows": 2,
         "heading": "Discover Your Signature Scent",
         "subheading": "From fresh to rich blends.",
@@ -357,10 +344,31 @@
         "color_scheme": "scheme-1"
       }
     },
+    "for_him_grid": {
+      "type": "balad-for-him-grid",
+      "settings": {
+        "eyebrow": "For Him",
+        "heading": "Fragrances for Him",
+        "subheading": "Bold woods, rich spices and fresh signatures.",
+        "collection": "for-him",
+        "show_count": true,
+        "columns": "6",
+        "products_to_show": 12,
+        "show_rating": true,
+        "show_buy_now": false,
+        "button_label": "Shop all for him",
+        "button_link": "shopify://collections/for-him",
+        "overlay_opacity": 20,
+        "parallax_strength": 15,
+        "background": "#1a1a1a",
+        "color_scheme": "scheme-1"
+      }
+    },
     "trending_now": {
       "type": "balad-trending-now",
       "disabled": true,
       "settings": {
+        "show_buy_now": false,
         "heading": "Trending Now",
         "subheading": "Most popular picks",
         "collection": "trending",
@@ -597,11 +605,16 @@
       ],
       "disabled": true,
       "settings": {
+        "background": "#ffffff",
         "heading": "",
         "subheading": "",
         "color_scheme": "scheme-1",
         "desktop_columns": "1",
         "mobile_columns": "1",
+        "show_arrows": true,
+        "show_dots": true,
+        "autoplay": false,
+        "autoplay_speed": 5,
         "gap": 20,
         "padding_top": 40,
         "padding_bottom": 40,
