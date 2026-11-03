@@ -137,6 +137,9 @@
   .balad-promo-cards {
     background: var(--promo-cards-bg, #ffffff) !important;
     width: 100%;
+    padding-top: clamp(10px, 1.2vw, 16px);
+    padding-bottom: clamp(10px, 1.2vw, 16px);
+    box-sizing: border-box;
   }
 
   .balad-promo-cards__shell {
@@ -376,6 +379,11 @@
   }
 
   @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .balad-promo-cards {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+
     .balad-promo-cards__shell {
       padding: 0 20px;
     }
@@ -388,6 +396,11 @@
 
   /* ── Mobile Layouts ── */
   @media screen and (max-width: 749px) {
+    .balad-promo-cards {
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
     .balad-promo-cards__shell {
       padding: 0 12px;
     }

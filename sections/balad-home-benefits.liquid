@@ -96,8 +96,8 @@
     --balad-benefits-line: rgb(17 17 17 / 0.08);
     background: var(--benefits-bg, #ffffff) !important;
     color: var(--balad-benefits-ink);
-    padding-top: clamp(10px, 1.4vw, 16px);
-    padding-bottom: clamp(4px, 0.8vw, 8px);
+    padding-top: clamp(10px, 1.2vw, 16px);
+    padding-bottom: clamp(10px, 1.2vw, 16px);
   }
 
   .balad-home-benefits__inner {
@@ -223,6 +223,10 @@
   }
 
     @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .balad-home-benefits {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
     .balad-home-benefits__inner {
       padding: 0 20px 0;
     }
@@ -230,11 +234,12 @@
 
   @media screen and (max-width: 749px) {
     .balad-home-benefits {
-      padding: 0;
+      padding-top: 8px;
+      padding-bottom: 8px;
     }
 
     .balad-home-benefits__inner {
-      padding: 8px 12px 4px;
+      padding: 0 12px;
       width: 100%;
       box-sizing: border-box;
     }

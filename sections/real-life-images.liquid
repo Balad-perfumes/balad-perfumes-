@@ -109,7 +109,8 @@
     width: 100%;
     max-width: 100%;
     margin: 0;
-    padding: 0 36px clamp(10px, 3.5vw, 12px);
+    padding: clamp(10px, 1.2vw, 16px) 36px;
+    box-sizing: border-box;
   }
 
   /* ── Shell ─────────────────────────────────────────────────────────── */
@@ -282,19 +283,20 @@
 
   @media screen and (min-width: 750px) and (max-width: 1024px) {
     .pf-real-life {
-      padding: 0 20px clamp(10px, 3.5vw, 12px);
+      padding: 10px 20px;
     }
   }
 
   /* ── Mobile ────────────────────────────────────────────────────────── */
   @media screen and (max-width: 749px) {
     .pf-real-life {
-      padding: 0;
+      padding: 8px 12px;
       margin: 0;
+      box-sizing: border-box;
     }
 
     .pf-real-life__shell {
-      padding: 10px 12px 10px;
+      padding: 0;
     }
 
     .pf-real-life__header {

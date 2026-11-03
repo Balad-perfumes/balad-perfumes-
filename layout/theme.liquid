@@ -64,6 +64,7 @@
       card-hover-effect-{{ settings.card_hover_effect }}
       {% if request.page_type == 'collection' or request.page_type == 'search' %}hide-mobile-tabs{% endif %}
       template-{{ template.name | default: 'index' }}
+      {% if template.suffix %}template-{{ template.suffix }} template-{{ template.name }}--{{ template.suffix }}{% endif %}
     "
   >
     {% if settings.loader_enable %}

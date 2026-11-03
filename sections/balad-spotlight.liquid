@@ -550,8 +550,9 @@
   .balad-spotlight {
     background: #ffffff;
     color: #171717;
-    padding-top: 0;
-    padding-bottom: clamp(10px, 3.5vw, 12px);
+    padding-top: clamp(10px, 1.2vw, 16px);
+    padding-bottom: clamp(10px, 1.2vw, 16px);
+    box-sizing: border-box;
   }
 
   .balad-spotlight__shell {
@@ -1290,9 +1291,24 @@
     .balad-spotlight-card { flex-basis: calc((100% - 32px) / 3); }
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .balad-spotlight {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
     .balad-spotlight__shell {
-      padding: 10px 10px 10px;
+      padding: 0 20px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .balad-spotlight {
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
+    .balad-spotlight__shell {
+      padding: 0 12px;
     }
 
     .balad-spotlight__top {

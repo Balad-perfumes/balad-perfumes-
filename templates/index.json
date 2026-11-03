@@ -69,7 +69,7 @@
         "corner_radius": 16,
         "padding_bottom": 12,
         "desktop_height": "100vh",
-        "mobile_height": "100vh",
+        "mobile_height": "58vh",
         "heading_size": "medium",
         "enable_zoom": false,
         "enable_overlay": false,

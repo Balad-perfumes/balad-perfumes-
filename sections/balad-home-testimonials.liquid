@@ -332,8 +332,8 @@
     --balad-testimonials-accent: #c13b2f;
     background: var(--testimonials-bg, #f7f7f8) !important;
     color: var(--balad-testimonials-ink);
-    padding-top: clamp(14px, 1.8vw, 20px);
-    padding-bottom: clamp(12px, 1.6vw, 18px);
+    padding-top: clamp(10px, 1.2vw, 16px);
+    padding-bottom: clamp(10px, 1.2vw, 16px);
     overflow: hidden;
   }
 
@@ -545,6 +545,10 @@
   }
 
     @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .balad-home-testimonials {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
     .balad-home-testimonials__inner {
       padding: 0 20px 0;
     }
@@ -552,12 +556,13 @@
 
   @media screen and (max-width: 749px) {
     .balad-home-testimonials {
-      padding: 10px 0 8px;
+      padding-top: 8px;
+      padding-bottom: 8px;
     }
 
     .balad-home-testimonials__inner {
       width: 100%;
-      padding: 8px 12px 0;
+      padding: 0 12px 0;
     }
 
     .balad-home-testimonials__marquee {

@@ -4830,3 +4830,15 @@ product-recommendations:has([data-has-recommendations='false']) {
     -webkit-backdrop-filter: none !important;
   }
 }
+
+/* Background styling for Contact and About pages to match Product page (#ffffff) */
+body.template-contact,
+body.template-page--contact,
+body.template-about,
+body.template-page--about,
+body.template-contact #MainContent,
+body.template-page--contact #MainContent,
+body.template-about #MainContent,
+body.template-page--about #MainContent {
+  background-color: #ffffff !important;
+}

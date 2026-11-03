@@ -53,17 +53,19 @@
         "mobile_nav_style": "modern_glass",
         "mobile_nav_show_home": true,
         "mobile_nav_home_label": "Home",
+        "mobile_nav_show_shop_all": true,
+        "mobile_nav_shop_all_label": "Shop All",
+        "mobile_nav_shop_all_url": "",
         "mobile_nav_show_collections": true,
-        "mobile_nav_collections_label": "Collections",
+        "mobile_nav_collections_label": "Collection",
         "mobile_nav_collections_url": "",
-        "mobile_nav_story_label": "Stories",
         "mobile_nav_show_about": true,
         "mobile_nav_about_label": "About",
         "mobile_nav_about_url": "",
         "mobile_nav_show_contact": true,
         "mobile_nav_contact_label": "Contact",
         "mobile_nav_contact_url": "",
-        "mobile_nav_show_account": true,
+        "mobile_nav_show_account": false,
         "mobile_nav_account_label": "Account"
       }
     }

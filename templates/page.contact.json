@@ -105,20 +105,10 @@
     },
     "contact_form": {
       "type": "contact-form",
-      "custom_css": [
-        ".pf-contact-form__topics {display: none;}"
-      ],
       "settings": {
-        "eyebrow": "FRAGRANCE CONCIERGE",
-        "heading": "Let's Find Your Signature Scent",
-        "subheading": "Tell us what you're looking for, and our fragrance team will help you discover a scent that feels uniquely yours.",
-        "feature_1_title": "Fragrance Recommendations",
-        "feature_1_desc": "Personalized scent suggestions based on your preferences, occasion, and style.",
-        "feature_2_title": "Order Support",
-        "feature_2_desc": "Need help with your order, delivery, or product details? We're here to assist.",
-        "feature_3_title": "Gifting & Collaborations",
-        "feature_3_desc": "Explore fragrance gifting ideas and partnership opportunities with Balad Perfumes.",
-        "direct_contact_note": "Prefer direct communication? Reach out to our team for fragrance advice, order support, or gifting assistance",
+        "eyebrow": "GET IN TOUCH",
+        "heading": "Send Us a Message",
+        "subheading": "Have a question about our perfumes or need assistance with an order? Fill in the details below and our team will be in touch shortly.",
         "button_label": "Send Message",
         "success_message": "Thank you for reaching out! We've received your inquiry and will be in touch shortly.",
         "privacy_text": "We value your privacy and will never share your contact information with third parties.",

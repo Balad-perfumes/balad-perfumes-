@@ -126,8 +126,8 @@
 <style>
   .balad-cats {
     background: var(--cats-bg, #ffffff) !important;
-    padding-top: 20px;
-    padding-bottom: 24px;
+    padding-top: clamp(10px, 1.2vw, 16px);
+    padding-bottom: clamp(10px, 1.2vw, 16px);
     width: 100%;
     box-sizing: border-box;
   }
@@ -339,6 +339,10 @@
   }
 
   @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .balad-cats {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
     .balad-cats__shell { padding: 0 20px; }
     .balad-cats__grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -354,7 +358,7 @@
   }
 
   @media screen and (max-width: 749px) {
-    .balad-cats { padding-top: 16px; padding-bottom: 20px; }
+    .balad-cats { padding-top: 8px; padding-bottom: 8px; }
     .balad-cats__shell { padding: 0 12px; }
     .balad-cats__head { margin-bottom: 12px; padding-bottom: 6px; }
     .balad-cats__heading { font-size: 18px; }
@@ -388,8 +392,8 @@
     position: relative;
     overflow: hidden;
     isolation: isolate;
-    padding-top: clamp(28px, 3.6vw, 48px);
-    padding-bottom: clamp(24px, 3vw, 40px);
+    padding-top: clamp(14px, 1.6vw, 20px);
+    padding-bottom: clamp(14px, 1.6vw, 20px);
   }
 
   .balad-cats__bg {

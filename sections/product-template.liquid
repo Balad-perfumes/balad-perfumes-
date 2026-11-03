@@ -197,7 +197,7 @@
           <div class="pdp-topbar__end">
             <p class="pdp-stock{% if current_variant.available %} is-in{% else %} is-out{% endif %}" data-pf-stock>
               <span class="pdp-stock__dot" aria-hidden="true"></span>
-              <span data-pf-stock-text>{% if current_variant.available %}In stock, ready to ship{% else %}Sold out{% endif %}</span>
+              <span data-pf-stock-text>{% if current_variant.available %}In Stock, Ready To Ship{% else %}Sold Out{% endif %}</span>
             </p>
             <button type="button" class="pdp-share" data-share-btn aria-label="Share product">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="15" height="15" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
@@ -383,7 +383,7 @@
             <div class="pdp-payment-methods__badges" aria-label="Accepted payment methods">
               {% render 'payment-icons' %}
             </div>
-            <p class="pdp-payment-methods__sub">Pay safely with UPI, Credit / Debit Cards, Net Banking &amp; COD</p>
+            <p class="pdp-payment-methods__sub">Pay safely with UPI, Credit / Debit Cards &amp; Net Banking</p>
           </div>
         {%- endif -%}
 
@@ -876,7 +876,7 @@
   .pdp-size.is-out.is-active::before { border-color: #c9c4b8; }
   .pdp-size:focus-visible { outline: 2px solid var(--pf-gold); outline-offset: 2px; }
 
-  .pdp-stock { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; margin: 0; padding: 6px 11px; border-radius: 999px; font-size: 12px; font-weight: 500; line-height: 1.2; white-space: nowrap; }
+  .pdp-stock { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; margin: 0; padding: 6px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1.2; white-space: nowrap; }
   .pdp-stock__dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
   .pdp-stock.is-in { color: #1d7a45; background: #eaf6ee; }
   .pdp-stock.is-in .pdp-stock__dot { background: #1d7a45; }
@@ -944,13 +944,20 @@
     border: none;
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
   }
   .pdp-payment-methods__badges {
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    gap: 6px 8px;
     flex-wrap: wrap;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
   }
   .pdp-payment-methods__badges .balad-payment-badge {
     display: inline-flex;
@@ -961,19 +968,21 @@
     border-radius: 4px;
     overflow: hidden;
     background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border: 1px solid #ebe8e2;
+    box-shadow: none;
     flex-shrink: 0;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.15s ease, border-color 0.15s ease;
   }
   .pdp-payment-methods__badges .balad-payment-badge:hover {
     transform: translateY(-1px);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.14);
+    box-shadow: none;
   }
   .pdp-payment-methods__badges .balad-payment-badge svg {
     width: 100%;
     height: 100%;
     display: block;
+    object-fit: contain;
   }
   .pdp-payment-methods__sub {
     margin: 0;
@@ -981,19 +990,24 @@
     color: var(--pf-muted, #767676);
     line-height: 1.4;
     letter-spacing: 0.01em;
+    text-align: center;
   }
-  @media screen and (max-width: 520px) {
+  @media screen and (max-width: 749px) {
     .pdp-payment-methods {
       margin-top: 10px;
-      padding: 0;
       gap: 6px;
     }
     .pdp-payment-methods__badges {
-      gap: 5px;
+      gap: 5px 6px;
+      max-width: 320px;
     }
     .pdp-payment-methods__badges .balad-payment-badge {
       width: 34px;
-      height: 21px;
+      height: 22px;
+      border-radius: 3.5px;
+    }
+    .pdp-payment-methods__sub {
+      font-size: 11px;
     }
   }
 
@@ -1524,7 +1538,7 @@
   }
 
   @media screen and (max-width: 380px) {
-    .pdp-stock { padding: 5px 9px; font-size: 11.5px; }
+    .pdp-stock { padding: 5px 10px; font-size: 10.5px; letter-spacing: 0.04em; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1703,7 +1717,7 @@
         stockEl.classList.toggle('is-in', !!available);
         stockEl.classList.toggle('is-out', !available);
       }
-      if (stockTextEl) stockTextEl.textContent = available ? 'In stock, ready to ship' : 'Sold out';
+      if (stockTextEl) stockTextEl.textContent = available ? 'In Stock, Ready To Ship' : 'Sold Out';
 
       if (v.price != null) {
         const priceText = formatMoney(v.price);

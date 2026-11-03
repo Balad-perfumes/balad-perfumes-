@@ -121,11 +121,10 @@
 
 <style>
   .smf-our-stores-section {
-    background: var(--smf-stores-bg, #ffffff) !important;
     color: #111111;
     width: 100%;
-    padding-top: clamp(10px, 1.4vw, 16px);
-    padding-bottom: clamp(4px, 0.8vw, 8px);
+    padding-top: clamp(10px, 1.2vw, 16px);
+    padding-bottom: clamp(10px, 1.2vw, 16px);
   }
 
   .smf-stores-shell {
@@ -190,12 +189,22 @@
   }
 
   @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .smf-our-stores-section {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+
     .smf-stores-shell {
       padding: 0 20px;
     }
   }
 
   @media (max-width: 749px) {
+    .smf-our-stores-section {
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
     .smf-stores-grid {
       grid-template-columns: 1fr;
       gap: 14px;

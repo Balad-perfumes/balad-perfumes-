@@ -4,7 +4,7 @@
   assign overlay_opacity = section.settings.overlay_opacity | default: 20 | divided_by: 100.0
   assign slide_count = section.blocks.size
   assign desktop_h = section.settings.desktop_height | default: 'fit_screen'
-  assign mobile_h = section.settings.mobile_height | default: 'fit_screen'
+  assign mobile_h = section.settings.mobile_height | default: '58vh'
   assign first_slide = section.blocks.first
   assign show_text = section.settings.show_text
   if show_text == nil
@@ -368,7 +368,7 @@
     padding-bottom: var(--hero-padding-bottom, 0px) !important;
     box-sizing: border-box;
     --hero-calc-desktop: 100vh;
-    --hero-calc-mobile: 100vh;
+    --hero-calc-mobile: 58vh;
   }
 
   .balad-min-hero--contained {
@@ -1138,9 +1138,9 @@
     }
 
     .balad-min-hero__viewport {
-      height: var(--hero-mobile-height-final, 75vh);
-      min-height: var(--hero-mobile-height-final, 75vh);
-      max-height: var(--hero-mobile-height-final, 75vh);
+      height: var(--hero-mobile-height-final, 58vh);
+      min-height: var(--hero-mobile-height-final, 58vh);
+      max-height: var(--hero-mobile-height-final, 58vh);
     }
 
     .balad-min-hero__track,
@@ -1227,12 +1227,12 @@
 
     .balad-min-hero__lookbook-wrap {
       padding: 0;
-      min-height: var(--hero-mobile-height-final, 75vh);
+      min-height: var(--hero-mobile-height-final, 58vh);
     }
 
     .balad-min-hero__lookbook-card {
       border-radius: 0;
-      min-height: var(--hero-mobile-height-final, 75vh);
+      min-height: var(--hero-mobile-height-final, 58vh);
     }
 
     .balad-min-hero__lookbook-overlay {
@@ -1703,15 +1703,17 @@
       "id": "mobile_height",
       "label": "Mobile Height",
       "options": [
-        { "value": "fit_screen", "label": "Fit 1 Page Exactly (Full Viewport without scroll)" },
-        { "value": "65vh", "label": "Compact (65vh)" },
+        { "value": "50vh", "label": "Extra Compact (50vh)" },
+        { "value": "58vh", "label": "Compact (58vh - Recommended)" },
+        { "value": "65vh", "label": "Balanced (65vh)" },
         { "value": "75vh", "label": "Standard (75vh)" },
         { "value": "82vh", "label": "Tall (82vh)" },
         { "value": "90vh", "label": "Extra Tall (90vh)" },
         { "value": "95vh", "label": "Almost full (95vh)" },
-        { "value": "100vh", "label": "Full Screen (100vh)" }
+        { "value": "100vh", "label": "Full Screen (100vh)" },
+        { "value": "fit_screen", "label": "Fit 1 Page Exactly (Full Viewport without scroll)" }
       ],
-      "default": "fit_screen"
+      "default": "58vh"
     },
     {
       "type": "select",

@@ -282,6 +282,7 @@
     </div>
   </div>
 
+  {% if section.settings.show_story_badge %}
   <!-- High-End Clean Structured Story Viewer Modal -->
   <style>
     .pf-story-modal, .pf-story-modal * {
@@ -504,6 +505,7 @@
       ]
     </script>
   </div>
+  {% endif %}
 </header>
 
 <!-- Slide-out Menu Drawer -->
@@ -2449,26 +2451,37 @@
     },
     {
       "type": "checkbox",
+      "id": "mobile_nav_show_shop_all",
+      "label": "Show Shop All Link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "mobile_nav_shop_all_label",
+      "label": "Shop All Label",
+      "default": "Shop All"
+    },
+    {
+      "type": "url",
+      "id": "mobile_nav_shop_all_url",
+      "label": "Shop All Custom URL (optional)"
+    },
+    {
+      "type": "checkbox",
       "id": "mobile_nav_show_collections",
-      "label": "Show Collections Link",
+      "label": "Show Collection Link",
       "default": true
     },
     {
       "type": "text",
       "id": "mobile_nav_collections_label",
-      "label": "Collections Label",
-      "default": "Collections"
+      "label": "Collection Label",
+      "default": "Collection"
     },
     {
       "type": "url",
       "id": "mobile_nav_collections_url",
       "label": "Collections Custom URL (optional)"
-    },
-    {
-      "type": "text",
-      "id": "mobile_nav_story_label",
-      "label": "Stories Label",
-      "default": "Stories"
     },
     {
       "type": "checkbox",
@@ -2508,7 +2521,7 @@
       "type": "checkbox",
       "id": "mobile_nav_show_account",
       "label": "Show Account Link",
-      "default": true
+      "default": false
     },
     {
       "type": "text",

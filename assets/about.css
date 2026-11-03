@@ -71,7 +71,8 @@
 .about-cta,
 .about-stats,
 .about-craftsmanship,
-.about-showcase {
+.about-showcase,
+.about-faq {
   background-color: white;
   color: var(--color-foreground);
 }

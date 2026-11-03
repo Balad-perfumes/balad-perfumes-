@@ -775,8 +775,8 @@
      ══════════════════════════════════════════════════════════════ */
   .balad-latest {
     background: var(--latest-bg, #ffffff) !important;
-    padding-top: clamp(10px, 1.4vw, 16px);
-    padding-bottom: clamp(4px, 0.8vw, 8px);
+    padding-top: clamp(10px, 1.2vw, 16px);
+    padding-bottom: clamp(10px, 1.2vw, 16px);
   }
 
   .balad-latest__shell {
@@ -933,6 +933,11 @@
   }
 
   @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .balad-latest {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+
     .balad-latest__shell {
       padding: 0 20px;
     }
@@ -946,7 +951,7 @@
   @media screen and (max-width: 749px) {
     .balad-latest {
       padding-top: 8px;
-      padding-bottom: 4px;
+      padding-bottom: 8px;
     }
 
     .balad-latest__shell {
