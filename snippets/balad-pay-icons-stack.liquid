@@ -1,0 +1,62 @@
+{%- comment -%}
+  Small overlapping round payment icons (GPay, PhonePe, UPI) shown inside
+  checkout / buy-now buttons. Artwork is cropped from snippets/payment-icons.liquid.
+
+  Usage: {% render 'balad-pay-icons-stack' %}
+  Optional: size (px, default 16)
+{%- endcomment -%}
+{%- assign pay_size = size | default: 16 -%}
+<span class="balad-pay-stack" style="--balad-pay-size: {{ pay_size }}px;" aria-hidden="true">
+  <span class="balad-pay-stack__icon" title="Google Pay">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="4.1 5.5 11.4 11.4" focusable="false"><path d="M13.986 11.284c0-.308-.024-.616-.073-.92h-4.29v1.747h2.451a2.096 2.096 0 0 1-.9 1.373v1.134h1.464a4.433 4.433 0 0 0 1.348-3.334z" fill="#4285F4"/><path d="M9.629 15.721a4.352 4.352 0 0 0 3.01-1.097l-1.466-1.14a2.752 2.752 0 0 1-4.094-1.44H5.577v1.17a4.53 4.53 0 0 0 4.052 2.507z" fill="#34A853"/><path d="M7.079 12.05a2.709 2.709 0 0 1 0-1.735v-1.17H5.577a4.505 4.505 0 0 0 0 4.075l1.502-1.17z" fill="#FBBC04"/><path d="M9.629 8.44a2.452 2.452 0 0 1 1.74.68l1.3-1.293a4.37 4.37 0 0 0-3.065-1.183 4.53 4.53 0 0 0-4.027 2.5l1.502 1.171a2.715 2.715 0 0 1 2.55-1.875z" fill="#EA4335"/></svg>
+  </span>
+  <span class="balad-pay-stack__icon balad-pay-stack__icon--flush" title="PhonePe">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="10 3 18 18" focusable="false"><g transform="translate(10 3)scale(.03516)"><circle cx="256" cy="256" r="256" fill="#5f259f"/><path fill="#fff" d="M372.164 189.203c0-10.008-8.576-18.593-18.584-18.593h-34.323l-78.638-90.084c-7.154-8.577-18.592-11.439-30.03-8.577l-27.17 8.577c-4.292 1.43-5.723 7.154-2.862 10.007l85.8 81.508H136.236c-4.293 0-7.154 2.861-7.154 7.154v14.292c0 10.016 8.585 18.592 18.592 18.592h20.015v68.639c0 51.476 27.17 81.499 72.931 81.499 14.292 0 25.739-1.431 40.03-7.146v45.753c0 12.87 10.016 22.886 22.885 22.886h20.015c4.293 0 8.577-4.293 8.577-8.586V210.648h32.893c4.292 0 7.145-2.861 7.145-7.145zM280.65 312.17c-8.576 4.292-20.015 5.723-28.591 5.723-22.886 0-34.324-11.438-34.324-37.176v-68.639h62.915z"/></g></svg>
+  </span>
+  <span class="balad-pay-stack__icon" title="UPI">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="25.6 4.9 14 14" focusable="false"><path fill="#097939" d="M30.296875 17.160156 34.832031 11.933594 32.683594 6.527344Z"/><path fill="#ed752e" d="M28.769531 17.160156 33.304688 11.933594 31.15625 6.527344Z"/></svg>
+  </span>
+</span>
+
+{% stylesheet %}
+  .balad-pay-stack {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    line-height: 0;
+    vertical-align: middle;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0;
+  }
+
+  .balad-pay-stack__icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--balad-pay-size, 16px);
+    height: var(--balad-pay-size, 16px);
+    padding: 1.5px;
+    margin: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 1px currentColor, 0 1px 2px rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .balad-pay-stack__icon + .balad-pay-stack__icon {
+    margin-left: calc(var(--balad-pay-size, 16px) * -0.32);
+  }
+
+  .balad-pay-stack__icon--flush { padding: 0; }
+
+  .balad-pay-stack .balad-pay-stack__icon svg {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+  }
+{% endstylesheet %}

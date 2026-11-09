@@ -32,6 +32,7 @@
     {%- render 'scripts' -%}
     {%- render 'theme-styles-variables' -%}
     {%- render 'color-schemes' -%}
+    {{ 'balad-modals.css' | asset_url | stylesheet_tag }}
     {%- render 'shoppable-video-enhancer' -%}
 
     {% comment %} Smooth Scroll & Viewport Overflow Protection {% endcomment %}
@@ -166,6 +167,8 @@
     {% section 'cart-drawer' %}
     {% section 'wishlist-drawer' %}
     {% render 'search-modal' %}
+    {% render 'balad-qa-modal' %}
+    {% render 'balad-wishlist-modal' %}
 
     {% if settings.quick_add or settings.mobile_quick_add or request.page_type == 'collection' or request.page_type == 'search' %}
       {% render 'quick-add-modal' %}

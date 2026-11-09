@@ -1,0 +1,197 @@
+{%- doc -%}
+  Global "Add to wishlist" popup + click handling for product card bookmarks ([data-wishlist-heart]).
+  Rendered once in layout/theme.liquid.
+
+  Most home / collection sections ship their own wishlist popup and handle the bookmark click themselves
+  (they call preventDefault + stopPropagation). This one only acts when nobody else handled the click,
+  e.g. the "Similar Products" section on the product page, so the bookmark no longer opens the product page.
+  Uses the same localStorage key ("wishlist") and item shape as the sections, and fires "wishlist:update"
+  so the wishlist drawer refreshes.
+{%- enddoc -%}
+
+<div class="balad-wishlist-modal" data-bpc-wishlist-modal style="display:none;" hidden role="dialog" aria-modal="true" aria-label="Add to wishlist">
+  <div class="balad-wishlist-modal__backdrop" data-bpc-wishlist-close></div>
+  <div class="balad-wishlist-modal__card">
+    <button type="button" class="balad-wishlist-modal__close" data-bpc-wishlist-close aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <div class="balad-wishlist-modal__header">
+      <div class="balad-wishlist-modal__product-img" data-bpc-wishlist-img></div>
+      <div class="balad-wishlist-modal__product-info">
+        <span class="balad-qa-modal__eyebrow">Save to wishlist</span>
+        <h3 class="balad-wishlist-modal__title" data-bpc-wishlist-title></h3>
+        <div class="balad-wishlist-modal__price-wrap">
+          <span class="balad-wishlist-modal__price" data-bpc-wishlist-price></span>
+          <span class="balad-wishlist-modal__compare-price" data-bpc-wishlist-compare></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="balad-wishlist-modal__sizes" data-bpc-wishlist-sizes-wrap>
+      <div class="balad-wishlist-modal__sizes-top">
+        <span class="balad-wishlist-modal__label">Size</span>
+      </div>
+      <div class="balad-wishlist-modal__size-grid" data-bpc-wishlist-sizes></div>
+    </div>
+
+    <button type="button" class="balad-wishlist-modal__add-btn" data-bpc-wishlist-add>Add to list</button>
+  </div>
+</div>
+
+<script>
+  (function () {
+    if (window.__bpcWishlistInit) return;
+    window.__bpcWishlistInit = true;
+
+    var KEY = 'wishlist';
+    var current = null;
+    var selectedSize = '';
+
+    function getList() {
+      try {
+        var parsed = JSON.parse(localStorage.getItem(KEY) || '[]');
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) { return []; }
+    }
+
+    function saveList(list) {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+      document.dispatchEvent(new CustomEvent('wishlist:update'));
+    }
+
+    function handleFromUrl(url) {
+      if (!url) return '';
+      var parts = url.split('?')[0].split('/');
+      return parts[parts.length - 1] || parts[parts.length - 2] || '';
+    }
+
+    function money(value) {
+      var n = Number(String(value || '').replace(/,/g, ''));
+      if (!n) return '';
+      return '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    }
+
+    function syncHearts() {
+      var list = getList();
+      document.querySelectorAll('[data-wishlist-heart]').forEach(function (btn) {
+        var handle = handleFromUrl(btn.dataset.productUrl);
+        var saved = list.some(function (item) { return item.handle === handle; });
+        btn.classList.toggle('is-saved', saved);
+        btn.setAttribute('aria-pressed', saved ? 'true' : 'false');
+        var svg = btn.querySelector('svg');
+        if (svg) svg.setAttribute('fill', saved ? 'currentColor' : 'none');
+      });
+    }
+
+    var modal = document.querySelector('[data-bpc-wishlist-modal]');
+
+    function open(btn) {
+      if (!modal) return;
+      current = btn;
+      var d = btn.dataset;
+      var title = d.productTitle || '';
+
+      modal.querySelector('[data-bpc-wishlist-title]').textContent = title;
+      modal.querySelector('[data-bpc-wishlist-price]').textContent = money(d.productPrice);
+
+      var compareEl = modal.querySelector('[data-bpc-wishlist-compare]');
+      var showCompare = d.productComparePrice && Number(d.productComparePrice) > Number(d.productPrice);
+      compareEl.textContent = showCompare ? money(d.productComparePrice) : '';
+      compareEl.hidden = !showCompare;
+
+      var imgEl = modal.querySelector('[data-bpc-wishlist-img]');
+      imgEl.innerHTML = d.productImage ? '<img src="' + escapeHtml(d.productImage) + '" alt="' + escapeHtml(title) + '">' : '';
+      imgEl.hidden = !d.productImage;
+
+      var sizes = (d.productSizes || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+      var wrap = modal.querySelector('[data-bpc-wishlist-sizes-wrap]');
+      var grid = modal.querySelector('[data-bpc-wishlist-sizes]');
+      selectedSize = sizes[0] || '';
+      wrap.hidden = sizes.length === 0;
+      grid.innerHTML = sizes.map(function (s, i) {
+        return '<button type="button" class="balad-wishlist-modal__size' + (i === 0 ? ' is-selected' : '') + '" data-size="' + escapeHtml(s) + '">' + escapeHtml(s) + '</button>';
+      }).join('');
+
+      modal.style.display = 'flex';
+      modal.removeAttribute('hidden');
+      requestAnimationFrame(function () { modal.classList.add('is-open'); });
+      document.body.style.overflow = 'hidden';
+    }
+
+    function close() {
+      if (!modal) return;
+      modal.classList.remove('is-open');
+      modal.style.display = 'none';
+      modal.setAttribute('hidden', '');
+      document.body.style.overflow = '';
+      current = null;
+    }
+
+    if (modal) {
+      modal.addEventListener('click', function (e) {
+        if (e.target.closest('[data-bpc-wishlist-close]')) { close(); return; }
+
+        var sizeBtn = e.target.closest('.balad-wishlist-modal__size');
+        if (sizeBtn) {
+          modal.querySelectorAll('.balad-wishlist-modal__size').forEach(function (b) { b.classList.remove('is-selected'); });
+          sizeBtn.classList.add('is-selected');
+          selectedSize = sizeBtn.dataset.size || '';
+          return;
+        }
+
+        if (e.target.closest('[data-bpc-wishlist-add]') && current) {
+          var d = current.dataset;
+          var handle = handleFromUrl(d.productUrl);
+          if (!handle) return;
+          var list = getList();
+          if (!list.some(function (item) { return item.handle === handle; })) {
+            list.push({ handle: handle, id: d.productId || '', title: d.productTitle || '', price: d.productPrice || '0', image: d.productImage || '', size: selectedSize });
+            saveList(list);
+          }
+          close();
+          syncHearts();
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.classList.contains('is-open')) close();
+      });
+    }
+
+    // Bookmark clicks that no section handled (sections call preventDefault + stopPropagation on their own)
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-wishlist-heart]');
+      if (!btn || e.defaultPrevented) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      var handle = handleFromUrl(btn.dataset.productUrl);
+      var list = getList();
+      if (list.some(function (item) { return item.handle === handle; })) {
+        saveList(list.filter(function (item) { return item.handle !== handle; }));
+        syncHearts();
+        return;
+      }
+      open(btn);
+    });
+
+    document.addEventListener('wishlist:update', syncHearts);
+    window.addEventListener('storage', function (e) { if (e.key === KEY) syncHearts(); });
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', syncHearts);
+    } else {
+      syncHearts();
+    }
+    document.addEventListener('shopify:section:load', syncHearts);
+  })();
+</script>

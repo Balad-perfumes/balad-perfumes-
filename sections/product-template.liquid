@@ -197,7 +197,7 @@
           <div class="pdp-topbar__end">
             <p class="pdp-stock{% if current_variant.available %} is-in{% else %} is-out{% endif %}" data-pf-stock>
               <span class="pdp-stock__dot" aria-hidden="true"></span>
-              <span data-pf-stock-text>{% if current_variant.available %}In Stock, Ready To Ship{% else %}Sold Out{% endif %}</span>
+              <span data-pf-stock-text>{% if current_variant.available %}In Stock{% else %}Sold Out{% endif %}</span>
             </p>
             <button type="button" class="pdp-share" data-share-btn aria-label="Share product">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="15" height="15" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
@@ -206,38 +206,57 @@
         </div>
 
         <header class="pdp-head">
+          {%- if selected_product.vendor != blank or selected_product.type != blank -%}
+            <p class="pdp-eyebrow">{{ selected_product.type | default: selected_product.vendor | escape }}</p>
+          {%- endif -%}
           <div class="pdp-head__row">
             <div class="pdp-head__main">
               <h1 class="pdp-title">{{ selected_product.title }}</h1>
-              <p class="pdp-specs">Eau de Parfum, lasts 6 to 8 hours</p>
-              {%- if notes_list.size > 0 -%}
-                <p class="pdp-notes">Notes: {{ notes_list | join: ', ' }}</p>
-              {%- endif -%}
-              {%- if has_reviews -%}
-                <a class="pdp-rating" href="#judgeme_product_reviews" data-pf-reviews-scroll aria-label="Rated {{ review_rating }} out of 5 from {{ review_count }} reviews">
-                  <span class="pdp-stars" aria-hidden="true">★★★★★<span class="pdp-stars__fill" style="width: {{ rating_pct }}%">★★★★★</span></span>
-                  <span class="pdp-rating__text"><strong>{{ review_rating }}</strong> ({{ review_count }} review{% if review_count != 1 %}s{% endif %})</span>
-                </a>
-              {%- endif -%}
+              <p class="pdp-specs">Eau de Parfum &middot; Lasts 6 to 8 hours</p>
             </div>
 
+            <!-- Price (same row as the name, right side) -->
             <div class="pdp-price__info">
               <div class="pdp-price__row">
                 <span class="pdp-price__main" data-pf-price-main>{% render 'format-price', price: current_variant.price %}</span>
                 <span class="pdp-price__compare" data-pf-compare-price{% unless has_discount %} hidden{% endunless %}>{% if has_discount %}{% render 'format-price', price: current_variant.compare_at_price %}{% endif %}</span>
-                <span class="pdp-price__off" data-pf-off-badge{% unless has_discount %} hidden{% endunless %}>({{ pct_off }}% OFF)</span>
               </div>
+              <span class="pdp-price__off" data-pf-off-badge{% unless has_discount %} hidden{% endunless %}>{{ pct_off }}% OFF</span>
               <span class="pdp-price__tax">Inclusive of all taxes</span>
             </div>
           </div>
+
+          {%- if has_reviews -%}
+            <a class="pdp-rating" href="#judgeme_product_reviews" data-pf-reviews-scroll aria-label="Rated {{ review_rating }} out of 5 from {{ review_count }} reviews">
+              <span class="pdp-stars" aria-hidden="true">★★★★★<span class="pdp-stars__fill" style="width: {{ rating_pct }}%">★★★★★</span></span>
+              <span class="pdp-rating__text"><strong>{{ review_rating }}</strong> &middot; {{ review_count }} review{% if review_count != 1 %}s{% endif %}</span>
+            </a>
+          {%- endif -%}
+
+          {%- if notes_list.size > 0 -%}
+            <ul class="pdp-notes" aria-label="Fragrance notes">
+              {%- for note in notes_list -%}
+                <li>{{ note | escape }}</li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
         </header>
 
         <!-- At a glance -->
         <ul class="pdp-glance">
-          <li><small>Type</small><strong>Eau de Parfum</strong></li>
-          <li><small>Lasts</small><strong>6 to 8 hours</strong></li>
+          <li>
+            <span class="pdp-glance__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v3M14 3v3"/><rect x="5" y="6" width="14" height="15" rx="3"/><path d="M9 12h6"/></svg></span>
+            <span class="pdp-glance__text"><small>Type</small><strong>Eau de Parfum</strong></span>
+          </li>
+          <li>
+            <span class="pdp-glance__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+            <span class="pdp-glance__text"><small>Lasts</small><strong>6 to 8 hours</strong></span>
+          </li>
           {%- unless selected_product.has_only_default_variant -%}
-            <li><small>Size</small><strong data-pf-glance-size>{{ selected_size_label }}</strong></li>
+            <li>
+              <span class="pdp-glance__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/></svg></span>
+              <span class="pdp-glance__text"><small>Size</small><strong data-pf-glance-size>{{ selected_size_label }}</strong></span>
+            </li>
           {%- endunless -%}
         </ul>
 
@@ -373,17 +392,23 @@
             <button type="button" class="pdp-btn pdp-btn--add" data-pf-add-to-bag {% unless current_variant.available %}disabled{% endunless %}>
               <span data-pf-add-text>{% if current_variant.available %}Add to bag{% else %}Sold out{% endif %}</span>
             </button>
-            <button type="button" class="pdp-btn pdp-btn--buy" data-pf-buy-now {% unless current_variant.available %}disabled{% endunless %}>Buy now</button>
+            <button type="button" class="pdp-btn pdp-btn--buy" data-pf-buy-now {% unless current_variant.available %}disabled{% endunless %}>
+              <span data-pf-buy-label>Buy now</span>
+              {% render 'balad-pay-icons-stack', size: 16 %}
+            </button>
           </div>
         {%- endform -%}
 
         <!-- Payment icons & guaranteed safe checkout under Buy Now button -->
         {%- if section.settings.show_secure_pay -%}
           <div class="pdp-payment-methods">
+            <p class="pdp-payment-methods__sub">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+              <span>100% secure payments</span>
+            </p>
             <div class="pdp-payment-methods__badges" aria-label="Accepted payment methods">
               {% render 'payment-icons' %}
             </div>
-            <p class="pdp-payment-methods__sub">Pay safely with UPI, Credit / Debit Cards &amp; Net Banking</p>
           </div>
         {%- endif -%}
 
@@ -537,9 +562,13 @@
         {%- endif -%}
         <div class="pf-product-template__sticky-text">
           <span class="pf-product-template__sticky-title">{{ selected_product.title }}</span>
+          {%- assign sticky_has_variants = false -%}
+          {%- unless selected_product.has_only_default_variant -%}{%- assign sticky_has_variants = true -%}{%- endunless -%}
+          <span class="pf-product-template__sticky-variant" data-pf-sticky-variant{% unless sticky_has_variants %} hidden{% endunless %}>{% if sticky_has_variants %}{{ current_variant.title }}{% endif %}</span>
           <span class="pf-product-template__sticky-price-wrap">
             <span class="pf-product-template__sticky-price" data-pf-sticky-price>{% render 'format-price', price: current_variant.price %}</span>
             <span class="pf-product-template__sticky-compare-price" data-pf-sticky-compare-price{% unless has_discount %} style="display:none"{% endunless %}>{% if has_discount %}{% render 'format-price', price: current_variant.compare_at_price %}{% endif %}</span>
+            <span class="pf-product-template__sticky-off" data-pf-sticky-off{% unless has_discount %} hidden{% endunless %}>{% if has_discount %}{{ current_variant.compare_at_price | minus: current_variant.price | times: 100.0 | divided_by: current_variant.compare_at_price | round }}% OFF{% endif %}</span>
           </span>
         </div>
       </div>
@@ -547,8 +576,15 @@
         <button type="button" class="pf-sticky-btn pf-sticky-btn--add" data-pf-sticky-add {% unless current_variant.available %}disabled{% endunless %}>
           <span data-pf-sticky-add-text>{% if current_variant.available %}Add to bag{% else %}Sold out{% endif %}</span>
         </button>
-        <button type="button" class="pf-sticky-btn pf-sticky-btn--buy" data-pf-sticky-buy {% unless current_variant.available %}disabled{% endunless %}>Buy now</button>
+        <button type="button" class="pf-sticky-btn pf-sticky-btn--buy" data-pf-sticky-buy {% unless current_variant.available %}disabled{% endunless %}>
+          <span data-pf-buy-label>Buy now</span>
+          {% render 'balad-pay-icons-stack', size: 15 %}
+        </button>
       </div>
+      <p class="pf-product-template__sticky-note">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        100% secure checkout &middot; UPI, Cards &amp; Net Banking
+      </p>
     </div>
   </div>
 </section>
@@ -737,10 +773,16 @@
   .pdp-share:active { transform: scale(0.95); }
   .pdp-share:focus-visible { outline: 2px solid var(--pf-gold); outline-offset: 2px; }
 
-  /* ───── Head: name, details and rating on the left, price on the right ───── */
-  .pdp-head { padding-bottom: 18px; border-bottom: 1px solid #ebe8e2; }
-  .pdp-head__row { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
-  .pdp-head__main { flex: 1 1 auto; min-width: 0; }
+  /* ───── Head: eyebrow, name, specs, rating and note chips (stacked) ───── */
+  .pdp-head { padding-bottom: 0; }
+  .pdp-eyebrow {
+    margin: 0 0 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--pf-gold);
+  }
 
   .pdp-title {
     margin: 0;
@@ -757,7 +799,20 @@
   }
 
   .pdp-specs { margin: 8px 0 0; font-size: 13px; line-height: 1.4; color: var(--pf-muted); }
-  .pdp-notes { margin: 3px 0 0; font-size: 13px; line-height: 1.4; color: var(--pf-gold); font-weight: 500; }
+
+  /* Fragrance notes as soft gold chips */
+  .pdp-notes { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 0; padding: 0; list-style: none; }
+  .pdp-notes li {
+    padding: 5px 11px;
+    border: 1px solid rgba(163, 123, 53, 0.28);
+    border-radius: 999px;
+    background: var(--pf-gold-soft);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    color: #7d5c22;
+  }
 
   /* Stars (used by the rating line under the title) */
   .pdp-stars {
@@ -782,40 +837,80 @@
   .pdp-rating:hover .pdp-rating__text { text-decoration: underline; }
   .pdp-rating__text strong { font-weight: 700; color: var(--pf-ink); }
 
-  /* Price block, right-aligned: big price, old price, discount, tax note */
-  .pdp-price__info { flex: 0 0 auto; text-align: right; }
-  .pdp-price__row { display: flex; align-items: baseline; justify-content: flex-end; flex-wrap: wrap; gap: 4px 10px; }
-  .pdp-price__main { font-size: 26px; font-weight: 600; line-height: 1; letter-spacing: -0.01em; color: var(--pf-ink); }
-  .pdp-price__compare { font-size: 14px; color: #a3a3a3; text-decoration: line-through; }
-  .pdp-price__off { font-size: 12.5px; font-weight: 700; letter-spacing: 0.01em; color: #b4501e; }
-  .pdp-price__compare[hidden], .pdp-price__off[hidden] { display: none; }
-  .pdp-price__tax { display: block; margin-top: 6px; font-size: 12px; color: var(--pf-muted); }
+  /* Name on the left, price on the right (same row) */
+  .pdp-head__row { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+  .pdp-head__main { flex: 1 1 auto; min-width: 0; }
+  .pdp-head__main .pdp-specs { margin-top: 6px; }
 
-  /* At a glance: minimal row, no boxes, just thin dividers between the facts */
+  /* Price block: right-aligned, plain (no box) */
+  .pdp-price__info {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    text-align: right;
+  }
+  .pdp-price__row { display: flex; align-items: baseline; justify-content: flex-end; flex-wrap: wrap; gap: 4px 10px; }
+  .pdp-price__main { font-size: 28px; font-weight: 700; line-height: 1; letter-spacing: -0.015em; color: var(--pf-ink); }
+  .pdp-price__compare { font-size: 15px; color: #a3a3a3; text-decoration: line-through; }
+  .pdp-price__off {
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: #b4501e;
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+  }
+  .pdp-price__compare[hidden], .pdp-price__off[hidden] { display: none; }
+  .pdp-price__tax { display: block; margin: 0; font-size: 11.5px; color: var(--pf-muted); white-space: nowrap; }
+
+  /* At a glance: three soft tiles with an icon each */
   .pdp-glance {
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: minmax(0, 1fr);
-    margin: 0;
-    padding: 16px 0;
+    gap: 8px;
+    margin: 18px 0 0;
+    padding: 0 0 18px;
     border-bottom: 1px solid #ebe8e2;
     list-style: none;
   }
   .pdp-glance li {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    align-items: center;
+    gap: 10px;
     min-width: 0;
-    padding: 0 18px;
-    border-left: 1px solid #ebe8e2;
+    padding: 11px 12px;
+    border: 1px solid #ebe8e2;
+    border-radius: var(--pf-radius-md);
+    background: #fff;
   }
-  .pdp-glance li:first-child { padding-left: 0; border-left: 0; }
-  .pdp-glance li:last-child { padding-right: 0; }
-  .pdp-glance small { font-size: 12px; line-height: 1.2; color: var(--pf-muted); }
-  .pdp-glance strong { font-size: 14px; font-weight: 600; line-height: 1.3; color: var(--pf-ink); overflow-wrap: anywhere; }
-  @media screen and (max-width: 420px) {
-    .pdp-glance li { padding: 0 12px; }
-    .pdp-glance strong { font-size: 13px; }
+  .pdp-glance__icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--pf-gold-soft);
+    color: var(--pf-gold);
+  }
+  .pdp-glance__icon svg { width: 17px; height: 17px; }
+  .pdp-glance__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .pdp-glance small { font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.2; color: var(--pf-muted); }
+  .pdp-glance strong { font-size: 13px; font-weight: 600; line-height: 1.3; color: var(--pf-ink); overflow-wrap: anywhere; }
+  /* Phones: icon sits above the text so three tiles still fit in one row */
+  @media screen and (max-width: 520px) {
+    .pdp-glance { gap: 6px; }
+    .pdp-glance li { flex-direction: column; align-items: flex-start; gap: 8px; padding: 10px; }
+    .pdp-glance__icon { width: 30px; height: 30px; }
+    .pdp-glance__icon svg { width: 15px; height: 15px; }
+    .pdp-glance strong { font-size: 12.5px; }
   }
 
   /* Section 4: size. The selected size uses a gold outline, soft gold fill and a tick,
@@ -917,98 +1012,89 @@
     height: 48px;
     margin: 0;
     padding: 0 14px;
-    border: 1px solid var(--pf-ink);
+    border: 1.5px solid var(--pf-ink);
     border-radius: var(--pf-radius-md);
     font-family: inherit;
     font-size: 12.5px;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    white-space: nowrap;
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, transform 0.12s ease;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
   }
 
   .pdp-btn:active:not(:disabled) { transform: scale(0.985); }
   .pdp-btn:focus-visible { outline: 2px solid var(--pf-gold); outline-offset: 3px; }
-  .pdp-btn--add { background: #fff; color: var(--pf-ink); }
-  .pdp-btn--add:hover:not(:disabled) { background: var(--pf-soft); }
-  .pdp-btn--buy { background: var(--pf-ink); color: #fff; }
-  .pdp-btn--buy:hover:not(:disabled) { background: #000; }
-  .pdp-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-
-  /* Payment methods & icons directly under Buy Now button */
-  .pdp-payment-methods {
-    margin: 12px 0 0;
-    padding: 0;
-    background: transparent;
-    border: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    box-sizing: border-box;
+  /* Same look as the sticky card: light outlined Add to bag, wider dark Buy now */
+  .pdp-btn--add { flex: 0.85 1 0; background: #fff; color: var(--pf-ink); border-color: #d9d4ca; }
+  .pdp-btn--add:hover:not(:disabled) { border-color: var(--pf-ink); background: var(--pf-soft); }
+  .pdp-btn--buy {
+    flex: 1.3 1 0;
+    background: linear-gradient(180deg, #2a2a2a, var(--pf-ink));
+    color: #fff;
   }
-  .pdp-payment-methods__badges {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px 8px;
-    flex-wrap: wrap;
-    width: 100%;
-    max-width: 420px;
-    margin: 0 auto;
-  }
-  .pdp-payment-methods__badges .balad-payment-badge {
+  .pdp-btn--buy:hover:not(:disabled) { background: #000; box-shadow: 0 10px 22px -6px rgba(0, 0, 0, 0.55); }
+  /* Buy now: label + round payment icons side by side */
+  .pdp-btn--buy,
+  .pf-sticky-btn--buy {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 24px;
-    border-radius: 4px;
-    overflow: hidden;
-    background: #ffffff;
-    border: 1px solid #ebe8e2;
-    box-shadow: none;
-    flex-shrink: 0;
-    transition: transform 0.15s ease, border-color 0.15s ease;
+    gap: 10px;
   }
-  .pdp-payment-methods__badges .balad-payment-badge:hover {
-    transform: translateY(-1px);
-    border-color: rgba(0, 0, 0, 0.14);
-    box-shadow: none;
-  }
-  .pdp-payment-methods__badges .balad-payment-badge svg {
+  .pdp-btn--buy .balad-pay-stack,
+  .pf-sticky-btn--buy .balad-pay-stack { position: relative; z-index: 1; }
+  .pdp-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* Payment methods under the buttons: one quiet line, lock + text on the left, small logos on the right */
+  .pdp-payment-methods {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 14px;
     width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: contain;
+    margin: 12px 0 0;
+    padding: 10px 0 0;
+    border-top: 1px dashed #e3dfd7;
   }
   .pdp-payment-methods__sub {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     margin: 0;
     font-size: 11.5px;
-    color: var(--pf-muted, #767676);
-    line-height: 1.4;
-    letter-spacing: 0.01em;
-    text-align: center;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    white-space: nowrap;
+    color: var(--pf-muted);
   }
-  @media screen and (max-width: 749px) {
-    .pdp-payment-methods {
-      margin-top: 10px;
-      gap: 6px;
-    }
-    .pdp-payment-methods__badges {
-      gap: 5px 6px;
-      max-width: 320px;
-    }
-    .pdp-payment-methods__badges .balad-payment-badge {
-      width: 34px;
-      height: 22px;
-      border-radius: 3.5px;
-    }
-    .pdp-payment-methods__sub {
-      font-size: 11px;
-    }
+  .pdp-payment-methods__sub svg { flex-shrink: 0; color: #1f7a3d; }
+  .pdp-payment-methods__badges {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+    margin: 0;
+  }
+  .pdp-payment-methods__badges .balad-payment-badge {
+    display: inline-flex;
+    width: 30px;
+    height: 19px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 0 0 1px #ebe8e2;
+    flex-shrink: 0;
+  }
+  .pdp-payment-methods__badges .balad-payment-badge svg { display: block; width: 100%; height: 100%; }
+  @media screen and (max-width: 480px) {
+    .pdp-payment-methods { justify-content: center; }
+    .pdp-payment-methods__badges { justify-content: center; }
+    .pdp-payment-methods__badges .balad-payment-badge { width: 28px; height: 18px; }
   }
 
   /* Estimated delivery + secure payments (already has top and bottom borders) */
@@ -1191,7 +1277,7 @@
   }
 
   /* Buy now: soft shine so the main button is the first thing noticed */
-  .pdp-btn--buy { position: relative; overflow: hidden; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18); }
+  .pdp-btn--buy { position: relative; overflow: hidden; box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.45); }
   .pdp-btn--buy:not(:disabled)::after {
     content: '';
     position: absolute;
@@ -1318,13 +1404,16 @@
     right: 20px;
     bottom: 20px;
     z-index: 999998;
-    width: 340px;
+    width: 360px;
     max-width: calc(100vw - 32px);
-    padding: 14px;
-    background: #fff;
-    border: 1px solid #e8e4dc;
-    border-radius: var(--pf-radius-md);
-    box-shadow: 0 16px 40px rgba(30, 24, 12, 0.16), 0 2px 6px rgba(30, 24, 12, 0.06);
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.97);
+    -webkit-backdrop-filter: saturate(160%) blur(14px);
+    backdrop-filter: saturate(160%) blur(14px);
+    border: 1px solid rgba(163, 123, 53, 0.22);
+    border-radius: var(--pf-radius);
+    box-shadow: 0 24px 48px -12px rgba(30, 24, 12, 0.28), 0 4px 12px rgba(30, 24, 12, 0.06);
+    overflow: hidden;
     transform: translateY(24px);
     opacity: 0;
     visibility: hidden;
@@ -1345,65 +1434,103 @@
     pointer-events: none !important;
   }
 
-  .pf-product-template__sticky-shell { display: flex; flex-direction: column; gap: 12px; }
+  /* Thin gold accent line along the top edge */
+  .pf-product-template__sticky-bar::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--pf-gold) 20%, #d8b46a 50%, var(--pf-gold) 80%, transparent);
+    opacity: 0.9;
+  }
 
-  .pf-product-template__sticky-info { display: flex; align-items: center; gap: 12px; min-width: 0; padding-right: 8px; }
+  .pf-product-template__sticky-shell { display: flex; flex-direction: column; gap: 14px; }
+
+  .pf-product-template__sticky-info { display: flex; align-items: center; gap: 14px; min-width: 0; padding-right: 28px; }
 
   .pf-product-template__sticky-img {
-    flex: 0 0 52px;
-    width: 52px;
-    height: 64px;
+    flex: 0 0 60px;
+    width: 60px;
+    height: 72px;
     border-radius: var(--pf-radius-sm);
     overflow: hidden;
-    background: #f1ede6;
+    background: linear-gradient(160deg, #faf6ee, var(--pf-gold-soft));
+    box-shadow: inset 0 0 0 1px rgba(163, 123, 53, 0.15);
   }
 
   .pf-product-template__sticky-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
-  .pf-product-template__sticky-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .pf-product-template__sticky-text { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 
   .pf-product-template__sticky-title {
     font-family: var(--font-heading--family);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
-    letter-spacing: 0.04em;
+    line-height: 1.25;
+    letter-spacing: 0.03em;
     text-transform: uppercase;
-    white-space: nowrap;
+    color: var(--pf-ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
   }
 
-  .pf-product-template__sticky-price-wrap { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; }
-  .pf-product-template__sticky-price { font-size: 17px; font-weight: 700; line-height: 1.1; }
+  .pf-product-template__sticky-variant {
+    align-self: flex-start;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--pf-soft);
+    border: 1px solid var(--pf-line);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--pf-muted);
+    white-space: nowrap;
+  }
+
+  .pf-product-template__sticky-price-wrap { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
+  .pf-product-template__sticky-price { font-size: 18px; font-weight: 700; line-height: 1.1; color: var(--pf-ink); }
   .pf-product-template__sticky-compare-price { font-size: 13px; color: #a3a3a3; text-decoration: line-through; }
+  .pf-product-template__sticky-off {
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--pf-gold-soft);
+    color: var(--pf-gold);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
 
   .pf-product-template__sticky-close {
     position: absolute;
-    top: -12px;
-    right: -12px;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
     display: grid;
     place-items: center;
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     padding: 0;
-    border: 1px solid #e0dbd0;
+    border: 0;
     border-radius: 50%;
-    background: #fff;
-    color: var(--pf-ink);
-    box-shadow: 0 2px 8px rgba(30, 24, 12, 0.14);
+    background: var(--pf-soft);
+    color: var(--pf-muted);
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease;
   }
 
-  .pf-product-template__sticky-close:hover { background: var(--pf-ink); border-color: var(--pf-ink); color: #fff; }
+  .pf-product-template__sticky-close svg { width: 12px; height: 12px; }
+  .pf-product-template__sticky-close:hover { background: var(--pf-ink); color: #fff; }
   .pf-product-template__sticky-close:focus-visible { outline: 2px solid var(--pf-gold); outline-offset: 2px; }
 
   .pf-product-template__sticky-actions { display: flex; gap: 8px; }
 
   .pf-sticky-btn {
     flex: 1 1 0;
-    height: 44px;
-    padding: 0 10px;
+    height: 46px;
+    padding: 0 12px;
     border: 1.5px solid var(--pf-ink);
     border-radius: var(--pf-radius-md);
     font-family: inherit;
@@ -1413,16 +1540,33 @@
     text-transform: uppercase;
     white-space: nowrap;
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, transform 0.12s ease;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
   }
 
   .pf-sticky-btn:active:not(:disabled) { transform: scale(0.985); }
   .pf-sticky-btn:disabled { opacity: 0.45; cursor: not-allowed; }
   .pf-sticky-btn:focus-visible { outline: 2px solid var(--pf-gold); outline-offset: 3px; }
-  .pf-sticky-btn--add { background: #fff; color: var(--pf-ink); }
-  .pf-sticky-btn--add:hover:not(:disabled) { background: var(--pf-soft); }
-  .pf-sticky-btn--buy { background: var(--pf-ink); color: #fff; }
-  .pf-sticky-btn--buy:hover:not(:disabled) { background: #000; }
+  .pf-sticky-btn--add { flex: 0.85 1 0; background: #fff; color: var(--pf-ink); border-color: #d9d4ca; }
+  .pf-sticky-btn--add:hover:not(:disabled) { border-color: var(--pf-ink); background: var(--pf-soft); }
+  .pf-sticky-btn--buy {
+    flex: 1.3 1 0;
+    background: linear-gradient(180deg, #2a2a2a, var(--pf-ink));
+    color: #fff;
+    box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.45);
+  }
+  .pf-sticky-btn--buy:hover:not(:disabled) { background: #000; box-shadow: 0 10px 22px -6px rgba(0, 0, 0, 0.55); }
+
+  .pf-product-template__sticky-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: -4px 0 0;
+    font-size: 11px;
+    color: var(--pf-muted);
+    letter-spacing: 0.02em;
+  }
+  .pf-product-template__sticky-note svg { color: var(--pf-gold); flex-shrink: 0; }
 
   /* Phones: slim one-row bar at the bottom edge. It only appears after the main buttons scroll out of view (see script). */
   @media screen and (max-width: 749px) {
@@ -1434,18 +1578,25 @@
       max-width: none;
       padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
       border-width: 1px 0 0;
-      border-radius: var(--pf-radius-md) var(--pf-radius-md) 0 0;
+      border-radius: 18px 18px 0 0;
+      box-shadow: 0 -10px 30px -8px rgba(30, 24, 12, 0.22);
     }
+    .pf-product-template__sticky-bar::before { height: 2px; }
     .pf-product-template__sticky-shell { flex-direction: row; align-items: center; gap: 10px; }
     .pf-product-template__sticky-info { flex: 1 1 auto; gap: 10px; padding-right: 0; }
-    .pf-product-template__sticky-img { flex-basis: 40px; width: 40px; height: 50px; }
-    .pf-product-template__sticky-title { font-size: 11.5px; }
-    .pf-product-template__sticky-price { font-size: 15px; }
-    .pf-product-template__sticky-compare-price { font-size: 12px; }
+    .pf-product-template__sticky-img { flex-basis: 44px; width: 44px; height: 44px; border-radius: 10px; }
+    .pf-product-template__sticky-text { gap: 3px; }
+    .pf-product-template__sticky-title { font-size: 11.5px; -webkit-line-clamp: 1; }
+    .pf-product-template__sticky-variant { display: none; }
+    .pf-product-template__sticky-price { font-size: 16px; }
+    .pf-product-template__sticky-compare-price { font-size: 11.5px; }
+    .pf-product-template__sticky-off { padding: 1px 6px; font-size: 9.5px; }
     .pf-product-template__sticky-actions { flex: 0 0 auto; }
-    .pf-sticky-btn { flex: 0 0 auto; height: 42px; padding: 0 12px; font-size: 11px; letter-spacing: 0.05em; }
+    .pf-sticky-btn { flex: 0 0 auto; height: 46px; padding: 0 16px; font-size: 11.5px; letter-spacing: 0.06em; border-radius: 12px; }
+    .pf-sticky-btn--buy { flex: 0 0 auto; gap: 8px; }
     .pf-sticky-btn--add { display: none; } /* Add to bag is in the main buttons; remove this line to show both */
-    .pf-product-template__sticky-close { top: -14px; right: 10px; }
+    .pf-product-template__sticky-close,
+    .pf-product-template__sticky-note { display: none; }
   }
 
   /* ───────── Desktop: photos two per row, pinned; details card pinned beside them ───────── */
@@ -1521,20 +1672,20 @@
   }
 
   @media screen and (max-width: 749px) {
-    .pdp-title { font-size: 20px; }
-    .pdp-price__main { font-size: 22px; }
+    .pdp-title { font-size: 21px; }
   }
 
-  /* Phones: price stays on the same row as the name, right-aligned, slightly smaller so both fit */
+  /* Phones: slightly tighter price panel */
   @media screen and (max-width: 480px) {
     .pdp-head__row { gap: 12px; }
-    .pdp-head__main { flex: 1 1 0; }
-    .pdp-price__info { max-width: 45%; }
+    .pdp-price__info { max-width: 46%; gap: 5px; }
     .pdp-price__row { gap: 2px 8px; }
-    .pdp-price__main { font-size: 19px; }
-    .pdp-price__compare { font-size: 12px; }
-    .pdp-price__off { font-size: 11px; }
-    .pdp-price__tax { font-size: 10.5px; }
+    .pdp-price__main { font-size: 21px; }
+    .pdp-price__compare { font-size: 12.5px; }
+    .pdp-price__tax { font-size: 10.5px; white-space: normal; }
+    .pdp-price__off { font-size: 10.5px; }
+    .pdp-price__tax { font-size: 11px; }
+    .pdp-notes li { font-size: 11px; padding: 4px 10px; }
   }
 
   @media screen and (max-width: 380px) {
@@ -1731,7 +1882,7 @@
         if (offEl) {
           if (hasDiscount) {
             const pct = Math.round(((v.compare_at_price - v.price) / v.compare_at_price) * 100);
-            offEl.textContent = '(' + pct + '% OFF)';
+            offEl.textContent = pct + '% OFF';
           }
           offEl.hidden = !hasDiscount;
         }
@@ -1739,6 +1890,16 @@
         if (stickyCompareEl) {
           stickyCompareEl.textContent = hasDiscount ? formatMoney(v.compare_at_price) : '';
           stickyCompareEl.style.display = hasDiscount ? 'inline' : 'none';
+        }
+        const stickyOffEl = root.querySelector('[data-pf-sticky-off]');
+        if (stickyOffEl) {
+          stickyOffEl.textContent = hasDiscount ? Math.round(((v.compare_at_price - v.price) / v.compare_at_price) * 100) + '% OFF' : '';
+          stickyOffEl.hidden = !hasDiscount;
+        }
+        const stickyVariantEl = root.querySelector('[data-pf-sticky-variant]');
+        if (stickyVariantEl && v.title && v.title !== 'Default Title') {
+          stickyVariantEl.textContent = v.title;
+          stickyVariantEl.hidden = false;
         }
       }
 
@@ -1872,9 +2033,10 @@
       const variantId = variantIdInput?.value;
       if (!variantId || !btn || btn.disabled) return;
 
-      const originalText = btn.textContent;
+      const labelEl = btn.querySelector('[data-pf-buy-label]') || btn;
+      const originalText = labelEl.textContent;
       btn.disabled = true;
-      btn.textContent = 'Please wait...';
+      labelEl.textContent = 'Please wait...';
 
       try {
         const formData = new FormData();
@@ -1890,7 +2052,7 @@
       } catch (err) {
         console.error('Buy Now error:', err);
         btn.disabled = false;
-        btn.textContent = originalText;
+        labelEl.textContent = originalText;
         alert('We could not start checkout. Please try again.');
       }
     };
@@ -1967,7 +2129,8 @@
       const liftWhatsApp = () => {
         const cardBottom = parseFloat(getComputedStyle(stickyBar).bottom) || 0;
         // The close button sticks out above the card, so clear it too, plus a small gap
-        const closeOverhang = stickyClose ? Math.abs(parseFloat(getComputedStyle(stickyClose).top)) || 0 : 0;
+        const closeTop = stickyClose ? parseFloat(getComputedStyle(stickyClose).top) || 0 : 0;
+        const closeOverhang = closeTop < 0 ? Math.abs(closeTop) : 0;
         const lift = cardBottom + stickyBar.offsetHeight + closeOverhang + 14;
         findWhatsApp().forEach((el) => {
           if (el.dataset.pfOrigBottom === undefined) {

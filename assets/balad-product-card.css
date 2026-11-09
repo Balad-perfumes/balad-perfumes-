@@ -358,7 +358,7 @@
   flex: 1 1 auto;
   grid-template-columns: minmax(0, 1fr) auto;
   align-content: start;
-  align-items: baseline;
+  align-items: center;
   column-gap: 12px;
   row-gap: 4px;
   padding: 14px 16px 15px;
@@ -369,7 +369,7 @@
 }
 
 .bpc__title {
-  grid-column: 1;
+  grid-column: 1 / -1;
   grid-row: 1;
   display: block;
   margin: 0;
@@ -380,6 +380,67 @@
   letter-spacing: -0.005em;
   white-space: nowrap;
   text-overflow: ellipsis;
+  color: inherit;
+  text-decoration: none;
+}
+
+.bpc__title:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── Plus button (Quick View): info panel, right end of the price row ── */
+.bpc__plus,
+.bpc__quick-view {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--bpc-ink, #111111);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+              background-color 0.2s ease,
+              color 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+.bpc__plus svg,
+.bpc__quick-view svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  pointer-events: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+}
+
+.bpc__plus:hover,
+.bpc__quick-view:hover {
+  background: var(--bpc-ink, #111111);
+  color: #ffffff;
+  border-color: var(--bpc-ink, #111111);
+  transform: scale(1.06);
+}
+
+.bpc__plus:active,
+.bpc__quick-view:active {
+  transform: scale(0.95);
+}
+
+.bpc__plus:focus-visible,
+.bpc__quick-view:focus-visible {
+  outline: 2px solid var(--bpc-ink);
+  outline-offset: 2px;
 }
 
 .bpc__size {
@@ -451,7 +512,8 @@
 /* ── Price repeated inside the info panel (only used on very narrow cards) ── */
 .bpc__price-alt {
   display: flex;
-  grid-column: 1 / -1;
+  grid-column: 1;
+  grid-row: 2;
   align-items: baseline;
   gap: 6px;
   margin-top: 2px;
@@ -464,6 +526,121 @@
   color: var(--bpc-muted);
   font-size: 11px;
   font-weight: 400;
+}
+
+/* ── Info panel layout ─────────────────────
+   type · size
+   Product name
+   ──────────────
+   price  was  off            (+)            */
+.bpc__info {
+  grid-template-areas:
+    'meta  meta'
+    'title title'
+    'line  line'
+    'price plus';
+  row-gap: 0;
+  padding: 13px 14px 12px;
+  background: #f6f4f0;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.03);
+}
+
+.bpc__meta {
+  grid-area: meta;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin: 0 0 5px;
+  color: var(--bpc-muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.bpc__meta-type {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bpc__meta-size { flex: none; color: #a37b35; }
+
+.bpc__meta-dot {
+  flex: none;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #c8c2b6;
+}
+
+.bpc__info .bpc__title {
+  grid-area: title;
+  font-size: clamp(14px, 6.2cqw, 16px);
+  line-height: 1.3;
+}
+
+.bpc__divider {
+  grid-area: line;
+  display: block;
+  height: 1px;
+  margin: 11px 0 10px;
+  background: linear-gradient(to right, rgb(0 0 0 / 0.09), rgb(0 0 0 / 0.03));
+}
+
+.bpc__info .bpc__price-alt {
+  grid-area: price;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+  margin: 0;
+  color: var(--bpc-ink);
+  text-decoration: none;
+}
+
+.bpc__price-now {
+  font-size: clamp(15px, 6.8cqw, 17.5px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.bpc__price-was {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11.5px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.bpc__info .bpc__price-was s {
+  color: var(--bpc-muted);
+  font-size: inherit;
+}
+
+.bpc__price-off {
+  color: #a37b35;
+  font-weight: 700;
+}
+
+.bpc__info .bpc__plus {
+  grid-area: plus;
+  align-self: center;
+  background: #fff;
+}
+
+/* Hover: dark circle, white + (must come after the rule above so it wins) */
+.bpc__info .bpc__plus:hover,
+.bpc__info .bpc__plus:focus-visible {
+  background: var(--bpc-ink, #111111);
+  border-color: var(--bpc-ink, #111111);
+  color: #ffffff;
 }
 
 /* ── Narrower cards: same layout, tighter sizes. "Buy now" always keeps its label ── */
@@ -508,6 +685,18 @@
 
   .bpc__size {
     font-size: 11.5px;
+  }
+
+  .bpc__plus,
+  .bpc__quick-view {
+    width: 32px;
+    height: 32px;
+  }
+
+  .bpc__plus svg,
+  .bpc__quick-view svg {
+    width: 15px;
+    height: 15px;
   }
 }
 
@@ -590,7 +779,7 @@
 }
 
 .bpc__skeleton-line--title {
-  grid-column: 1;
+  grid-column: 1 / -1;
   width: 72%;
   height: 15px;
 }
@@ -601,8 +790,25 @@
   height: 12px;
 }
 
+.bpc__skeleton-circle--plus {
+  grid-column: 2;
+  grid-row: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    rgba(215, 212, 206, 0.5) 0%,
+    rgba(238, 235, 230, 0.85) 50%,
+    rgba(215, 212, 206, 0.5) 100%
+  );
+  background-size: 200% 100%;
+  animation: bpc-shimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
 .bpc__skeleton-line--price {
-  grid-column: 1 / -1;
+  grid-column: 1;
+  grid-row: 2;
   width: 48%;
   height: 13px;
   margin-top: 2px;
@@ -615,8 +821,253 @@
   .bpc__skeleton,
   .bpc__skeleton-badge,
   .bpc__skeleton-buy,
-  .bpc__skeleton-line {
+  .bpc__skeleton-line,
+  .bpc__skeleton-circle {
     transition: none !important;
     animation: none !important;
   }
+}
+
+/* ── Balad Quick Add / Quick View Modal ─────── */
+.balad-qa-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.22s ease, visibility 0.22s ease;
+}
+
+.balad-qa-modal.is-open {
+  display: flex;
+  opacity: 1;
+  visibility: visible;
+}
+
+.balad-qa-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: pointer;
+}
+
+.balad-qa-modal__card {
+  position: relative;
+  z-index: 1;
+  width: calc(100% - 32px);
+  max-width: 400px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+  transform: translateY(12px) scale(0.98);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.balad-qa-modal.is-open .balad-qa-modal__card {
+  transform: translateY(0) scale(1);
+}
+
+.balad-qa-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #666666;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.balad-qa-modal__close:hover {
+  background: #111111;
+  color: #ffffff;
+}
+
+.balad-qa-modal__header {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-right: 28px;
+}
+
+.balad-qa-modal__product-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #f5f5f5;
+}
+
+.balad-qa-modal__product-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.balad-qa-modal__eyebrow {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #888888;
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
+.balad-qa-modal__title {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111111;
+  line-height: 1.25;
+}
+
+.balad-qa-modal__price-wrap {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.balad-qa-modal__price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111111;
+}
+
+.balad-qa-modal__compare-price {
+  font-size: 12px;
+  color: #888888;
+  text-decoration: line-through;
+}
+
+.balad-qa-modal__sizes {
+  margin-bottom: 18px;
+}
+
+.balad-qa-modal__sizes-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.balad-qa-modal__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333333;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.balad-qa-modal__size-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.balad-qa-modal__size {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #e2e2e2;
+  background: #ffffff;
+  color: #111111;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.balad-qa-modal__size:hover {
+  border-color: #111111;
+}
+
+.balad-qa-modal__size.is-selected {
+  background: #111111;
+  color: #ffffff;
+  border-color: #111111;
+}
+
+.balad-qa-modal__size.is-unavailable {
+  opacity: 0.35;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.balad-qa-modal__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.balad-qa-modal__btn {
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.balad-qa-modal__btn--bag {
+  background: #ffffff;
+  color: #111111;
+  border: 1.5px solid #111111;
+}
+
+.balad-qa-modal__btn--bag:hover {
+  background: #111111;
+  color: #ffffff;
+}
+
+.balad-qa-modal__btn--buy {
+  background: #111111;
+  color: #ffffff;
+  border: 1.5px solid #111111;
+}
+
+.balad-qa-modal__btn--buy:hover {
+  background: #2a2a2a;
+  border-color: #2a2a2a;
+}
+
+.balad-qa-modal__sold-out {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f5f5f5;
+  color: #888888;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.balad-qa-modal__sold-out svg {
+  width: 16px;
+  height: 16px;
+}
+/* Info panel on small cards (2 per row on phones) */
+@container (max-width: 230px) {
+  .bpc__info { padding: 11px 11px 10px; }
+  .bpc__meta { margin-bottom: 4px; font-size: 9.5px; letter-spacing: 0.07em; }
+  .bpc__divider { margin: 9px 0 8px; }
+  .bpc__price-was { gap: 4px; font-size: 10.5px; }
 }

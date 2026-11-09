@@ -1,0 +1,483 @@
+/* ──────────────────────────────────────────────────────────────
+   Balad popups: Quick View (.balad-qa-modal) and Add to Wishlist
+   (.balad-wishlist-modal). One shared design for every copy of these
+   popups on the site (each section ships its own markup + basic CSS).
+   Selectors start with "html body" so this file wins over the basic
+   per-section styles without needing !important.
+   Desktop: centred card. Phones: sheet that slides up from the bottom.
+   ────────────────────────────────────────────────────────────── */
+
+html body .balad-qa-modal,
+html body .balad-wishlist-modal {
+  --bm-ink: #111;
+  --bm-text: #4b4b4b;
+  --bm-muted: #8a8a8a;
+  --bm-line: #ece9e3;
+  --bm-soft: #f7f5f1;
+  --bm-gold: #a37b35;
+  --bm-gold-soft: #f4ecdb;
+
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+html body .balad-qa-modal.is-open,
+html body .balad-wishlist-modal.is-open {
+  display: flex;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Backdrop */
+html body .balad-qa-modal__backdrop,
+html body .balad-wishlist-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(17 14 10 / 0.5);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  animation: bm-fade 0.25s ease both;
+}
+
+/* Card */
+html body .balad-qa-modal__card,
+html body .balad-wishlist-modal__card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  margin: 0;
+  padding: 22px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 30px 60px -20px rgb(30 24 12 / 0.35), 0 6px 16px rgb(30 24 12 / 0.08);
+  transform: none;
+  animation: bm-pop 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Thin gold accent along the top edge */
+html body .balad-qa-modal__card::before,
+html body .balad-wishlist-modal__card::before {
+  content: '';
+  position: absolute;
+  inset: 0 22px auto;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: linear-gradient(90deg, transparent, var(--bm-gold), #d8b46a, var(--bm-gold), transparent);
+  opacity: 0.85;
+}
+
+/* Close */
+html body .balad-qa-modal__close,
+html body .balad-wishlist-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--bm-soft);
+  color: var(--bm-ink);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+html body .balad-qa-modal__close:hover,
+html body .balad-wishlist-modal__close:hover {
+  background: var(--bm-ink);
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+html body .balad-qa-modal__close svg,
+html body .balad-wishlist-modal__close svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Header: image + name + price */
+html body .balad-qa-modal__header,
+html body .balad-wishlist-modal__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 18px;
+  padding: 0 40px 18px 0;
+  border-bottom: 1px solid var(--bm-line);
+}
+
+html body .balad-qa-modal__product-img,
+html body .balad-wishlist-modal__product-img {
+  flex: none;
+  width: 84px;
+  height: 104px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #f4f1ec;
+  box-shadow: inset 0 0 0 1px rgb(163 123 53 / 0.12);
+}
+
+html body .balad-qa-modal__product-img img,
+html body .balad-wishlist-modal__product-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html body .balad-qa-modal__product-info,
+html body .balad-wishlist-modal__product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+html body .balad-qa-modal__eyebrow {
+  display: block;
+  margin: 0;
+  color: var(--bm-gold);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+html body .balad-qa-modal__title,
+html body .balad-wishlist-modal__title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin: 0;
+  color: var(--bm-ink);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+}
+
+html body .balad-qa-modal__title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+html body .balad-qa-modal__title a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+html body .balad-qa-modal__price-wrap,
+html body .balad-wishlist-modal__price-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+html body .balad-qa-modal__price,
+html body .balad-wishlist-modal__price {
+  color: var(--bm-ink);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+html body .balad-qa-modal__compare-price,
+html body .balad-wishlist-modal__compare-price {
+  color: var(--bm-muted);
+  font-size: 13px;
+  font-weight: 400;
+  text-decoration: line-through;
+}
+
+/* Sizes */
+html body .balad-qa-modal__sizes,
+html body .balad-wishlist-modal__sizes {
+  margin: 0 0 20px;
+}
+
+html body .balad-qa-modal__sizes-top,
+html body .balad-wishlist-modal__sizes-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 10px;
+}
+
+html body .balad-qa-modal__label,
+html body .balad-wishlist-modal__label {
+  color: var(--bm-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+html body .balad-qa-modal__size-grid,
+html body .balad-wishlist-modal__size-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+html body .balad-qa-modal__size,
+html body .balad-wishlist-modal__size {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 12px;
+  border: 1.5px solid #e3dfd7;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--bm-ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.12s ease;
+}
+
+html body .balad-qa-modal__size:hover,
+html body .balad-wishlist-modal__size:hover {
+  border-color: var(--bm-gold);
+}
+
+html body .balad-qa-modal__size:active,
+html body .balad-wishlist-modal__size:active {
+  transform: scale(0.97);
+}
+
+/* Selected: gold outline + soft gold fill + tick (same as the product page) */
+html body .balad-qa-modal__size.is-selected,
+html body .balad-wishlist-modal__size.is-selected {
+  border-color: var(--bm-gold);
+  background: var(--bm-gold-soft);
+  color: var(--bm-ink);
+  font-weight: 700;
+}
+
+html body .balad-qa-modal__size.is-selected::before,
+html body .balad-wishlist-modal__size.is-selected::before {
+  content: '';
+  flex-shrink: 0;
+  width: 5px;
+  height: 9px;
+  margin-top: -2px;
+  border: solid var(--bm-gold);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+html body .balad-qa-modal__size.is-unavailable {
+  background: #faf9f7;
+  color: #a3a3a3;
+  text-decoration: line-through;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+/* Buttons */
+html body .balad-qa-modal__actions {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 10px;
+}
+
+html body .balad-qa-modal__btn,
+html body .balad-wishlist-modal__add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  margin: 0;
+  padding: 0 14px;
+  border: 1.5px solid var(--bm-ink);
+  border-radius: 12px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.12s ease;
+}
+
+html body .balad-qa-modal__btn:active,
+html body .balad-wishlist-modal__add-btn:active {
+  transform: scale(0.985);
+}
+
+html body .balad-qa-modal__btn--bag {
+  border-color: #d9d4ca;
+  background: #fff;
+  color: var(--bm-ink);
+}
+
+html body .balad-qa-modal__btn--bag:hover {
+  border-color: var(--bm-ink);
+  background: var(--bm-soft);
+  color: var(--bm-ink);
+}
+
+html body .balad-qa-modal__btn--buy,
+html body .balad-wishlist-modal__add-btn {
+  background: linear-gradient(180deg, #2a2a2a, var(--bm-ink));
+  color: #fff;
+  box-shadow: 0 8px 18px -6px rgb(0 0 0 / 0.45);
+}
+
+html body .balad-qa-modal__btn--buy:hover,
+html body .balad-wishlist-modal__add-btn:hover {
+  border-color: #000;
+  background: #000;
+  box-shadow: 0 10px 22px -6px rgb(0 0 0 / 0.55);
+}
+
+/* Bookmark icon in front of "Add to list" */
+html body .balad-wishlist-modal__add-btn::before {
+  content: '';
+  flex: none;
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linejoin='round'%3E%3Cpath d='M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linejoin='round'%3E%3Cpath d='M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+html body .balad-qa-modal__sold-out {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px dashed #e0dbd0;
+  border-radius: 12px;
+  background: var(--bm-soft);
+  color: var(--bm-muted);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+html body .balad-qa-modal__sold-out svg {
+  width: 16px;
+  height: 16px;
+}
+
+html body .balad-qa-modal :focus-visible,
+html body .balad-wishlist-modal :focus-visible {
+  outline: 2px solid var(--bm-gold);
+  outline-offset: 2px;
+}
+
+/* ── Phones: bottom sheet ─────────────────── */
+@media screen and (max-width: 560px) {
+  html body .balad-qa-modal,
+  html body .balad-wishlist-modal {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  html body .balad-qa-modal__card,
+  html body .balad-wishlist-modal__card {
+    max-width: none;
+    max-height: 88vh;
+    max-height: 88dvh;
+    padding: 26px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+    border-radius: 22px 22px 0 0;
+    animation-name: bm-sheet;
+  }
+
+  /* Grab handle instead of the gold line */
+  html body .balad-qa-modal__card::before,
+  html body .balad-wishlist-modal__card::before {
+    inset: 9px auto auto 50%;
+    width: 40px;
+    height: 4px;
+    border-radius: 999px;
+    background: #e3dfd7;
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+
+  html body .balad-qa-modal__close,
+  html body .balad-wishlist-modal__close {
+    top: 16px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+  }
+
+  html body .balad-qa-modal__header,
+  html body .balad-wishlist-modal__header {
+    gap: 14px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+  }
+
+  html body .balad-qa-modal__product-img,
+  html body .balad-wishlist-modal__product-img {
+    width: 72px;
+    height: 90px;
+  }
+
+  html body .balad-qa-modal__title,
+  html body .balad-wishlist-modal__title {
+    font-size: 15px;
+  }
+
+  html body .balad-qa-modal__price,
+  html body .balad-wishlist-modal__price {
+    font-size: 17px;
+  }
+
+  html body .balad-qa-modal__size-grid,
+  html body .balad-wishlist-modal__size-grid {
+    grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  }
+}
+
+@keyframes bm-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes bm-pop {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes bm-sheet {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .balad-qa-modal__backdrop,
+  html body .balad-wishlist-modal__backdrop,
+  html body .balad-qa-modal__card,
+  html body .balad-wishlist-modal__card {
+    animation: none;
+  }
+}
