@@ -15,6 +15,12 @@
       {%- assign lcp_preload = content_for_layout | split: 'BALAD_LCP_PRELOAD' -%}
       {{ lcp_preload[1] }}
     {%- endif -%}
+    {%- comment -%}
+      Shop Pay, Reelfy and Judge.me all load from cdn.shopify.com. Opening that connection now (in parallel)
+      instead of when the first of them is found saves the DNS + TCP + TLS round trips on mobile.
+    {%- endcomment -%}
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.shopify.com">
     {%- if settings.favicon != blank -%}
       <link
         rel="icon"
@@ -69,6 +75,10 @@
       {%- render 'theme-editor' -%}
     {% endif %}
 
+    {%- comment -%}
+      Must stay exactly {{ content_for_header }}: Shopify rejects the upload if a filter is applied to it.
+      (It contains a render-blocking reelfy.css link from the Reelfy app block; the theme can't change that.)
+    {%- endcomment -%}
     {{ content_for_header }}
     {% # theme-check-enable RemoteAsset %}
   </head>
