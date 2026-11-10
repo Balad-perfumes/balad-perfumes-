@@ -1931,10 +1931,12 @@
       const h = header.offsetHeight;
       const headerGroup = document.querySelector('#header-group') || header.closest('.shopify-section-group-header-group');
       const totalH = headerGroup && headerGroup.offsetHeight > h ? headerGroup.offsetHeight : h;
-      if (h > 0) {
-        document.documentElement.style.setProperty('--header-height', h + 'px');
-        document.documentElement.style.setProperty('--header-height-mobile', h + 'px');
-        document.documentElement.style.setProperty('--header-group-height', totalH + 'px');
+      // Write only when the value changes: a custom property set on <html> restyles every element on the page
+      const rootStyle = document.documentElement.style;
+      if (h > 0 && (rootStyle.getPropertyValue('--header-height') !== h + 'px' || rootStyle.getPropertyValue('--header-group-height') !== totalH + 'px')) {
+        rootStyle.setProperty('--header-height', h + 'px');
+        rootStyle.setProperty('--header-height-mobile', h + 'px');
+        rootStyle.setProperty('--header-group-height', totalH + 'px');
       }
     };
 
