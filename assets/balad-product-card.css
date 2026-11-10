@@ -166,10 +166,16 @@
   transform: scale(1.06);
 }
 
+/* Saved: button stays white, bookmark turns solid black (JS sets fill="currentColor") */
 .bpc__wish.is-saved,
 .bpc__wish[aria-pressed='true'] {
-  background: var(--bpc-ink);
-  color: #fff;
+  background: #fff;
+  color: var(--bpc-ink);
+}
+
+.bpc__wish.is-saved svg,
+.bpc__wish[aria-pressed='true'] svg {
+  fill: currentColor;
 }
 
 /* ── Image dots ──────────────────────────── */
@@ -503,10 +509,14 @@
   outline-offset: 2px;
 }
 
-.bpc__buy:focus-visible,
-.bpc__wish:focus-visible {
+.bpc__buy:focus-visible {
   outline-color: #fff;
   outline-offset: -3px;
+}
+
+.bpc__wish:focus-visible {
+  outline-color: var(--bpc-ink);
+  outline-offset: 2px;
 }
 
 /* ── Price repeated inside the info panel (only used on very narrow cards) ── */

@@ -61,12 +61,14 @@
           <p class="balad-cats__subheading">{{ section.settings.subheading }}</p>
         {% endif %}
       </div>
-      {% if section.settings.discover_more_label != blank and discover_url != blank %}
-        <a href="{{ discover_url }}" class="balad-cats__discover">{{ section.settings.discover_more_label }}</a>
-      {% endif %}
+      <div class="balad-cats__head-actions">
+        {% if section.settings.discover_more_label != blank and discover_url != blank %}
+          <a href="{{ discover_url }}" class="balad-cats__discover">{{ section.settings.discover_more_label }}</a>
+        {% endif %}
+      </div>
     </div>
 
-    <div class="balad-cats__grid">
+    <div class="balad-cats__grid" data-cats-track>
       {%- if use_picked -%}
         {%- assign coll_source = section.settings.collection_list -%}
       {%- else -%}
@@ -120,6 +122,8 @@
         </a>
       {%- endfor -%}
     </div>
+
+    <div class="balad-cats__dots" data-cats-dots role="tablist" aria-label="Category pages" hidden></div>
   </div>
 </section>
 
@@ -182,13 +186,51 @@
   }
   .balad-cats__discover:hover { opacity: 0.7; }
 
-  /* ── Grid: 4 per row on desktop, 2 per row on mobile ── */
+  /* ── Single scrolling row: 4 visible on desktop, 3 on tablet, 2 on mobile ── */
   .balad-cats__grid {
+    --cats-visible: var(--cats-cols, 4);
+    --cats-gap: 16px;
     display: grid;
-    grid-template-columns: repeat(var(--cats-cols, 4), minmax(0, 1fr));
-    column-gap: 16px;
-    row-gap: 20px;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - (var(--cats-visible) - 1) * var(--cats-gap)) / var(--cats-visible));
+    grid-template-columns: none;
+    gap: var(--cats-gap);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 4px 0 10px;
+    margin: -4px 0 -10px;
   }
+  .balad-cats__grid::-webkit-scrollbar { display: none; }
+  .balad-cats__grid > .balad-cc { scroll-snap-align: start; }
+
+  .balad-cats__head-actions { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+  .balad-cats__dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .balad-cats__dots[hidden] { display: none; }
+  .balad-cats__dot {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: rgb(17 17 17 / 0.18);
+    cursor: pointer;
+    transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.25s ease;
+  }
+  .balad-cats__dot:hover { background: rgb(17 17 17 / 0.35); }
+  .balad-cats__dot.is-active { width: 22px; background: #111111; }
+  .balad-cats__dot:focus-visible { outline: 2px solid #111111; outline-offset: 3px; }
+  .balad-cats--parallax .balad-cats__dot { background: rgb(255 255 255 / 0.4); }
+  .balad-cats--parallax .balad-cats__dot.is-active { background: #ffffff; }
 
   /* ── Collection item: image card with content and gradient overlay inside ── */
   .balad-cc {
@@ -345,9 +387,8 @@
     }
     .balad-cats__shell { padding: 0 20px; }
     .balad-cats__grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      column-gap: 14px;
-      row-gap: 18px;
+      --cats-visible: 3;
+      --cats-gap: 14px;
     }
     .balad-cc {
       aspect-ratio: var(--cats-aspect, 1 / 1.12);
@@ -366,9 +407,8 @@
     .balad-cats__discover { font-size: 12.5px; }
 
     .balad-cats__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: 10px;
-      row-gap: 12px;
+      --cats-visible: 2;
+      --cats-gap: 10px;
     }
 
     .balad-cc {
@@ -444,6 +484,66 @@
     .balad-cc .balad-cc__image { transition: none; }
   }
 </style>
+
+<script>
+  (function () {
+    const section = document.querySelector('[data-cats-section="{{ section.id }}"]');
+    if (!section) return;
+    const track = section.querySelector('[data-cats-track]');
+    const dotsWrap = section.querySelector('[data-cats-dots]');
+    if (!track || !dotsWrap) return;
+    let dots = [];
+    let positions = [];
+
+    const metrics = () => {
+      const card = track.querySelector('.balad-cc');
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      const step = card ? card.getBoundingClientRect().width + gap : track.clientWidth;
+      return { step };
+    };
+
+    // One dot per snap position: (cards - visible + 1)
+    const build = () => {
+      const max = track.scrollWidth - track.clientWidth;
+      if (max <= 2) {
+        dotsWrap.hidden = true;
+        dotsWrap.innerHTML = '';
+        dots = [];
+        return;
+      }
+      const { step } = metrics();
+      const count = Math.round(max / step) + 1;
+      positions = Array.from({ length: count }, (_, i) => Math.min(i * step, max));
+      dotsWrap.innerHTML = positions
+        .map((_, i) => `<button type="button" class="balad-cats__dot" role="tab" aria-label="Go to slide ${i + 1}"></button>`)
+        .join('');
+      dots = Array.from(dotsWrap.children);
+      dots.forEach((dot, i) => dot.addEventListener('click', () => track.scrollTo({ left: positions[i], behavior: 'smooth' })));
+      dotsWrap.hidden = false;
+      update();
+    };
+
+    const update = () => {
+      if (!dots.length) return;
+      const x = track.scrollLeft;
+      let active = 0;
+      positions.forEach((pos, i) => { if (Math.abs(pos - x) < Math.abs(positions[active] - x)) active = i; });
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('is-active', i === active);
+        dot.setAttribute('aria-selected', i === active ? 'true' : 'false');
+      });
+    };
+
+    let ticking = false;
+    track.addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => { update(); ticking = false; });
+    }, { passive: true });
+    window.addEventListener('resize', build);
+    build();
+  })();
+</script>
 
 <script>
   (() => {

@@ -184,88 +184,89 @@
 
     <!-- ═════════ INFO ═════════ -->
     <div class="pf-product-template__content">
-      <div class="pdp-info">
+      <div class="pdp-info pdp-info--v2">
+        <!-- Breadcrumb (small line above the main card) -->
+        <div class="pdp-topbar pdp-topbar--panel">
+            <nav class="pdp-crumbs" aria-label="Breadcrumb">
+              <a href="{{ routes.root_url }}">Home</a>
+              <span aria-hidden="true">/</span>
+              <a href="{{ routes.all_products_collection_url }}">All Products</a>
+              <span aria-hidden="true">/</span>
+              <span class="pdp-crumbs__current" aria-current="page">{{ selected_product.title }}</span>
+            </nav>
+        </div>
 
-        <div class="pdp-topbar">
-          <nav class="pdp-crumbs" aria-label="Breadcrumb">
-            <a href="{{ routes.root_url }}">Home</a>
-            <span aria-hidden="true">/</span>
-            <a href="{{ routes.all_products_collection_url }}">All Products</a>
-            <span aria-hidden="true">/</span>
-            <span class="pdp-crumbs__current" aria-current="page">{{ selected_product.title }}</span>
-          </nav>
-          <div class="pdp-topbar__end">
+        <!-- Main card: stock/rating, name, price, size and buy buttons (all above the fold) -->
+        <section class="pdp-sc pdp-sc--intro pdp-sc--main">
+        <!-- Top bar: stock + rating + share -->
+        <div class="pdp-topbar pdp-topbar--card">
+          <div class="pdp-head__meta">
             <p class="pdp-stock{% if current_variant.available %} is-in{% else %} is-out{% endif %}" data-pf-stock>
               <span class="pdp-stock__dot" aria-hidden="true"></span>
               <span data-pf-stock-text>{% if current_variant.available %}In Stock{% else %}Sold Out{% endif %}</span>
             </p>
-            <button type="button" class="pdp-share" data-share-btn aria-label="Share product">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="15" height="15" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            </button>
+            {%- if has_reviews -%}
+              <a class="pdp-rating" href="#judgeme_product_reviews" data-pf-reviews-scroll aria-label="Rated {{ review_rating }} out of 5 from {{ review_count }} reviews">
+                <span class="pdp-stars" aria-hidden="true">★★★★★<span class="pdp-stars__fill" style="width: {{ rating_pct }}%">★★★★★</span></span>
+                <span class="pdp-rating__text"><strong>{{ review_rating }}</strong> &middot; {{ review_count }} review{% if review_count != 1 %}s{% endif %}</span>
+              </a>
+            {%- endif -%}
           </div>
+          <button type="button" class="pdp-share" data-share-btn aria-label="Share product">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="15" height="15" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          </button>
         </div>
 
+        <!-- 2. Name, stock, rating -->
         <header class="pdp-head">
           {%- if selected_product.vendor != blank or selected_product.type != blank -%}
-            <p class="pdp-eyebrow">{{ selected_product.type | default: selected_product.vendor | escape }}</p>
-          {%- endif -%}
-          <div class="pdp-head__row">
-            <div class="pdp-head__main">
-              <h1 class="pdp-title">{{ selected_product.title }}</h1>
-              <p class="pdp-specs">Eau de Parfum &middot; Lasts 6 to 8 hours</p>
+            <div class="pdp-head__top">
+              <p class="pdp-eyebrow">{{ selected_product.type | default: selected_product.vendor | escape }}</p>
             </div>
-
-            <!-- Price (same row as the name, right side) -->
-            <div class="pdp-price__info">
+          {%- endif -%}
+          <!-- Title + price on one row -->
+          <div class="pdp-intro__row">
+            <h1 class="pdp-title">{{ selected_product.title }}</h1>
+            <div class="pdp-intro__price">
               <div class="pdp-price__row">
-                <span class="pdp-price__main" data-pf-price-main>{% render 'format-price', price: current_variant.price %}</span>
                 <span class="pdp-price__compare" data-pf-compare-price{% unless has_discount %} hidden{% endunless %}>{% if has_discount %}{% render 'format-price', price: current_variant.compare_at_price %}{% endif %}</span>
+                <span class="pdp-price__main" data-pf-price-main>{% render 'format-price', price: current_variant.price %}</span>
               </div>
-              <span class="pdp-price__off" data-pf-off-badge{% unless has_discount %} hidden{% endunless %}>{{ pct_off }}% OFF</span>
-              <span class="pdp-price__tax">Inclusive of all taxes</span>
+              <span class="pdp-price__tax">Incl. of all taxes</span>
             </div>
           </div>
+          {%- liquid
+            assign save_amt = 0
+            if has_discount
+              assign save_amt = current_variant.compare_at_price | minus: current_variant.price
+            endif
+          -%}
+          <div class="pdp-intro__save">
+            <span class="pdp-price__off" data-pf-off-badge{% unless has_discount %} hidden{% endunless %}>{{ pct_off }}% OFF</span>
+            <p class="pdp-save" data-pf-save{% unless has_discount %} hidden{% endunless %}>You save <strong data-pf-save-amount>{% if has_discount %}{% render 'format-price', price: save_amt %}{% endif %}</strong></p>
+          </div>
 
-          {%- if has_reviews -%}
-            <a class="pdp-rating" href="#judgeme_product_reviews" data-pf-reviews-scroll aria-label="Rated {{ review_rating }} out of 5 from {{ review_count }} reviews">
-              <span class="pdp-stars" aria-hidden="true">★★★★★<span class="pdp-stars__fill" style="width: {{ rating_pct }}%">★★★★★</span></span>
-              <span class="pdp-rating__text"><strong>{{ review_rating }}</strong> &middot; {{ review_count }} review{% if review_count != 1 %}s{% endif %}</span>
-            </a>
-          {%- endif -%}
-
-          {%- if notes_list.size > 0 -%}
-            <ul class="pdp-notes" aria-label="Fragrance notes">
-              {%- for note in notes_list -%}
-                <li>{{ note | escape }}</li>
-              {%- endfor -%}
-            </ul>
-          {%- endif -%}
-        </header>
-
-        <!-- At a glance -->
-        <ul class="pdp-glance">
-          <li>
-            <span class="pdp-glance__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v3M14 3v3"/><rect x="5" y="6" width="14" height="15" rx="3"/><path d="M9 12h6"/></svg></span>
-            <span class="pdp-glance__text"><small>Type</small><strong>Eau de Parfum</strong></span>
-          </li>
-          <li>
-            <span class="pdp-glance__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
-            <span class="pdp-glance__text"><small>Lasts</small><strong>6 to 8 hours</strong></span>
-          </li>
-          {%- unless selected_product.has_only_default_variant -%}
+          <!-- Key facts strip -->
+          <ul class="pdp-glance pdp-facts">
             <li>
-              <span class="pdp-glance__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/></svg></span>
-              <span class="pdp-glance__text"><small>Size</small><strong data-pf-glance-size>{{ selected_size_label }}</strong></span>
+              <span class="pdp-glance__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v3M14 3v3"/><rect x="5" y="6" width="14" height="15" rx="3"/><path d="M9 12h6"/></svg></span>
+              <span class="pdp-glance__text"><small>Type</small><strong>Eau de Parfum</strong></span>
             </li>
-          {%- endunless -%}
-        </ul>
+            <li>
+              <span class="pdp-glance__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+              <span class="pdp-glance__text"><small>Lasts</small><strong>6&ndash;8 hours</strong></span>
+            </li>
+            {%- unless selected_product.has_only_default_variant -%}
+              <li>
+                <span class="pdp-glance__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/></svg></span>
+                <span class="pdp-glance__text"><small>Size</small><strong data-pf-glance-size>{{ selected_size_label }}</strong></span>
+              </li>
+            {%- endunless -%}
+          </ul>
+        </header>
 
         <!-- Savings, real low-stock and offer line -->
         {%- liquid
-          assign save_amt = 0
-          if has_discount
-            assign save_amt = current_variant.compare_at_price | minus: current_variant.price
-          endif
           assign inv_map = ''
           for v in selected_product.variants
             if v.inventory_management == 'shopify' and v.inventory_policy == 'deny'
@@ -286,8 +287,10 @@
             assign hurry_pct = cur_qty | times: 100.0 | divided_by: low_threshold | round | at_least: 8 | at_most: 100
           endif
         -%}
-        <div class="pdp-nudges" data-pf-nudges{% unless has_discount or section.settings.offer_text != blank %} hidden{% endunless %}>
-          <p class="pdp-save" data-pf-save{% unless has_discount %} hidden{% endunless %}>You save <strong data-pf-save-amount>{% if has_discount %}{% render 'format-price', price: save_amt %}{% endif %}</strong> on this perfume</p>
+
+        <!-- Size & buy -->
+        <div class="pdp-buy">
+        <div class="pdp-nudges" data-pf-nudges{% if section.settings.offer_text == blank %} hidden{% endif %}>
           {%- if section.settings.offer_text != blank -%}
             <p class="pdp-offer">{{ section.settings.offer_text | escape }}</p>
           {%- endif -%}
@@ -350,27 +353,6 @@
           assign eta_max_date = now_secs | plus: eta_max_secs | date: '%a, %-d %b'
         -%}
 
-        {%- if section.settings.show_freeship -%}
-          <div class="pdp-freeship" role="note">
-            <span class="pdp-freeship__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            </span>
-            <span class="pdp-freeship__text">
-              <strong>{{ section.settings.freeship_text | default: 'Free delivery across India' | escape }}</strong>
-              {%- if section.settings.freeship_sub != blank -%}
-                <span>{{ section.settings.freeship_sub | escape }}</span>
-              {%- endif -%}
-              <span class="pdp-freeship__eta" data-pf-delivery
-                data-dispatch="{{ section.settings.dispatch_days | default: 2 }}"
-                data-min="{{ section.settings.delivery_min_days | default: 3 }}"
-                data-max="{{ section.settings.delivery_max_days | default: 6 }}"
-                {% unless current_variant.available %}hidden{% endunless %}>
-                Estimated delivery: <b data-pf-delivery-range>{{ eta_min_date }} to {{ eta_max_date }}</b>
-              </span>
-            </span>
-          </div>
-        {%- endif -%}
-
         <!-- Hurry up: driven by real Shopify inventory, only shows when stock is genuinely low -->
         <div class="pdp-hurry" data-pf-lowstock data-threshold="{{ low_threshold }}" data-inv="{{ inv_map }}" style="--pdp-hurry: {{ hurry_pct }}%"{% unless show_low %} hidden{% endunless %}>
           <div class="pdp-hurry__top">
@@ -399,6 +381,24 @@
           </div>
         {%- endform -%}
 
+        <!-- Delivery promise (quick summary; full details in the Delivery card) -->
+        <ul class="pdp-promise">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <span><strong>{% if section.settings.show_freeship %}Free delivery{% else %}Fast delivery{% endif %}</strong><small>Get it by {{ eta_max_date }}</small></span>
+          </li>
+          {%- if section.settings.show_cod -%}
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>
+              <span><strong>Cash on delivery</strong><small>Pay when it arrives</small></span>
+            </li>
+          {%- endif -%}
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            <span><strong>100% authentic</strong><small>Sealed &amp; genuine</small></span>
+          </li>
+        </ul>
+
         <!-- Payment icons & guaranteed safe checkout under Buy Now button -->
         {%- if section.settings.show_secure_pay -%}
           <div class="pdp-payment-methods">
@@ -409,6 +409,52 @@
             <div class="pdp-payment-methods__badges" aria-label="Accepted payment methods">
               {% render 'payment-icons' %}
             </div>
+          </div>
+        {%- endif -%}
+        </div>
+        </section>
+
+        <!-- 4. Fragrance profile -->
+        <section class="pdp-sc pdp-sc--profile">
+          <p class="pdp-sc__label">Fragrance profile</p>
+          {%- if notes_list.size > 0 -%}
+            <ul class="pdp-notes" aria-label="Fragrance notes">
+              {%- for note in notes_list -%}
+                <li>{{ note | escape }}</li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        {%- assign pdp_excerpt = selected_product.description | strip_html | strip -%}
+        {%- assign pdp_excerpt = pdp_excerpt | replace: 'Ahmed Al Maghribi Bin Shaikh', selected_product.title -%}
+        {%- assign pdp_excerpt = pdp_excerpt | replace: 'Ahmed Al Maghribi', 'Balad Perfumes' | truncatewords: 32 -%}
+        {%- if pdp_excerpt != blank -%}
+          <p class="pdp-excerpt">{{ pdp_excerpt }}</p>
+        {%- else -%}
+          <p class="pdp-excerpt">Experience the beauty of <strong>{{ selected_product.title }}</strong>, a luxury fragrance crafted with fine concentrated oils, luminous florals, and warm amber notes. Sophisticated, elegant, and long-lasting.</p>
+        {%- endif -%}
+        </section>
+
+        <!-- 6. Delivery & trust -->
+        <section class="pdp-sc pdp-perks">
+          <p class="pdp-sc__label">Delivery &amp; trust</p>
+        {%- if section.settings.show_freeship -%}
+          <div class="pdp-freeship" role="note">
+            <span class="pdp-freeship__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            </span>
+            <span class="pdp-freeship__text">
+              <strong>{{ section.settings.freeship_text | default: 'Free delivery across India' | escape }}</strong>
+              {%- if section.settings.freeship_sub != blank -%}
+                <span>{{ section.settings.freeship_sub | escape }}</span>
+              {%- endif -%}
+              <span class="pdp-freeship__eta" data-pf-delivery
+                data-dispatch="{{ section.settings.dispatch_days | default: 2 }}"
+                data-min="{{ section.settings.delivery_min_days | default: 3 }}"
+                data-max="{{ section.settings.delivery_max_days | default: 6 }}"
+                {% unless current_variant.available %}hidden{% endunless %}>
+                Estimated delivery: <b data-pf-delivery-range>{{ eta_min_date }} to {{ eta_max_date }}</b>
+              </span>
+            </span>
           </div>
         {%- endif -%}
 
@@ -440,8 +486,7 @@
           </ul>
         {%- endif -%}
 
-        <!-- Assurances -->
-        <ul class="pdp-trust">
+          <ul class="pdp-trust">
           <li class="pdp-trust__item">
             <span class="pdp-trust__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10z"/><path d="M2 21c0-3 1.9-5.4 5.1-6C9.5 14.5 12 13 13 12"/></svg>
@@ -470,10 +515,13 @@
             </span>
           </li>
         </ul>
+        </section>
 
-        <!-- Information (one accordion, one open at a time) -->
+        <!-- 7. Product details -->
+        <section class="pdp-sc pdp-sc--info">
+          <p class="pdp-sc__label">Product details</p>
         <div class="pf-accordions">
-          <details class="pf-accordion-item" name="pdp-info" open>
+          <details class="pf-accordion-item" name="pdp-info">
             <summary class="pf-accordion-header">
               <span class="pf-accordion-title">Description</span>
               <span class="pf-accordion-icon" aria-hidden="true"></span>
@@ -537,6 +585,8 @@
             </div>
           </details>
         </div>
+
+        </section>
 
         <button type="button" class="pf-buybox__write-review" data-pf-reviews-open>Write a review</button>
       </div>
@@ -1344,6 +1394,7 @@
   .pf-accordion-bullets li:last-child { margin-bottom: 0; }
 
   /* Write a review as a button */
+  .pf-buybox__write-review[hidden] { display: none !important; }
   .pf-buybox__write-review {
     align-self: stretch;
     display: inline-flex;
@@ -1695,6 +1746,841 @@
   @media (prefers-reduced-motion: reduce) {
     .pf-product-template *,
     .pf-product-template__sticky-bar { transition: none !important; animation: none !important; }
+  }
+
+  /* =================================================================
+     PRODUCT DETAILS v3 — editorial, focused column
+     header / price / excerpt / key facts / size / buy / delivery / trust / info
+     ================================================================= */
+  .pf-product-template {
+    --pf-head-font: var(--font-heading--family, 'Manrope'), var(--font-body--family, sans-serif);
+    --pf-hair: #ebe5db;
+    --pf-cream: #f7f3ec;
+    --pf-green: #2f7a4b;
+  }
+
+  .pdp-info.pdp-info--v2 {
+    width: 100%;
+    max-width: 540px;
+    gap: 0;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+  }
+  .pdp-info--v2 > [hidden] { display: none !important; }
+
+  /* ---------- Breadcrumb ---------- */
+  .pdp-info--v2 .pdp-topbar { margin: 0 0 28px; flex-wrap: nowrap; }
+  .pdp-info--v2 .pdp-crumbs { flex: 1 1 auto; font-size: 12px; }
+  .pdp-info--v2 .pdp-share { width: 36px; height: 36px; border-color: var(--pf-hair); }
+
+  /* ---------- Header ---------- */
+  .pdp-info--v2 .pdp-head { margin: 0; }
+  .pdp-info--v2 .pdp-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+  }
+  .pdp-info--v2 .pdp-eyebrow::before { content: ''; width: 22px; height: 1px; background: currentColor; }
+  .pdp-info--v2 .pdp-title {
+    font-family: var(--pf-head-font);
+    font-size: clamp(30px, 2.6vw, 40px);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  .pdp-head__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 14px; }
+  .pdp-head__meta .pdp-stock { margin: 0; }
+  .pdp-head__meta .pdp-rating { margin: 0; }
+  .pdp-head__meta .pdp-specs { margin: 0; font-size: 13px; color: var(--pf-muted); }
+  .pdp-head__meta > * + .pdp-specs::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 3px;
+    margin: 0 12px 3px 0;
+    border-radius: 50%;
+    background: #c9c0b2;
+    vertical-align: middle;
+  }
+  .pdp-info--v2 .pdp-notes { margin-top: 16px; }
+
+  /* ---------- Price: one clean row, no box ---------- */
+  .pdp-info--v2 .pdp-deal {
+    margin: 24px 0 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    overflow: visible;
+  }
+  .pdp-deal .pdp-price__info {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 0;
+    text-align: left;
+  }
+  .pdp-deal .pdp-price__row { flex: 1 1 100%; justify-content: flex-start; align-items: baseline; gap: 4px 12px; }
+  .pdp-deal .pdp-price__main {
+    font-family: var(--pf-head-font);
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .pdp-deal .pdp-price__compare { font-size: 16px; color: #a8a095; }
+  .pdp-deal .pdp-price__off {
+    align-self: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #f3e9d6;
+    color: #8a6424;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+  .pdp-deal .pdp-save {
+    display: inline;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--pf-green);
+  }
+  .pdp-deal .pdp-save[hidden] { display: none; }
+  .pdp-deal .pdp-save::before { content: none; }
+  .pdp-deal .pdp-price__tax { font-size: 12.5px; color: var(--pf-muted); }
+  .pdp-deal .pdp-save:not([hidden]) + .pdp-price__tax::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 3px;
+    margin: 0 10px 3px;
+    border-radius: 50%;
+    background: #c9c0b2;
+    vertical-align: middle;
+  }
+
+  /* ---------- Excerpt ---------- */
+  .pdp-excerpt strong { font-weight: 600; color: var(--pf-ink); }
+  .pdp-excerpt {
+    margin: 20px 0 0;
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: #4a453e;
+  }
+
+  /* ---------- Key facts: minimal row between hairlines ---------- */
+  .pdp-info--v2 .pdp-glance {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 0;
+    margin: 24px 0 0;
+    padding: 16px 0;
+    border: 0;
+    border-top: 1px solid var(--pf-hair);
+    border-bottom: 1px solid var(--pf-hair);
+    border-radius: 0;
+    background: none;
+    overflow: visible;
+  }
+  .pdp-info--v2 .pdp-glance li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 0;
+    background: none;
+  }
+  .pdp-info--v2 .pdp-glance li:first-child { padding-left: 0; }
+  .pdp-info--v2 .pdp-glance li + li { border-left: 1px solid var(--pf-hair); }
+  .pdp-info--v2 .pdp-glance__icon { width: 34px; height: 34px; background: var(--pf-cream); color: var(--pf-gold); box-shadow: none; }
+  .pdp-info--v2 .pdp-glance small { font-size: 10px; letter-spacing: 0.12em; }
+  .pdp-info--v2 .pdp-glance strong { font-size: 13px; }
+
+  /* Offer line */
+  .pdp-info--v2 .pdp-nudges { margin: 18px 0 0; padding: 0; border: 0; }
+
+  /* ---------- Size ---------- */
+  .pdp-info--v2 .pdp-option { margin: 24px 0 0; padding: 0; border: 0; }
+  .pdp-info--v2 .pdp-option__label {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--pf-muted);
+  }
+  .pdp-info--v2 .pdp-option__label strong { font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--pf-ink); }
+  .pdp-info--v2 .pdp-size {
+    height: 44px;
+    padding: 0 22px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  /* ---------- Low stock ---------- */
+  .pdp-info--v2 .pdp-hurry { margin: 20px 0 0; }
+
+  /* ---------- Buy ---------- */
+  .pdp-info--v2 .pdp-form { margin: 24px 0 0; }
+  .pdp-info--v2 .pdp-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; }
+  .pdp-info--v2 .pdp-btn {
+    height: 50px;
+    min-height: 50px;
+    padding: 0 18px;
+    border-radius: 999px;
+    font-family: var(--pf-head-font);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    box-shadow: none;
+  }
+  .pdp-info--v2 .pdp-btn--add { border-width: 1px; border-color: #15130f; }
+  .pdp-info--v2 .pdp-btn--add:hover:not(:disabled) { background: #15130f; color: #ffffff; }
+  .pdp-info--v2 .pdp-btn--buy { box-shadow: 0 12px 24px -14px rgba(21, 19, 15, 0.65); }
+  .pdp-info--v2 .pdp-btn .balad-pay-stack { --balad-pay-size: 15px !important; }
+  .pdp-info--v2 .pdp-payment-methods { margin: 14px 0 0; padding: 0; border: 0; }
+
+  /* ---------- Delivery + trust ---------- */
+  .pdp-perks { margin: 24px 0 0; padding: 0; background: none; border-radius: 0; }
+  .pdp-perks > * { margin: 0 !important; }
+
+  .pdp-perks .pdp-freeship {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--pf-hair);
+    border-radius: 14px;
+    background: #ffffff;
+    color: var(--pf-ink);
+    box-shadow: none;
+  }
+  .pdp-perks .pdp-freeship__icon { width: 38px; height: 38px; background: var(--pf-cream); color: var(--pf-gold); }
+  .pdp-perks .pdp-freeship__icon::after { border-color: var(--pf-gold); }
+  .pdp-perks .pdp-freeship__text strong { font-size: 13.5px; font-weight: 700; color: var(--pf-ink); }
+  .pdp-perks .pdp-freeship__text span { font-size: 12.5px; color: var(--pf-muted); }
+  .pdp-perks .pdp-freeship__text .pdp-freeship__eta {
+    margin-top: 4px;
+    padding-top: 0;
+    border-top: 0;
+    font-size: 12.5px;
+    color: var(--pf-muted);
+  }
+  .pdp-perks .pdp-freeship__eta b { color: var(--pf-green); font-weight: 600; }
+
+  .pdp-perks .pdp-meta-row,
+  .pdp-perks .pdp-assure { padding: 14px 0 0; border: 0; }
+
+  .pdp-perks .pdp-trust {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px !important;
+    padding: 0;
+    border: 0 !important;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .pdp-perks .pdp-trust__item {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 14px 8px;
+    border: 0 !important;
+    border-radius: 14px;
+    background: var(--pf-cream);
+    box-shadow: none;
+    text-align: center;
+  }
+  .pdp-perks .pdp-trust__icon { width: 34px; height: 34px; margin: 0; background: #ffffff; border: 0; color: var(--pf-gold); }
+  .pdp-perks .pdp-trust__icon svg { width: 16px; height: 16px; }
+  .pdp-perks .pdp-trust__text { align-items: center; }
+  .pdp-perks .pdp-trust__text strong { font-size: 12px; line-height: 1.25; }
+  .pdp-perks .pdp-trust__text small { font-size: 11px; line-height: 1.3; }
+
+  /* ---------- Info accordion ---------- */
+  .pdp-info--v2 .pf-accordions {
+    margin: 28px 0 0;
+    padding: 0;
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
+    border-top: 1px solid var(--pf-hair);
+  }
+  .pdp-info--v2 .pf-accordion-title { font-family: var(--pf-head-font); font-size: 14.5px; font-weight: 600; }
+
+  .pf-buybox__write-review { margin-top: 14px; }
+
+  /* ---------- Desktop layout ---------- */
+  @media screen and (min-width: 990px) {
+    .pf-product-template__shell:has(.pdp-gallery.is-single) {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      gap: clamp(40px, 5vw, 80px);
+    }
+    .pdp-gallery.is-single .pdp-gallery__stage { max-width: none; }
+    .pdp-gallery.is-single .pdp-slide { border-radius: 24px; }
+    .pf-product-template__content .pdp-info--v2 { padding-top: 12px; }
+  }
+
+  /* ---------- Phones ---------- */
+  @media screen and (max-width: 749px) {
+    .pdp-info.pdp-info--v2 { max-width: none; }
+    .pdp-info--v2 .pdp-topbar { margin-bottom: 18px; }
+    .pdp-info--v2 .pdp-title { font-size: 27px; }
+    .pdp-deal .pdp-price__main { font-size: 26px; }
+    .pdp-excerpt { font-size: 14px; }
+    .pdp-info--v2 .pdp-glance li { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .pdp-info--v2 .pdp-btn { height: 48px; min-height: 48px; font-size: 12px; letter-spacing: 0.06em; }
+    .pdp-perks .pdp-trust__item { padding: 12px 6px; }
+  }
+
+  /* =================================================================
+     PRODUCT DETAILS v4 — labelled section cards on a cream panel
+     ================================================================= */
+  .pdp-info.pdp-info--v2 {
+    max-width: 580px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    background: #f5f0e8;
+    border-radius: 26px;
+  }
+  .pdp-info--v2 > * { margin: 0 !important; }
+
+  .pdp-sc {
+    position: relative;
+    padding: 22px;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 1px 2px rgba(21, 19, 15, 0.04), 0 12px 30px -24px rgba(21, 19, 15, 0.4);
+  }
+
+  /* Small section heading with a hairline after it */
+  .pdp-sc__label,
+  .pdp-sc--buy .pdp-option__label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #8a8279;
+  }
+  .pdp-sc__label::before,
+  .pdp-sc--buy .pdp-option__label::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--pf-gold);
+  }
+  .pdp-sc__label::after,
+  .pdp-sc--buy .pdp-option__label::after {
+    content: '';
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--pf-hair);
+  }
+  .pdp-sc--buy .pdp-option__label strong { order: 0; font-size: 12.5px; letter-spacing: 0.02em; color: var(--pf-ink); }
+
+  /* ---- 1. Intro ---- */
+  .pdp-sc--intro .pdp-topbar { margin: 0 0 20px; }
+  .pdp-sc--intro .pdp-title { font-size: clamp(28px, 2.4vw, 36px); }
+  .pdp-sc--intro .pdp-deal {
+    margin: 20px 0 0 !important;
+    padding: 16px 18px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #fbf7f0 0%, #f4ecdd 100%);
+  }
+  .pdp-sc--intro .pdp-deal .pdp-price__off { background: var(--pf-ink); color: #f1e3c4; }
+
+  /* ---- 2. Fragrance profile ---- */
+  .pdp-sc--profile .pdp-glance {
+    margin: 0;
+    padding: 0;
+    gap: 8px;
+    border: 0;
+  }
+  .pdp-sc--profile .pdp-glance li {
+    padding: 12px;
+    border-radius: 12px;
+    background: #f8f4ed;
+  }
+  .pdp-sc--profile .pdp-glance li:first-child { padding-left: 12px; }
+  .pdp-sc--profile .pdp-glance li + li { border-left: 0; }
+  .pdp-sc--profile .pdp-glance__icon { background: #ffffff; }
+  .pdp-sc--profile .pdp-excerpt { margin: 16px 0 0; font-size: 14px; }
+
+  /* ---- 3. Size & buy ---- */
+  .pdp-sc--buy > * + * { margin-top: 18px; }
+  .pdp-sc--buy > [hidden] { display: none !important; }
+  .pdp-sc--buy .pdp-nudges { margin-top: 0; }
+  .pdp-sc--buy .pdp-option { margin: 0; }
+  .pdp-sc--buy .pdp-form { margin-top: 18px; }
+  .pdp-sc--buy .pdp-payment-methods { margin-top: 14px; }
+  .pdp-sc--buy .pdp-hurry { margin-top: 16px; }
+
+  /* ---- 4. Delivery & trust ---- */
+  .pdp-sc.pdp-perks { padding: 22px; background: #ffffff; border-radius: 18px; }
+  .pdp-sc.pdp-perks > * + * { margin-top: 12px !important; }
+  .pdp-sc.pdp-perks .pdp-freeship { border: 0; background: #f8f4ed; }
+  .pdp-sc.pdp-perks .pdp-freeship__icon { background: #ffffff; }
+  .pdp-sc.pdp-perks .pdp-trust { margin-top: 10px !important; }
+  .pdp-sc.pdp-perks .pdp-trust__item { background: #f8f4ed; }
+
+  /* ---- 5. Product details ---- */
+  .pdp-sc--info { padding-bottom: 8px; }
+  .pdp-sc--info .pf-accordions { margin: 0; border-top: 0; }
+  .pdp-sc--info .pf-accordion-item:first-child .pf-accordion-header { padding-top: 0; }
+  .pdp-sc--info .pf-accordion-item:last-child { border-bottom: 0; }
+
+  .pdp-info--v2 .pf-buybox__write-review { margin: 0 !important; }
+
+  @media screen and (max-width: 749px) {
+    .pdp-info.pdp-info--v2 { max-width: none; padding: 8px; gap: 8px; border-radius: 20px; }
+    .pdp-sc, .pdp-sc.pdp-perks { padding: 16px; border-radius: 16px; }
+    .pdp-sc--intro .pdp-deal { padding: 14px; }
+  }
+
+  /* =================================================================
+     INTRO CARD v2 — label + share, title, chips, price with square badge
+     ================================================================= */
+  .pdp-info--v2 .pdp-topbar--panel { margin: 0 !important; padding: 6px 12px 2px; }
+  .pdp-info--v2 .pdp-topbar--panel .pdp-crumbs { font-size: 12px; }
+
+  .pdp-sc--intro { padding: 24px; }
+  .pdp-head__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .pdp-head__top .pdp-eyebrow { margin: 0; }
+  .pdp-head__top .pdp-share { width: 36px; height: 36px; margin-left: auto; border-color: var(--pf-hair); }
+
+  .pdp-sc--intro .pdp-title { font-size: clamp(30px, 2.6vw, 38px); font-weight: 700; letter-spacing: -0.025em; }
+
+  .pdp-sc--intro .pdp-head__meta { gap: 8px; margin-top: 14px; }
+  .pdp-sc--intro .pdp-head__meta > * + .pdp-specs::before { content: none; }
+  .pdp-chip,
+  .pdp-sc--intro .pdp-stock {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .pdp-chip { background: #f5f0e8; color: #4a453e; }
+  .pdp-sc--intro .pdp-stock { margin: 0; letter-spacing: 0.04em; }
+  .pdp-sc--intro .pdp-rating { height: 28px; padding: 0 4px; }
+
+  /* Title + price share one row; compact intro */
+  .pdp-sc--intro { padding: 20px 22px; }
+  .pdp-sc--intro .pdp-head__top { margin-bottom: 6px; }
+  .pdp-sc--intro .pdp-head__top .pdp-share { width: 32px; height: 32px; }
+  .pdp-intro__row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .pdp-sc--intro .pdp-intro__row .pdp-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    font-size: clamp(22px, 1.9vw, 28px);
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+  }
+  .pdp-intro__price {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    padding-top: 2px;
+    text-align: right;
+  }
+  .pdp-intro__price .pdp-price__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  .pdp-intro__price .pdp-price__main {
+    font-family: var(--pf-head-font);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--pf-ink);
+    white-space: nowrap;
+  }
+  .pdp-intro__price .pdp-price__compare { font-size: 14px; color: #a8a095; white-space: nowrap; }
+  .pdp-intro__price .pdp-price__tax { font-size: 11px; color: var(--pf-muted); white-space: nowrap; }
+
+  /* Discount line: small pill + saving */
+  .pdp-intro__save { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .pdp-intro__save:not(:has(> :not([hidden]))) { display: none; }
+  .pdp-intro__save .pdp-price__off {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 9px;
+    border-radius: 999px;
+    background: var(--pf-ink);
+    color: #f1e3c4;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .pdp-intro__save .pdp-price__off[hidden],
+  .pdp-intro__save .pdp-save[hidden] { display: none; }
+  .pdp-intro__save .pdp-save { margin: 0; font-size: 12.5px; font-weight: 500; color: var(--pf-green, #1f7a3d); }
+
+  .pdp-sc--intro .pdp-head__meta { gap: 6px; margin-top: 12px; }
+  .pdp-sc--intro .pdp-chip,
+  .pdp-sc--intro .pdp-stock { height: 26px; padding: 0 10px; font-size: 11.5px; }
+  .pdp-sc--intro .pdp-rating { height: 26px; }
+  .pdp-sc--intro .pdp-notes { margin-top: 12px; }
+
+  @media screen and (max-width: 749px) {
+    .pdp-sc--intro { padding: 16px; }
+    .pdp-intro__row { gap: 12px; }
+    .pdp-sc--intro .pdp-intro__row .pdp-title { font-size: 20px; }
+    .pdp-intro__price .pdp-price__main { font-size: 20px; }
+    .pdp-intro__price .pdp-price__compare { font-size: 12.5px; }
+    .pdp-intro__price .pdp-price__row { flex-direction: column-reverse; align-items: flex-end; gap: 0; }
+    .pdp-info--v2 .pdp-topbar--panel { padding: 4px 8px 0; }
+  }
+
+  /* =================================================================
+     PRODUCT DETAILS v5 — one main card (name, price, size, buttons)
+     at the top so the buy controls are visible without scrolling.
+     Calm type scale: 20–22 title, 13 body, 10.5–11 labels.
+     ================================================================= */
+  .pdp-info.pdp-info--v2 { gap: 8px; }
+  .pdp-info--v2 .pdp-sc { padding: 20px; border-radius: 16px; }
+
+  /* Section labels: small, quiet, with hairline */
+  .pdp-info--v2 .pdp-sc__label { margin: 0 0 14px; font-size: 10.5px; letter-spacing: 0.14em; }
+
+  /* ---- Main card ---- */
+  .pdp-sc--main .pdp-head__top { margin-bottom: 4px; min-height: 30px; }
+  .pdp-sc--main .pdp-eyebrow { margin: 0; font-size: 10.5px; letter-spacing: 0.18em; }
+  .pdp-sc--main .pdp-eyebrow::before { width: 16px; }
+  .pdp-sc--main .pdp-head__top .pdp-share { width: 30px; height: 30px; }
+  .pdp-sc--main .pdp-head__top .pdp-share svg { width: 13px; height: 13px; }
+
+  .pdp-sc--main .pdp-intro__row .pdp-title {
+    font-family: var(--pf-head-font);
+    font-size: clamp(19px, 1.45vw, 22px);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+  }
+  .pdp-sc--main .pdp-intro__price .pdp-price__main { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
+  .pdp-sc--main .pdp-intro__price .pdp-price__compare { font-size: 13px; }
+  .pdp-sc--main .pdp-intro__price .pdp-price__tax { font-size: 10.5px; }
+
+  .pdp-sc--main .pdp-intro__save { margin-top: 8px; }
+  .pdp-sc--main .pdp-intro__save .pdp-price__off { height: 20px; padding: 0 8px; font-size: 10.5px; }
+  .pdp-sc--main .pdp-intro__save .pdp-save { font-size: 12px; }
+
+  .pdp-sc--main .pdp-head__meta { gap: 10px; margin-top: 12px; }
+  .pdp-sc--main .pdp-stock { height: 24px; padding: 0 10px; font-size: 10.5px; letter-spacing: 0.06em; }
+  .pdp-sc--main .pdp-rating { height: 24px; padding: 0; gap: 6px; font-size: 12px; }
+  .pdp-sc--main .pdp-stars { font-size: 12px; letter-spacing: 1px; }
+
+  /* ---- Buy block inside the main card ---- */
+  .pdp-buy {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--pf-hair);
+  }
+  .pdp-buy > [hidden] { display: none !important; }
+  .pdp-sc--main .pdp-buy > * { margin: 0; }
+
+  .pdp-sc--main .pdp-buy .pdp-nudges { padding: 0; border: 0; }
+  .pdp-sc--main .pdp-buy .pdp-offer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: var(--pf-gold-soft);
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #6b4e1c;
+  }
+
+  .pdp-sc--main .pdp-buy .pdp-option { margin: 0; padding: 0; border: 0; }
+  .pdp-sc--main .pdp-buy .pdp-option__label {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 0 0 10px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #8a8279;
+  }
+  .pdp-sc--main .pdp-buy .pdp-option__label::before,
+  .pdp-sc--main .pdp-buy .pdp-option__label::after { content: none; }
+  .pdp-sc--main .pdp-buy .pdp-option__label strong {
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--pf-ink);
+  }
+  .pdp-sc--main .pdp-buy .pdp-sizes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: 8px;
+  }
+  .pdp-sc--main .pdp-buy .pdp-size {
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #e3ddd2;
+    border-radius: 10px;
+    background: #ffffff;
+    font-size: 12.5px;
+    font-weight: 500;
+  }
+  .pdp-sc--main .pdp-buy .pdp-size:hover { border-color: #b9ae9c; }
+  .pdp-sc--main .pdp-buy .pdp-size.is-active {
+    border-color: var(--pf-ink);
+    background: #faf7f2;
+    box-shadow: inset 0 0 0 0.5px var(--pf-ink);
+    font-weight: 600;
+  }
+  .pdp-sc--main .pdp-buy .pdp-size.is-active::before { border-color: var(--pf-ink); width: 4px; height: 8px; }
+  .pdp-sc--main .pdp-buy .pdp-size.is-out { background: #faf9f7; color: #a8a095; }
+
+  .pdp-sc--main .pdp-buy .pdp-hurry { padding: 10px 12px; border-radius: 10px; }
+  .pdp-sc--main .pdp-buy .pdp-hurry__top { font-size: 12px; }
+  .pdp-sc--main .pdp-buy .pdp-hurry__sub { display: none; }
+  .pdp-sc--main .pdp-buy .pdp-hurry__bar { margin-top: 8px; height: 5px; }
+
+  .pdp-sc--main .pdp-buy .pdp-form { margin: 2px 0 0; }
+  .pdp-sc--main .pdp-buy .pdp-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+    gap: 8px;
+    margin: 0;
+  }
+  .pdp-sc--main .pdp-buy .pdp-btn {
+    height: 48px;
+    min-height: 48px;
+    padding: 0 14px;
+    border-radius: 12px;
+    font-family: var(--pf-head-font);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+  .pdp-sc--main .pdp-buy .pdp-btn--add { border: 1px solid var(--pf-ink); background: #ffffff; color: var(--pf-ink); }
+  .pdp-sc--main .pdp-buy .pdp-btn--add:hover:not(:disabled) { background: var(--pf-ink); color: #ffffff; }
+  .pdp-sc--main .pdp-buy .pdp-btn--buy { border: 0; box-shadow: 0 10px 20px -14px rgba(21, 19, 15, 0.7); }
+  .pdp-sc--main .pdp-buy .pdp-btn .balad-pay-stack { --balad-pay-size: 14px !important; }
+
+  .pdp-sc--main .pdp-buy .pdp-payment-methods { margin: -2px 0 0; padding: 10px 0 0; border-top: 1px dashed var(--pf-hair); }
+  .pdp-sc--main .pdp-buy .pdp-payment-methods__sub { font-size: 11px; color: var(--pf-muted); }
+
+  /* ---- Fragrance profile ---- */
+  .pdp-sc--profile .pdp-notes { margin: 0 0 12px; gap: 6px; }
+  .pdp-sc--profile .pdp-notes li { padding: 4px 10px; font-size: 11px; font-weight: 500; }
+  .pdp-info--v2 .pdp-sc--profile .pdp-glance { gap: 8px; margin: 0; padding: 0; border: 0; }
+  .pdp-info--v2 .pdp-sc--profile .pdp-glance li { gap: 10px; padding: 10px 12px; border-radius: 12px; }
+  .pdp-info--v2 .pdp-sc--profile .pdp-glance__icon { width: 30px; height: 30px; }
+  .pdp-info--v2 .pdp-sc--profile .pdp-glance__icon svg { width: 15px; height: 15px; }
+  .pdp-info--v2 .pdp-sc--profile .pdp-glance small { font-size: 9.5px; letter-spacing: 0.12em; }
+  .pdp-info--v2 .pdp-sc--profile .pdp-glance strong { font-size: 12.5px; }
+  .pdp-sc--profile .pdp-excerpt { margin: 14px 0 0; font-size: 13px; line-height: 1.65; color: #5a544b; }
+
+  /* ---- Delivery & trust ---- */
+  .pdp-info--v2 .pdp-sc.pdp-perks { padding: 20px; }
+  .pdp-sc.pdp-perks .pdp-freeship { gap: 12px; padding: 12px 14px; border-radius: 12px; }
+  .pdp-sc.pdp-perks .pdp-freeship__icon { width: 34px; height: 34px; }
+  .pdp-sc.pdp-perks .pdp-freeship__text strong { font-size: 13px; }
+  .pdp-sc.pdp-perks .pdp-freeship__text span,
+  .pdp-sc.pdp-perks .pdp-freeship__text .pdp-freeship__eta { font-size: 12px; }
+  .pdp-sc.pdp-perks .pdp-trust__item { padding: 12px 6px; border-radius: 12px; }
+  .pdp-sc.pdp-perks .pdp-trust__icon { width: 30px; height: 30px; }
+  .pdp-sc.pdp-perks .pdp-trust__icon svg { width: 14px; height: 14px; }
+  .pdp-sc.pdp-perks .pdp-trust__text strong { font-size: 11.5px; }
+  .pdp-sc.pdp-perks .pdp-trust__text small { font-size: 10.5px; }
+
+  /* ---- Details accordion ---- */
+  .pdp-info--v2 .pdp-sc--info .pf-accordion-title { font-size: 13.5px; font-weight: 600; }
+  .pdp-info--v2 .pdp-sc--info .pf-accordion-body { font-size: 13px; line-height: 1.65; }
+
+  @media screen and (max-width: 749px) {
+    .pdp-info--v2 .pdp-sc,
+    .pdp-info--v2 .pdp-sc.pdp-perks { padding: 16px; border-radius: 14px; }
+    .pdp-sc--main .pdp-intro__row .pdp-title { font-size: 18px; }
+    .pdp-sc--main .pdp-intro__price .pdp-price__main { font-size: 19px; }
+    .pdp-sc--main .pdp-intro__price .pdp-price__compare { font-size: 12px; }
+    .pdp-buy { gap: 12px; margin-top: 14px; padding-top: 14px; }
+    .pdp-sc--main .pdp-buy .pdp-sizes { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+    .pdp-sc--main .pdp-buy .pdp-btn { height: 46px; min-height: 46px; font-size: 11.5px; letter-spacing: 0.06em; }
+  }
+
+  /* ---- Main card: fuller structure ---- */
+  /* Soft cream header tint + thin gold accent line on top */
+  .pdp-info--v2 .pdp-sc--main {
+    overflow: hidden;
+    padding-top: 22px;
+    background: linear-gradient(180deg, #fbf7f0 0%, #ffffff 150px);
+    border: 1px solid #efe8dc;
+  }
+  .pdp-info--v2 .pdp-sc--main::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--pf-gold) 30%, #d9b877 50%, var(--pf-gold) 70%, transparent);
+    opacity: 0.85;
+  }
+
+  /* Breadcrumb + share: top bar inside the main card, hairline below */
+  .pdp-info--v2 .pdp-sc--main .pdp-topbar--card {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: -4px 0 16px;
+    padding: 0 0 14px;
+    border-bottom: 1px solid #efe7da;
+  }
+  .pdp-info--v2 .pdp-sc--main .pdp-topbar--card .pdp-head__meta {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    margin: 0;
+  }
+  .pdp-info--v2 .pdp-sc--main .pdp-topbar--card .pdp-rating { white-space: nowrap; }
+  .pdp-info--v2 .pdp-sc--main .pdp-topbar--card .pdp-head__meta > .pdp-stock + .pdp-rating {
+    padding-left: 12px;
+    border-left: 1px solid #e6ddcf;
+  }
+  .pdp-info--v2 .pdp-sc--main .pdp-topbar--card .pdp-share {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    background: #ffffff;
+    border-color: #e9e1d4;
+  }
+  .pdp-info--v2 .pdp-sc--main .pdp-topbar--card .pdp-share svg { width: 13px; height: 13px; }
+  .pdp-sc--main .pdp-head__top { min-height: 0; margin-bottom: 6px; }
+
+  /* Key facts: one tinted box, three columns split by hairlines */
+  .pdp-info--v2 .pdp-sc--main .pdp-facts {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 0;
+    margin: 16px 0 0;
+    padding: 12px 0;
+    border: 1px solid #f0e9dd;
+    border-radius: 12px;
+    background: #faf6ef;
+  }
+  .pdp-info--v2 .pdp-sc--main .pdp-facts li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 0;
+    background: none;
+  }
+  .pdp-info--v2 .pdp-sc--main .pdp-facts li + li { border-left: 1px solid #ebe2d3; }
+  .pdp-info--v2 .pdp-sc--main .pdp-facts .pdp-glance__icon {
+    width: 30px;
+    height: 30px;
+    background: #ffffff;
+    color: var(--pf-gold);
+    box-shadow: 0 1px 2px rgba(21, 19, 15, 0.06);
+  }
+  .pdp-info--v2 .pdp-sc--main .pdp-facts .pdp-glance__icon svg { width: 15px; height: 15px; }
+  .pdp-info--v2 .pdp-sc--main .pdp-facts small { font-size: 9.5px; letter-spacing: 0.12em; color: #8a8279; }
+  .pdp-info--v2 .pdp-sc--main .pdp-facts strong { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Delivery promise under the buttons */
+  .pdp-promise {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 0;
+    margin: 0;
+    padding: 2px 0 0;
+    list-style: none;
+  }
+  .pdp-promise li {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    padding: 0 12px;
+  }
+  .pdp-promise li:first-child { padding-left: 0; }
+  .pdp-promise li + li { border-left: 1px solid var(--pf-hair); }
+  .pdp-promise svg { flex-shrink: 0; width: 18px; height: 18px; color: var(--pf-gold); }
+  .pdp-promise span { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .pdp-promise strong { font-size: 12px; font-weight: 600; line-height: 1.3; color: var(--pf-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pdp-promise small { font-size: 11px; line-height: 1.3; color: var(--pf-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Payment row sits as the card footer */
+  .pdp-sc--main .pdp-buy .pdp-payment-methods {
+    margin: 2px -20px -20px;
+    padding: 12px 20px;
+    border-top: 1px solid #f0e9dd;
+    background: #fbf8f3;
+  }
+
+  @media screen and (max-width: 749px) {
+    .pdp-info--v2 .pdp-sc--main { padding-top: 18px; }
+    .pdp-sc--main .pdp-buy .pdp-payment-methods { margin: 2px -16px -16px; padding: 10px 16px; }
+  }
+  @media screen and (max-width: 520px) {
+    .pdp-info--v2 .pdp-sc--main .pdp-facts li { flex-direction: column; align-items: flex-start; gap: 6px; padding: 0 10px; }
+    .pdp-promise li { flex-direction: column; align-items: flex-start; gap: 5px; padding: 0 8px; }
+    .pdp-promise strong { font-size: 11.5px; }
+    .pdp-promise small { font-size: 10.5px; }
   }
 </style>
 
@@ -2186,7 +3072,7 @@
     // ── Rating line: scroll to the Judge.me widget when it exists on the page ──
     root.querySelectorAll('[data-pf-reviews-scroll]').forEach((el) => {
       el.addEventListener('click', (e) => {
-        const widget = document.querySelector('#judgeme_product_reviews');
+        const widget = document.querySelector('#judgeme_product_reviews') || document.querySelector('[data-bcs]');
         if (!widget) return;
         e.preventDefault();
         widget.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2198,7 +3084,10 @@
       if (window.jdgm && typeof window.jdgm.initializeWidgets === 'function') window.jdgm.initializeWidgets();
     };
 
+    // Hide "Write a review" when the Judge.me reviews section isn't on this page
+    const hasReviewsSection = !!document.querySelector('.pf-product-template__reviews, #judgeme_product_reviews');
     root.querySelectorAll('[data-pf-reviews-open]').forEach((btn) => {
+      if (!hasReviewsSection) { btn.hidden = true; return; }
       btn.addEventListener('click', () => {
         let attempts = 0;
         const open = () => {
