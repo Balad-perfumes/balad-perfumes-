@@ -926,7 +926,9 @@
     const init = (scope = document) => {
       if (reduce) return;
       scope.querySelectorAll('[data-forhim-parallax]').forEach((root) => roots.add(root));
-      request(); // next frame, not mid-parse (getBoundingClientRect forces layout)
+      // First run on window load (listener below), not during page load: getBoundingClientRect forced a layout
+      // before the hero painted. Editor re-renders happen after load, so run right away then.
+      if (document.readyState === 'complete') request();
     };
 
     window.addEventListener('scroll', request, { passive: true });
