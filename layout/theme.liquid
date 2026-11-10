@@ -32,7 +32,9 @@
     {%- render 'scripts' -%}
     {%- render 'theme-styles-variables' -%}
     {%- render 'color-schemes' -%}
-    {{ 'balad-modals.css' | asset_url | stylesheet_tag }}
+    {%- comment -%} QA / wishlist modal styles: the modals start hidden (inline display:none), so this doesn't need to block first paint {%- endcomment -%}
+    <link rel="stylesheet" href="{{ 'balad-modals.css' | asset_url }}" media="print" onload="this.media='all'">
+    <noscript>{{ 'balad-modals.css' | asset_url | stylesheet_tag }}</noscript>
     {%- if template.name == 'cart' -%}
       {{ 'cart-drawer.css' | asset_url | stylesheet_tag }}
     {%- endif -%}

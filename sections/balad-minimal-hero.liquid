@@ -83,6 +83,7 @@
             data-slide
             data-index="{{ forloop.index0 }}"
             aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}"
+            {% unless forloop.first %}inert{% endunless %}
             {{ block.shopify_attributes }}
           >
             {% if btn_link != blank %}
@@ -1506,6 +1507,8 @@
           slides.forEach((s, i) => {
             s.classList.toggle('is-active', i === idx);
             s.setAttribute('aria-hidden', i === idx ? 'false' : 'true');
+            // aria-hidden slides still hold links; inert takes them out of the tab order too
+            s.inert = i !== idx;
           });
           dots.forEach((d, i) => {
             d.classList.toggle('is-active', i === idx);

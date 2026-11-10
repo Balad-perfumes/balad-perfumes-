@@ -391,12 +391,57 @@
       }
       setTimeout(alignInstagramCards, 150);
     });
-    [600, 1200, 2200, 3500].forEach((t) => setTimeout(alignInstagramCards, t));
-    window.addEventListener('load', alignInstagramCards);
+    // Measure only after load: the earlier 600/1200ms runs read layout while the page was still
+    // being built, which forced extra synchronous reflows during the critical load window.
+    window.addEventListener('load', () => {
+      alignInstagramCards();
+      [1000, 2500].forEach((t) => setTimeout(alignInstagramCards, t));
+    });
 
     document.addEventListener('DOMContentLoaded', enhanceShoppableVideoAppSection);
     window.addEventListener('load', enhanceShoppableVideoAppSection);
-    setTimeout(enhanceShoppableVideoAppSection, 400);
-    setTimeout(enhanceShoppableVideoAppSection, 1200);
+
+    /* ── Accessibility: Reelfy's Flickity carousel marks off-screen cells aria-hidden="true" but leaves
+       their links/buttons/videos focusable ("ARIA hidden element must not be focusable"). Take those
+       out of the tab order while the cell is hidden and restore them when it's selected again.
+       (Not `inert`: Flickity also hides cells that are still visible, and they must stay clickable.) ── */
+    const FOCUSABLE = 'a[href], button, input, select, textarea, iframe, video[controls], audio[controls], [contenteditable], [tabindex]';
+    const syncCell = (cell) => {
+      const hidden = cell.getAttribute('aria-hidden') === 'true';
+      if (hidden) {
+        cell.querySelectorAll(FOCUSABLE).forEach((el) => {
+          if (el.hasAttribute('data-pf-tabindex')) return;
+          el.setAttribute('data-pf-tabindex', el.getAttribute('tabindex') ?? '');
+          el.setAttribute('tabindex', '-1');
+        });
+      } else {
+        cell.querySelectorAll('[data-pf-tabindex]').forEach((el) => {
+          const original = el.getAttribute('data-pf-tabindex');
+          if (original) el.setAttribute('tabindex', original);
+          else el.removeAttribute('tabindex');
+          el.removeAttribute('data-pf-tabindex');
+        });
+      }
+    };
+    const CELL = '.carousel-cell, .rf-video-item';
+    const syncAllCells = () => document.querySelectorAll(CELL).forEach(syncCell);
+    const watchHiddenCells = () => {
+      syncAllCells();
+      new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          if (m.type === 'attributes') {
+            if (m.target.matches && m.target.matches(CELL)) syncCell(m.target);
+          } else {
+            m.addedNodes.forEach((n) => {
+              if (n.nodeType !== 1) return;
+              if (n.matches(CELL)) syncCell(n);
+              n.querySelectorAll(CELL).forEach(syncCell);
+            });
+          }
+        }
+      }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-hidden'] });
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watchHiddenCells);
+    else watchHiddenCells();
   })();
 </script>
