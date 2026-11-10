@@ -1,214 +1,335 @@
-<dialog
-  id="wishlist-drawer"
-  class="wl-drawer"
-  aria-label="Wishlist"
->
+<dialog id="wishlist-drawer" class="wl-drawer" aria-labelledby="wishlist-drawer-heading">
   <div class="wl-drawer__inner">
-    <!-- Header (Compact minimal height) -->
     <div class="wl-drawer__header">
       <div class="wl-drawer__title-wrap">
-        <h2 class="wl-drawer__heading">Wishlist</h2>
-        <span class="wl-drawer__count" id="wishlist-drawer-count">(0)</span>
+        <h2 class="wl-drawer__heading" id="wishlist-drawer-heading">Wishlist</h2>
+        <span class="wl-drawer__badge" id="wishlist-drawer-count">0</span>
       </div>
-
-      <button
-        class="wl-drawer__close"
-        type="button"
-        aria-label="Close wishlist"
-        id="wishlist-drawer-close"
-      >
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <div class="wl-drawer__header-actions">
+        <button type="button" class="wl-drawer__clear" id="wishlist-drawer-clear-btn" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9.5 7V4.8h5V7"/><path d="M6.5 7l.8 12.2a1 1 0 0 0 1 .9h7.4a1 1 0 0 0 1-.9L17.5 7"/></svg>
+          <span>Clear all</span>
+        </button>
+        <span class="wl-drawer__header-sep" id="wishlist-drawer-sep" aria-hidden="true" hidden></span>
+        <button class="wl-drawer__close" type="button" aria-label="Close wishlist" id="wishlist-drawer-close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+            <line x1="17.5" y1="6.5" x2="6.5" y2="17.5"></line>
+            <line x1="6.5" y1="6.5" x2="17.5" y2="17.5"></line>
+          </svg>
+        </button>
+      </div>
     </div>
 
-    <!-- Notification Toast -->
-    <div class="wl-drawer__toast" id="wishlist-drawer-toast" style="display:none;" role="status"></div>
-
-    <!-- Drawer Body (Scrollable container) -->
-    <div class="wl-drawer__body" id="wishlist-drawer-body">
-      <!-- Empty state -->
-      <div class="wl-drawer__empty" id="wishlist-drawer-empty" style="display:none">
+    <div class="wl-drawer__scroll">
+      <div class="wl-drawer__empty" id="wishlist-drawer-empty" hidden>
+        <span class="wl-drawer__empty-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6.5 3.5h11a1 1 0 0 1 1 1v16l-6.5-3.8-6.5 3.8v-16a1 1 0 0 1 1-1z"/>
+          </svg>
+        </span>
         <p class="wl-drawer__empty-title">Your wishlist is empty</p>
-        <p class="wl-drawer__empty-sub">Save your favourite pieces to review them anytime.</p>
-        <a href="/collections/all" class="wl-drawer__empty-cta" id="wishlist-drawer-shop-btn">
-          Explore Collection
-        </a>
+        <p class="wl-drawer__empty-sub">Tap the bookmark on any fragrance to save it for later.</p>
+        <a href="{{ routes.all_products_collection_url }}" class="wl-drawer__empty-btn">Shop fragrances</a>
       </div>
 
-      <!-- Populated item list -->
-      <div class="wl-drawer__items-wrap" id="wishlist-drawer-items-wrap">
-        <div class="wl-drawer__list" id="wishlist-drawer-grid"></div>
+      <div class="wl-drawer__note" id="wishlist-drawer-note" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1v16l-6.5-3.8-6.5 3.8v-16a1 1 0 0 1 1-1z"/></svg>
+        <span>Saved on this device. Add your favourites to the bag anytime.</span>
       </div>
+
+      <ul class="wl-drawer__list" id="wishlist-drawer-grid" role="list"></ul>
     </div>
 
-    <!-- Drawer Sticky Footer (Clear Wishlist + Continue Shopping) -->
-    <div class="wl-drawer__footer" id="wishlist-drawer-footer" style="display:none">
-      <button type="button" class="wl-drawer__footer-btn wl-drawer__footer-btn--outline" id="wishlist-drawer-clear-btn">
-        Clear Wishlist
-      </button>
-      <button type="button" class="wl-drawer__footer-btn wl-drawer__footer-btn--solid" id="wishlist-continue-shop-btn">
-        Continue Shopping
+    <div class="wl-drawer__footer" id="wishlist-drawer-footer" hidden>
+      <button type="button" class="wl-drawer__secondary" id="wishlist-continue-shop-btn">Continue shopping</button>
+      <button type="button" class="wl-drawer__cta" id="wishlist-add-all-btn">
+        <svg class="wl-drawer__cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.75 9.25A2.25 2.25 0 0 1 7 7h10a2.25 2.25 0 0 1 2.25 2.25V17.5A3.5 3.5 0 0 1 15.75 21h-7.5a3.5 3.5 0 0 1-3.5-3.5z"/><path d="M8.75 7V6.25a3.25 3.25 0 0 1 6.5 0V7"/><path d="M12 11.25v5.5M9.25 14h5.5"/></svg>
+        <span class="wl-drawer__cta-label">Add all to bag</span>
+        <span class="wl-drawer__cta-count" id="wishlist-add-all-count"></span>
       </button>
     </div>
+
+    <div class="wl-drawer__toast" id="wishlist-drawer-toast" role="status" aria-live="polite"></div>
   </div>
 </dialog>
 
-<button
-  class="wl-drawer__backdrop visually-hidden"
-  id="wishlist-drawer-backdrop"
-  aria-label="Close wishlist"
-  type="button"
-></button>
-
 <style>
-  /* Backdrop */
-  .wl-drawer__backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-    z-index: 499;
-    border: 0;
-    cursor: pointer;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.28s ease;
-  }
-
-  .wl-drawer__backdrop.is-open {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  /* Drawer Dialog Container */
+  /* =============================================================
+     BALAD WISHLIST DRAWER — matches the cart drawer
+     ============================================================= */
   .wl-drawer {
+    --d-bg: #ffffff;
+    --d-tint: #f7f3ed;
+    --d-tint-2: #efe8dd;
+    --d-ink: #15130f;
+    --d-text: #2c2823;
+    --d-muted: #8a8279;
+    --d-line: #efeae2;
+    --d-gold: #a8844a;
+    --d-success: #2f7a4b;
+    --d-danger: #b3261e;
+    --d-pad: 20px;
+    --d-head: var(--font-heading--family, 'Manrope'), var(--font-body--family, sans-serif);
+    --d-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
     position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: auto;
+    inset: 0 0 0 auto;
+    width: min(100vw, 400px);
+    max-width: 100vw;
     height: 100dvh;
     max-height: 100dvh;
-    width: min(100vw, 400px);
     margin: 0;
     padding: 0;
     border: 0;
-    border-radius: 0;
-    background: #ffffff;
-    color: #111111;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.08);
-    z-index: 500;
-    transform: translateX(100%);
-    transition: transform 0.32s cubic-bezier(0.2, 0.9, 0.3, 1), visibility 0.32s;
+    background: var(--d-bg);
+    color: var(--d-text);
+    box-shadow: -24px 0 60px -28px rgba(21, 19, 15, 0.35);
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    visibility: hidden;
-    max-width: 100%;
   }
+  .wl-drawer *, .wl-drawer *::before, .wl-drawer *::after { box-sizing: border-box; }
+  .wl-drawer p { margin: 0; }
+  .wl-drawer [hidden] { display: none !important; }
 
-  .wl-drawer[open] {
-    display: flex;
-    flex-direction: column;
-    transform: translateX(0);
-    visibility: visible;
-  }
+  .wl-drawer[open] { display: flex; flex-direction: column; animation: wlIn 0.42s var(--d-ease) both; }
+  .wl-drawer.is-closing { animation: wlOut 0.28s ease-in both; }
+  .wl-drawer::backdrop { background: rgba(21, 19, 15, 0.42); animation: wlFade 0.3s ease both; }
+  .wl-drawer.is-closing::backdrop { animation: wlFade 0.28s ease reverse both; }
+  @keyframes wlIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+  @keyframes wlOut { from { transform: translateX(0); } to { transform: translateX(100%); } }
+  @keyframes wlFade { from { opacity: 0; } to { opacity: 1; } }
 
-  .wl-drawer__inner {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 100%;
-    max-height: 100dvh;
-    overflow: hidden;
-    background: #ffffff;
-  }
+  .wl-drawer__inner { position: relative; display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; }
 
-  /* Header (Reduced Height) */
+  /* ---------- Header ---------- */
   .wl-drawer__header {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
-    height: 48px;
-    min-height: 48px;
-    max-height: 48px;
-    box-sizing: border-box;
-    border-bottom: 1px solid #f0f0f0;
-    flex-shrink: 0;
-    background: #ffffff;
+    gap: 12px;
+    height: 60px;
+    padding: 0 12px 0 var(--d-pad);
+    border-bottom: 1px solid var(--d-line);
   }
-
-  .wl-drawer__title-wrap {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-  }
-
+  .wl-drawer__title-wrap { display: flex; align-items: center; gap: 8px; min-width: 0; }
   .wl-drawer__heading {
     margin: 0;
-    font-size: 0.85rem;
+    font-family: var(--d-head);
+    font-size: 18px;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #111111;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--d-ink);
+  }
+  .wl-drawer__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--d-tint-2);
+    color: var(--d-ink);
+    font-size: 11px;
+    font-weight: 700;
     line-height: 1;
   }
-
-  .wl-drawer__count {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: #888888;
-    line-height: 1;
-  }
-
-  .wl-drawer__close {
-    width: 26px;
-    height: 26px;
-    display: inline-grid;
-    place-items: center;
+  .wl-drawer__header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .wl-drawer__clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 32px;
+    padding: 0 10px;
     border: 0;
+    border-radius: 999px;
     background: transparent;
-    cursor: pointer;
-    color: #111111;
-    padding: 0;
-    opacity: 0.7;
-    transition: opacity 0.15s ease;
-  }
-
-  .wl-drawer__close:hover {
-    opacity: 1;
-  }
-
-  /* Toast Notification */
-  .wl-drawer__toast {
-    background: #111111;
-    color: #ffffff;
-    font-size: 0.78rem;
+    color: var(--d-muted);
+    font-size: 12px;
     font-weight: 500;
-    padding: 7px 20px;
-    text-align: center;
-    letter-spacing: 0.02em;
-    flex-shrink: 0;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
   }
+  .wl-drawer__clear svg { width: 14px; height: 14px; }
+  .wl-drawer__clear:hover { color: var(--d-danger); background: rgba(179, 38, 30, 0.06); }
+  .wl-drawer__header-sep { width: 1px; height: 18px; margin: 0 2px; background: var(--d-line); }
+  .wl-drawer__close {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--d-tint);
+    color: var(--d-ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  .wl-drawer__close svg { width: 16px; height: 16px; display: block; transition: transform 0.35s var(--d-ease); }
+  .wl-drawer__close:hover { background: var(--d-ink); color: #ffffff; }
+  .wl-drawer__close:hover svg { transform: rotate(90deg); }
+  .wl-drawer__close:focus-visible { outline: 2px solid var(--d-ink); outline-offset: 2px; }
 
-  /* Body Content (Dedicated Smooth Scroll) */
-  .wl-drawer__body {
+  /* ---------- Scroll ---------- */
+  .wl-drawer__scroll {
     flex: 1 1 auto;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
     min-height: 0;
-    padding: 0 20px;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px var(--d-pad) 18px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(21, 19, 15, 0.15) transparent;
   }
 
-  /* Empty State */
+  .wl-drawer__note {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--d-tint);
+    font-size: 11.5px;
+    line-height: 1.4;
+    color: var(--d-muted);
+  }
+  .wl-drawer__note svg { flex-shrink: 0; width: 16px; height: 16px; color: var(--d-gold); }
+
+  /* ---------- Items ---------- */
+  .wl-drawer__list { list-style: none; margin: 4px 0 0; padding: 0; }
+
+  .wl-item {
+    display: grid;
+    grid-template-columns: 68px minmax(0, 1fr);
+    gap: 14px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--d-line);
+    transition: opacity 0.25s ease, transform 0.3s var(--d-ease);
+  }
+  .wl-item:last-child { border-bottom: 0; }
+  .wl-item.is-removing { opacity: 0; transform: translateX(16px); }
+  .wl-drawer[open] .wl-item { animation: wlRowIn 0.5s var(--d-ease) both; }
+  .wl-drawer[open] .wl-item:nth-child(2) { animation-delay: 0.05s; }
+  .wl-drawer[open] .wl-item:nth-child(3) { animation-delay: 0.1s; }
+  .wl-drawer[open] .wl-item:nth-child(4) { animation-delay: 0.15s; }
+  .wl-drawer[open] .wl-item:nth-child(n + 5) { animation-delay: 0.2s; }
+  @keyframes wlRowIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .wl-item__media {
+    display: block;
+    width: 68px;
+    height: 84px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--d-tint);
+  }
+  .wl-item__img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s var(--d-ease); }
+  .wl-item__media:hover .wl-item__img { transform: scale(1.06); }
+
+  .wl-item__body { display: flex; flex-direction: column; min-width: 0; }
+  .wl-item__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .wl-item__info { min-width: 0; }
+  .wl-item__title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--d-ink);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .wl-item__title:hover { color: var(--d-gold); }
+  .wl-item__meta {
+    margin-top: 4px !important;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--d-muted);
+  }
+  .wl-item__price {
+    flex-shrink: 0;
+    font-family: var(--d-head);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+    color: var(--d-ink);
+    white-space: nowrap;
+  }
+
+  .wl-item__foot {
+    margin-top: auto;
+    padding-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .wl-item__add-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 13px 0 11px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--d-tint);
+    color: var(--d-ink);
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  .wl-item__add-btn svg { width: 14px; height: 14px; }
+  .wl-item__add-btn:hover { background: var(--d-ink); color: #ffffff; }
+  .wl-item__add-btn.is-loading { pointer-events: none; color: transparent; }
+  .wl-item__add-btn.is-loading::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--d-ink);
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: wlSpin 0.7s linear infinite;
+  }
+  .wl-item__add-btn.is-added { background: var(--d-success); color: #ffffff; }
+  @keyframes wlSpin { to { transform: rotate(360deg); } }
+
+  .wl-item__remove {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    margin-right: -6px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #b0a89e;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+  .wl-item__remove svg { width: 15px; height: 15px; }
+  .wl-item__remove:hover { color: var(--d-danger); background: rgba(179, 38, 30, 0.07); }
+
+  /* ---------- Empty ---------- */
   .wl-drawer__empty {
     flex: 1;
     display: flex;
@@ -216,495 +337,422 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 50px 16px;
-    gap: 6px;
+    padding: 32px 20px 64px;
   }
-
-  .wl-drawer__empty-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #111111;
-    margin: 0;
+  .wl-drawer__empty-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 18px;
+    border-radius: 50%;
+    background: var(--d-tint);
+    color: var(--d-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-
-  .wl-drawer__empty-sub {
-    font-size: 0.8rem;
-    line-height: 1.5;
-    color: #777777;
-    margin: 0 0 14px 0;
-    max-width: 240px;
-  }
-
-  .wl-drawer__empty-cta {
+  .wl-drawer__empty-icon svg { width: 24px; height: 24px; }
+  .wl-drawer__empty-title { margin: 0 0 6px !important; font-family: var(--d-head); font-size: 17px; font-weight: 700; letter-spacing: -0.01em; color: var(--d-ink); }
+  .wl-drawer__empty-sub { margin: 0 0 20px !important; max-width: 250px; font-size: 12.5px; line-height: 1.5; color: var(--d-muted); }
+  .wl-drawer__empty-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 24px;
-    min-height: 38px;
-    background: #111111;
+    height: 46px;
+    padding: 0 28px;
+    border-radius: 999px;
+    background: var(--d-ink);
     color: #ffffff;
+    font-family: var(--d-head);
+    font-size: 13.5px;
     font-weight: 600;
-    font-size: 0.75rem;
     text-decoration: none;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    transition: opacity 0.18s ease;
+    transition: background-color 0.2s ease;
   }
+  .wl-drawer__empty-btn:hover { background: #26221d; }
 
-  .wl-drawer__empty-cta:hover {
-    opacity: 0.85;
-  }
-
-  /* Populated Item List */
-  .wl-drawer__items-wrap {
-    width: 100%;
-    padding-top: 4px;
-    padding-bottom: 16px;
-  }
-
-  .wl-drawer__list {
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Individual Wishlist Item */
-  .wl-item {
-    display: grid;
-    grid-template-columns: 68px 1fr;
-    gap: 14px;
-    padding: 14px 0;
-    border-bottom: 1px solid #f2f2f2;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    align-items: start;
-  }
-
-  .wl-item:last-child {
-    border-bottom: none;
-  }
-
-  .wl-item.is-removing {
-    opacity: 0;
-    transform: translateX(12px);
-  }
-
-  .wl-item__media {
-    display: block;
-    aspect-ratio: 3 / 4;
-    background: #f7f7f7;
-    overflow: hidden;
-    position: relative;
-    border-radius: 1px;
-  }
-
-  .wl-item__img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .wl-item__img-placeholder {
-    width: 100%;
-    height: 100%;
-    background: #f0f0f0;
-  }
-
-  .wl-item__details {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-  }
-
-  .wl-item__row-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 8px;
-  }
-
-  .wl-item__title {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #111111;
-    text-decoration: none;
-    line-height: 1.35;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .wl-item__title:hover {
-    text-decoration: underline;
-  }
-
-  .wl-item__remove {
-    width: 20px;
-    height: 20px;
-    display: inline-grid;
-    place-items: center;
-    border: 0;
-    background: transparent;
-    color: #999999;
-    cursor: pointer;
-    padding: 0;
+  /* ---------- Footer ---------- */
+  .wl-drawer__footer {
     flex-shrink: 0;
-    transition: color 0.15s ease;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 12px var(--d-pad) calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--d-line);
+    background: var(--d-bg);
   }
-
-  .wl-item__remove:hover {
-    color: #111111;
-  }
-
-  .wl-item__meta {
-    font-size: 0.74rem;
-    color: #888888;
-  }
-
-  .wl-item__price {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #111111;
-    margin-top: 1px;
-  }
-
-  .wl-item__actions {
-    margin-top: 6px;
-  }
-
-  .wl-item__add-btn {
+  /* Add all to bag — centred pill (deliberately unlike the checkout button) */
+  .wl-drawer__cta {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 48px;
+    margin: 0;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--d-ink);
+    color: #ffffff;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 12px;
-    min-height: 28px;
-    background: #111111;
-    color: #ffffff;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    border: 0;
+    gap: 10px;
     cursor: pointer;
-    transition: opacity 0.15s ease;
+    box-shadow: 0 10px 22px -14px rgba(21, 19, 15, 0.7);
+    transition: background-color 0.2s ease, transform 0.25s var(--d-ease), box-shadow 0.25s ease;
+  }
+  .wl-drawer__cta:hover { background: #2a2620; transform: translateY(-1px); box-shadow: 0 14px 26px -14px rgba(21, 19, 15, 0.75); }
+  .wl-drawer__cta:active { transform: translateY(0); }
+  .wl-drawer__cta:focus-visible { outline: 2px solid var(--d-ink); outline-offset: 3px; }
+  .wl-drawer__cta-icon { width: 18px; height: 18px; flex-shrink: 0; color: #d9bf8a; transition: transform 0.3s var(--d-ease); }
+  .wl-drawer__cta:hover .wl-drawer__cta-icon { transform: scale(1.1); }
+  .wl-drawer__cta-label { font-family: var(--d-head); font-size: 14px; font-weight: 600; letter-spacing: 0.01em; line-height: 1; }
+  .wl-drawer__cta-count {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: rgba(217, 191, 138, 0.18);
+    color: #e8d3a6;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
     white-space: nowrap;
   }
+  /* Count already shows in the header badge; hidden so both footer buttons fit on one row */
+  .wl-drawer__cta-count { display: none !important; }
 
-  .wl-item__add-btn:hover {
-    opacity: 0.85;
+  .wl-drawer__cta.is-loading { pointer-events: none; }
+  .wl-drawer__cta.is-loading > * { visibility: hidden; }
+  .wl-drawer__cta.is-loading::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: wlSpin 0.7s linear infinite;
   }
 
-  .wl-item__add-btn.is-loading {
-    opacity: 0.5;
-    pointer-events: none;
-  }
-
-  .wl-item__view-link {
-    display: inline-flex;
-    align-items: center;
-    font-size: 0.74rem;
+  .wl-drawer__secondary {
+    flex: 0 0 auto;
+    height: 48px;
+    margin: 0;
+    padding: 0 18px;
+    border: 1px solid #ddd5c9;
+    border-radius: 999px;
+    background: var(--d-bg);
+    color: var(--d-ink);
+    font-family: var(--d-head);
+    font-size: 13.5px;
     font-weight: 600;
-    color: #111111;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    transition: opacity 0.15s ease;
-  }
-
-  .wl-item__view-link:hover {
-    opacity: 0.7;
-  }
-
-  /* Footer (Clear Wishlist & Continue Shopping) */
-  .wl-drawer__footer {
-    border-top: 1px solid #f0f0f0;
-    padding: 14px 20px 16px;
-    background: #ffffff;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-
-  .wl-drawer__footer-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 16px;
-    min-height: 40px;
-    font-size: 0.76rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    text-decoration: none;
+    white-space: nowrap;
     cursor: pointer;
-    transition: all 0.15s ease;
-    text-align: center;
-    box-sizing: border-box;
-    width: 100%;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
   }
+  .wl-drawer__secondary:hover { border-color: var(--d-ink); background: var(--d-tint); }
+  .wl-drawer__secondary:focus-visible { outline: 2px solid var(--d-ink); outline-offset: 3px; }
 
-  .wl-drawer__footer-btn--solid {
-    background: #111111;
+  /* ---------- Toast ---------- */
+  .wl-drawer__toast {
+    position: absolute;
+    left: 50%;
+    bottom: 84px;
+    z-index: 5;
+    max-width: calc(100% - 40px);
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: var(--d-ink);
     color: #ffffff;
-    border: 1px solid #111111;
+    font-size: 12.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: 0 10px 24px -10px rgba(21, 19, 15, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 8px);
+    transition: opacity 0.25s ease, transform 0.3s var(--d-ease);
   }
-
-  .wl-drawer__footer-btn--solid:hover {
-    opacity: 0.85;
-  }
-
-  .wl-drawer__footer-btn--outline {
-    background: #ffffff;
-    color: #111111;
-    border: 1px solid #e0e0e0;
-  }
-
-  .wl-drawer__footer-btn--outline:hover {
-    border-color: #111111;
-    background: #fafafa;
-  }
+  .wl-drawer__toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+  .wl-drawer__inner:has(.wl-drawer__footer[hidden]) .wl-drawer__toast { bottom: 24px; }
 
   @media (max-width: 749px) {
-    .wl-drawer {
-      width: 100vw;
-    }
+    .wl-drawer { width: 100vw; --d-pad: 16px; }
+    .wl-drawer__header { height: 56px; padding-right: 10px; }
+    .wl-drawer__heading { font-size: 17px; }
+  }
+  @media (max-width: 440px) {
+    .wl-drawer__secondary { padding: 0 14px; font-size: 13px; }
+    .wl-drawer__cta { padding: 0 12px; gap: 8px; }
+    .wl-drawer__cta-label { font-size: 13.5px; }
+  }
+  @media (max-width: 360px) {
+    .wl-drawer__clear span { display: none; }
+    .wl-drawer__secondary { padding: 0 12px; font-size: 12px; }
+    .wl-drawer__cta-icon { display: none; }
+  }
 
-    .wl-drawer__header {
-      padding: 12px 16px;
-    }
-
-    .wl-drawer__body {
-      padding: 0 16px;
-    }
-
-    .wl-drawer__footer {
-      padding: 12px 16px 14px;
-    }
+  @media (prefers-reduced-motion: reduce) {
+    .wl-drawer, .wl-drawer *, .wl-drawer::backdrop { transition: none !important; animation: none !important; }
   }
 </style>
 
 {% javascript %}
-(function() {
-  const drawer   = document.getElementById('wishlist-drawer');
-  const backdrop = document.getElementById('wishlist-drawer-backdrop');
-  const closeBtn = document.getElementById('wishlist-drawer-close');
-  const grid     = document.getElementById('wishlist-drawer-grid');
-  const empty    = document.getElementById('wishlist-drawer-empty');
-  const footer   = document.getElementById('wishlist-drawer-footer');
-  const countEl  = document.getElementById('wishlist-drawer-count');
-  const clearBtn = document.getElementById('wishlist-drawer-clear-btn');
-  const toast    = document.getElementById('wishlist-drawer-toast');
-  const continueBtn = document.getElementById('wishlist-continue-shop-btn');
-
+(function () {
+  const drawer = document.getElementById('wishlist-drawer');
   if (!drawer) return;
 
+  const closeBtn = document.getElementById('wishlist-drawer-close');
+  const grid = document.getElementById('wishlist-drawer-grid');
+  const empty = document.getElementById('wishlist-drawer-empty');
+  const note = document.getElementById('wishlist-drawer-note');
+  const footer = document.getElementById('wishlist-drawer-footer');
+  const countEl = document.getElementById('wishlist-drawer-count');
+  const clearBtn = document.getElementById('wishlist-drawer-clear-btn');
+  const sep = document.getElementById('wishlist-drawer-sep');
+  const addAllBtn = document.getElementById('wishlist-add-all-btn');
+  const addAllCount = document.getElementById('wishlist-add-all-count');
+  const toast = document.getElementById('wishlist-drawer-toast');
+  const continueBtn = document.getElementById('wishlist-continue-shop-btn');
+
+  const getList = () => {
+    try {
+      const parsed = JSON.parse(localStorage.getItem('wishlist') || '[]');
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  };
+
+  const escapeHtml = (s) =>
+    String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  // Prices are stored as plain numbers ("1499.00"); older entries may already be formatted.
+  const formatPrice = (value) => {
+    const raw = String(value ?? '').trim();
+    if (!raw) return '';
+    if (/[^\d.,\s]/.test(raw)) return raw;
+    const n = Number(raw.replace(/,/g, ''));
+    if (!n) return '';
+    return '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+  };
+
   let toastTimer = null;
-  function showToast(msg, duration = 2200) {
+  const showToast = (msg, duration = 2200) => {
     if (!toast) return;
     toast.textContent = msg;
-    toast.style.display = 'block';
+    toast.classList.add('is-visible');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => {
-      toast.style.display = 'none';
-    }, duration);
-  }
+    toastTimer = setTimeout(() => toast.classList.remove('is-visible'), duration);
+  };
 
-  function openDrawer() {
-    drawer.setAttribute('open', '');
-    if (backdrop) backdrop.classList.add('is-open');
-    document.body.style.overflow = 'hidden';
+  // ---------- Open / close (true modal so it sits above the mobile nav bar) ----------
+  let closeTimer = null;
+  const openDrawer = () => {
+    clearTimeout(closeTimer);
+    drawer.classList.remove('is-closing');
     renderGrid();
-  }
+    if (!drawer.open) {
+      if (typeof drawer.showModal === 'function') drawer.showModal();
+      else drawer.setAttribute('open', '');
+    }
+    document.documentElement.style.overflow = 'hidden';
+  };
 
-  function closeDrawer() {
-    drawer.removeAttribute('open');
-    if (backdrop) backdrop.classList.remove('is-open');
-    document.body.style.overflow = '';
-  }
+  const closeDrawer = () => {
+    if (!drawer.open || drawer.classList.contains('is-closing')) return;
+    drawer.classList.add('is-closing');
+    closeTimer = setTimeout(() => {
+      drawer.classList.remove('is-closing');
+      if (typeof drawer.close === 'function') drawer.close();
+      else drawer.removeAttribute('open');
+      document.documentElement.style.overflow = '';
+    }, 260);
+  };
 
-  // Close handlers
-  if (backdrop) backdrop.addEventListener('click', closeDrawer);
-  if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
-  if (continueBtn) continueBtn.addEventListener('click', closeDrawer);
-  drawer.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
-
-  // Clear all button handler in footer
-  if (clearBtn) {
-    clearBtn.addEventListener('click', () => {
-      if (confirm('Clear all items from wishlist?')) {
-        if (typeof window.clearWishlist === 'function') {
-          window.clearWishlist();
-        } else {
-          localStorage.setItem('wishlist', '[]');
-          document.dispatchEvent(new CustomEvent('wishlist:update'));
-        }
-        showToast('Wishlist cleared');
-      }
-    });
-  }
-
-  // Add to Bag handler inside drawer
-  grid.addEventListener('click', async (e) => {
-    const btn = e.target.closest('[data-wl-add-cart]');
-    if (!btn) return;
-
+  drawer.addEventListener('cancel', (e) => {
     e.preventDefault();
-    e.stopPropagation();
+    closeDrawer();
+  });
+  drawer.addEventListener('click', (e) => {
+    if (e.target === drawer) closeDrawer();
+  });
+  closeBtn?.addEventListener('click', closeDrawer);
+  continueBtn?.addEventListener('click', closeDrawer);
 
-    const variantId = btn.dataset.wlAddCart;
-    if (!variantId) return;
+  clearBtn?.addEventListener('click', () => {
+    if (!confirm('Remove all items from your wishlist?')) return;
+    if (typeof window.clearWishlist === 'function') {
+      window.clearWishlist();
+    } else {
+      localStorage.setItem('wishlist', '[]');
+      document.dispatchEvent(new CustomEvent('wishlist:update'));
+    }
+    showToast('Wishlist cleared');
+  });
 
-    btn.classList.add('is-loading');
-    const originalText = btn.textContent;
-    btn.textContent = 'Adding...';
+  // ---------- Cart helpers ----------
+  // Saved items have no variant id: match the saved size, else first available variant.
+  const resolveVariantId = async (item) => {
+    if (item.variantId) return item.variantId;
+    const res = await fetch('/products/' + encodeURIComponent(item.handle) + '.js', { headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error('Product not found');
+    const product = await res.json();
+    const variants = product.variants || [];
+    const size = String(item.size || '').trim().toLowerCase();
+    const bySize =
+      size && size !== 'default'
+        ? variants.find((v) => v.available && (v.options || []).some((o) => String(o).trim().toLowerCase() === size))
+        : null;
+    const variant = bySize || variants.find((v) => v.available);
+    if (!variant) throw new Error('sold-out');
+    return variant.id;
+  };
 
+  const addToCart = async (items) => {
+    const response = await fetch('/cart/add.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ items })
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.description || 'Could not add item');
+    }
+  };
+
+  const goToCart = () => {
+    closeDrawer();
+    setTimeout(() => {
+      if (typeof window.pfOpenCart === 'function') window.pfOpenCart('wishlist-drawer');
+      else window.location.href = '/cart';
+    }, 280);
+  };
+
+  addAllBtn?.addEventListener('click', async () => {
+    const list = getList();
+    if (!list.length) return;
+    addAllBtn.classList.add('is-loading');
+    const results = await Promise.allSettled(list.map(resolveVariantId));
+    const items = results.filter((r) => r.status === 'fulfilled').map((r) => ({ id: Number(r.value), quantity: 1 }));
     try {
-      const response = await fetch('/cart/add.js', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ id: Number(variantId), quantity: 1 })
-      });
-
-      if (response.ok) {
-        const item = await response.json();
-        showToast(`Added to Bag`);
-        
-        // Dispatch cart updates
-        document.dispatchEvent(new CustomEvent('cart:update', { detail: { resource: item } }));
-        window.dispatchEvent(new CustomEvent('cart:update', { detail: { resource: item } }));
-        
-        // Trigger cart drawer if available
-        const cartDrawerTrigger = document.querySelector('[data-testid="cart-drawer-trigger"], [data-open-cart-drawer], .balad-header__cart-button');
-        if (cartDrawerTrigger) {
-          setTimeout(() => {
-            closeDrawer();
-            cartDrawerTrigger.click();
-          }, 500);
-        }
-      } else {
-        const err = await response.json();
-        showToast(err.description || 'Could not add item');
-      }
+      if (!items.length) throw new Error('These items are sold out');
+      await addToCart(items);
+      const skipped = list.length - items.length;
+      showToast(skipped ? `Added ${items.length} · ${skipped} unavailable` : 'All items added to your bag');
+      setTimeout(goToCart, 600);
     } catch (error) {
-      showToast('Error adding to bag.');
+      showToast(error.message || 'Could not add items');
     } finally {
-      btn.classList.remove('is-loading');
-      btn.textContent = originalText;
+      addAllBtn.classList.remove('is-loading');
     }
   });
 
-  // Remove handler with smooth slide-out animation
-  grid.addEventListener('click', (e) => {
-    const removeBtn = e.target.closest('[data-wishlist-remove]');
-    if (!removeBtn) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    const handle = removeBtn.dataset.wishlistRemove;
-    const itemEl = removeBtn.closest('.wl-item');
-
-    if (itemEl) {
-      itemEl.classList.add('is-removing');
+  grid.addEventListener('click', async (e) => {
+    const removeBtn = e.target.closest('[data-wl-remove]');
+    if (removeBtn) {
+      e.preventDefault();
+      const handle = removeBtn.dataset.wlRemove;
+      removeBtn.closest('.wl-item')?.classList.add('is-removing');
       setTimeout(() => {
         if (typeof window.removeFromWishlist === 'function') {
           window.removeFromWishlist(handle);
         } else {
-          let list = JSON.parse(localStorage.getItem('wishlist') || '[]');
-          list = list.filter(i => i.handle !== handle);
-          localStorage.setItem('wishlist', JSON.stringify(list));
+          localStorage.setItem('wishlist', JSON.stringify(getList().filter((i) => i.handle !== handle)));
           document.dispatchEvent(new CustomEvent('wishlist:update'));
         }
-      }, 180);
-    }
-  });
-
-  function renderGrid() {
-    const list = JSON.parse(localStorage.getItem('wishlist') || '[]');
-    const count = list.length;
-
-    if (countEl) countEl.textContent = `(${count})`;
-
-    if (count === 0) {
-      grid.innerHTML = '';
-      grid.style.display   = 'none';
-      empty.style.display  = 'flex';
-      footer.style.display = 'none';
+      }, 220);
       return;
     }
 
-    grid.style.display   = 'flex';
-    empty.style.display  = 'none';
-    footer.style.display = 'flex';
+    const addBtn = e.target.closest('[data-wl-add-cart]');
+    if (!addBtn) return;
+    e.preventDefault();
 
-    grid.innerHTML = list.map(item => {
-      const t  = (item.title || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      const img = item.image || '';
-      const sizeParam = item.size && item.size !== 'Default' ? '?size=' + encodeURIComponent(item.size) : '';
-      const productUrl = '/products/' + item.handle + sizeParam;
-      const variantId = item.variantId || '';
+    const item = getList().find((i) => i.handle === addBtn.dataset.wlAddCart);
+    if (!item) return;
 
-      return `
-        <article class="wl-item" data-handle="${item.handle}">
-          <a class="wl-item__media" href="${productUrl}">
-            ${img ? `<img class="wl-item__img" src="${img}" alt="${t}" loading="lazy">` : `<div class="wl-item__img-placeholder"></div>`}
-          </a>
+    addBtn.classList.add('is-loading');
+    try {
+      const variantId = await resolveVariantId(item);
+      await addToCart([{ id: Number(variantId), quantity: 1 }]);
+      addBtn.classList.remove('is-loading');
+      addBtn.classList.add('is-added');
+      addBtn.textContent = 'Added';
+      showToast('Added to your bag');
+      setTimeout(goToCart, 550);
+    } catch (error) {
+      addBtn.classList.remove('is-loading');
+      showToast(error.message === 'sold-out' ? 'This item is sold out' : error.message || 'Could not add item');
+    }
+  });
 
-          <div class="wl-item__details">
-            <div class="wl-item__row-top">
-              <a class="wl-item__title" href="${productUrl}">${t}</a>
-              <button
-                class="wl-item__remove"
-                type="button"
-                aria-label="Remove item"
-                title="Remove"
-                data-wishlist-remove="${item.handle}"
-              >
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
+  // ---------- Render ----------
+  const bagIcon =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.75 9.25A2.25 2.25 0 0 1 7 7h10a2.25 2.25 0 0 1 2.25 2.25V17.5A3.5 3.5 0 0 1 15.75 21h-7.5a3.5 3.5 0 0 1-3.5-3.5z"/><path d="M8.75 7V6.25a3.25 3.25 0 0 1 6.5 0V7"/><path d="M12 11.25v5.5M9.25 14h5.5"/></svg>';
+  const trashIcon =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9.5 7V4.8h5V7"/><path d="M6.5 7l.8 12.2a1 1 0 0 0 1 .9h7.4a1 1 0 0 0 1-.9L17.5 7"/></svg>';
+
+  function renderGrid() {
+    const list = getList();
+    const count = list.length;
+    const has = count > 0;
+
+    if (countEl) countEl.textContent = String(count);
+    if (addAllCount) addAllCount.textContent = count === 1 ? '1 item' : `${count} items`;
+    grid.hidden = !has;
+    note.hidden = !has;
+    footer.hidden = !has;
+    clearBtn.hidden = !has;
+    sep.hidden = !has;
+    empty.hidden = has;
+
+    if (!has) {
+      grid.innerHTML = '';
+      return;
+    }
+
+    grid.innerHTML = list
+      .map((item) => {
+        const title = escapeHtml(item.title);
+        const handle = escapeHtml(item.handle);
+        const hasSize = item.size && item.size !== 'Default';
+        const productUrl =
+          '/products/' + encodeURIComponent(item.handle || '') + (hasSize ? '?size=' + encodeURIComponent(item.size) : '');
+        const price = formatPrice(item.price);
+        const img = item.image
+          ? `<img class="wl-item__img" src="${escapeHtml(item.image)}" alt="${title}" loading="lazy" width="68" height="84">`
+          : '';
+
+        return `
+          <li class="wl-item" data-handle="${handle}">
+            <a class="wl-item__media" href="${productUrl}" tabindex="-1" aria-hidden="true">${img}</a>
+            <div class="wl-item__body">
+              <div class="wl-item__head">
+                <div class="wl-item__info">
+                  <a class="wl-item__title" href="${productUrl}">${title}</a>
+                  ${hasSize ? `<p class="wl-item__meta">${escapeHtml(item.size)}</p>` : ''}
+                </div>
+                ${price ? `<span class="wl-item__price">${price}</span>` : ''}
+              </div>
+              <div class="wl-item__foot">
+                <button type="button" class="wl-item__add-btn" data-wl-add-cart="${handle}">${bagIcon}<span>Add to bag</span></button>
+                <button class="wl-item__remove" type="button" aria-label="Remove ${title} from wishlist" data-wl-remove="${handle}">${trashIcon}</button>
+              </div>
             </div>
-
-            ${item.size && item.size !== 'Default' ? `<div class="wl-item__meta">Size: ${item.size}</div>` : ''}
-
-            <div class="wl-item__price">${item.price || ''}</div>
-
-            <div class="wl-item__actions">
-              ${variantId ? `
-                <button
-                  type="button"
-                  class="wl-item__add-btn"
-                  data-wl-add-cart="${variantId}"
-                  data-product-handle="${item.handle}"
-                  data-product-title="${t}"
-                >
-                  Add to Bag
-                </button>
-              ` : `
-                <a
-                  href="${productUrl}"
-                  class="wl-item__view-link"
-                >
-                  View Product
-                </a>
-              `}
-            </div>
-          </div>
-        </article>`;
-    }).join('');
+          </li>`;
+      })
+      .join('');
   }
 
-  // Re-render when wishlist changes
   document.addEventListener('wishlist:update', renderGrid);
-
-  // Listen for the open trigger (header button dispatches this)
   document.addEventListener('wishlist-drawer:open', openDrawer);
   document.addEventListener('wishlist-drawer:close', closeDrawer);
 
-  // Expose globally so the header button or scripts can call it
   window.openWishlistDrawer = openDrawer;
   window.closeWishlistDrawer = closeDrawer;
 })();

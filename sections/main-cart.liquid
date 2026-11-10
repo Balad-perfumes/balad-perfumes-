@@ -1,271 +1,399 @@
 <script src="{{ 'component-cart-items.js' | asset_url }}" type="module" fetchpriority="low"></script>
 
-{% capture cart_page_more_blocks_content %}
-  <div class="cart-page__more-blocks">
-    {%- content_for 'blocks' -%}
+{%- comment -%}
+  Cart page. Line items reuse snippets/pf-cart-drawer-items.liquid (same refs as the theme cart scripts),
+  and the checkout button / trust row reuse the classes styled in sections/cart-drawer.liquid.
+{%- endcomment -%}
+
+{%- liquid
+  assign cart_savings = 0
+  for item in cart.items
+    assign line_compare = item.variant.compare_at_price | default: 0 | times: item.quantity
+    if line_compare > item.final_line_price
+      assign line_saving = line_compare | minus: item.final_line_price
+      assign cart_savings = cart_savings | plus: line_saving
+    endif
+  endfor
+  for discount in cart.cart_level_discount_applications
+    assign cart_savings = cart_savings | plus: discount.total_allocated_amount
+  endfor
+
+  assign ship_ts = 'now' | date: '%s' | plus: 86400
+  assign ship_wd = ship_ts | date: '%w'
+  if ship_wd == '0'
+    assign ship_ts = ship_ts | plus: 86400
+  endif
+  assign ship_date = ship_ts | date: '%a, %-d %b'
+
+  assign continue_url = section.settings.continue_url | default: routes.all_products_collection_url
+-%}
+
+{% capture empty_cart_page %}
+  <div class="pf-cart-page__empty">
+    <span class="pf-cart-drawer__empty-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5.5 7.5h13l-1 12.2a1.5 1.5 0 0 1-1.5 1.3H8a1.5 1.5 0 0 1-1.5-1.3l-1-12.2z"/>
+        <path d="M9 9.5V6a3 3 0 0 1 6 0v3.5"/>
+      </svg>
+    </span>
+    <h1 class="pf-cart-page__empty-title">Your bag is empty</h1>
+    <p class="pf-cart-page__empty-sub">Find a fragrance you love and it will show up here.</p>
+    <a href="{{ continue_url }}" class="pf-drawer-btn pf-drawer-btn--solid">Shop fragrances</a>
   </div>
 {% endcapture %}
 
 {% capture cart_items_children %}
   <template id="empty-cart-template">
-    <div class="section-background color-{{ section.settings.color_scheme }}"></div>
-    <div
-      class="section color-{{ section.settings.color_scheme }} section--{{ section.settings.section_width }}"
-    >
-      <div
-        class="cart-page spacing-style{% if cart.empty? %} cart-page--empty{% endif %}"
-        style="{% render 'spacing-style', settings: section.settings %}"
-      >
-        <div class="cart-page__title">
-          {%- content_for 'block', id: 'cart-page-title', type: '_cart-title', force_empty: true %}
-        </div>
-        <div class="cart-page__items">
-          {%- content_for 'block', id: 'cart-page-items', type: '_cart-products', force_empty: true %}
-        </div>
-        {{ cart_page_more_blocks_content }}
-      </div>
-    </div>
+    <div class="pf-cart-page">{{ empty_cart_page }}</div>
   </template>
 
-  {% # theme-check-disable UniqueStaticBlockId %}
-  <div class="section-background color-{{ section.settings.color_scheme }}"></div>
-  <div
-    class="section color-{{ section.settings.color_scheme }} section--{{ section.settings.section_width }}"
-  >
-    <div
-      class="cart-page spacing-style{% if cart.empty? %} cart-page--empty{% endif %}"
-      style="{% render 'spacing-style', settings: section.settings %}"
-    >
-      <div class="cart-page__title">
-        {%- content_for 'block', id: 'cart-page-title', type: '_cart-title' %}
-      </div>
-
-      <div class="cart-page__items">
-        {%- content_for 'block', id: 'cart-page-items', type: '_cart-products' %}
-      </div>
-
-      {%- unless cart.empty? -%}
-        <div class="cart-page__summary">
-          {%- content_for 'block', id: 'cart-page-summary', type: '_cart-summary' -%}
+  <div class="pf-cart-page color-{{ section.settings.color_scheme }}">
+    {%- if cart.empty? -%}
+      {{ empty_cart_page }}
+    {%- else -%}
+      <div class="pf-cart-page__head">
+        <div class="pf-cart-page__title-wrap">
+          <h1 class="pf-cart-page__title">Shopping Bag</h1>
+          <span class="pf-cart-drawer__badge">{{ cart.item_count }}</span>
         </div>
-      {%- endunless -%}
+        <a class="pf-cart-page__continue" href="{{ continue_url }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="11 6 5 12 11 18"/></svg>
+          Continue shopping
+        </a>
+      </div>
 
-      {{ cart_page_more_blocks_content }}
-    </div>
+      <div class="pf-cart-page__grid">
+        <div class="pf-cart-page__main">
+          {%- if section.settings.show_delivery -%}
+            <div class="pf-cart-drawer__info">
+              <span class="pf-cart-drawer__info-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5h11v9.5h-11z"/><path d="M13.5 9.5h4l3 3.2V16h-7"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>
+              </span>
+              <div class="pf-cart-drawer__info-text">
+                <p class="pf-cart-drawer__info-title">
+                  {{ section.settings.delivery_title | default: 'Ships next working day' }}
+                  <span aria-hidden="true">·</span>
+                  <strong>{{ ship_date }}</strong>
+                </p>
+                {%- if section.settings.delivery_text != blank -%}
+                  <p class="pf-cart-drawer__info-sub">{{ section.settings.delivery_text }}</p>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- endif -%}
+
+          <div class="pf-cart-page__items">
+            <div class="pf-cart-page__items-head">
+              <span>{{ cart.item_count }} {% if cart.item_count == 1 %}item{% else %}items{% endif %} in your bag</span>
+              <button type="button" class="pf-cart-drawer__clear" data-pf-clear-cart>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9.5 7V4.8h5V7"/><path d="M6.5 7l.8 12.2a1 1 0 0 0 1 .9h7.4a1 1 0 0 0 1-.9L17.5 7"/></svg>
+                <span>Clear all</span>
+              </button>
+            </div>
+            {% render 'pf-cart-drawer-items' %}
+          </div>
+        </div>
+
+        <aside class="pf-cart-page__aside" aria-label="Order summary">
+          <div class="pf-cart-page__summary">
+            <h2 class="pf-cart-page__summary-title">Order summary</h2>
+
+            <dl class="pf-cart-page__rows">
+              <div class="pf-cart-page__row">
+                <dt>Subtotal</dt>
+                <dd>{% render 'format-price', price: cart.items_subtotal_price %}</dd>
+              </div>
+              {%- for discount in cart.cart_level_discount_applications -%}
+                <div class="pf-cart-page__row pf-cart-page__row--green">
+                  <dt>{{ discount.title | escape }}</dt>
+                  <dd>−{% render 'format-price', price: discount.total_allocated_amount %}</dd>
+                </div>
+              {%- endfor -%}
+              <div class="pf-cart-page__row">
+                <dt>Shipping</dt>
+                <dd class="pf-cart-page__muted">Calculated at checkout</dd>
+              </div>
+              <div class="pf-cart-page__row pf-cart-page__row--total">
+                <dt>Total</dt>
+                <dd>
+                  {%- capture total_price -%}{%- render 'format-price', price: cart.total_price -%}{%- endcapture -%}
+                  <text-component ref="cartTotal" value="{{ total_price | strip_html | strip }}" data-cart-subtotal>{{ total_price }}</text-component>
+                </dd>
+              </div>
+            </dl>
+
+            {%- if cart_savings > 0 -%}
+              <p class="pf-cart-page__saving">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>
+                You're saving <strong>{% render 'format-price', price: cart_savings %}</strong> on this order
+              </p>
+            {%- endif -%}
+
+            <form action="{{ routes.cart_url }}" method="post" class="pf-cart-drawer__checkout-form">
+              {%- if settings.show_cart_note -%}
+                <details class="pf-cart-page__note"{% if cart.note != blank %} open{% endif %}>
+                  <summary>
+                    Add a gift note or instructions
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                  </summary>
+                  <label class="visually-hidden" for="pf-cart-note">Order note</label>
+                  <textarea id="pf-cart-note" name="note" rows="3" placeholder="Write your message…">{{ cart.note }}</textarea>
+                </details>
+              {%- endif -%}
+
+              <button type="submit" name="checkout" class="pf-cart-drawer__checkout">
+                <span class="pf-cart-drawer__checkout-lock" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>
+                </span>
+                <span class="pf-cart-drawer__checkout-label">Checkout</span>
+                <span class="pf-cart-drawer__checkout-amount">{{ total_price }}</span>
+                <span class="pf-cart-drawer__checkout-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+                </span>
+              </button>
+            </form>
+
+            <div class="pf-cart-drawer__trust">
+              <p class="pf-cart-drawer__trust-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>
+                100% secure payments
+              </p>
+              <div class="pf-cart-drawer__payments">
+                {% render 'payment-icons' %}
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    {%- endif -%}
   </div>
-  {% # theme-check-enable UniqueStaticBlockId %}
 {% endcapture %}
+
 {% render 'cart-items-component', children: cart_items_children, section_id: section.id %}
 
 <style>
-  .cart-page {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0 var(--padding-5xl);
+  /* =============================================================
+     BALAD CART PAGE — shares tokens + components with the cart drawer
+     ============================================================= */
+  .pf-cart-page {
+    --d-bg: #ffffff;
+    --d-tint: #f7f3ed;
+    --d-tint-2: #efe8dd;
+    --d-ink: #15130f;
+    --d-text: #2c2823;
+    --d-muted: #8a8279;
+    --d-line: #efeae2;
+    --d-gold: #a8844a;
+    --d-success: #2f7a4b;
+    --d-danger: #b3261e;
+    --d-head: var(--font-heading--family, 'Manrope'), var(--font-body--family, sans-serif);
+    --d-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: {{ section.settings.padding-block-start | default: 32 }}px 20px {{ section.settings.padding-block-end | default: 64 }}px;
+    color: var(--d-text);
+    background: transparent;
+  }
+  .pf-cart-page *, .pf-cart-page *::before, .pf-cart-page *::after { box-sizing: border-box; }
+  .pf-cart-page p { margin: 0; }
+
+  /* Head */
+  .pf-cart-page__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--d-line);
+  }
+  .pf-cart-page__title-wrap { display: flex; align-items: center; gap: 10px; }
+  .pf-cart-page__title {
+    margin: 0;
+    font-family: var(--d-head);
+    font-size: clamp(24px, 3vw, 32px);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    color: var(--d-ink);
+  }
+  .pf-cart-page .pf-cart-drawer__badge { min-width: 24px; height: 24px; font-size: 12px; }
+  .pf-cart-page__continue {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--d-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+  }
+  .pf-cart-page__continue svg { width: 15px; height: 15px; transition: transform 0.3s var(--d-ease); }
+  .pf-cart-page__continue:hover { color: var(--d-ink); }
+  .pf-cart-page__continue:hover svg { transform: translateX(-3px); }
+
+  /* Layout */
+  .pf-cart-page__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; align-items: start; }
+  @media screen and (min-width: 990px) {
+    .pf-cart-page__grid { grid-template-columns: minmax(0, 1fr) 380px; gap: 48px; }
+    .pf-cart-page__aside { position: sticky; top: calc(var(--header-height, 76px) + 24px); }
   }
 
-  .cart-page--empty {
+  .pf-cart-page__main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+  /* White cards so the page reads clearly on the cream site background */
+  .pf-cart-page__card,
+  .pf-cart-page .pf-cart-drawer__info,
+  .pf-cart-page__items,
+  .pf-cart-page__summary {
+    background: var(--d-bg);
+    border: 1px solid var(--d-line);
+    box-shadow: 0 1px 2px rgba(21, 19, 15, 0.03), 0 12px 32px -20px rgba(21, 19, 15, 0.18);
+  }
+  .pf-cart-page .pf-cart-drawer__info { padding: 14px 18px; border-radius: 16px; }
+  .pf-cart-page .pf-cart-drawer__info-icon { background: var(--d-tint); }
+  .pf-cart-page__items { padding: 6px 24px 4px; border-radius: 20px; }
+
+  /* Items */
+  .pf-cart-page__items-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 0 12px;
+    border-bottom: 1px solid var(--d-line);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--d-muted);
+  }
+  .pf-cart-page__items-head .pf-cart-drawer__clear { margin-right: -10px; text-transform: none; letter-spacing: 0; }
+
+  .pf-cart-page .pf-ci-list { margin: 0; }
+  .pf-cart-page .pf-ci { grid-template-columns: 96px minmax(0, 1fr); gap: 18px; padding: 20px 0; }
+  .pf-cart-page .pf-ci__media { width: 96px; height: 120px; border-radius: 14px; }
+  .pf-cart-page .pf-ci__title { font-size: 15px; }
+  .pf-cart-page .pf-ci__variant { font-size: 11.5px; }
+  .pf-cart-page .pf-ci__price { font-size: 16px; }
+  .pf-cart-page .pf-ci__compare { font-size: 12px; }
+  .pf-cart-page .pf-ci__qty .quantity-selector { width: 104px; height: 36px; }
+  .pf-cart-page .pf-ci__qty .quantity-selector :is(.quantity-minus, .quantity-plus) { width: 30px; height: 30px; min-width: 30px; max-height: 30px; }
+  .pf-cart-page .pf-ci__remove { width: 34px; height: 34px; }
+
+  /* Summary */
+  .pf-cart-page__summary {
+    padding: 24px;
+    border-radius: 20px;
+  }
+  .pf-cart-page__summary-title {
+    margin: 0 0 16px;
+    font-family: var(--d-head);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--d-ink);
+  }
+  .pf-cart-page__rows { margin: 0; display: flex; flex-direction: column; gap: 12px; }
+  .pf-cart-page__row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 13.5px; color: var(--d-text); }
+  .pf-cart-page__row dt, .pf-cart-page__row dd { margin: 0; }
+  .pf-cart-page__row dd { font-weight: 600; color: var(--d-ink); }
+  .pf-cart-page__row--green, .pf-cart-page__row--green dd { color: var(--d-success); }
+  .pf-cart-page__muted { font-weight: 500 !important; color: var(--d-muted) !important; font-size: 12.5px; }
+  .pf-cart-page__row--total {
+    margin-top: 4px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(21, 19, 15, 0.1);
+    font-family: var(--d-head);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--d-ink);
+  }
+  .pf-cart-page__row--total dd { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+
+  .pf-cart-page__saving {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 14px !important;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(47, 122, 75, 0.09);
+    color: var(--d-success);
+    font-size: 12.5px;
+    font-weight: 500;
+  }
+  .pf-cart-page__saving svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .pf-cart-page .pf-cart-drawer__checkout-form { margin-top: 18px; }
+  .pf-cart-page .pf-cart-drawer__checkout { height: 54px; }
+
+  .pf-cart-page__note { margin-bottom: 14px; border-radius: 12px; background: var(--d-tint); }
+  .pf-cart-page__note summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--d-text);
+    cursor: pointer;
+    list-style: none;
+  }
+  .pf-cart-page__note summary::-webkit-details-marker { display: none; }
+  .pf-cart-page__note summary svg { width: 15px; height: 15px; transition: transform 0.3s var(--d-ease); }
+  .pf-cart-page__note[open] summary svg { transform: rotate(180deg); }
+  .pf-cart-page__note textarea {
+    display: block;
+    width: calc(100% - 28px);
+    margin: 0 14px 14px;
+    padding: 10px 12px;
+    border: 1px solid var(--d-line);
+    border-radius: 10px;
+    background: var(--d-bg);
+    font: inherit;
+    font-size: 13px;
+    resize: vertical;
+  }
+
+  .pf-cart-page .pf-cart-drawer__trust { margin-top: 14px; flex-wrap: wrap; justify-content: center; row-gap: 8px; }
+  .pf-cart-page .pf-cart-drawer__payments .balad-payment-badge { background: #ffffff; }
+
+  /* Empty */
+  .pf-cart-page__empty {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-  }
-
-  .cart-page--empty .cart-page__title,
-  .cart-page--empty .cart-page__more-blocks {
-    margin-top: var(--margin-6xl);
-  }
-
-  .cart-page__more-blocks {
-    width: 100%;
-  }
-
-  .cart-page--empty .cart-title {
     text-align: center;
+    padding: 72px 20px 88px;
   }
-
-  .cart-page__main {
-    grid-column: 1;
+  .pf-cart-page__empty .pf-cart-drawer__empty-icon { width: 76px; height: 76px; }
+  .pf-cart-page__empty-title {
+    margin: 0 0 8px;
+    font-family: var(--d-head);
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--d-ink);
   }
+  .pf-cart-page__empty-sub { margin: 0 0 24px !important; max-width: 320px; font-size: 14px; line-height: 1.55; color: var(--d-muted); }
 
-  .cart-page__summary {
-    padding-top: var(--padding-xl);
-  }
-
-  .cart-page__title + .cart-page__items {
-    margin-block-start: var(--margin-lg);
-  }
-
-  .cart-page .cart-items__table-row {
-    display: grid !important;
-    grid-template-columns: 70px 1fr auto !important;
-    grid-template-rows: auto auto !important;
-    gap: 6px 14px !important;
-    align-items: start !important;
-    position: relative !important;
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 8px !important;
-    padding: 14px !important;
-    margin-bottom: 12px !important;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02) !important;
-  }
-
-  .cart-page .cart-items__media {
-    grid-column: 1 !important;
-    grid-row: 1 / 3 !important;
-    width: 70px !important;
-    min-width: 70px !important;
-    height: 70px !important;
-    padding: 0 !important;
-    align-self: start !important;
-  }
-
-  .cart-page .cart-items__media-container {
-    width: 70px !important;
-    height: 70px !important;
-    border-radius: 6px !important;
-    overflow: hidden !important;
-    border: 1px solid #eeeeee !important;
-  }
-
-  .cart-page .cart-items__details {
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-    padding: 0 24px 0 0 !important;
-    min-width: 0 !important;
-  }
-
-  .cart-page .cart-items__title {
-    font-size: 13.5px !important;
-    font-weight: 700 !important;
-    color: #111111 !important;
-    line-height: 1.25 !important;
-    margin-bottom: 2px !important;
-    display: block !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-
-  .cart-page .cart-items__variant-subtitle {
-    font-size: 12px !important;
-    color: #777777 !important;
-    margin: 2px 0 !important;
-    line-height: 1.2 !important;
-  }
-
-  .cart-page .cart-items__price-savings-wrap {
-    grid-column: 2 !important;
-    grid-row: 2 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 2px !important;
-  }
-
-  .cart-page .cart-items__price-row {
-    display: flex !important;
-    align-items: baseline !important;
-    gap: 6px !important;
-  }
-
-  .cart-page .cart-items__sale-price {
-    font-size: 14.5px !important;
-    font-weight: 800 !important;
-    color: #111111 !important;
-  }
-
-  .cart-page .cart-items__compare-price {
-    font-size: 12.5px !important;
-    color: #999999 !important;
-    text-decoration: line-through !important;
-    font-weight: 500 !important;
-  }
-
-  .cart-page .cart-items__save-badge {
-    font-size: 11.5px !important;
-    font-weight: 700 !important;
-    color: #16a34a !important;
-    display: block !important;
-  }
-
-  .cart-page .cart-items__remove {
-    position: absolute !important;
-    top: 12px !important;
-    right: 12px !important;
-    background: transparent !important;
-    border: none !important;
-    padding: 4px !important;
-    color: #111111 !important;
-    cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-
-  .cart-page .cart-items__quantity {
-    grid-column: 3 !important;
-    grid-row: 2 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    padding: 0 !important;
-    margin-top: 4px !important;
-    width: auto !important;
-  }
-
-  .cart-page .cart-items__price {
-    grid-column: 3 !important;
-    grid-row: 1 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    text-align: right !important;
-    font-size: 14.5px !important;
-    font-weight: 700 !important;
-    color: #111111 !important;
-    align-self: start !important;
-  }
-
-  .cart-page .cart-items__save-badge {
-    font-size: 11.5px !important;
-    font-weight: 700 !important;
-    color: #16a34a !important;
-    display: block !important;
-    margin-top: 2px !important;
-  }
-
-  @media screen and (min-width: 750px) {
-    .cart-page {
-      grid-template-columns: 1fr min(50vw, var(--sidebar-width));
-      grid-template-rows: min-content min-content 1fr;
-    }
-
-    .cart-page__summary {
-      display: grid;
-      height: 100%;
-      grid-column: 2;
-      grid-row: 1 / -1;
-      align-self: stretch;
-      grid-template-rows: subgrid;
-      padding-top: 0;
-
-      /* needed to support blurred effect from hero section */
-      position: relative;
-    }
-
-    .section--page-width .cart-page:has(.cart-summary--extend) {
-      grid-column: 2 / 4;
-      grid-template-columns: 1fr minmax(
-          var(--sidebar-width),
-          calc((100vw - var(--page-width)) / 2 + var(--sidebar-width))
-        );
-    }
-  }
-
-  @media screen and (min-width: 1400px) {
-    .cart-page {
-      grid-template-columns: 1fr var(--sidebar-width);
-    }
+  @media screen and (max-width: 749px) {
+    .pf-cart-page { padding: 20px 16px 48px; }
+    .pf-cart-page__head { padding-bottom: 14px; margin-bottom: 16px; align-items: center; }
+    .pf-cart-page__continue { font-size: 12px; }
+    .pf-cart-page .pf-ci { grid-template-columns: 76px minmax(0, 1fr); gap: 14px; padding: 16px 0; }
+    .pf-cart-page .pf-ci__media { width: 76px; height: 96px; }
+    .pf-cart-page .pf-ci__title { font-size: 14px; }
+    .pf-cart-page .pf-ci__price { font-size: 14.5px; }
+    .pf-cart-page__summary { padding: 18px; border-radius: 16px; }
+    .pf-cart-page__items { padding: 4px 16px 2px; border-radius: 16px; }
+    .pf-cart-page .pf-cart-drawer__info { padding: 12px 14px; }
   }
 </style>
 
@@ -275,57 +403,40 @@
   "disabled_on": {
     "groups": ["header", "footer"]
   },
-  "blocks": [
-    {
-      "type": "@theme"
-    },
-    {
-      "type": "@app"
-    },
-    {
-      "type": "text"
-    },
-    {
-      "type": "icon"
-    },
-    {
-      "type": "image"
-    },
-    {
-      "type": "button"
-    },
-    {
-      "type": "video"
-    },
-    {
-      "type": "group"
-    },
-    {
-      "type": "spacer"
-    }
-  ],
   "settings": [
-    {
-      "type": "select",
-      "id": "section_width",
-      "label": "t:settings.width",
-      "options": [
-        {
-          "value": "page-width",
-          "label": "t:options.page"
-        },
-        {
-          "value": "full-width",
-          "label": "t:options.full"
-        }
-      ],
-      "default": "page-width"
-    },
     {
       "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:settings.color_scheme",
       "default": "scheme-1"
+    },
+    {
+      "type": "url",
+      "id": "continue_url",
+      "label": "Continue shopping link"
+    },
+    {
+      "type": "header",
+      "content": "Delivery info"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_delivery",
+      "label": "Show delivery estimate",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "delivery_title",
+      "label": "Heading",
+      "default": "Ships next working day",
+      "info": "The next working date (skipping Sunday) is added automatically."
+    },
+    {
+      "type": "text",
+      "id": "delivery_text",
+      "label": "Delivery times",
+      "default": "Delivered across India in 3–7 business days"
     },
     {
       "type": "header",
@@ -339,7 +450,7 @@
       "max": 100,
       "step": 1,
       "unit": "px",
-      "default": 0
+      "default": 32
     },
     {
       "type": "range",
@@ -349,7 +460,7 @@
       "max": 100,
       "step": 1,
       "unit": "px",
-      "default": 0
+      "default": 64
     }
   ]
 }

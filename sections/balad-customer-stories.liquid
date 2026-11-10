@@ -1,0 +1,868 @@
+{%- liquid
+  assign story_count = section.blocks.size
+  assign image_ms = section.settings.image_duration | default: 5 | times: 1000
+-%}
+
+{%- capture bcs_play_icon -%}
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>
+{%- endcapture -%}
+
+<section
+  class="bcs color-{{ section.settings.color_scheme }}"
+  data-bcs
+  data-image-ms="{{ image_ms }}"
+  style="--bcs-pt: {{ section.settings.padding_top }}px; --bcs-pb: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="bcs__wrap">
+    <div class="bcs__head">
+      <div class="bcs__head-text">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="bcs__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.heading != blank -%}
+          <h2 class="bcs__heading">{{ section.settings.heading | escape }}</h2>
+        {%- endif -%}
+        {%- if section.settings.subheading != blank -%}
+          <p class="bcs__sub">{{ section.settings.subheading | escape }}</p>
+        {%- endif -%}
+      </div>
+      {%- if section.settings.instagram_url != blank -%}
+        <a class="bcs__ig" href="{{ section.settings.instagram_url }}" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="3.8"/><circle cx="17.2" cy="6.8" r="0.9" fill="currentColor" stroke="none"/></svg>
+          <span>{{ section.settings.instagram_label | default: 'Follow on Instagram' | escape }}</span>
+        </a>
+      {%- endif -%}
+    </div>
+
+    {%- if story_count > 0 -%}
+      <div class="bcs__rail-wrap">
+        <ul class="bcs__rail" role="list" data-bcs-rail>
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign thumb = blank
+              if block.settings.image != blank
+                assign thumb = block.settings.image | image_url: width: 540
+              elsif block.settings.asset_image != blank
+                assign thumb = block.settings.asset_image | asset_url
+              endif
+              assign has_video = false
+              if block.settings.video != blank
+                assign has_video = true
+              endif
+            -%}
+            <li class="bcs__item" {{ block.shopify_attributes }}>
+              <button
+                type="button"
+                class="bcs__tile"
+                data-bcs-open="{{ forloop.index0 }}"
+                aria-label="Open story{% if block.settings.name != blank %} from {{ block.settings.name | escape }}{% endif %}"
+              >
+                <span class="bcs__tile-media">
+                  {%- if has_video -%}
+                    {{ block.settings.video | video_tag: muted: true, loop: true, playsinline: true, preload: 'metadata', image_size: '540x', class: 'bcs__tile-video' }}
+                  {%- elsif thumb != blank -%}
+                    <img src="{{ thumb }}" alt="{{ block.settings.name | default: 'Customer story' | escape }}" loading="lazy" width="540" height="960">
+                  {%- else -%}
+                    <span class="bcs__placeholder">Add an image or video</span>
+                  {%- endif -%}
+                </span>
+                <span class="bcs__tile-shade" aria-hidden="true"></span>
+
+                {%- if block.settings.badge != blank -%}
+                  <span class="bcs__badge">{{ block.settings.badge | escape }}</span>
+                {%- endif -%}
+                {%- if has_video -%}
+                  <span class="bcs__play" aria-hidden="true">{{ bcs_play_icon }}</span>
+                {%- endif -%}
+
+                <span class="bcs__tile-text">
+                  {%- if block.settings.name != blank -%}
+                    <span class="bcs__tile-name">{{ block.settings.name | escape }}</span>
+                  {%- endif -%}
+                  {%- if block.settings.caption != blank -%}
+                    <span class="bcs__tile-caption">{{ block.settings.caption | escape }}</span>
+                  {%- endif -%}
+                </span>
+              </button>
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        {%- if story_count > 3 -%}
+          <button type="button" class="bcs__nav bcs__nav--prev" data-bcs-scroll="-1" aria-label="Scroll stories left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button type="button" class="bcs__nav bcs__nav--next" data-bcs-scroll="1" aria-label="Scroll stories right">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- comment -%} Full-screen story viewer {%- endcomment -%}
+  <dialog class="bcs-viewer" data-bcs-viewer aria-label="Customer stories">
+    <div class="bcs-viewer__card">
+      <div class="bcs-viewer__bars" aria-hidden="true">
+        {%- for block in section.blocks -%}
+          <span class="bcs-viewer__bar"><span class="bcs-viewer__fill" data-bcs-fill></span></span>
+        {%- endfor -%}
+      </div>
+
+      <div class="bcs-viewer__top">
+        <span class="bcs-viewer__avatar" aria-hidden="true">B.</span>
+        <span class="bcs-viewer__who">
+          <span class="bcs-viewer__brand">{{ shop.name | escape }}</span>
+          <span class="bcs-viewer__name" data-bcs-name></span>
+        </span>
+        <button type="button" class="bcs-viewer__icon" data-bcs-mute aria-label="Unmute" hidden>
+          <svg class="bcs-viewer__ico-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>
+          <svg class="bcs-viewer__ico-sound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        </button>
+        <button type="button" class="bcs-viewer__icon" data-bcs-close aria-label="Close stories">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="bcs-viewer__stage">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign full = blank
+            if block.settings.image != blank
+              assign full = block.settings.image | image_url: width: 1080
+            elsif block.settings.asset_image != blank
+              assign full = block.settings.asset_image | asset_url
+            endif
+          -%}
+          <div
+            class="bcs-viewer__slide"
+            data-bcs-slide
+            data-name="{{ block.settings.name | escape }}"
+            {% if block.settings.video != blank %}data-video{% endif %}
+          >
+            {%- if block.settings.video != blank -%}
+              {{ block.settings.video | video_tag: playsinline: true, muted: true, preload: 'none', image_size: '1080x', class: 'bcs-viewer__media' }}
+            {%- elsif full != blank -%}
+              <img class="bcs-viewer__media" src="{{ full }}" alt="{{ block.settings.name | default: 'Customer story' | escape }}" loading="lazy" width="1080" height="1920">
+            {%- endif -%}
+
+            {%- if block.settings.caption != blank or block.settings.product != blank -%}
+              <div class="bcs-viewer__bottom">
+                {%- if block.settings.caption != blank -%}
+                  <p class="bcs-viewer__caption">{{ block.settings.caption | escape }}</p>
+                {%- endif -%}
+                {%- if block.settings.product != blank -%}
+                  <a class="bcs-viewer__cta" href="{{ block.settings.product.url }}">
+                    {%- if block.settings.product.featured_image != blank -%}
+                      <img src="{{ block.settings.product.featured_image | image_url: width: 96 }}" alt="" width="36" height="36" loading="lazy">
+                    {%- endif -%}
+                    <span>Shop {{ block.settings.product.title | escape }}</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+                  </a>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+
+        <button type="button" class="bcs-viewer__tap bcs-viewer__tap--prev" data-bcs-prev aria-label="Previous story"></button>
+        <button type="button" class="bcs-viewer__tap bcs-viewer__tap--next" data-bcs-next aria-label="Next story"></button>
+      </div>
+    </div>
+
+    <button type="button" class="bcs-viewer__arrow bcs-viewer__arrow--prev" data-bcs-prev aria-label="Previous story">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button type="button" class="bcs-viewer__arrow bcs-viewer__arrow--next" data-bcs-next aria-label="Next story">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </dialog>
+</section>
+
+<style>
+  .bcs {
+    --bcs-ink: #15130f;
+    --bcs-muted: #7a736b;
+    --bcs-gold: #a8844a;
+    --bcs-line: #ece5da;
+    --bcs-head: var(--font-heading--family, 'Manrope'), var(--font-body--family, sans-serif);
+    --bcs-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    width: 100%;
+    padding: var(--bcs-pt, 16px) 0 var(--bcs-pb, 16px);
+  }
+  .bcs *, .bcs *::before, .bcs *::after { box-sizing: border-box; }
+  /* Same shell as the other home sections: full width, 36 / 20 / 12px side padding */
+  .bcs__wrap { width: 100%; max-width: 100%; margin: 0; padding: 0 36px; }
+
+  /* Heading row */
+  .bcs__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgb(17 17 17 / 0.1);
+  }
+  .bcs__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 6px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--bcs-gold);
+  }
+  .bcs__eyebrow::before { content: ''; width: 24px; height: 1px; background: currentColor; }
+  .bcs__heading {
+    margin: 0;
+    font-family: var(--font-heading--family, inherit);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: #111111;
+  }
+  .bcs__sub { margin: 6px 0 0; max-width: 520px; font-size: 14px; line-height: 1.4; font-weight: 400; color: #6b7280; }
+
+  .bcs__ig {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 16px;
+    border: 1px solid #ddd5c9;
+    border-radius: 999px;
+    background: #ffffff;
+    color: var(--bcs-ink);
+    font-family: var(--bcs-head);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+  .bcs__ig svg { width: 16px; height: 16px; }
+  .bcs__ig:hover { background: var(--bcs-ink); border-color: var(--bcs-ink); color: #ffffff; }
+
+  /* Rail */
+  .bcs__rail-wrap { position: relative; }
+  .bcs__rail {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 4 * 16px) / 5);
+    gap: 16px;
+    margin: 0;
+    padding: 4px 0 8px;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .bcs__rail::-webkit-scrollbar { display: none; }
+  .bcs__item { scroll-snap-align: start; min-width: 0; }
+
+  .bcs__tile {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    padding: 0;
+    border: 0;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #efe8dd;
+    color: #ffffff;
+    text-align: left;
+    cursor: pointer;
+    isolation: isolate;
+    box-shadow: 0 1px 2px rgba(21, 19, 15, 0.05), 0 14px 32px -22px rgba(21, 19, 15, 0.45);
+    transition: transform 0.45s var(--bcs-ease), box-shadow 0.45s var(--bcs-ease);
+  }
+  .bcs__tile:hover { transform: translateY(-4px); box-shadow: 0 1px 2px rgba(21, 19, 15, 0.05), 0 22px 40px -22px rgba(21, 19, 15, 0.55); }
+  .bcs__tile:focus-visible { outline: 2px solid var(--bcs-ink); outline-offset: 3px; }
+
+  .bcs__tile-media, .bcs__tile-media img, .bcs__tile-media video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .bcs__tile-media img, .bcs__tile-media video { transition: transform 0.8s var(--bcs-ease); }
+  .bcs__tile:hover .bcs__tile-media img, .bcs__tile:hover .bcs__tile-media video { transform: scale(1.05); }
+  .bcs__placeholder { display: flex; align-items: center; justify-content: center; height: 100%; padding: 16px; color: var(--bcs-muted); font-size: 13px; text-align: center; }
+
+  .bcs__tile-shade {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0) 22%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, 0.78) 100%);
+  }
+
+  .bcs__badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .bcs__play {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--bcs-ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bcs__play svg { width: 14px; height: 14px; margin-left: 2px; }
+
+  .bcs__tile-text { position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 2; display: flex; flex-direction: column; gap: 4px; }
+  .bcs__tile-name { font-family: var(--bcs-head); font-size: 14.5px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
+  .bcs__tile-caption {
+    font-size: 12px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.85);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .bcs__nav {
+    position: absolute;
+    top: 50%;
+    z-index: 3;
+    width: 44px;
+    height: 44px;
+    margin-top: -26px;
+    padding: 0;
+    border: 1px solid var(--bcs-line);
+    border-radius: 50%;
+    background: #ffffff;
+    color: var(--bcs-ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 10px 24px -12px rgba(21, 19, 15, 0.4);
+    transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+  }
+  .bcs__nav svg { width: 18px; height: 18px; }
+  .bcs__nav:hover { background: var(--bcs-ink); color: #ffffff; border-color: var(--bcs-ink); }
+  .bcs__nav--prev { left: -16px; }
+  .bcs__nav--next { right: -16px; }
+  .bcs__nav[disabled] { opacity: 0; pointer-events: none; }
+
+  @media screen and (max-width: 989px) {
+    .bcs__rail { grid-auto-columns: calc((100% - 2 * 12px) / 3.2); gap: 12px; }
+    .bcs__nav { display: none; }
+  }
+  @media screen and (min-width: 750px) and (max-width: 1024px) {
+    .bcs { padding-top: 10px; padding-bottom: 10px; }
+    .bcs__wrap { padding: 0 20px; }
+  }
+  @media screen and (max-width: 749px) {
+    .bcs { padding-top: 8px; padding-bottom: 8px; }
+    .bcs__wrap { padding: 0 12px; }
+    .bcs__head { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 12px; padding-bottom: 10px; }
+    .bcs__heading { font-size: 18px; }
+    .bcs__sub { margin-top: 6px; font-size: 14px; }
+    .bcs__rail { grid-auto-columns: 46%; gap: 10px; margin: 0 -12px; padding: 4px 12px 8px; scroll-padding-inline: 12px; }
+    .bcs__tile { border-radius: 16px; }
+    .bcs__ig { height: 36px; font-size: 12.5px; }
+  }
+
+  /* ---------- Viewer ---------- */
+  .bcs-viewer {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: hidden;
+  }
+  .bcs-viewer[open] { display: flex; align-items: center; justify-content: center; animation: bcsFade 0.3s ease both; }
+  .bcs-viewer::backdrop { background: rgba(10, 9, 8, 0.82); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+  @keyframes bcsFade { from { opacity: 0; } to { opacity: 1; } }
+
+  .bcs-viewer__card {
+    position: relative;
+    height: min(92dvh, 860px);
+    aspect-ratio: 9 / 16;
+    max-width: 100vw;
+    border-radius: 22px;
+    overflow: hidden;
+    background: #0d0c0b;
+    color: #ffffff;
+    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+    animation: bcsPop 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes bcsPop { from { transform: scale(0.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .bcs-viewer__bars { position: absolute; top: 12px; left: 12px; right: 12px; z-index: 5; display: flex; gap: 4px; }
+  .bcs-viewer__bar { flex: 1; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, 0.3); overflow: hidden; }
+  .bcs-viewer__fill { display: block; height: 100%; width: 0; background: #ffffff; border-radius: inherit; }
+
+  .bcs-viewer__top {
+    position: absolute;
+    top: 24px;
+    left: 12px;
+    right: 8px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .bcs-viewer__avatar {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #15130f;
+    border: 2px solid #d9bf8a;
+    color: #d9bf8a;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .bcs-viewer__who { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.2; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45); }
+  .bcs-viewer__brand { font-size: 13px; font-weight: 700; }
+  .bcs-viewer__name { font-size: 12px; color: rgba(255, 255, 255, 0.82); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bcs-viewer__icon {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+  .bcs-viewer__icon svg { width: 18px; height: 18px; }
+  .bcs-viewer__icon[hidden] { display: none; }
+  .bcs-viewer__ico-sound { display: none; }
+  .bcs-viewer.is-unmuted .bcs-viewer__ico-sound { display: block; }
+  .bcs-viewer.is-unmuted .bcs-viewer__ico-muted { display: none; }
+
+  .bcs-viewer__stage { position: absolute; inset: 0; }
+  .bcs-viewer__slide { position: absolute; inset: 0; display: none; }
+  .bcs-viewer__slide.is-active { display: block; }
+  .bcs-viewer__media { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bcs-viewer__slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 18%, rgba(0, 0, 0, 0) 62%, rgba(0, 0, 0, 0.7) 100%);
+  }
+
+  .bcs-viewer__bottom { position: absolute; left: 16px; right: 16px; bottom: 18px; z-index: 6; display: flex; flex-direction: column; gap: 12px; }
+  .bcs-viewer__caption {
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(12, 10, 8, 0.55);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+  .bcs-viewer__cta {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 46px;
+    padding: 0 16px 0 5px;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #15130f;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    max-width: 100%;
+  }
+  .bcs-viewer__cta img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #f1ebe2; }
+  .bcs-viewer__cta span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bcs-viewer__cta svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .bcs-viewer__tap { position: absolute; top: 80px; bottom: 120px; z-index: 4; width: 38%; padding: 0; border: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .bcs-viewer__tap--prev { left: 0; }
+  .bcs-viewer__tap--next { right: 0; width: 62%; }
+
+  .bcs-viewer__arrow {
+    position: absolute;
+    top: 50%;
+    width: 52px;
+    height: 52px;
+    margin-top: -26px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  .bcs-viewer__arrow svg { width: 22px; height: 22px; }
+  .bcs-viewer__arrow:hover { background: #ffffff; color: #15130f; }
+  .bcs-viewer__arrow--prev { left: calc(50% - min(92dvh, 860px) * 0.28125 - 84px); }
+  .bcs-viewer__arrow--next { right: calc(50% - min(92dvh, 860px) * 0.28125 - 84px); }
+
+  @media screen and (max-width: 749px) {
+    .bcs-viewer__card { width: 100vw; height: 100dvh; aspect-ratio: auto; border-radius: 0; }
+    .bcs-viewer__arrow { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bcs__tile, .bcs__tile-media img, .bcs__tile-media video, .bcs-viewer[open], .bcs-viewer__card { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<script>
+  (function () {
+    function init(section) {
+      if (!section || section.dataset.bcsReady) return;
+      section.dataset.bcsReady = 'true';
+
+      var rail = section.querySelector('[data-bcs-rail]');
+      var viewer = section.querySelector('[data-bcs-viewer]');
+      if (!viewer) return;
+      var slides = Array.prototype.slice.call(viewer.querySelectorAll('[data-bcs-slide]'));
+      var fills = Array.prototype.slice.call(viewer.querySelectorAll('[data-bcs-fill]'));
+      var nameEl = viewer.querySelector('[data-bcs-name]');
+      var muteBtn = viewer.querySelector('[data-bcs-mute]');
+      var imageMs = parseInt(section.dataset.imageMs, 10) || 5000;
+      var current = 0;
+      var raf = null;
+      var startedAt = 0;
+      var paused = false;
+      var pausedAt = 0;
+      var muted = true;
+
+      // Rail arrows + hover-preview for video tiles
+      section.querySelectorAll('[data-bcs-scroll]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var tile = rail.querySelector('.bcs__item');
+          var step = tile ? tile.getBoundingClientRect().width + 16 : 240;
+          rail.scrollBy({ left: Number(btn.dataset.bcsScroll) * step * 2, behavior: 'smooth' });
+        });
+      });
+      section.querySelectorAll('.bcs__tile').forEach(function (tile) {
+        var v = tile.querySelector('video');
+        if (!v) return;
+        tile.addEventListener('mouseenter', function () { v.play().catch(function () {}); });
+        tile.addEventListener('mouseleave', function () { v.pause(); });
+      });
+
+      function stopAll() {
+        cancelAnimationFrame(raf);
+        slides.forEach(function (s) {
+          var v = s.querySelector('video');
+          if (v) { v.pause(); }
+        });
+      }
+
+      function setFills(idx, progress) {
+        fills.forEach(function (f, i) {
+          f.style.width = i < idx ? '100%' : i === idx ? (progress * 100) + '%' : '0%';
+        });
+      }
+
+      function tick() {
+        var slide = slides[current];
+        var v = slide.querySelector('video');
+        var progress;
+        if (v) {
+          progress = v.duration ? v.currentTime / v.duration : 0;
+        } else {
+          progress = paused ? pausedAt : Math.min((performance.now() - startedAt) / imageMs, 1);
+        }
+        setFills(current, progress);
+        if (!v && !paused && progress >= 1) return go(current + 1);
+        raf = requestAnimationFrame(tick);
+      }
+
+      function show(idx) {
+        stopAll();
+        current = idx;
+        paused = false;
+        slides.forEach(function (s, i) { s.classList.toggle('is-active', i === idx); });
+        var slide = slides[idx];
+        if (nameEl) nameEl.textContent = slide.dataset.name || '';
+        var v = slide.querySelector('video');
+        if (muteBtn) muteBtn.hidden = !v;
+        if (v) {
+          v.muted = muted;
+          v.currentTime = 0;
+          v.onended = function () { go(current + 1); };
+          v.play().catch(function () {});
+        }
+        startedAt = performance.now();
+        raf = requestAnimationFrame(tick);
+      }
+
+      function go(idx) {
+        if (idx < 0) idx = 0;
+        if (idx >= slides.length) return close();
+        show(idx);
+      }
+
+      function open(idx) {
+        if (typeof viewer.showModal === 'function') viewer.showModal();
+        else viewer.setAttribute('open', '');
+        document.documentElement.style.overflow = 'hidden';
+        show(idx);
+      }
+
+      function close() {
+        stopAll();
+        if (viewer.open && typeof viewer.close === 'function') viewer.close();
+        else viewer.removeAttribute('open');
+        document.documentElement.style.overflow = '';
+      }
+
+      section.querySelectorAll('[data-bcs-open]').forEach(function (btn) {
+        btn.addEventListener('click', function () { open(parseInt(btn.dataset.bcsOpen, 10) || 0); });
+      });
+      viewer.querySelectorAll('[data-bcs-next]').forEach(function (b) { b.addEventListener('click', function () { go(current + 1); }); });
+      viewer.querySelectorAll('[data-bcs-prev]').forEach(function (b) { b.addEventListener('click', function () { go(current - 1); }); });
+      viewer.querySelector('[data-bcs-close]').addEventListener('click', close);
+      viewer.addEventListener('cancel', function (e) { e.preventDefault(); close(); });
+      viewer.addEventListener('click', function (e) { if (e.target === viewer) close(); });
+      viewer.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight') go(current + 1);
+        if (e.key === 'ArrowLeft') go(current - 1);
+      });
+
+      if (muteBtn) {
+        muteBtn.addEventListener('click', function () {
+          muted = !muted;
+          viewer.classList.toggle('is-unmuted', !muted);
+          muteBtn.setAttribute('aria-label', muted ? 'Unmute' : 'Mute');
+          var v = slides[current].querySelector('video');
+          if (v) v.muted = muted;
+        });
+      }
+
+      // Hold to pause (images and videos)
+      var stage = viewer.querySelector('.bcs-viewer__stage');
+      var holdTimer = null;
+      stage.addEventListener('pointerdown', function () {
+        holdTimer = setTimeout(function () {
+          paused = true;
+          pausedAt = Math.min((performance.now() - startedAt) / imageMs, 1);
+          var v = slides[current].querySelector('video');
+          if (v) v.pause();
+        }, 180);
+      });
+      ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (evt) {
+        stage.addEventListener(evt, function () {
+          clearTimeout(holdTimer);
+          if (!paused) return;
+          paused = false;
+          startedAt = performance.now() - pausedAt * imageMs;
+          var v = slides[current].querySelector('video');
+          if (v) v.play().catch(function () {});
+        });
+      });
+
+      // Swipe left / right on touch
+      var sx = 0;
+      stage.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
+      stage.addEventListener('touchend', function (e) {
+        var dx = e.changedTouches[0].clientX - sx;
+        if (Math.abs(dx) > 50) go(current + (dx < 0 ? 1 : -1));
+      });
+    }
+
+    function boot() { document.querySelectorAll('[data-bcs]').forEach(init); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+    else boot();
+    document.addEventListener('shopify:section:load', function (e) { init(e.target.querySelector('[data-bcs]')); });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Customer stories",
+  "tag": "section",
+  "class": "section-balad-customer-stories",
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer"
+    ]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "#happycustomer"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Loved by our customers"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Real moments from our stores and messages. Tap a story to watch."
+    },
+    {
+      "type": "url",
+      "id": "instagram_url",
+      "label": "Instagram link"
+    },
+    {
+      "type": "text",
+      "id": "instagram_label",
+      "label": "Instagram button label",
+      "default": "Follow on Instagram"
+    },
+    {
+      "type": "range",
+      "id": "image_duration",
+      "label": "Image story duration",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 16,
+      "info": "Desktop only. Tablet and mobile use the same compact spacing as the other home sections."
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 16,
+      "info": "Desktop only. Tablet and mobile use the same compact spacing as the other home sections."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "story",
+      "name": "Story",
+      "settings": [
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Video",
+          "info": "MP4 or MOV. When set, the video is shown instead of the image."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image / screenshot"
+        },
+        {
+          "type": "text",
+          "id": "asset_image",
+          "label": "Theme image file (advanced)",
+          "info": "Used only when no image or video is selected, e.g. balad-story-01.jpg from the theme assets folder."
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Customer name or handle"
+        },
+        {
+          "type": "text",
+          "id": "badge",
+          "label": "Label",
+          "info": "Small tag on the tile, e.g. In store, WhatsApp review."
+        },
+        {
+          "type": "textarea",
+          "id": "caption",
+          "label": "Caption"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product (optional)",
+          "info": "Adds a Shop button inside the story."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Customer stories",
+      "blocks": [
+        {
+          "type": "story"
+        },
+        {
+          "type": "story"
+        },
+        {
+          "type": "story"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

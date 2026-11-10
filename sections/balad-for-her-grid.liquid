@@ -645,16 +645,7 @@
 
         closeQAModal();
 
-        // Dispatch theme cart updates
-        document.dispatchEvent(new CustomEvent('cart:updated', { bubbles: true }));
-        document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
-
-        const cartDrawer = document.querySelector('cart-drawer') || document.querySelector('#CartDrawer');
-        if (cartDrawer && typeof cartDrawer.open === 'function') {
-          cartDrawer.open();
-        } else {
-          window.location.href = '/cart';
-        }
+        if (window.pfOpenCart) { window.pfOpenCart('quick-add'); } else { window.location.href = '/cart'; }
       } catch (err) {
         console.error('Add to cart error:', err);
         if (qaProductUrl) window.location.href = qaProductUrl;

@@ -1,0 +1,36 @@
+{%- doc -%}
+  Compact product card used in the cart drawer "recommended products" rail.
+
+  @param {object} product - The product to render.
+  @param {object} variant - The variant added to the cart by the quick-add button.
+{%- enddoc -%}
+
+{%- assign offer_image = product.featured_media.preview_image | default: product.featured_image -%}
+<div class="pf-offer-card">
+  <a class="pf-offer-media" href="{{ product.url }}" tabindex="-1" aria-hidden="true">
+    {%- if offer_image != blank -%}
+      {{ offer_image | image_url: width: 160 | image_tag: class: 'pf-offer-img', loading: 'lazy', width: 56, height: 56, alt: product.title }}
+    {%- endif -%}
+  </a>
+  <div class="pf-offer-info">
+    <a class="pf-offer-name" href="{{ product.url }}">{{ product.title }}</a>
+    <div class="pf-offer-price-row">
+      <span class="pf-offer-price">{% render 'format-price', price: variant.price %}</span>
+      {%- if variant.compare_at_price > variant.price -%}
+        <span class="pf-offer-compare">{% render 'format-price', price: variant.compare_at_price %}</span>
+      {%- endif -%}
+    </div>
+  </div>
+  <button
+    type="button"
+    class="pf-offer-add-btn"
+    data-pf-offer-variant-id="{{ variant.id }}"
+    aria-label="Add {{ product.title | escape }} to bag"
+  >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    <span>Add</span>
+  </button>
+</div>

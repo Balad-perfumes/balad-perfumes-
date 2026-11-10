@@ -1520,10 +1520,8 @@
         })
         .then((cart) => {
           addBagBtn.textContent = 'Added!';
-          document.dispatchEvent(new CustomEvent('cart:update', {
-            bubbles: true,
-            detail: { data: cart, resource: cart, metadata: { itemCount: cart.item_count } }
-          }));
+          if (typeof closeQAModal === 'function') closeQAModal();
+          if (window.pfOpenCart) { window.pfOpenCart('quick-add'); } else { document.dispatchEvent(new CustomEvent('cart:update', { bubbles: true, detail: { data: cart, resource: cart } })); }
           setTimeout(() => {
             addBagBtn.textContent = 'Add To Bag';
             addBagBtn.disabled = false;

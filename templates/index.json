@@ -480,7 +480,8 @@
         "content_source": "static",
         "judgeme_widget_type": "featured_carousel",
         "judgeme_product": ""
-      }
+      },
+      "disabled": true
     },
     "real_life_images": {
       "type": "real-life-images",
@@ -1056,6 +1057,74 @@
         "padding-block-end": 0,
         "remove_horizontal_padding": false
       }
+    },
+    "customer_stories": {
+      "type": "balad-customer-stories",
+      "blocks": {
+        "story_01": {
+          "type": "story",
+          "settings": {
+            "asset_image": "balad-story-01.jpg",
+            "name": "Kannan",
+            "badge": "WhatsApp review",
+            "caption": "“An excellent creation. I've been receiving so many compliments from my colleagues. I'd love to buy the same one again.”"
+          }
+        },
+        "story_02": {
+          "type": "story",
+          "settings": {
+            "asset_image": "balad-story-02.jpg",
+            "name": "Happy customer",
+            "badge": "In store",
+            "caption": "Picking up his favourites at Balad Perfumes."
+          }
+        },
+        "story_03": {
+          "type": "story",
+          "settings": {
+            "asset_image": "balad-story-03.jpg",
+            "name": "@advjiyasjamal",
+            "badge": "In store",
+            "caption": "Shared by @advjiyasjamal on Instagram."
+          }
+        },
+        "story_04": {
+          "type": "story",
+          "settings": {
+            "asset_image": "balad-story-04.jpg",
+            "name": "Happy customers",
+            "badge": "In store",
+            "caption": "A group visit to our store."
+          }
+        },
+        "story_05": {
+          "type": "story",
+          "settings": {
+            "asset_image": "balad-story-05.jpg",
+            "name": "@sirajnadapuramm & family",
+            "badge": "Family visit",
+            "caption": "A family day out at Balad Perfumes."
+          }
+        }
+      },
+      "block_order": [
+        "story_01",
+        "story_02",
+        "story_03",
+        "story_04",
+        "story_05"
+      ],
+      "settings": {
+        "eyebrow": "#happycustomer",
+        "heading": "Loved by our customers",
+        "subheading": "Real moments from our stores and messages. Tap a story to watch.",
+        "instagram_url": "https://www.instagram.com/baladperfume/",
+        "instagram_label": "Follow @baladperfume",
+        "image_duration": 5,
+        "color_scheme": "scheme-1",
+        "padding_top": 16,
+        "padding_bottom": 16
+      }
     }
   },
   "order": [
@@ -1072,6 +1141,7 @@
     "trending_now",
     "our_stores",
     "testimonials",
+    "customer_stories",
     "real_life_images",
     "promo_cards",
     "spotlight",

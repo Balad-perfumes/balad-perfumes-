@@ -1,0 +1,109 @@
+{%- doc -%}
+  Cart drawer line items. Keeps the refs / actions that component-cart-items.js relies on
+  (cartItemRows[], quantitySelectors[], onLineItemRemove, cartItemError-N) with a compact card layout.
+{%- enddoc -%}
+
+<script src="{{ 'component-cart-quantity-selector.js' | asset_url }}" type="module" fetchpriority="low"></script>
+
+<span class="visually-hidden" ref="cartItemCount" aria-hidden="true">{{- cart.items.size -}}</span>
+
+<ul class="pf-ci-list" role="list" aria-label="{{ 'accessibility.cart' | t }}">
+  {%- for item in cart.items -%}
+    {%- liquid
+      assign can_update_quantity = item.instructions.can_update_quantity | default: true, allow_false: true
+      assign can_remove = item.instructions.can_remove | default: true, allow_false: true
+      assign unit_compare = item.variant.compare_at_price | default: 0
+      assign line_compare = unit_compare | times: item.quantity
+      assign has_compare = false
+      if line_compare > item.final_line_price
+        assign has_compare = true
+        assign line_saving = line_compare | minus: item.final_line_price
+        assign saving_pct = line_saving | times: 100 | divided_by: line_compare
+      endif
+    -%}
+    <li
+      class="pf-ci{% if item.parent_relationship.parent != null %} pf-ci--nested{% endif %}"
+      ref="cartItemRows[]"
+      data-key="{{ item.key }}"
+      data-parent-key="{{ item.parent_relationship.parent.key }}"
+    >
+      <a class="pf-ci__media" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+        {%- if item.image -%}
+          {{ item.image | image_url: width: 240 | image_tag: class: 'pf-ci__img', loading: 'lazy', width: 76, height: 96, alt: item.product.title }}
+        {%- endif -%}
+      </a>
+
+      <div class="pf-ci__body">
+        <div class="pf-ci__head">
+          <div class="pf-ci__info">
+            <a class="pf-ci__title" href="{{ item.url }}">{{ item.product.title }}</a>
+            {%- capture variant_text -%}
+              {%- unless item.product.has_only_default_variant -%}
+                {%- for option in item.options_with_values -%}{{ option.value }}{% unless forloop.last %} · {% endunless %}{%- endfor -%}
+              {%- endunless -%}
+            {%- endcapture -%}
+            {%- if variant_text != blank or has_compare -%}
+              <p class="pf-ci__variant">
+                {{- variant_text -}}
+                {%- if has_compare -%}<span class="pf-ci__off">{{ saving_pct }}% off</span>{%- endif -%}
+              </p>
+            {%- endif -%}
+            {%- for property in item.properties -%}
+              {%- assign first_char = property.first | slice: 0 -%}
+              {%- if property.last != blank and first_char != '_' -%}
+                <p class="pf-ci__note">{{ property.first }}: {{ property.last }}</p>
+              {%- endif -%}
+            {%- endfor -%}
+            {%- if item.selling_plan_allocation -%}
+              <p class="pf-ci__note">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+            {%- endif -%}
+          </div>
+
+          <div class="pf-ci__prices">
+            {%- capture line_price -%}{%- render 'format-price', price: item.final_line_price -%}{%- endcapture -%}
+            <text-component class="pf-ci__price" value="{{ line_price | strip_html | strip }}">{{ line_price }}</text-component>
+            {%- if has_compare -%}
+              <span class="pf-ci__compare">{% render 'format-price', price: line_compare %}</span>
+            {%- endif -%}
+            {%- if item.quantity > 1 -%}
+              <span class="pf-ci__each">{% render 'format-price', price: item.final_price %} each</span>
+            {%- endif -%}
+          </div>
+        </div>
+
+        <div class="pf-ci__foot">
+          <div class="pf-ci__qty">
+            {% render 'quantity-selector',
+              product: item.product,
+              variant: item.variant,
+              in_cart_quantity: item.quantity,
+              line_index: forloop.index0,
+              can_update_quantity: can_update_quantity
+            %}
+          </div>
+
+          <button
+            class="pf-ci__remove"
+            type="button"
+            aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
+            on:click="/onLineItemRemove/{{ forloop.index }}"
+            {% unless can_remove %}hidden{% endunless %}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 7h16"/><path d="M9.5 7V4.8h5V7"/><path d="M6.5 7l.8 12.2a1 1 0 0 0 1 .9h7.4a1 1 0 0 0 1-.9L17.5 7"/>
+            </svg>
+            <span class="visually-hidden">Remove</span>
+          </button>
+        </div>
+
+        {%- for discount in item.line_level_discount_allocations -%}
+          <p class="pf-ci__discount">{{ discount.discount_application.title | escape }} (−{% render 'format-price', price: discount.amount %})</p>
+        {%- endfor -%}
+
+        <div class="pf-ci__error hidden" ref="cartItemErrorContainer-{{ forloop.index }}" role="alert">
+          <small ref="cartItemError-{{ forloop.index }}"></small>
+        </div>
+      </div>
+    </li>
+  {%- endfor -%}
+</ul>

@@ -76,13 +76,20 @@
                         {% for child in link.links %}
                           <a class="pf-header__dropdown-link{% if child.current %} is-current{% endif %}" href="{{ child.url }}">
                             <span class="pf-header__dropdown-title">{{ child.title | escape }}</span>
+                            <svg class="pf-header__dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
                           </a>
                         {% endfor %}
                       </div>
+                      {% if link.url != blank and link.url != '#' %}
+                        <a class="pf-header__dropdown-all" href="{{ link.url }}">
+                          <span>View all {{ link.title | escape }}</span>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+                        </a>
+                      {% endif %}
                     </div>
                   </details>
                 {% else %}
-                  <a class="pf-header__nav-link{% if link.current %} is-active{% endif %}" href="{{ link.url }}">
+                  <a class="pf-header__nav-link{% if link.current %} is-active{% endif %}" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
                     <span>{{ link.title | escape }}</span>
                   </a>
                 {% endif %}
@@ -132,14 +139,12 @@
 
     <!-- Right Column: Action Icons -->
     <div class="pf-header__col-right pf-header__actions">
-      <!-- 1. Desktop Story Badge -->
       {% if section.settings.show_story_badge %}
         <button
           type="button"
           class="pf-header__story-badge pf-header__story-badge--desktop"
           data-open-story-modal
-          aria-label="View Store Stories"
-          title="View Stories"
+          aria-label="View store stories"
         >
           <span class="pf-header__story-ring">
             {% if section.settings.custom_story_avatar != blank %}
@@ -161,124 +166,121 @@
         </button>
       {% endif %}
 
-      <!-- 2. Store / Location Pin (Desktop) -->
-      {% if section.settings.show_location %}
-        <a
-          href="{{ section.settings.location_link | default: '/pages/our-stores' }}"
-          class="pf-header__icon-button pf-header__location-btn pf-header__hide-mobile"
-          aria-label="Stores & Location"
-          title="Find Store"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 21c-4.5-5.5-7-8.5-7-12a7 7 0 1 1 14 0c0 3.5-2.5 6.5-7 12z"/>
-            <circle cx="12" cy="9" r="2.5"/>
-          </svg>
-        </a>
-      {% endif %}
+      <!-- Utility group: stores, search, account -->
+      <div class="pf-header__action-group pf-header__action-group--utility">
+        {% if section.settings.show_location %}
+          <a
+            href="{{ section.settings.location_link | default: '/pages/our-stores' }}"
+            class="pf-header__icon-button pf-header__location-btn pf-header__hide-mobile"
+            aria-label="Find a store"
+            data-tip="Stores"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 21.5c-4.4-5.2-6.8-8.6-6.8-12a6.8 6.8 0 1 1 13.6 0c0 3.4-2.4 6.8-6.8 12z"/>
+              <circle cx="12" cy="9.4" r="2.4"/>
+            </svg>
+          </a>
+        {% endif %}
 
-      <!-- 3. Search Icon -->
-      {% if section.settings.show_search %}
+        {% if section.settings.show_search %}
+          <button
+            class="pf-header__icon-button pf-header__search-btn"
+            type="button"
+            on:click="#search-modal/showDialog"
+            aria-label="Search"
+            data-tip="Search"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="10.8" cy="10.8" r="6.8"/>
+              <path d="m20 20-4.4-4.4"/>
+            </svg>
+          </button>
+        {% endif %}
+
+        {% if section.settings.show_account %}
+          <a
+            class="pf-header__icon-button pf-header__account-btn pf-header__hide-mobile{% if customer %} is-signed-in{% endif %}"
+            href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
+            aria-label="{%- if customer -%}My account{%- else -%}Sign in{%- endif -%}"
+            data-tip="{%- if customer -%}Account{%- else -%}Sign in{%- endif -%}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.9"/>
+              <path d="M4.8 20.2c.6-3.7 3.6-6 7.2-6s6.6 2.3 7.2 6"/>
+            </svg>
+          </a>
+        {% endif %}
+      </div>
+
+      <span class="pf-header__divider pf-header__hide-mobile" aria-hidden="true"></span>
+
+      <!-- Commerce group: wishlist, bag, menu -->
+      <div class="pf-header__action-group pf-header__action-group--commerce">
+        {% if section.settings.show_wishlist %}
+          <wishlist-icon>
+            <button
+              type="button"
+              class="pf-header__icon-button pf-header__wishlist-button"
+              aria-label="Wishlist"
+              data-tip="Wishlist"
+              onclick="if(window.openWishlistDrawer){window.openWishlistDrawer()}else{document.dispatchEvent(new CustomEvent('wishlist-drawer:open'))}"
+            >
+              {% if section.settings.custom_wishlist_icon != blank %}
+                {{
+                  section.settings.custom_wishlist_icon
+                  | image_url: width: 60
+                  | image_tag: class: 'pf-header__custom-icon', loading: 'lazy', alt: ''
+                }}
+              {% else %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M6.5 3.5h11a1 1 0 0 1 1 1v16l-6.5-3.8-6.5 3.8v-16a1 1 0 0 1 1-1z"/>
+                </svg>
+              {% endif %}
+              <span data-wishlist-bubble class="pf-header__wishlist-bubble" style="display:none">
+                <span class="pf-header__wishlist-count" data-wishlist-count>0</span>
+              </span>
+            </button>
+          </wishlist-icon>
+        {% endif %}
+
         <button
-          class="pf-header__icon-button pf-header__search-btn"
+          class="pf-header__icon-button pf-header__cart-button"
           type="button"
-          on:click="#search-modal/showDialog"
-          aria-label="Search"
-          title="Search"
+          on:click="#cart-drawer/open"
+          aria-label="Bag"
+          data-tip="Bag"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="7"/>
-            <path d="m20 20-3.5-3.5"/>
+          {% if section.settings.custom_cart_icon != blank %}
+            {{
+              section.settings.custom_cart_icon
+              | image_url: width: 60
+              | image_tag: class: 'pf-header__custom-icon', loading: 'lazy', alt: ''
+            }}
+          {% else %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4.75 9.25A2.25 2.25 0 0 1 7 7h10a2.25 2.25 0 0 1 2.25 2.25V17.5A3.5 3.5 0 0 1 15.75 21h-7.5a3.5 3.5 0 0 1-3.5-3.5z"/>
+              <path d="M8.75 7V6.25a3.25 3.25 0 0 1 6.5 0V7"/>
+              <path d="M9.25 11.25a2.75 2.75 0 0 0 5.5 0"/>
+            </svg>
+          {% endif %}
+          <span class="pf-header__cart-count" {% if cart == empty %}hidden aria-hidden="true"{% endif %}>
+            {{- cart.items.size -}}
+          </span>
+        </button>
+
+        <button
+          class="pf-header__menu-pill"
+          type="button"
+          data-pf-header-menu
+          aria-label="Open menu"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+            <line x1="4" y1="7" x2="20" y2="7"/>
+            <line x1="4" y1="12" x2="20" y2="12"/>
+            <line x1="4" y1="17" x2="14" y2="17"/>
           </svg>
         </button>
-      {% endif %}
-
-      <!-- 4. Account Icon (Desktop) -->
-      {% if section.settings.show_account %}
-        <a
-          class="pf-header__icon-button pf-header__account-btn pf-header__hide-mobile"
-          href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
-          aria-label="{%- if customer -%}Account{%- else -%}Log in{%- endif -%}"
-          title="{%- if customer -%}Account{%- else -%}Log in{%- endif -%}"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="7.5" r="4"/>
-            <path d="M4.5 20c0-4 3.5-6.5 7.5-6.5s7.5 2.5 7.5 6.5"/>
-          </svg>
-        </a>
-      {% endif %}
-
-      <!-- 5. Bookmark / Wishlist Icon -->
-      {% if section.settings.show_wishlist %}
-        <wishlist-icon>
-          <button
-            type="button"
-            class="pf-header__icon-button pf-header__wishlist-button"
-            aria-label="Wishlist"
-            title="Wishlist"
-            onclick="if(window.openWishlistDrawer){window.openWishlistDrawer()}else{document.dispatchEvent(new CustomEvent('wishlist-drawer:open'))}"
-          >
-            {% if section.settings.custom_wishlist_icon != blank %}
-              {{
-                section.settings.custom_wishlist_icon
-                | image_url: width: 60
-                | image_tag: class: 'pf-header__custom-icon', loading: 'lazy', alt: 'Wishlist'
-              }}
-            {% else %}
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/>
-              </svg>
-            {% endif %}
-            <div
-              data-wishlist-bubble
-              class="pf-header__wishlist-bubble"
-              style="display:none"
-            >
-              <span class="pf-header__wishlist-count" data-wishlist-count>0</span>
-            </div>
-          </button>
-        </wishlist-icon>
-      {% endif %}
-
-      <!-- 6. Shopping Bag / Cart Icon -->
-      <button
-        class="pf-header__icon-button pf-header__cart-button"
-        type="button"
-        on:click="#cart-drawer/open"
-        aria-label="Cart"
-        title="Cart"
-      >
-        {% if section.settings.custom_cart_icon != blank %}
-          {{
-            section.settings.custom_cart_icon
-            | image_url: width: 60
-            | image_tag: class: 'pf-header__custom-icon', loading: 'lazy', alt: 'Cart'
-          }}
-        {% else %}
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M6 6h12v14a1.5 1.5 0 0 1-1.5 1.5H7.5A1.5 1.5 0 0 1 6 20V6z"/>
-            <path d="M9 6V4.5a3 3 0 0 1 6 0V6"/>
-            <path d="M10 10.5h4"/>
-          </svg>
-        {% endif %}
-        <span class="pf-header__cart-count" {% if cart == empty %}hidden aria-hidden="true"{% endif %}>
-          {{- cart.items.size -}}
-        </span>
-      </button>
-
-      <!-- 7. Hamburger Menu Button (3 lines) -->
-      <button
-        class="pf-header__menu-pill"
-        type="button"
-        data-pf-header-menu
-        aria-label="Open menu"
-        title="Menu"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="4" y1="6" x2="20" y2="6"/>
-          <line x1="4" y1="12" x2="20" y2="12"/>
-          <line x1="4" y1="18" x2="20" y2="18"/>
-        </svg>
-      </button>
+      </div>
     </div>
   </div>
 
@@ -561,10 +563,10 @@
         {% endif %}
 
         <button class="pf-header__drawer-icon pf-header__cart-button" type="button" on:click="#cart-drawer/open" aria-label="Cart">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M6 6h12v14a1.5 1.5 0 0 1-1.5 1.5H7.5A1.5 1.5 0 0 1 6 20V6z"/>
-            <path d="M9 6V4.5a3 3 0 0 1 6 0V6"/>
-            <path d="M10 10.5h4"/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4.75 9.25A2.25 2.25 0 0 1 7 7h10a2.25 2.25 0 0 1 2.25 2.25V17.5A3.5 3.5 0 0 1 15.75 21h-7.5a3.5 3.5 0 0 1-3.5-3.5z"/>
+            <path d="M8.75 7V6.25a3.25 3.25 0 0 1 6.5 0V7"/>
+            <path d="M9.25 11.25a2.75 2.75 0 0 0 5.5 0"/>
           </svg>
           <span class="pf-header__cart-count" {% if cart == empty %}hidden aria-hidden="true"{% endif %}>
             {{- cart.items.size -}}
@@ -577,7 +579,10 @@
       {% if menu != blank and menu.links.size > 0 %}
         {% for link in menu.links %}
           <div class="pf-header__drawer-group">
-            <a class="pf-header__drawer-link" href="{{ link.url }}">{{ link.title | escape }}</a>
+            <a class="pf-header__drawer-link{% if link.current or link.child_active %} is-current{% endif %}" href="{{ link.url }}">
+              <span>{{ link.title | escape }}</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+            </a>
             {% if link.links != blank %}
               <div class="pf-header__drawer-subgrid">
                 {% for child in link.links %}
@@ -788,6 +793,13 @@
   .pf-header__nav-link[aria-current='page'],
   .pf-header__nav-link.is-current { font-weight: 600; }
 
+  /* Hovering one link softly dims its siblings */
+  @media (hover: hover) and (pointer: fine) {
+    .pf-header__nav-list:hover .pf-header__nav-link { opacity: 0.55; }
+    .pf-header__nav-list .pf-header__nav-item:hover .pf-header__nav-link,
+    .pf-header__nav-list .pf-header__menu[open] .pf-header__nav-link { opacity: 1; }
+  }
+
   .pf-header__caret {
     width: 5px;
     height: 5px;
@@ -834,7 +846,10 @@
   }
   .pf-header__dropdown-grid { display: flex; flex-direction: column; gap: 2px; }
   .pf-header__dropdown-link {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     padding: 11px 14px;
     border-radius: 10px;
     color: #111111;
@@ -842,13 +857,45 @@
     font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.01em;
-    transition: background-color 0.2s ease, padding-left 0.3s var(--pf-ease);
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  .pf-header__dropdown-arrow {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.25s ease, transform 0.35s var(--pf-ease);
   }
   .pf-header__dropdown-link:hover,
   .pf-header__dropdown-link.is-current {
     background: rgba(17, 17, 17, 0.05);
-    padding-left: 18px;
   }
+  .pf-header__dropdown-link:hover .pf-header__dropdown-arrow,
+  .pf-header__dropdown-link.is-current .pf-header__dropdown-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .pf-header__dropdown-all {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 6px;
+    padding: 12px 14px;
+    border-top: 1px solid rgba(17, 17, 17, 0.07);
+    border-radius: 0 0 10px 10px;
+    color: #111111;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition: color 0.2s ease;
+  }
+  .pf-header__dropdown-all svg { width: 14px; height: 14px; transition: transform 0.35s var(--pf-ease); }
+  .pf-header__dropdown-all:hover { color: #b08d4f; }
+  .pf-header__dropdown-all:hover svg { transform: translateX(4px); }
 
   /* ---------- Brand ---------- */
   .pf-header__brand {
@@ -891,8 +938,66 @@
   .pf-header__actions {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     white-space: nowrap;
+  }
+  .pf-header__action-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .pf-header__action-group wishlist-icon { display: contents; }
+  .pf-header__divider {
+    width: 1px;
+    height: 20px;
+    margin: 0 6px;
+    background: currentColor;
+    opacity: 0.16;
+    flex-shrink: 0;
+  }
+
+  /* Hover tooltip (desktop pointers only) */
+  @media (hover: hover) and (pointer: fine) {
+    .pf-header__icon-button[data-tip]::after {
+      content: attr(data-tip);
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: #111111;
+      color: #ffffff;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, -4px);
+      transition: opacity 0.2s ease, transform 0.3s var(--pf-ease);
+      z-index: 5;
+    }
+    .pf-header__icon-button[data-tip]:hover::after,
+    .pf-header__icon-button[data-tip]:focus-visible::after {
+      opacity: 1;
+      transform: translate(-50%, 0);
+      transition-delay: 0.15s;
+    }
+  }
+
+  /* Signed-in indicator on the account icon */
+  .pf-header__account-btn.is-signed-in::before {
+    content: '';
+    position: absolute;
+    right: 9px;
+    bottom: 9px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #3d9a62;
+    box-shadow: 0 0 0 2px var(--pf-badge-ring, #f6f3ee);
   }
 
   .pf-header__icon-button,
@@ -1012,8 +1117,20 @@
     text-align: center;
     box-sizing: border-box;
     pointer-events: none;
+    animation: pfBadgePop 0.45s var(--pf-ease);
   }
   .pf-header__cart-count[hidden] { display: none; }
+  .pf-header__cart-count.is-bumped,
+  .pf-header__wishlist-bubble.is-bumped { animation: pfBadgeBump 0.5s var(--pf-ease); }
+  @keyframes pfBadgePop {
+    from { transform: scale(0.4); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  @keyframes pfBadgeBump {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.35); }
+    100% { transform: scale(1); }
+  }
 
   /* ==========================================================================
      CLEAN STRUCTURED STORY MODAL VIEWER
@@ -1655,7 +1772,10 @@
   .pf-header__drawer-group:nth-child(n+6) { animation-delay: 0.33s; }
 
   .pf-header__drawer-link {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     padding: 12px 0 4px;
     color: #111111;
     text-decoration: none;
@@ -1665,8 +1785,17 @@
     letter-spacing: -0.02em;
     transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
   }
+  .pf-header__drawer-link svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    opacity: 0.35;
+    transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
   .pf-header__drawer-link:hover,
   .pf-header__drawer-link.is-current { transform: translateX(6px); }
+  .pf-header__drawer-link:hover svg,
+  .pf-header__drawer-link.is-current svg { opacity: 1; transform: translateX(-6px); }
 
   .pf-header__drawer-subgrid {
     display: flex;
@@ -1886,10 +2015,25 @@
       }
     });
 
+    const bump = (node) => {
+      node.classList.remove('is-bumped');
+      void node.offsetWidth;
+      node.classList.add('is-bumped');
+    };
+
+    document.addEventListener('wishlist:update', () => {
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.pf-header__wishlist-bubble').forEach((bubble) => {
+          if (bubble.style.display !== 'none') bump(bubble);
+        });
+      });
+    });
+
     const updateCartCount = (count) => {
       const countNodes = document.querySelectorAll('.pf-header__cart-count');
       countNodes.forEach((countNode) => {
         if (count > 0) {
+          if (String(count) !== countNode.textContent.trim() && !countNode.hidden) bump(countNode);
           countNode.textContent = count;
           countNode.removeAttribute('hidden');
           countNode.removeAttribute('aria-hidden');

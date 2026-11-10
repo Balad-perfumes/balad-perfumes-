@@ -11,57 +11,13 @@
   "sections": {
     "cart-section": {
       "type": "main-cart",
-      "blocks": {
-        "cart-page-title": {
-          "type": "_cart-title",
-          "static": true,
-          "settings": {
-            "title": "Cart",
-            "show_count": true,
-            "type_preset": "h4",
-            "alignment": "left",
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {}
-        },
-        "cart-page-items": {
-          "type": "_cart-products",
-          "static": true,
-          "settings": {
-            "gap": 24,
-            "image_ratio": "portrait",
-            "dividers": true,
-            "vendor": false,
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {}
-        },
-        "cart-page-summary": {
-          "type": "_cart-summary",
-          "static": true,
-          "settings": {
-            "extend_summary": true,
-            "inherit_color_scheme": false,
-            "color_scheme": "scheme-4",
-            "border": "none",
-            "border_width": 1,
-            "border_opacity": 100,
-            "border_radius": 0
-          },
-          "blocks": {}
-        }
-      },
       "settings": {
-        "section_width": "page-width",
-        "color_scheme": "",
-        "padding-block-start": 24,
-        "padding-block-end": 0
+        "color_scheme": "scheme-1",
+        "show_delivery": true,
+        "delivery_title": "Ships next working day",
+        "delivery_text": "Delivered across India in 3–7 business days",
+        "padding-block-start": 32,
+        "padding-block-end": 64
       }
     },
     "cart_fragrance_recommendations": {
