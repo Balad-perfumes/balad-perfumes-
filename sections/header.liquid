@@ -695,7 +695,7 @@
   }
 
   /* Pull the first section under the transparent header ONLY when transparent mode is active */
-  body:has(.pf-header--transparent) .content-for-layout > .shopify-section:first-child {
+  body.has-transparent-header .content-for-layout > .shopify-section:first-child {
     margin-top: calc(var(--header-height, 76px) * -1);
   }
 
@@ -1620,11 +1620,7 @@
 
   /* Completely hide mobile bottom nav bar when drawer is open */
   body.pf-drawer-open .balad-mobile-nav,
-  body.pf-drawer-open .balad-mobile-tabs,
-  .pf-header__drawer:not([hidden]) ~ .balad-mobile-nav,
-  .pf-header__drawer:not([hidden]) ~ .balad-mobile-tabs,
-  html:has(.pf-header__drawer:not([hidden])) .balad-mobile-nav,
-  html:has(.pf-header__drawer:not([hidden])) .balad-mobile-tabs {
+  body.pf-drawer-open .balad-mobile-tabs {
     display: none !important;
     opacity: 0 !important;
     pointer-events: none !important;
@@ -1862,7 +1858,7 @@
       gap: 10px;
     }
 
-    body:has(.pf-header--transparent) .content-for-layout > .shopify-section:first-child {
+    body.has-transparent-header .content-for-layout > .shopify-section:first-child {
       margin-top: calc(var(--header-height-mobile, 60px) * -1);
     }
 

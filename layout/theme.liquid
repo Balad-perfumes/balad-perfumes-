@@ -33,6 +33,9 @@
     {%- render 'theme-styles-variables' -%}
     {%- render 'color-schemes' -%}
     {{ 'balad-modals.css' | asset_url | stylesheet_tag }}
+    {%- if template.name == 'cart' -%}
+      {{ 'cart-drawer.css' | asset_url | stylesheet_tag }}
+    {%- endif -%}
     {%- render 'shoppable-video-enhancer' -%}
 
     {% comment %} Smooth Scroll & Viewport Overflow Protection {% endcomment %}
@@ -75,6 +78,20 @@
     <div id="header-group">
       {% sections 'header-group' %}
     </div>
+    {%- comment -%}
+      Mark the header type on <body> once, before the page content renders. CSS uses
+      body.has-transparent-header etc. instead of body:has(...): a :has() rule on <body>
+      made Chrome restyle the whole page hundreds of times during load (every time an app
+      or carousel changed something), which was most of the mobile "Style & Layout" time.
+    {%- endcomment -%}
+    <script>
+      (function (b, q) {
+        if (q('.pf-header--transparent, .header[transparent], header-component[transparent]')) b.classList.add('has-transparent-header');
+        if (q('.pf-header--about-page')) b.classList.add('has-about-header');
+        if (q('#header-group header-component[sticky]')) b.classList.add('has-sticky-header');
+        if (q('#header-group > .header-section > #header-component[transparent]') && !q('#header-group > .header-section + .shopify-section')) b.classList.add('has-overlay-header');
+      })(document.body, function (s) { return document.querySelector(s); });
+    </script>
 
     <script>
       (function() {
@@ -169,6 +186,7 @@
     {% render 'search-modal' %}
     {% render 'balad-qa-modal' %}
     {% render 'balad-wishlist-modal' %}
+    <script src="{{ 'balad-product-card.js' | asset_url }}" defer></script>
 
     {% if settings.quick_add or settings.mobile_quick_add or request.page_type == 'collection' or request.page_type == 'search' %}
       {% render 'quick-add-modal' %}

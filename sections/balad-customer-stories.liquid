@@ -51,18 +51,27 @@
                 type="button"
                 class="bcs__tile"
                 data-bcs-open="{{ forloop.index0 }}"
-                aria-label="Open story{% if block.settings.name != blank %} from {{ block.settings.name | escape }}{% endif %}"
               >
-                <span class="bcs__tile-media">
+                {%- comment -%}
+                  No aria-label: the button's name comes from its visible text (name, caption, duration),
+                  so what people see matches what screen readers announce. Images are decorative here.
+                {%- endcomment -%}
+                <span class="visually-hidden">Open story:</span>
+                <span class="bcs__tile-media" aria-hidden="true">
                   {%- if has_video -%}
                     {%- if block.settings.video.preview_image != blank -%}
-                      {{ block.settings.video.preview_image | image_url: width: 540 | image_tag: loading: 'lazy', class: 'bcs__tile-poster', alt: block.settings.name | default: 'Customer video story' }}
+                      {{ block.settings.video.preview_image | image_url: width: 540 | image_tag: loading: 'lazy', class: 'bcs__tile-poster', alt: '' }}
                     {%- elsif thumb != blank -%}
-                      <img class="bcs__tile-poster" src="{{ thumb }}" alt="{{ block.settings.name | default: 'Customer video story' | escape }}" loading="lazy" width="540" height="960">
+                      <img class="bcs__tile-poster" src="{{ thumb }}" alt="" loading="lazy" width="540" height="960">
                     {%- endif -%}
-                    {{ block.settings.video | video_tag: muted: true, loop: true, playsinline: true, preload: 'none', image_size: '540x', class: 'bcs__tile-video' }}
+                    {%- comment -%} Built by hand instead of video_tag, whose fallback <img> inside <video> has no alt {%- endcomment -%}
+                    <video class="bcs__tile-video" muted loop playsinline preload="none">
+                      {%- for source in block.settings.video.sources -%}
+                        <source src="{{ source.url }}" type="{{ source.mime_type }}">
+                      {%- endfor -%}
+                    </video>
                   {%- elsif thumb != blank -%}
-                    <img src="{{ thumb }}" alt="{{ block.settings.name | default: 'Customer story' | escape }}" loading="lazy" width="540" height="960">
+                    <img src="{{ thumb }}" alt="" loading="lazy" width="540" height="960">
                   {%- else -%}
                     <span class="bcs__placeholder">Add an image or video</span>
                   {%- endif -%}
@@ -238,7 +247,7 @@
     line-height: 1.1;
     color: #111111;
   }
-  .bcs__sub { margin: 6px 0 0; max-width: 520px; font-size: 14px; line-height: 1.4; font-weight: 400; color: #6b7280; }
+  .bcs__sub { margin: 6px 0 0; max-width: 520px; font-size: 14px; line-height: 1.4; font-weight: 400; color: #565c66; }
 
   .bcs__ig {
     flex-shrink: 0;

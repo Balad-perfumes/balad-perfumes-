@@ -79,9 +79,7 @@
     display: none;
   }
 
-  body:has(> #header-group > .header-section > #header-component[transparent]):not(
-      :has(> #header-group > .header-section + .shopify-section)
-    )
+  body.has-overlay-header
     > main
     > .section-wrapper:first-child {
     --section-height-offset: var(--header-group-height, 0);

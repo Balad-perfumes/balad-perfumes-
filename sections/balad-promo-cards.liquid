@@ -369,6 +369,30 @@
     inset: -8px -4px;
   }
 
+  /* Tap targets: each dot is a 24x24 button (WCAG minimum) and draws the small pill
+     with ::before, so it looks the same but is easy to hit. */
+  .balad-promo-cards .balad-promo-cards__dots.balad-promo-cards__dots { gap: 0; padding-block: 0; }
+  .balad-promo-cards .balad-promo-cards__dot.balad-promo-cards__dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    height: 24px;
+    min-width: 24px;
+    background: transparent;
+  }
+  .balad-promo-cards .balad-promo-cards__dot::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.55);
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease;
+  }
+  .balad-promo-cards .balad-promo-cards__dot.is-active::before { width: 22px; background: #ffffff; }
+  .balad-promo-cards .balad-promo-cards__dot.is-active { min-width: 30px; }
+  .balad-promo-cards .balad-promo-cards__dot::after { content: none; }
+
   .balad-promo-cards__dot.is-active {
     width: 22px;
     background: #ffffff;
@@ -743,13 +767,17 @@
           slides.forEach(function (slide, i) {
             var on = i === index;
             slide.classList.toggle('is-active', on);
-            slide.setAttribute('aria-hidden', on ? 'false' : 'true');
+            // inert (not aria-hidden): off-screen slides hold links, and aria-hidden on
+            // focusable content is an accessibility error. inert hides them from both.
+            slide.inert = !on;
+            slide.removeAttribute('aria-hidden');
           });
         }
 
         function render(offsetPx) {
           if (!isSliderMode()) {
             track.style.transform = '';
+            slides.forEach(function (slide) { slide.inert = false; });
             return;
           }
           if (offsetPx) {
@@ -952,7 +980,14 @@
       });
     }
 
-    initPromoSliders(document);
+    // Set up after the page has parsed and the browser is idle: measuring layout mid-parse
+    // forced a full-page layout while the hero was still trying to paint.
+    function whenIdle(fn) {
+      var run = function () { (window.requestIdleCallback || function (cb) { setTimeout(cb, 200); })(fn, { timeout: 2000 }); };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, { once: true });
+      else run();
+    }
+    whenIdle(function () { initPromoSliders(document); });
     document.addEventListener('shopify:section:load', function (e) { initPromoSliders(e.target); });
   })();
 </script>

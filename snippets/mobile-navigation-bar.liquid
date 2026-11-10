@@ -261,16 +261,14 @@
       pointer-events: none !important;
     }
 
-    /* Hide when Drawer or Modal is Open */
+    /* Hide when a drawer or modal is open. Every modal/drawer locks page scroll with
+       body/html style="overflow: hidden", so match that instead of html:has(...):
+       :has() on <html> makes the browser restyle the whole page whenever any
+       is-open / is-active / hidden changes anywhere (carousels do that constantly). */
     body.pf-drawer-open .balad-mobile-nav,
     body.story-modal-open .balad-mobile-nav,
-    .pf-header__drawer:not([hidden]) ~ .balad-mobile-nav,
-    html:has(.pf-header__drawer:not([hidden])) .balad-mobile-nav,
-    html:has(.balad-qa-modal.is-open) .balad-mobile-nav,
-    html:has(.balad-wishlist-modal.is-open) .balad-mobile-nav,
-    html:has(.balad-filter-drawer.is-open) .balad-mobile-nav,
-    html:has(.balad-spotlight__drawer[aria-hidden="false"]) .balad-mobile-nav,
-    html:has(.pf-review-modal.is-active) .balad-mobile-nav {
+    body[style*="overflow: hidden"] .balad-mobile-nav,
+    html[style*="overflow: hidden"] .balad-mobile-nav {
       display: none !important;
       opacity: 0 !important;
       pointer-events: none !important;

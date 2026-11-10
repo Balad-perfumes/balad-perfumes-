@@ -975,9 +975,9 @@ summary::-webkit-details-marker {
 }
 
 /* When header is transparent, pull the first main content section up to sit under the floating header */
-body:has(.header[transparent]) .content-for-layout > .shopify-section:first-child,
-body:has(.pf-header--transparent) .content-for-layout > .shopify-section:first-child,
-body:has(.pf-header--about-page) .content-for-layout > .shopify-section:first-child {
+body.has-transparent-header .content-for-layout > .shopify-section:first-child,
+body.has-transparent-header .content-for-layout > .shopify-section:first-child,
+body.has-about-header .content-for-layout > .shopify-section:first-child {
   margin-top: calc(var(--header-group-height) * -1);
 }
 
@@ -989,17 +989,17 @@ body:has(.pf-header--about-page) .content-for-layout > .shopify-section:first-ch
   width: 100% !important;
 }
 
-body:has(.header[transparent]) #header-group > .header-section,
-body:has(.pf-header--transparent) #header-group > .header-section,
-body:has(.pf-header--about-page) #header-group > .header-section {
+body.has-transparent-header #header-group > .header-section,
+body.has-transparent-header #header-group > .header-section,
+body.has-about-header #header-group > .header-section {
   z-index: var(--layer-sticky);
 }
 
 /* All other header group content should be beneath the floating header,
 but above the rest of the page content */
-body:has(.header[transparent]) #header-group > *:not(.header-section),
-body:has(.pf-header--transparent) #header-group > *:not(.header-section),
-body:has(.pf-header--about-page) #header-group > *:not(.header-section) {
+body.has-transparent-header #header-group > *:not(.header-section),
+body.has-transparent-header #header-group > *:not(.header-section),
+body.has-about-header #header-group > *:not(.header-section) {
   z-index: calc(var(--layer-sticky) - 1);
 }
 
@@ -1623,7 +1623,7 @@ media-gallery {
     --constrained-min-height: 500px;
   }
 
-  body:has(header-component[transparent]) .product-media-container.constrain-height {
+  body.has-transparent-header .product-media-container.constrain-height {
     --viewport-offset: 0px;
   }
 

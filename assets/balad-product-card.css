@@ -2,7 +2,7 @@
 
 .bpc {
   --bpc-ink: #111;
-  --bpc-muted: #8a8a8a;
+  --bpc-muted: #696969; /* was #8a8a8a: 3.1:1 on the card panel, below the 4.5:1 AA minimum */
   --bpc-panel: #f3f3f2;
   --bpc-media-bg: #ece9e4;
   --bpc-pad: 8px;
@@ -67,41 +67,75 @@
   opacity: 1;
 }
 
-/* ── Skeleton loading shimmer ──────────────── */
+/* ── Skeleton loading ─────────────────────────
+   The highlight is a pseudo-element moved with transform, which the GPU animates
+   off the main thread. (Animating background-position repainted every frame on
+   the main thread, for every card still waiting for its image.) */
 .bpc__skeleton {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(
-    90deg,
-    rgba(236, 233, 228, 0.7) 0%,
-    rgba(255, 255, 255, 0.75) 40%,
-    rgba(247, 245, 242, 0.95) 50%,
-    rgba(255, 255, 255, 0.75) 60%,
-    rgba(236, 233, 228, 0.7) 100%
-  );
-  background-size: 200% 100%;
-  animation: bpc-shimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  overflow: hidden;
+  background: var(--bpc-media-bg);
   pointer-events: none;
   opacity: 1;
   visibility: visible;
   transition: opacity 0.35s ease, visibility 0.35s ease;
 }
 
+.bpc__skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgb(255 255 255 / 0.55) 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: bpc-sweep 1.4s ease-in-out infinite;
+}
+
 .bpc__media.is-loaded .bpc__skeleton,
 .bpc__media.has-loaded .bpc__skeleton {
   opacity: 0;
   visibility: hidden;
+}
+
+.bpc__media.is-loaded .bpc__skeleton::after,
+.bpc__media.has-loaded .bpc__skeleton::after {
   animation: none;
 }
 
+@keyframes bpc-sweep {
+  to { transform: translateX(100%); }
+}
+
+@keyframes bpc-pulse {
+  50% { opacity: 0.55; }
+}
+
+/* Kept for the placeholder skeleton card (balad-product-card-skeleton.liquid) */
 @keyframes bpc-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Whole-card skeleton: until the card's first image has loaded, the text rows show
+   as soft grey bars (pulsing with opacity, also GPU-only) and the small overlays stay
+   hidden, so the card reads as "loading" instead of text popping in beside an empty
+   image box. The :has() is scoped to one card, so only that card restyles on load. */
+.bpc:has(> .bpc__media:not(.is-loaded)) :is(.bpc__meta, .bpc__title, .bpc__price-alt) {
+  color: transparent !important;
+  border-radius: 6px;
+  background: #e9e6e1;
+  animation: bpc-pulse 1.4s ease-in-out infinite;
+}
+.bpc:has(> .bpc__media:not(.is-loaded)) :is(.bpc__meta, .bpc__title, .bpc__price-alt) * {
+  color: transparent !important;
+  background: none !important;
+  border-color: transparent !important;
+}
+.bpc:has(> .bpc__media:not(.is-loaded)) :is(.bpc__badges, .bpc__dots, .bpc__divider) { opacity: 0; }
+.bpc:has(> .bpc__media:not(.is-loaded)) .bpc__media::after { opacity: 0; }
+.bpc :is(.bpc__meta, .bpc__title, .bpc__price-alt, .bpc__badges, .bpc__dots, .bpc__divider) {
+  transition: color 0.3s ease, opacity 0.3s ease, background-color 0.3s ease;
 }
 
 /* ── Badges ──────────────────────────────── */
@@ -577,7 +611,7 @@
   text-overflow: ellipsis;
 }
 
-.bpc__meta-size { flex: none; color: #a37b35; }
+.bpc__meta-size { flex: none; color: #7a5a22; }
 
 .bpc__meta-dot {
   flex: none;
@@ -635,7 +669,7 @@
 }
 
 .bpc__price-off {
-  color: #a37b35;
+  color: #7a5a22;
   font-weight: 700;
 }
 
@@ -829,6 +863,7 @@
   .bpc *:not(.bpc__buy)::before,
   .bpc *::after,
   .bpc__skeleton,
+  .bpc__skeleton::after,
   .bpc__skeleton-badge,
   .bpc__skeleton-buy,
   .bpc__skeleton-line,
