@@ -432,6 +432,10 @@
           if (m.type === 'attributes') {
             if (m.target.matches && m.target.matches(CELL)) syncCell(m.target);
           } else {
+            // Reelfy fills each card's product info by AJAX after load, adding new links *inside*
+            // cells that are already hidden, so re-check the cell the new content landed in too.
+            const parentCell = m.target.closest && m.target.closest(CELL);
+            if (parentCell) syncCell(parentCell);
             m.addedNodes.forEach((n) => {
               if (n.nodeType !== 1) return;
               if (n.matches(CELL)) syncCell(n);

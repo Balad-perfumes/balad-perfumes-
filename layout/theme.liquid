@@ -6,6 +6,15 @@
   lang="{{ request.locale.iso_code }}"
 >
   <head>
+    {%- comment -%}
+      Hero (LCP) image preload, emitted by sections/balad-minimal-hero.liquid between BALAD_LCP_PRELOAD
+      markers. Sections render before the layout, so we can lift it out of content_for_layout and put it
+      first in <head>, where the browser requests it before every other CSS/JS/font file.
+    {%- endcomment -%}
+    {%- if content_for_layout contains 'BALAD_LCP_PRELOAD' -%}
+      {%- assign lcp_preload = content_for_layout | split: 'BALAD_LCP_PRELOAD' -%}
+      {{ lcp_preload[1] }}
+    {%- endif -%}
     {%- if settings.favicon != blank -%}
       <link
         rel="icon"

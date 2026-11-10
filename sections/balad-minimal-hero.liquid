@@ -119,6 +119,29 @@
                     {% if forloop.first %}
                       {% assign loading_attr = 'eager' %}
                       {% assign priority_attr = 'high' %}
+                      {%- comment -%}
+                        LCP preload. The hero <img> is ~250KB into the HTML, so the browser only found it after
+                        ~50 other requests (most of mobile LCP was "load delay"). layout/theme.liquid copies the
+                        links between these markers to the top of <head>. Here they sit inside an HTML comment,
+                        so this copy does nothing. The URLs must match the srcsets below exactly to be reused.
+                      {%- endcomment -%}
+                      <!--BALAD_LCP_PRELOAD
+                      {%- if block.settings.mobile_image != blank %}
+                      <link rel="preload" as="image" fetchpriority="high" media="(max-width: 749px)" imagesizes="100vw" imagesrcset="{{ block.settings.mobile_image | image_url: width: 750, format: 'webp' }} 750w, {{ block.settings.mobile_image | image_url: width: 1000, format: 'webp' }} 1000w, {{ block.settings.mobile_image | image_url: width: 1200, format: 'webp' }} 1200w, {{ block.settings.mobile_image | image_url: width: 1500, format: 'webp' }} 1500w">
+                      <link rel="preload" as="image" fetchpriority="high" media="(min-width: 750px)"
+                      {%- else %}
+                      <link rel="preload" as="image" fetchpriority="high"
+                      {%- endif %} imagesizes="100vw" imagesrcset="
+                      {%- assign preload_widths = '750,1200,1600,2000,2400,3000' | split: ',' -%}
+                      {%- assign sep = '' -%}
+                      {%- for w in preload_widths -%}
+                        {%- assign pw = w | plus: 0 -%}
+                        {%- if pw <= block.settings.image.width -%}
+                          {{ sep }}{{ block.settings.image | image_url: width: pw, format: 'webp' }} {{ pw }}w
+                          {%- assign sep = ', ' -%}
+                        {%- endif -%}
+                      {%- endfor -%}">
+                      BALAD_LCP_PRELOAD-->
                     {% endif %}
                     {% if block.settings.mobile_image != blank %}
                       <picture class="balad-min-hero__picture">
