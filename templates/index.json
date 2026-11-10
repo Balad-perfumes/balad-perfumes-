@@ -379,110 +379,6 @@
         "color_scheme": "scheme-1"
       }
     },
-    "our_stores": {
-      "type": "balad-our-stores",
-      "blocks": {
-        "store_1": {
-          "type": "store",
-          "settings": {
-            "image": "shopify://shop_images/WhatsApp_Image_2026-08-03_at_11.55.24_AM.jpg",
-            "store_name": "Calicut",
-            "directions_label": "Get Direction",
-            "directions_url": "",
-            "address": "Khaleej Residency, near Aster, Near M.I.M.S Hospital, Govindapuram, Kozhikode, Kerala 673016",
-            "phone": "+91 94474 25555"
-          }
-        },
-        "store_3": {
-          "type": "store",
-          "settings": {
-            "image": "shopify://shop_images/unnamed.webp",
-            "store_name": "Thekkady",
-            "directions_label": "Get Direction",
-            "directions_url": "",
-            "address": "BALAD PERFUMES, Kavitha building, JUNCTION thekkadiy, Thekkady, Kumily, Attappallam, Kerala 685509",
-            "phone": "+91 94473 76786"
-          }
-        }
-      },
-      "block_order": [
-        "store_1",
-        "store_3"
-      ],
-      "settings": {
-        "color_scheme": "scheme-1",
-        "header_alignment": "left",
-        "heading": "Our Stores",
-        "subheading": "Visit us across Kerala.",
-        "discover_more_label": "",
-        "discover_more_link": "/pages/our-stores",
-        "padding_top": 16,
-        "padding_bottom": 16,
-        "background": "#f6f3ee"
-      }
-    },
-    "testimonials": {
-      "type": "balad-home-testimonials",
-      "blocks": {
-        "testimonial_HVBwMC": {
-          "type": "testimonial",
-          "settings": {
-            "rating": 5,
-            "quote": "“A sophisticated fragrance with a lasting impression. The quality and attention to detail make Balad a wonderful choice.”",
-            "name": "Aisha H.",
-            "initials": "AH",
-            "role": "Verified Customer"
-          }
-        },
-        "review_1": {
-          "type": "testimonial",
-          "settings": {
-            "rating": 5,
-            "quote": "“A fragrance that feels luxurious, lasts beautifully, and makes every moment a little more special. Truly impressed.”",
-            "name": "Arjun R.",
-            "initials": "AR",
-            "role": "Verified Customer"
-          }
-        },
-        "review_2": {
-          "type": "testimonial",
-          "settings": {
-            "rating": 5,
-            "quote": "“The scent is elegant, long-lasting, and perfect for everyday wear. Balad has become my go-to perfume brand.”",
-            "name": "Sara N.",
-            "initials": "SN",
-            "role": "Verified Customer"
-          }
-        },
-        "review_3": {
-          "type": "testimonial",
-          "settings": {
-            "rating": 5,
-            "quote": "“Beautiful packaging, refined fragrances, and excellent quality. Every purchase feels like a premium experience.”",
-            "name": "Faisal M.",
-            "initials": "FM",
-            "role": "Verified Customer"
-          }
-        }
-      },
-      "block_order": [
-        "testimonial_HVBwMC",
-        "review_1",
-        "review_2",
-        "review_3"
-      ],
-      "disabled": true,
-      "settings": {
-        "color_scheme": "scheme-1",
-        "eyebrow": "Community Voices",
-        "heading": "Why They Choose Balad",
-        "subheading": "Loved by fragrance lovers.",
-        "background": "#ffffff",
-        "content_source": "static",
-        "judgeme_widget_type": "featured_carousel",
-        "judgeme_product": ""
-      }
-    },
     "customer_stories": {
       "type": "balad-customer-stories",
       "blocks": {
@@ -806,6 +702,110 @@
         "color_scheme": "scheme-1",
         "padding_top": 16,
         "padding_bottom": 16
+      }
+    },
+    "our_stores": {
+      "type": "balad-our-stores",
+      "blocks": {
+        "store_1": {
+          "type": "store",
+          "settings": {
+            "image": "shopify://shop_images/WhatsApp_Image_2026-08-03_at_11.55.24_AM.jpg",
+            "store_name": "Calicut",
+            "directions_label": "Get Direction",
+            "directions_url": "",
+            "address": "Khaleej Residency, near Aster, Near M.I.M.S Hospital, Govindapuram, Kozhikode, Kerala 673016",
+            "phone": "+91 94474 25555"
+          }
+        },
+        "store_3": {
+          "type": "store",
+          "settings": {
+            "image": "shopify://shop_images/unnamed.webp",
+            "store_name": "Thekkady",
+            "directions_label": "Get Direction",
+            "directions_url": "",
+            "address": "BALAD PERFUMES, Kavitha building, JUNCTION thekkadiy, Thekkady, Kumily, Attappallam, Kerala 685509",
+            "phone": "+91 94473 76786"
+          }
+        }
+      },
+      "block_order": [
+        "store_1",
+        "store_3"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "header_alignment": "left",
+        "heading": "Our Stores",
+        "subheading": "Visit us across Kerala.",
+        "discover_more_label": "",
+        "discover_more_link": "/pages/our-stores",
+        "padding_top": 16,
+        "padding_bottom": 16,
+        "background": "#f6f3ee"
+      }
+    },
+    "testimonials": {
+      "type": "balad-home-testimonials",
+      "blocks": {
+        "testimonial_HVBwMC": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "“A sophisticated fragrance with a lasting impression. The quality and attention to detail make Balad a wonderful choice.”",
+            "name": "Aisha H.",
+            "initials": "AH",
+            "role": "Verified Customer"
+          }
+        },
+        "review_1": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "“A fragrance that feels luxurious, lasts beautifully, and makes every moment a little more special. Truly impressed.”",
+            "name": "Arjun R.",
+            "initials": "AR",
+            "role": "Verified Customer"
+          }
+        },
+        "review_2": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "“The scent is elegant, long-lasting, and perfect for everyday wear. Balad has become my go-to perfume brand.”",
+            "name": "Sara N.",
+            "initials": "SN",
+            "role": "Verified Customer"
+          }
+        },
+        "review_3": {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "quote": "“Beautiful packaging, refined fragrances, and excellent quality. Every purchase feels like a premium experience.”",
+            "name": "Faisal M.",
+            "initials": "FM",
+            "role": "Verified Customer"
+          }
+        }
+      },
+      "block_order": [
+        "testimonial_HVBwMC",
+        "review_1",
+        "review_2",
+        "review_3"
+      ],
+      "disabled": true,
+      "settings": {
+        "color_scheme": "scheme-1",
+        "eyebrow": "Community Voices",
+        "heading": "Why They Choose Balad",
+        "subheading": "Loved by fragrance lovers.",
+        "background": "#ffffff",
+        "content_source": "static",
+        "judgeme_widget_type": "featured_carousel",
+        "judgeme_product": ""
       }
     },
     "real_life_images": {
@@ -1396,9 +1396,9 @@
     "category_products_scroll",
     "for_him_grid",
     "trending_now",
+    "customer_stories",
     "our_stores",
     "testimonials",
-    "customer_stories",
     "real_life_images",
     "promo_cards",
     "spotlight",
