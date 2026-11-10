@@ -224,9 +224,21 @@
               <p class="pdp-eyebrow">{{ selected_product.type | default: selected_product.vendor | escape }}</p>
             </div>
           {%- endif -%}
-          <!-- Title + price on one row -->
+          {%- liquid
+            assign save_amt = 0
+            if has_discount
+              assign save_amt = current_variant.compare_at_price | minus: current_variant.price
+            endif
+          -%}
+          <!-- Title with savings under it, price on the right -->
           <div class="pdp-intro__row">
-            <h1 class="pdp-title">{{ selected_product.title }}</h1>
+            <div class="pdp-intro__name">
+              <h1 class="pdp-title">{{ selected_product.title }}</h1>
+              <div class="pdp-intro__save">
+                <span class="pdp-price__off" data-pf-off-badge{% unless has_discount %} hidden{% endunless %}>{{ pct_off }}% OFF</span>
+                <p class="pdp-save" data-pf-save{% unless has_discount %} hidden{% endunless %}>You save <strong data-pf-save-amount>{% if has_discount %}{% render 'format-price', price: save_amt %}{% endif %}</strong></p>
+              </div>
+            </div>
             <div class="pdp-intro__price">
               <div class="pdp-price__row">
                 <span class="pdp-price__compare" data-pf-compare-price{% unless has_discount %} hidden{% endunless %}>{% if has_discount %}{% render 'format-price', price: current_variant.compare_at_price %}{% endif %}</span>
@@ -234,16 +246,6 @@
               </div>
               <span class="pdp-price__tax">Incl. of all taxes</span>
             </div>
-          </div>
-          {%- liquid
-            assign save_amt = 0
-            if has_discount
-              assign save_amt = current_variant.compare_at_price | minus: current_variant.price
-            endif
-          -%}
-          <div class="pdp-intro__save">
-            <span class="pdp-price__off" data-pf-off-badge{% unless has_discount %} hidden{% endunless %}>{{ pct_off }}% OFF</span>
-            <p class="pdp-save" data-pf-save{% unless has_discount %} hidden{% endunless %}>You save <strong data-pf-save-amount>{% if has_discount %}{% render 'format-price', price: save_amt %}{% endif %}</strong></p>
           </div>
 
           <!-- Key facts strip -->
@@ -402,12 +404,14 @@
         <!-- Payment icons & guaranteed safe checkout under Buy Now button -->
         {%- if section.settings.show_secure_pay -%}
           <div class="pdp-payment-methods">
-            <p class="pdp-payment-methods__sub">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-              <span>100% secure payments</span>
-            </p>
-            <div class="pdp-payment-methods__badges" aria-label="Accepted payment methods">
-              {% render 'payment-icons' %}
+            <div class="pdp-payment-methods__inner">
+              <p class="pdp-payment-methods__sub">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                <span>100% secure payments</span>
+              </p>
+              <div class="pdp-payment-methods__badges" aria-label="Accepted payment methods">
+                {% render 'payment-icons' %}
+              </div>
             </div>
           </div>
         {%- endif -%}
@@ -1099,15 +1103,17 @@
 
   /* Payment methods under the buttons: one quiet line, lock + text on the left, small logos on the right */
   .pdp-payment-methods {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px 14px;
+    container-type: inline-size;
     width: 100%;
     margin: 12px 0 0;
     padding: 10px 0 0;
     border-top: 1px dashed #e3dfd7;
+  }
+  .pdp-payment-methods__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
   }
   .pdp-payment-methods__sub {
     display: inline-flex;
@@ -1125,26 +1131,38 @@
   .pdp-payment-methods__badges {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
     justify-content: flex-end;
+    flex-shrink: 0;
     gap: 4px;
     margin: 0;
   }
   .pdp-payment-methods__badges .balad-payment-badge {
-    display: inline-flex;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 30px;
-    height: 19px;
-    border-radius: 3px;
+    height: 20px;
+    padding: 2px 3px;
+    border-radius: 4px;
     overflow: hidden;
     background: #fff;
     box-shadow: 0 0 0 1px #ebe8e2;
     flex-shrink: 0;
   }
   .pdp-payment-methods__badges .balad-payment-badge svg { display: block; width: 100%; height: 100%; }
-  @media screen and (max-width: 480px) {
-    .pdp-payment-methods { justify-content: center; }
-    .pdp-payment-methods__badges { justify-content: center; }
-    .pdp-payment-methods__badges .balad-payment-badge { width: 28px; height: 18px; }
+  /* The tile draws the border, so drop the outlines some icons carry in their artwork */
+  .pdp-payment-methods__badges .balad-payment-badge svg path[opacity],
+  .pdp-payment-methods__badges .balad-payment-badge svg rect[stroke-opacity] { display: none; }
+
+  /* Not enough room beside the text: logos take a full-width row of their own, flush to both edges */
+  @container (max-width: 479px) {
+    .pdp-payment-methods__inner { flex-direction: column; align-items: stretch; gap: 8px; }
+    .pdp-payment-methods__badges {
+      display: grid;
+      grid-template-columns: repeat(9, minmax(0, 40px));
+      justify-content: space-between;
+    }
+    .pdp-payment-methods__badges .balad-payment-badge { width: auto; height: auto; aspect-ratio: 38 / 24; }
   }
 
   /* Estimated delivery + secure payments (already has top and bottom borders) */
@@ -2202,9 +2220,11 @@
     justify-content: space-between;
     gap: 16px;
   }
-  .pdp-sc--intro .pdp-intro__row .pdp-title {
+  .pdp-intro__name {
     flex: 1 1 auto;
     min-width: 0;
+  }
+  .pdp-sc--intro .pdp-intro__row .pdp-title {
     margin: 0;
     font-size: clamp(22px, 1.9vw, 28px);
     line-height: 1.15;
@@ -2453,22 +2473,12 @@
   }
 
   /* ---- Main card: fuller structure ---- */
-  /* Soft cream header tint + thin gold accent line on top */
+  /* Soft cream header tint */
   .pdp-info--v2 .pdp-sc--main {
     overflow: hidden;
     padding-top: 22px;
     background: linear-gradient(180deg, #fbf7f0 0%, #ffffff 150px);
     border: 1px solid #efe8dc;
-  }
-  .pdp-info--v2 .pdp-sc--main::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, var(--pf-gold) 30%, #d9b877 50%, var(--pf-gold) 70%, transparent);
-    opacity: 0.85;
   }
 
   /* Breadcrumb + share: top bar inside the main card, hairline below */
@@ -2520,14 +2530,18 @@
   }
   .pdp-info--v2 .pdp-sc--main .pdp-facts li {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    gap: 6px;
     min-width: 0;
-    padding: 0 14px;
+    padding: 0 8px;
     border: 0;
     border-radius: 0;
     background: none;
+    text-align: center;
   }
+  .pdp-info--v2 .pdp-sc--main .pdp-facts .pdp-glance__text { align-items: center; max-width: 100%; }
   .pdp-info--v2 .pdp-sc--main .pdp-facts li + li { border-left: 1px solid #ebe2d3; }
   .pdp-info--v2 .pdp-sc--main .pdp-facts .pdp-glance__icon {
     width: 30px;
@@ -2552,20 +2566,26 @@
   }
   .pdp-promise li {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 9px;
+    justify-content: center;
+    gap: 6px;
     min-width: 0;
-    padding: 0 12px;
+    padding: 0 8px;
+    text-align: center;
   }
-  .pdp-promise li:first-child { padding-left: 0; }
   .pdp-promise li + li { border-left: 1px solid var(--pf-hair); }
   .pdp-promise svg { flex-shrink: 0; width: 18px; height: 18px; color: var(--pf-gold); }
-  .pdp-promise span { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .pdp-promise span { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0; max-width: 100%; }
+  .pdp-promise strong,
+  .pdp-promise small,
+  .pdp-info--v2 .pdp-sc--main .pdp-facts .pdp-glance__text > * { max-width: 100%; }
   .pdp-promise strong { font-size: 12px; font-weight: 600; line-height: 1.3; color: var(--pf-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .pdp-promise small { font-size: 11px; line-height: 1.3; color: var(--pf-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* Payment row sits as the card footer */
   .pdp-sc--main .pdp-buy .pdp-payment-methods {
+    width: auto;
     margin: 2px -20px -20px;
     padding: 12px 20px;
     border-top: 1px solid #f0e9dd;
@@ -2577,8 +2597,8 @@
     .pdp-sc--main .pdp-buy .pdp-payment-methods { margin: 2px -16px -16px; padding: 10px 16px; }
   }
   @media screen and (max-width: 520px) {
-    .pdp-info--v2 .pdp-sc--main .pdp-facts li { flex-direction: column; align-items: flex-start; gap: 6px; padding: 0 10px; }
-    .pdp-promise li { flex-direction: column; align-items: flex-start; gap: 5px; padding: 0 8px; }
+    .pdp-info--v2 .pdp-sc--main .pdp-facts li,
+    .pdp-promise li { padding: 0 6px; }
     .pdp-promise strong { font-size: 11.5px; }
     .pdp-promise small { font-size: 10.5px; }
   }
