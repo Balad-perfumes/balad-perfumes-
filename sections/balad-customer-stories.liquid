@@ -3,10 +3,6 @@
   assign image_ms = section.settings.image_duration | default: 5 | times: 1000
 -%}
 
-{%- capture bcs_play_icon -%}
-  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>
-{%- endcapture -%}
-
 <section
   class="bcs color-{{ section.settings.color_scheme }}"
   data-bcs
@@ -59,7 +55,12 @@
               >
                 <span class="bcs__tile-media">
                   {%- if has_video -%}
-                    {{ block.settings.video | video_tag: muted: true, loop: true, playsinline: true, preload: 'metadata', image_size: '540x', class: 'bcs__tile-video' }}
+                    {%- if block.settings.video.preview_image != blank -%}
+                      {{ block.settings.video.preview_image | image_url: width: 540 | image_tag: loading: 'lazy', class: 'bcs__tile-poster', alt: block.settings.name | default: 'Customer video story' }}
+                    {%- elsif thumb != blank -%}
+                      <img class="bcs__tile-poster" src="{{ thumb }}" alt="{{ block.settings.name | default: 'Customer video story' | escape }}" loading="lazy" width="540" height="960">
+                    {%- endif -%}
+                    {{ block.settings.video | video_tag: muted: true, loop: true, playsinline: true, preload: 'none', image_size: '540x', class: 'bcs__tile-video' }}
                   {%- elsif thumb != blank -%}
                     <img src="{{ thumb }}" alt="{{ block.settings.name | default: 'Customer story' | escape }}" loading="lazy" width="540" height="960">
                   {%- else -%}
@@ -72,7 +73,19 @@
                   <span class="bcs__badge">{{ block.settings.badge | escape }}</span>
                 {%- endif -%}
                 {%- if has_video -%}
-                  <span class="bcs__play" aria-hidden="true">{{ bcs_play_icon }}</span>
+                  {%- liquid
+                    assign dur_s = block.settings.video.duration | default: 0 | divided_by: 1000
+                    assign dur_m = dur_s | divided_by: 60
+                    assign dur_r = dur_s | modulo: 60
+                  -%}
+                  <span class="bcs__play">
+                    <span class="bcs__play-ico" aria-hidden="true"></span>
+                    {%- if dur_s > 0 -%}
+                      <span class="bcs__play-time">{{ dur_m }}:{% if dur_r < 10 %}0{% endif %}{{ dur_r }}</span>
+                    {%- else -%}
+                      <span class="bcs__play-time">Video</span>
+                    {%- endif -%}
+                  </span>
                 {%- endif -%}
 
                 <span class="bcs__tile-text">
@@ -322,21 +335,59 @@
     font-weight: 600;
     letter-spacing: 0.02em;
   }
+  /* Video tiles: cover image underneath, muted preview fades in on hover */
+  .bcs__tile-media .bcs__tile-video { opacity: 0; transition: opacity 0.35s ease, transform 0.8s var(--bcs-ease); }
+  .bcs__tile.is-playing .bcs__tile-video { opacity: 1; }
+  .bcs video::-webkit-media-controls,
+  .bcs video::-webkit-media-controls-start-playback-button,
+  .bcs video::-webkit-media-controls-overlay-play-button {
+    display: none !important;
+    -webkit-appearance: none;
+  }
+
+  /* Play badge: top-right frosted pill (matches the label on the left) */
   .bcs__play {
     position: absolute;
     top: 12px;
     right: 12px;
     z-index: 2;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.92);
-    color: var(--bcs-ink);
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    gap: 6px;
+    height: 24px;
+    padding: 0 9px 0 4px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.32);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    color: #ffffff;
+    pointer-events: none;
+    transition: opacity 0.3s ease, background-color 0.25s ease;
   }
-  .bcs__play svg { width: 14px; height: 14px; margin-left: 2px; }
+  .bcs__play-ico {
+    position: relative;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #ffffff;
+  }
+  .bcs__play-ico::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    margin: -3.5px 0 0 -2px;
+    border-style: solid;
+    border-width: 3.5px 0 3.5px 6px;
+    border-color: transparent transparent transparent #15130f;
+  }
+  .bcs__play-time { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .bcs__tile:hover .bcs__play { background: rgba(0, 0, 0, 0.5); }
+  .bcs__tile.is-playing .bcs__play { opacity: 0; }
 
   .bcs__tile-text { position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 2; display: flex; flex-direction: column; gap: 4px; }
   .bcs__tile-name { font-family: var(--bcs-head); font-size: 14.5px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
@@ -589,8 +640,13 @@
       section.querySelectorAll('.bcs__tile').forEach(function (tile) {
         var v = tile.querySelector('video');
         if (!v) return;
-        tile.addEventListener('mouseenter', function () { v.play().catch(function () {}); });
-        tile.addEventListener('mouseleave', function () { v.pause(); });
+        tile.addEventListener('mouseenter', function () {
+          v.play().then(function () { tile.classList.add('is-playing'); }).catch(function () {});
+        });
+        tile.addEventListener('mouseleave', function () {
+          v.pause();
+          tile.classList.remove('is-playing');
+        });
       });
 
       function stopAll() {
