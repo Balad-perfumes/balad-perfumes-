@@ -568,7 +568,8 @@
       window.requestAnimationFrame(() => { update(); ticking = false; });
     }, { passive: true });
     window.addEventListener('resize', build);
-    build();
+    // Next frame, not mid-parse: build() reads scrollWidth/getBoundingClientRect, which forced a layout during load
+    requestAnimationFrame(build);
   })();
 </script>
 
@@ -597,7 +598,7 @@
     window.addEventListener('scroll', request, { passive: true });
     window.addEventListener('resize', request);
     window.addEventListener('load', request);
-    apply();
+    request(); // next frame, not mid-parse (getBoundingClientRect forces layout)
   })();
 </script>
 

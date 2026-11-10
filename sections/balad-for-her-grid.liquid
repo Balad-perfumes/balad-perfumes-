@@ -60,6 +60,8 @@
         <img
           class="balad-forher__bg-img"
           src="{{ bg_image | image_url: width: 2400 }}"
+          width="{{ bg_image.width }}"
+          height="{{ bg_image.height }}"
           srcset="{{ bg_image | image_url: width: 1200 }} 1200w, {{ bg_image | image_url: width: 1600 }} 1600w, {{ bg_image | image_url: width: 2000 }} 2000w, {{ bg_image | image_url: width: 2400 }} 2400w"
           sizes="100vw"
           alt=""
@@ -880,7 +882,9 @@
         }, true);
         track.addEventListener('dragstart', (e) => e.preventDefault());
 
-        update();
+        // No synchronous update() here: reading scrollWidth/offsetLeft while the page is still parsing
+        // forced a full layout mid-load. ResizeObserver fires once by itself on the next frame.
+        if (!window.ResizeObserver) requestAnimationFrame(update);
       });
     };
 
@@ -922,7 +926,7 @@
     const init = (scope = document) => {
       if (reduce) return;
       scope.querySelectorAll('[data-forher-parallax]').forEach((root) => roots.add(root));
-      apply();
+      request(); // next frame, not mid-parse (getBoundingClientRect forces layout)
     };
 
     window.addEventListener('scroll', request, { passive: true });

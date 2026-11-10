@@ -128,10 +128,12 @@
                       <!--BALAD_LCP_PRELOAD
                       {%- if block.settings.mobile_image != blank %}
                       <link rel="preload" as="image" fetchpriority="high" media="(max-width: 749px)" imagesizes="100vw" imagesrcset="{{ block.settings.mobile_image | image_url: width: 750, format: 'webp' }} 750w, {{ block.settings.mobile_image | image_url: width: 1000, format: 'webp' }} 1000w, {{ block.settings.mobile_image | image_url: width: 1200, format: 'webp' }} 1200w, {{ block.settings.mobile_image | image_url: width: 1500, format: 'webp' }} 1500w">
-                      <link rel="preload" as="image" fetchpriority="high" media="(min-width: 750px)"
+                      {%- comment -%}
+                        No desktop preload here: Chrome's early fetch ignored media="(min-width: 750px)" in mobile
+                        tests and downloaded the 1600px desktop image on phones too.
+                      {%- endcomment -%}
                       {%- else %}
-                      <link rel="preload" as="image" fetchpriority="high"
-                      {%- endif %} imagesizes="100vw" imagesrcset="
+                      <link rel="preload" as="image" fetchpriority="high" imagesizes="100vw" imagesrcset="
                       {%- assign preload_widths = '750,1200,1600,2000,2400,3000' | split: ',' -%}
                       {%- assign sep = '' -%}
                       {%- for w in preload_widths -%}
@@ -141,6 +143,7 @@
                           {%- assign sep = ', ' -%}
                         {%- endif -%}
                       {%- endfor -%}">
+                      {%- endif %}
                       BALAD_LCP_PRELOAD-->
                     {% endif %}
                     {% if block.settings.mobile_image != blank %}
