@@ -471,6 +471,7 @@
         "review_2",
         "review_3"
       ],
+      "disabled": true,
       "settings": {
         "color_scheme": "scheme-1",
         "eyebrow": "Community Voices",
@@ -480,8 +481,332 @@
         "content_source": "static",
         "judgeme_widget_type": "featured_carousel",
         "judgeme_product": ""
+      }
+    },
+    "customer_stories": {
+      "type": "balad-customer-stories",
+      "blocks": {
+        "story_Mwbthm": {
+          "type": "story",
+          "settings": {
+            "image": "shopify://shop_images/Screenshot_2026-11-10_122144.png",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_88gPDf": {
+          "type": "story",
+          "settings": {
+            "video": "shopify://files/videos/AQMOXYpxpJcTsmm9edesGmPn5fkOemf68UC8VwrSJkNtKCZv4tYzXz-zuO6R0_ykJwaOvV9jadB8524EvndAUWelH9RbamYUy2iCM1o.mp4",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_EKiV6h": {
+          "type": "story",
+          "settings": {
+            "video": "shopify://files/videos/AQOxIDHN7LR1WXeJZeVVEgmisB4xSacdW6gwXrvP7yoroepOF_IqwzqBnEonlJqlHLBh6ujT-GqW-vgV5byu8fLUrbvaTCypQrrJr9Q.mp4",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_93Ex7Y": {
+          "type": "story",
+          "settings": {
+            "video": "shopify://files/videos/AQMr-tVFWVDRJESb9VxNA519zRUZxYCJOml60vSGK45VoCnkSLsss1tEAxzVgRQkMIhauPNqyras-wV9JV3zkVarxzplkpATO4emPHI.mp4",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_kMmwNz": {
+          "type": "story",
+          "settings": {
+            "video": "shopify://files/videos/AQMQlNuu7ReLNP9qpUB_kaaSBPpUI0TDfKE2t_SE3wVVKjl5IGVqh2WPrZiWZcTV7JOSyVOuI34XLkpGi3j8Y6st6bHeLyritxzMIVM.mp4",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_03": {
+          "type": "story",
+          "settings": {
+            "asset_image": "balad-story-03.jpg",
+            "name": "@advjiyasjamal",
+            "badge": "In store",
+            "caption": "Shared by @advjiyasjamal on Instagram.",
+            "product": ""
+          }
+        },
+        "story_4CWe7K": {
+          "type": "story",
+          "settings": {
+            "video": "shopify://files/videos/AQMU5kS9F0j3a10Ydl15frH5Stj9qFef_gejdYNrC-4yKzrXe3QQkSKwDh0pmVaCwB9fqTpPDiUxF-wg0dT5e5KGOdOHqUfInTxDnGg.mp4",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_jMNTBi": {
+          "type": "story",
+          "settings": {
+            "image": "shopify://shop_images/Screenshot_2026-11-10_121735.png",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_aQHExK": {
+          "type": "story",
+          "settings": {
+            "video": "shopify://files/videos/AQN40ySAFCbZQd8VTm4JtMaKB-UYU1OCK5FnnVXLTLKK5vf-UmHEswKVXC7Jv4_tsUkqh5SAem2kjwQ42jVkxI2BwYqZUR-3ls1DHRg.mp4",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_wKDPWU": {
+          "type": "story",
+          "settings": {
+            "image": "shopify://shop_images/Screenshot_2026-11-10_121640.png",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_7fywQJ": {
+          "type": "story",
+          "settings": {
+            "video": "shopify://files/videos/AQNdGdqPSxh8yAd3Qvx-ERlKDzYvfOMS95GIjUq25QfMQJj0e1lk_VLJ09RAFwEvFt0Eo8PnEPEF9d4yBFio9568jnGossmX3REVILk.mp4",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_YTUWWM": {
+          "type": "story",
+          "settings": {
+            "video": "shopify://files/videos/AQNEbEGcoCeMky5Oroe1v9h1ZeEI5_wToASaNvYDxeXNQBcm0QOW343iVPjjXN9dHvF79mOfL7J16VvStojcj1z7jvlHPQF-h_WkZ8w.mp4",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_xMF3x8": {
+          "type": "story",
+          "settings": {
+            "image": "shopify://shop_images/Screenshot_2026-11-10_121356.png",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_UyXiBc": {
+          "type": "story",
+          "settings": {
+            "image": "shopify://shop_images/Screenshot_2026-11-10_121256.png",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_6mVjcW": {
+          "type": "story",
+          "settings": {
+            "video": "shopify://files/videos/AQOg-tLg8mJEM-m4wMhzzBzZF2OLGerrgtWxrR-I_x4gjcuuNa5WstvxcaJ_dThw7bPwfIg0K6p5XgPL7n1wgtsm8KMBWN3OO-oB3uo.mp4",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_ajwdBP": {
+          "type": "story",
+          "settings": {
+            "video": "shopify://files/videos/AQOiB5DhglIANxkN0ySPPHLW3tiuxGvpSddfmfgoQBlRCZ0dzT6ufR8Io8x2cSxfSNzv4xt72Vs_whSF6rjFeblvnep2EseKjMBRmKg.mp4",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_ALhrCy": {
+          "type": "story",
+          "settings": {
+            "image": "shopify://shop_images/Screenshot_2026-11-10_120939.png",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_02": {
+          "type": "story",
+          "settings": {
+            "asset_image": "balad-story-02.jpg",
+            "name": "Happy customer",
+            "badge": "In store",
+            "caption": "Picking up his favourites at Balad Perfumes.",
+            "product": ""
+          }
+        },
+        "story_04": {
+          "type": "story",
+          "settings": {
+            "asset_image": "balad-story-04.jpg",
+            "name": "Happy customers",
+            "badge": "In store",
+            "caption": "A group visit to our store.",
+            "product": ""
+          }
+        },
+        "story_VitF7C": {
+          "type": "story",
+          "settings": {
+            "image": "shopify://shop_images/Screenshot_2026-11-10_120658.png",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_APKmkV": {
+          "type": "story",
+          "settings": {
+            "video": "shopify://files/videos/AQP5XhTJvPyzuDEmjCxjnVqnGcK2f7oQssue5-3GFNgy5ZMUwuVTU8aUseCN2tq5bDXxSN16G13pdEtFqOzEjjiBzSfHRRDkVLOYua0.mp4",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_ADbCmC": {
+          "type": "story",
+          "settings": {
+            "video": "shopify://files/videos/AQPQTPeI9h3-QLrJtsGUm-JgNfkJtdeF_TQD0JiTRYW_OkZze9NLTEZG-AIYqVHCBQA3Y_GkHBDuz2gF5x5RObYrJiQNEpKJTJghHIM.mp4",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_fMKefp": {
+          "type": "story",
+          "settings": {
+            "video": "shopify://files/videos/AQPU5hDCDJqN1DqLuh6EgyhUJYPDLBDbYyJgedrjwGNFQA0i3YU2TnI_zxnqANMs15dCQnD-PaGJ1PVniDz-h13v2T35AKsqYBBe3ZU.mp4",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_TJ7paU": {
+          "type": "story",
+          "settings": {
+            "video": "shopify://files/videos/AQPUV36Q3X7tbanW7YINF-Z2wdDCp45JlZiuZuC0BDJhbXodgdhxu9HLR1uxo1zxVepCrAfOLyPRNNCXZjM7mKXmUTVEWl7wEUgb2V0.mp4",
+            "asset_image": "",
+            "name": "",
+            "badge": "",
+            "caption": "",
+            "product": ""
+          }
+        },
+        "story_01": {
+          "type": "story",
+          "settings": {
+            "asset_image": "balad-story-01.jpg",
+            "name": "Kannan",
+            "badge": "WhatsApp review",
+            "caption": "“An excellent creation. I've been receiving so many compliments from my colleagues. I'd love to buy the same one again.”",
+            "product": ""
+          }
+        },
+        "story_05": {
+          "type": "story",
+          "settings": {
+            "asset_image": "balad-story-05.jpg",
+            "name": "@sirajnadapuramm & family",
+            "badge": "Family visit",
+            "caption": "A family day out at Balad Perfumes.",
+            "product": ""
+          }
+        }
       },
-      "disabled": true
+      "block_order": [
+        "story_Mwbthm",
+        "story_88gPDf",
+        "story_EKiV6h",
+        "story_93Ex7Y",
+        "story_kMmwNz",
+        "story_03",
+        "story_4CWe7K",
+        "story_jMNTBi",
+        "story_aQHExK",
+        "story_wKDPWU",
+        "story_7fywQJ",
+        "story_YTUWWM",
+        "story_xMF3x8",
+        "story_UyXiBc",
+        "story_6mVjcW",
+        "story_ajwdBP",
+        "story_ALhrCy",
+        "story_02",
+        "story_04",
+        "story_VitF7C",
+        "story_APKmkV",
+        "story_ADbCmC",
+        "story_fMKefp",
+        "story_TJ7paU",
+        "story_01",
+        "story_05"
+      ],
+      "settings": {
+        "eyebrow": "#happycustomer",
+        "heading": "Loved by our customers",
+        "subheading": "Real moments from our stores and messages. Tap a story to watch.",
+        "instagram_url": "https://www.instagram.com/baladperfume/",
+        "instagram_label": "Follow @baladperfume",
+        "image_duration": 5,
+        "color_scheme": "scheme-1",
+        "padding_top": 16,
+        "padding_bottom": 16
+      }
     },
     "real_life_images": {
       "type": "real-life-images",
@@ -1056,74 +1381,6 @@
         "padding-block-start": 0,
         "padding-block-end": 0,
         "remove_horizontal_padding": false
-      }
-    },
-    "customer_stories": {
-      "type": "balad-customer-stories",
-      "blocks": {
-        "story_01": {
-          "type": "story",
-          "settings": {
-            "asset_image": "balad-story-01.jpg",
-            "name": "Kannan",
-            "badge": "WhatsApp review",
-            "caption": "“An excellent creation. I've been receiving so many compliments from my colleagues. I'd love to buy the same one again.”"
-          }
-        },
-        "story_02": {
-          "type": "story",
-          "settings": {
-            "asset_image": "balad-story-02.jpg",
-            "name": "Happy customer",
-            "badge": "In store",
-            "caption": "Picking up his favourites at Balad Perfumes."
-          }
-        },
-        "story_03": {
-          "type": "story",
-          "settings": {
-            "asset_image": "balad-story-03.jpg",
-            "name": "@advjiyasjamal",
-            "badge": "In store",
-            "caption": "Shared by @advjiyasjamal on Instagram."
-          }
-        },
-        "story_04": {
-          "type": "story",
-          "settings": {
-            "asset_image": "balad-story-04.jpg",
-            "name": "Happy customers",
-            "badge": "In store",
-            "caption": "A group visit to our store."
-          }
-        },
-        "story_05": {
-          "type": "story",
-          "settings": {
-            "asset_image": "balad-story-05.jpg",
-            "name": "@sirajnadapuramm & family",
-            "badge": "Family visit",
-            "caption": "A family day out at Balad Perfumes."
-          }
-        }
-      },
-      "block_order": [
-        "story_01",
-        "story_02",
-        "story_03",
-        "story_04",
-        "story_05"
-      ],
-      "settings": {
-        "eyebrow": "#happycustomer",
-        "heading": "Loved by our customers",
-        "subheading": "Real moments from our stores and messages. Tap a story to watch.",
-        "instagram_url": "https://www.instagram.com/baladperfume/",
-        "instagram_label": "Follow @baladperfume",
-        "image_duration": 5,
-        "color_scheme": "scheme-1",
-        "padding_top": 16,
-        "padding_bottom": 16
       }
     }
   },
