@@ -486,6 +486,16 @@
     "customer_stories": {
       "type": "balad-customer-stories",
       "blocks": {
+        "story_01": {
+          "type": "story",
+          "settings": {
+            "asset_image": "balad-story-01.jpg",
+            "name": "Kannan",
+            "badge": "WhatsApp review",
+            "caption": "“An excellent creation. I've been receiving so many compliments from my colleagues. I'd love to buy the same one again.”",
+            "product": ""
+          }
+        },
         "story_Mwbthm": {
           "type": "story",
           "settings": {
@@ -497,10 +507,10 @@
             "product": ""
           }
         },
-        "story_88gPDf": {
+        "story_TJ7paU": {
           "type": "story",
           "settings": {
-            "video": "shopify://files/videos/AQMOXYpxpJcTsmm9edesGmPn5fkOemf68UC8VwrSJkNtKCZv4tYzXz-zuO6R0_ykJwaOvV9jadB8524EvndAUWelH9RbamYUy2iCM1o.mp4",
+            "video": "shopify://files/videos/AQPUV36Q3X7tbanW7YINF-Z2wdDCp45JlZiuZuC0BDJhbXodgdhxu9HLR1uxo1zxVepCrAfOLyPRNNCXZjM7mKXmUTVEWl7wEUgb2V0.mp4",
             "asset_image": "",
             "name": "",
             "badge": "",
@@ -538,6 +548,16 @@
             "name": "",
             "badge": "",
             "caption": "",
+            "product": ""
+          }
+        },
+        "story_05": {
+          "type": "story",
+          "settings": {
+            "asset_image": "balad-story-05.jpg",
+            "name": "@sirajnadapuramm & family",
+            "badge": "Family visit",
+            "caption": "A family day out at Balad Perfumes.",
             "product": ""
           }
         },
@@ -736,44 +756,26 @@
             "product": ""
           }
         },
-        "story_TJ7paU": {
+        "story_88gPDf": {
           "type": "story",
           "settings": {
-            "video": "shopify://files/videos/AQPUV36Q3X7tbanW7YINF-Z2wdDCp45JlZiuZuC0BDJhbXodgdhxu9HLR1uxo1zxVepCrAfOLyPRNNCXZjM7mKXmUTVEWl7wEUgb2V0.mp4",
+            "video": "shopify://files/videos/AQMOXYpxpJcTsmm9edesGmPn5fkOemf68UC8VwrSJkNtKCZv4tYzXz-zuO6R0_ykJwaOvV9jadB8524EvndAUWelH9RbamYUy2iCM1o.mp4",
             "asset_image": "",
             "name": "",
             "badge": "",
             "caption": "",
             "product": ""
           }
-        },
-        "story_01": {
-          "type": "story",
-          "settings": {
-            "asset_image": "balad-story-01.jpg",
-            "name": "Kannan",
-            "badge": "WhatsApp review",
-            "caption": "“An excellent creation. I've been receiving so many compliments from my colleagues. I'd love to buy the same one again.”",
-            "product": ""
-          }
-        },
-        "story_05": {
-          "type": "story",
-          "settings": {
-            "asset_image": "balad-story-05.jpg",
-            "name": "@sirajnadapuramm & family",
-            "badge": "Family visit",
-            "caption": "A family day out at Balad Perfumes.",
-            "product": ""
-          }
         }
       },
       "block_order": [
+        "story_01",
         "story_Mwbthm",
-        "story_88gPDf",
+        "story_TJ7paU",
         "story_EKiV6h",
         "story_93Ex7Y",
         "story_kMmwNz",
+        "story_05",
         "story_03",
         "story_4CWe7K",
         "story_jMNTBi",
@@ -792,9 +794,7 @@
         "story_APKmkV",
         "story_ADbCmC",
         "story_fMKefp",
-        "story_TJ7paU",
-        "story_01",
-        "story_05"
+        "story_88gPDf"
       ],
       "settings": {
         "eyebrow": "#happycustomer",
