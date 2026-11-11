@@ -852,12 +852,18 @@
           requestAnimationFrame(updateActiveDot);
         }, { passive: true });
 
-        window.addEventListener('resize', update);
         // Measure only once the section nears the viewport. It renders with content-visibility: auto (base.css),
         // so measuring it at load would force the browser to lay out the whole off-screen grid.
+        // No window resize listener when ResizeObserver exists: the observer already catches width changes, and
+        // mobile browsers fire resize during load (and on every address-bar show/hide), which ran update()
+        // synchronously and forced a ~140ms layout before first paint.
         const startMeasuring = () => {
-          if (window.ResizeObserver) new ResizeObserver(update).observe(track);
-          else requestAnimationFrame(update);
+          if (window.ResizeObserver) {
+            new ResizeObserver(update).observe(track);
+          } else {
+            requestAnimationFrame(update);
+            window.addEventListener('resize', update);
+          }
         };
         if ('IntersectionObserver' in window) {
           const io = new IntersectionObserver((entries) => {
@@ -935,9 +941,24 @@
       requestAnimationFrame(apply);
     };
 
+    // Only sections near the viewport are measured. Measuring off-screen ones on every scroll frame forced
+    // layout of grids that content-visibility: auto (base.css) would otherwise skip.
+    const visibility = 'IntersectionObserver' in window
+      ? new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) roots.add(entry.target);
+            else roots.delete(entry.target);
+          });
+          request();
+        }, { rootMargin: '200px 0px' })
+      : null;
+
     const init = (scope = document) => {
       if (reduce) return;
-      scope.querySelectorAll('[data-forhim-parallax]').forEach((root) => roots.add(root));
+      scope.querySelectorAll('[data-forhim-parallax]').forEach((root) => {
+        if (visibility) visibility.observe(root);
+        else roots.add(root);
+      });
       // First run on window load (listener below), not during page load: getBoundingClientRect forced a layout
       // before the hero painted. Editor re-renders happen after load, so run right away then.
       if (document.readyState === 'complete') request();

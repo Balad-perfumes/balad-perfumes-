@@ -2064,9 +2064,17 @@
       setScrollState();
     });
     window.addEventListener('scroll', onHeaderScroll, { passive: true });
+    // Coalesce into the next frame: mobile browsers fire resize during load and on every address-bar
+    // show/hide, and measuring synchronously here forced a full-page layout each time.
+    let headerResizeQueued = false;
     window.addEventListener('resize', () => {
-      updateHeaderMetrics();
-      setScrollState();
+      if (headerResizeQueued) return;
+      headerResizeQueued = true;
+      requestAnimationFrame(() => {
+        headerResizeQueued = false;
+        updateHeaderMetrics();
+        setScrollState();
+      });
     }, { passive: true });
 
     // -------------------------------------------------------------
