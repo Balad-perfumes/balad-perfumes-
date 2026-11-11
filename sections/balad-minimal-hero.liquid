@@ -1509,13 +1509,27 @@
         hero.dataset.initialized = 'true';
 
         // Subtract announcement bar height so the mobile hero fits the visible screen exactly
-        const setAnnounceH = () => {
-          const bar = document.querySelector('.balad-announce');
-          hero.style.setProperty('--hero-announce-h', (bar ? bar.offsetHeight : 0) + 'px');
+        // ResizeObserver reports the bar's size after the browser's own layout pass. Reading offsetHeight here
+        // instead forced a synchronous layout of the whole page during load (~150ms on mobile, right before LCP).
+        const announceBar = document.querySelector('.balad-announce');
+        let announceH = -1;
+        const setAnnounceH = (h) => {
+          h = Math.round(h);
+          if (h === announceH) return;
+          announceH = h;
+          hero.style.setProperty('--hero-announce-h', h + 'px');
         };
-        setAnnounceH();
-        window.addEventListener('resize', setAnnounceH);
-        window.addEventListener('load', setAnnounceH);
+        if (!announceBar) {
+          setAnnounceH(0);
+        } else if ('ResizeObserver' in window) {
+          new ResizeObserver((entries) => {
+            const box = entries[0].borderBoxSize && entries[0].borderBoxSize[0];
+            setAnnounceH(box ? box.blockSize : announceBar.offsetHeight);
+          }).observe(announceBar);
+        } else {
+          requestAnimationFrame(() => setAnnounceH(announceBar.offsetHeight));
+          window.addEventListener('resize', () => setAnnounceH(announceBar.offsetHeight));
+        }
 
         const viewport = hero.querySelector('.balad-min-hero__viewport');
         const track = hero.querySelector('[data-track]');

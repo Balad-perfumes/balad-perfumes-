@@ -853,7 +853,22 @@
         }, { passive: true });
 
         window.addEventListener('resize', update);
-        if (window.ResizeObserver) new ResizeObserver(update).observe(track);
+        // Measure only once the section nears the viewport. It renders with content-visibility: auto (base.css),
+        // so measuring it at load would force the browser to lay out the whole off-screen grid.
+        const startMeasuring = () => {
+          if (window.ResizeObserver) new ResizeObserver(update).observe(track);
+          else requestAnimationFrame(update);
+        };
+        if ('IntersectionObserver' in window) {
+          const io = new IntersectionObserver((entries) => {
+            if (!entries.some((entry) => entry.isIntersecting)) return;
+            io.disconnect();
+            startMeasuring();
+          }, { rootMargin: '400px 0px' });
+          io.observe(root);
+        } else {
+          startMeasuring();
+        }
 
         /* Mouse drag-to-scroll (touch scrolls natively) */
         let down = false, moved = false, startX = 0, startLeft = 0;
@@ -882,9 +897,6 @@
         }, true);
         track.addEventListener('dragstart', (e) => e.preventDefault());
 
-        // No synchronous update() here: reading scrollWidth/offsetLeft while the page is still parsing
-        // forced a full layout mid-load. ResizeObserver fires once by itself on the next frame.
-        if (!window.ResizeObserver) requestAnimationFrame(update);
       });
     };
 

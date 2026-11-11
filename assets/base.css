@@ -4842,3 +4842,26 @@ body.template-about #MainContent,
 body.template-page--about #MainContent {
   background-color: #ffffff !important;
 }
+
+/* ---------------------------------------------------------------------------
+   Below-the-fold homepage sections: let the browser skip their style, layout and
+   paint until they come near the viewport. The homepage has ~3,700 elements and the
+   first full layout of all of them (before first paint) was the largest part of
+   mobile LCP "render delay". `auto` in contain-intrinsic-size makes the browser
+   remember each section's real height once it has rendered, so the scrollbar settles.
+
+   Sections that render wishlist / Q&A modals inside themselves get this on their
+   `__shell` wrapper only: the modals are position: fixed, and containment on an
+   ancestor would turn it into their containing block and clip them.
+--------------------------------------------------------------------------- */
+.content-for-layout .balad-latest__shell,
+.content-for-layout .balad-forher__shell,
+.content-for-layout .balad-forhim__shell,
+.content-for-layout .balad-catprod__shell,
+.content-for-layout .balad-promo-cards,
+.content-for-layout .balad-home-benefits,
+.content-for-layout .bcs,
+.content-for-layout .smf-our-stores-section {
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto 640px;
+}

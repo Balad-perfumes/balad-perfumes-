@@ -568,9 +568,20 @@
       ticking = true;
       window.requestAnimationFrame(() => { update(); ticking = false; });
     }, { passive: true });
-    window.addEventListener('resize', build);
-    // Next frame, not mid-parse: build() reads scrollWidth/getBoundingClientRect, which forced a layout during load
-    requestAnimationFrame(build);
+    // build() reads scrollWidth/getBoundingClientRect. A ResizeObserver callback runs after the browser has already
+    // laid the page out, so those reads are free; calling build() from rAF/load forced an extra full layout.
+    if ('ResizeObserver' in window) {
+      let lastW = -1;
+      new ResizeObserver((entries) => {
+        const w = Math.round(entries[0].contentRect.width);
+        if (w === lastW) return;
+        lastW = w;
+        build();
+      }).observe(track);
+    } else {
+      window.addEventListener('resize', build);
+      requestAnimationFrame(build);
+    }
   })();
 </script>
 

@@ -490,7 +490,8 @@
         document.body.appendChild(nav);
       }
 
-      let lastScrollY = window.scrollY;
+      // Read lazily on the first scroll: reading scrollY right after the appendChild above forced a layout during load
+      let lastScrollY = null;
       let ticking = false;
       const scrollThreshold = 14;
 
@@ -508,6 +509,7 @@
 
       const onScroll = () => {
         const currentScrollY = window.scrollY;
+        if (lastScrollY === null) lastScrollY = currentScrollY;
         const delta = currentScrollY - lastScrollY;
         const isNearBottom = (window.innerHeight + currentScrollY) >= (document.documentElement.scrollHeight - 60);
 

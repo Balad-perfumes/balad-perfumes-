@@ -1923,7 +1923,9 @@
       document.body.appendChild(drawer);
     }
 
-    let currentScrolledState = null;
+    // Start from the state rendered in the markup (data-scrolled="false"), so the first setScrollState() on load
+    // doesn't rewrite the same attribute and trigger a full-page style recalc before first paint.
+    let currentScrolledState = header ? header.getAttribute('data-scrolled') === 'true' : null;
     let headerScrollTicking = false;
 
     const updateHeaderMetrics = () => {
@@ -1945,9 +1947,7 @@
       const isScrolled = window.scrollY > 10;
       if (currentScrolledState !== isScrolled) {
         currentScrolledState = isScrolled;
-        const stateStr = isScrolled ? 'true' : 'false';
-        header.dataset.scrolled = stateStr;
-        header.setAttribute('data-scrolled', stateStr);
+        header.setAttribute('data-scrolled', isScrolled ? 'true' : 'false');
       }
     };
 
@@ -2058,8 +2058,11 @@
       updateCartCount(count);
     });
 
-    updateHeaderMetrics();
-    setScrollState();
+    // Both read layout (offsetHeight / scrollY); run them in the next frame instead of forcing a layout mid-load.
+    requestAnimationFrame(() => {
+      updateHeaderMetrics();
+      setScrollState();
+    });
     window.addEventListener('scroll', onHeaderScroll, { passive: true });
     window.addEventListener('resize', () => {
       updateHeaderMetrics();
