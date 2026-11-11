@@ -132,12 +132,15 @@
       });
     }
 
-    // Prefetch the HTML (network only, no rendering) once the page has finished loading
+    // Prefetch the HTML (network only, no rendering) a few seconds after the page has loaded. On this page
+    // `load` can fire before the hero image has painted, so prefetching right at load competed with it.
     function prefetch() {
       var idle = window.requestIdleCallback || function (cb) { return setTimeout(cb, 300); };
-      idle(function () {
-        document.querySelectorAll(SELECTOR).forEach(function (p) { fetchSection(p.getAttribute('data-lazy-section')).catch(function () {}); });
-      });
+      setTimeout(function () {
+        idle(function () {
+          document.querySelectorAll(SELECTOR).forEach(function (p) { fetchSection(p.getAttribute('data-lazy-section')).catch(function () {}); });
+        });
+      }, 3000);
     }
     if (document.readyState === 'complete') prefetch();
     else window.addEventListener('load', prefetch, { once: true });
