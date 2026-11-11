@@ -20,6 +20,9 @@
   .skip-to-content-link {
     position: absolute;
     left: -99999px;
+    /* Laid out even while off-screen, so its bold Inter text pulled in the Inter 700 file on every page load */
+    font-family: var(--font-heading--family);
+    font-weight: 700;
   }
 
   .skip-to-content-link:focus {
