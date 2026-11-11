@@ -1472,7 +1472,7 @@
     background: rgba(255, 255, 255, 0.97);
     -webkit-backdrop-filter: saturate(160%) blur(14px);
     backdrop-filter: saturate(160%) blur(14px);
-    border: 1px solid rgba(163, 123, 53, 0.22);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: var(--pf-radius);
     box-shadow: 0 24px 48px -12px rgba(30, 24, 12, 0.28), 0 4px 12px rgba(30, 24, 12, 0.06);
     overflow: hidden;
@@ -1494,16 +1494,6 @@
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
-  }
-
-  /* Thin gold accent line along the top edge */
-  .pf-product-template__sticky-bar::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, var(--pf-gold) 20%, #d8b46a 50%, var(--pf-gold) 80%, transparent);
-    opacity: 0.9;
   }
 
   .pf-product-template__sticky-shell { display: flex; flex-direction: column; gap: 14px; }
@@ -1621,6 +1611,30 @@
   }
   .pf-sticky-btn--buy:hover:not(:disabled) { background: #000; box-shadow: 0 10px 22px -6px rgba(0, 0, 0, 0.55); }
 
+  /* Loading state for Add to bag / Buy now (main + sticky): label hidden, spinner in its place.
+     Uses ::before because .pdp-btn--buy's shine already uses ::after. */
+  .pf-product-template .pf-btn-loading {
+    position: relative;
+    cursor: progress;
+    opacity: 1 !important;
+  }
+  .pf-product-template .pf-btn-loading > * { visibility: hidden; }
+  .pf-product-template .pf-btn-loading::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: pfBtnSpin 0.7s linear infinite;
+  }
+  @keyframes pfBtnSpin { to { transform: rotate(360deg); } }
+
   .pf-product-template__sticky-note {
     display: flex;
     align-items: center;
@@ -1646,7 +1660,6 @@
       border-radius: 18px 18px 0 0;
       box-shadow: 0 -10px 30px -8px rgba(30, 24, 12, 0.22);
     }
-    .pf-product-template__sticky-bar::before { height: 2px; }
     /* Phones, two rows:
          [ NAME  (100 ML)                 ₹3,999  ₹4,500  10% OFF ]
          [ ───────────── bag icon  ADD TO CART (full width) ───── ] */
@@ -3112,6 +3125,15 @@
       });
     });
 
+    // Spinner in place of the label while a request runs (CSS: .pf-btn-loading)
+    const setBtnLoading = (btn, loading) => {
+      if (!btn) return;
+      btn.disabled = loading;
+      btn.classList.toggle('pf-btn-loading', loading);
+      if (loading) btn.setAttribute('aria-busy', 'true');
+      else btn.removeAttribute('aria-busy');
+    };
+
     // ── Add to bag ──
     const handleAddToBag = async (btn) => {
       const variantId = variantIdInput?.value;
@@ -3119,8 +3141,7 @@
 
       const textEl = btn?.querySelector('[data-pf-sticky-add-text], [data-pf-add-text]') || btn;
       const originalText = textEl ? textEl.textContent : 'Add to bag';
-      if (btn) btn.disabled = true;
-      if (textEl) textEl.textContent = 'Adding...';
+      setBtnLoading(btn, true);
 
       try {
         const sectionIds = [];
@@ -3167,13 +3188,11 @@
           else window.location.href = window.Shopify?.routes?.root ? `${window.Shopify.routes.root}cart` : '/cart';
         }
 
-        if (textEl) textEl.textContent = 'Added';
-        setTimeout(() => {
-          if (textEl) textEl.textContent = originalText;
-          if (btn) btn.disabled = false;
-        }, 1200);
+        setBtnLoading(btn, false);
       } catch (err) {
         console.error('Add to cart error:', err);
+        setBtnLoading(btn, false);
+        if (btn) btn.disabled = true;
         if (textEl) textEl.textContent = 'Try again';
         setTimeout(() => {
           if (textEl) textEl.textContent = originalText;
@@ -3192,10 +3211,7 @@
       const variantId = variantIdInput?.value;
       if (!variantId || !btn || btn.disabled) return;
 
-      const labelEl = btn.querySelector('[data-pf-buy-label]') || btn;
-      const originalText = labelEl.textContent;
-      btn.disabled = true;
-      labelEl.textContent = 'Please wait...';
+      setBtnLoading(btn, true);
 
       try {
         const formData = new FormData();
@@ -3210,8 +3226,7 @@
         window.location.assign(`${window.Shopify?.routes?.root || '/'}checkout`);
       } catch (err) {
         console.error('Buy Now error:', err);
-        btn.disabled = false;
-        labelEl.textContent = originalText;
+        setBtnLoading(btn, false);
         alert('We could not start checkout. Please try again.');
       }
     };
@@ -3219,6 +3234,10 @@
     [buyNowBtn, stickyBuyBtn].forEach((btn) => {
       if (!btn) return;
       btn.addEventListener('click', (e) => { e.preventDefault(); handleBuyNow(btn); });
+    });
+    // Back from checkout restores this page from the back/forward cache with Buy now still spinning
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted) root.querySelectorAll('.pf-btn-loading').forEach((b) => setBtnLoading(b, false));
     });
 
     // ── Share ──
