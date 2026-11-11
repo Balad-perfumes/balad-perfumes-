@@ -568,15 +568,9 @@
       ticking = true;
       window.requestAnimationFrame(() => { update(); ticking = false; });
     }, { passive: true });
-    // build() reads scrollWidth/getBoundingClientRect. Calling it directly (or in the first animation frame)
-    // forced a full-page layout before the hero could paint (~0.7s on mobile). ResizeObserver callbacks run
-    // right after the browser's own layout, so the reads are free; it also fires on every resize.
-    if (window.ResizeObserver) {
-      new ResizeObserver(() => build()).observe(track);
-    } else {
-      window.addEventListener('resize', build);
-      window.addEventListener('load', build);
-    }
+    window.addEventListener('resize', build);
+    // Next frame, not mid-parse: build() reads scrollWidth/getBoundingClientRect, which forced a layout during load
+    requestAnimationFrame(build);
   })();
 </script>
 
@@ -605,9 +599,7 @@
     window.addEventListener('scroll', request, { passive: true });
     window.addEventListener('resize', request);
     window.addEventListener('load', request);
-    // No initial call: an early getBoundingClientRect forced a full layout before the hero painted.
-    // The load listener above does the first run; the section is below the hero anyway.
-    if (document.readyState === 'complete') request();
+    request(); // next frame, not mid-parse (getBoundingClientRect forces layout)
   })();
 </script>
 
