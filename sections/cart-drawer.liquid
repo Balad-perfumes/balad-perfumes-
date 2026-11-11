@@ -1,10 +1,5 @@
 <script src="{{ 'cart-drawer.js' | asset_url }}" type="module" fetchpriority="low"></script>
-{%- if template.name == 'index' -%}
-  {%- comment -%} Homepage: loaded after page load or on first tap (deferred-modules in layout/theme.liquid) {%- endcomment -%}
-  <script type="module-deferred" data-src="{{ 'component-cart-items.js' | asset_url }}"></script>
-{%- else -%}
 <script src="{{ 'component-cart-items.js' | asset_url }}" type="module" fetchpriority="low"></script>
-{%- endif -%}
 
 {%- liquid
   assign free_ship_threshold = section.settings.free_shipping_threshold | default: 0
