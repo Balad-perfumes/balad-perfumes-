@@ -609,8 +609,10 @@
 
     window.addEventListener('scroll', request, { passive: true });
     window.addEventListener('resize', request);
-    window.addEventListener('load', request);
-    request(); // next frame, not mid-parse (getBoundingClientRect forces layout)
+    // First run on window load, not in the next frame: during parsing, innerHeight/getBoundingClientRect
+    // force a full-page layout before the first paint. Editor re-renders happen after load, so run then.
+    if (document.readyState === 'complete') request();
+    else window.addEventListener('load', request);
   })();
 </script>
 

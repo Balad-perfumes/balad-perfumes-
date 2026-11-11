@@ -923,6 +923,9 @@
 
     const apply = () => {
       ticking = false;
+      // Nothing near the viewport: return before touching layout. Even window.innerHeight forces a full-page
+      // layout while the page is still loading (it was ~120ms right before first paint on mobile).
+      if (!roots.size) return;
       const vh = window.innerHeight || 800;
       roots.forEach((root) => {
         const img = root.querySelector('.balad-forhim__bg-img');
@@ -952,7 +955,7 @@
             if (entry.isIntersecting) roots.add(entry.target);
             else roots.delete(entry.target);
           });
-          request();
+          if (roots.size) request();
         }, { rootMargin: '200px 0px' })
       : null;
 
@@ -967,9 +970,10 @@
       if (document.readyState === 'complete') request();
     };
 
-    window.addEventListener('scroll', request, { passive: true });
-    window.addEventListener('resize', request);
-    window.addEventListener('load', request);
+    const requestIfVisible = () => { if (roots.size) request(); };
+    window.addEventListener('scroll', requestIfVisible, { passive: true });
+    window.addEventListener('resize', requestIfVisible);
+    window.addEventListener('load', requestIfVisible);
     init();
     document.addEventListener('DOMContentLoaded', () => init());
     document.addEventListener('shopify:section:load', (e) => init(e.target));
