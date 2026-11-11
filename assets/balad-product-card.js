@@ -49,10 +49,28 @@ if (!window.__baladDeferInit) {
       });
     }
 
+    // Start only once the hero (the mobile LCP image) has painted. Any request that starts before
+    // that paint counts against LCP in PageSpeed's simulation (every byte goes through the same
+    // throttled 4G link), so "Shop Our Collections" photos just below the hero waited for it.
+    function afterHeroPaint(fn) {
+      var done = false;
+      function run() {
+        if (done) return;
+        done = true;
+        requestAnimationFrame(function () { setTimeout(fn, 0); });
+      }
+      var hero = document.querySelector('.balad-min-hero__img');
+      if (!hero || hero.complete || document.readyState === 'complete') return run();
+      hero.addEventListener('load', run, { once: true });
+      hero.addEventListener('error', run, { once: true });
+      window.addEventListener('load', run, { once: true });
+    }
+
+    function start() { afterHeroPaint(function () { scan(); }); }
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function () { scan(); });
+      document.addEventListener('DOMContentLoaded', start);
     } else {
-      scan();
+      start();
     }
     document.addEventListener('shopify:section:load', function (e) { scan(e.target); });
     // Printing shows the whole page; make sure every photo is there.

@@ -93,18 +93,29 @@
         <a href="{{ coll.url }}" class="balad-cc" draggable="false">
           <span class="balad-cc__media">
             {%- if img != blank -%}
-              {{
-                img
-                | image_url: width: 900
-                | image_tag:
-                  loading: 'lazy',
-                  fetchpriority: 'low',
-                  widths: '360, 540, 720, 900',
-                  sizes: '(min-width: 1200px) 25vw, (min-width: 750px) 33vw, 46vw',
-                  alt: coll.title,
-                  class: 'balad-cc__image',
-                  draggable: 'false'
-              }}
+              {%- capture cc_img -%}
+                {{
+                  img
+                  | image_url: width: 900
+                  | image_tag:
+                    loading: 'lazy',
+                    fetchpriority: 'low',
+                    widths: '360, 540, 720, 900',
+                    sizes: '(min-width: 1200px) 25vw, (min-width: 750px) 33vw, 46vw',
+                    alt: coll.title,
+                    class: 'balad-cc__image',
+                    draggable: 'false'
+                }}
+              {%- endcapture -%}
+              {%- comment -%}
+                Below the hero, hold the photos until the hero has painted (assets/balad-product-card.js).
+                On mobile these ~75 KB downloaded alongside the hero and pushed PageSpeed's simulated LCP back.
+              {%- endcomment -%}
+              {%- if section.index > 1 -%}
+                {{ cc_img | replace: ' srcset=', ' data-defer-srcset=' | replace: ' src=', ' data-defer-src=' }}
+              {%- else -%}
+                {{ cc_img }}
+              {%- endif -%}
             {%- else -%}
               {{ 'collection-1' | placeholder_svg_tag: 'balad-cc__image balad-cc__placeholder' }}
             {%- endif -%}
