@@ -20,6 +20,15 @@
   assign contact_whatsapp_text = section.settings.contact_whatsapp_text | default: '+91 94474 25555'
 %}
 
+{%- comment -%}
+  Homepage: the footer is ~10 KB gzip of HTML at the very bottom of a long page, so it loads on demand like the
+  balad-* homepage sections (snippets/lazy-section.liquid). section.index is blank when Shopify renders the
+  section through the Section Rendering API (?section_id=), so that fetch returns the real footer.
+  Heights measured from the rendered footer: 931px phones, 890px tablets, 414px desktop.
+{%- endcomment -%}
+{%- if template.name == 'index' and section.index != blank and request.design_mode == false -%}
+  {%- render 'lazy-section', section_id: section.id, kind: 'block', h: 931, ht: 890, hd: 414 -%}
+{%- else -%}
 <footer class="balad-footer color-{{ section.settings.color_scheme }}" id="balad-site-footer">
   <div class="balad-footer__wrap">
     <div class="balad-footer__grid">
@@ -456,6 +465,7 @@
     }
   }
 </style>
+{%- endif -%}
 
 {% schema %}
 {

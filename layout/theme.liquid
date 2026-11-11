@@ -287,7 +287,8 @@
       </script>
     {%- endif -%}
     {%- comment -%} Sections rendered as on-demand placeholders (snippets/lazy-section.liquid) need their loader {%- endcomment -%}
-    {%- if content_for_layout contains 'data-lazy-section=' -%}
+    {%- comment -%} The homepage footer (sections/footer.liquid) is one too, and it isn't part of content_for_layout {%- endcomment -%}
+    {%- if content_for_layout contains 'data-lazy-section=' or template.name == 'index' -%}
       <script src="{{ 'lazy-sections.js' | asset_url }}" defer></script>
     {%- endif -%}
 

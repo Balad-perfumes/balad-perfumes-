@@ -398,8 +398,11 @@
       [1000, 2500].forEach((t) => setTimeout(alignInstagramCards, t));
     });
 
-    // The gallery can be lazy-rendered (sections/_blocks.liquid "Load content when scrolled near"): align once it exists
-    document.addEventListener('lazy-blocks:rendered', () => {
+    // The gallery can be lazy-rendered (sections/_blocks.liquid "Load content when scrolled near"): the real
+    // section replaces the skeleton (and the heading added to it), so add the heading again and align once it exists
+    document.addEventListener('shopify:section:load', (event) => {
+      if (!event.detail || !event.detail.lazy || !/1790060856/.test(event.detail.sectionId || '')) return;
+      enhanceShoppableVideoAppSection();
       [300, 1200, 2500].forEach((t) => setTimeout(alignInstagramCards, t));
     });
 
