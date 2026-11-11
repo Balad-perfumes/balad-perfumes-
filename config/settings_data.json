@@ -124,7 +124,7 @@
       },
       "15191099883265461803": {
         "type": "shopify://apps/reelfy-videos/blocks/app-embed/4022ffb0-05c3-4ef3-a409-6df51f4b1b3f",
-        "disabled": true,
+        "disabled": false,
         "settings": {
           "exclude_pages": ""
         }
