@@ -1,3 +1,6 @@
+{%- comment -%} Sections below the first two load their card photos only when scrolled near (see balad-product-card.js) {%- endcomment -%}
+{%- assign defer_card_media = false -%}
+{%- if section.index > 2 -%}{%- assign defer_card_media = true -%}{%- endif -%}
 {{ 'balad-product-card.css' | asset_url | stylesheet_tag }}
 {% liquid
   assign coll_handle = section.settings.collection
@@ -108,7 +111,7 @@
           endif
         %}
         <div class="balad-latest-grid__card" data-product-card>
-          {% render 'balad-product-card', product: product, limit: 4, badge_first: forloop.first, show_rating: section.settings.show_rating, show_buy_now: section.settings.show_buy_now %}
+          {% render 'balad-product-card', product: product, defer_media: defer_card_media, limit: 4, badge_first: forloop.first, show_rating: section.settings.show_rating, show_buy_now: section.settings.show_buy_now %}
         </div>
       {% endfor %}
 

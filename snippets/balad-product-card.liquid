@@ -7,6 +7,7 @@
   @param {object} product - The product
   @param {number} [limit] - Max images in the hover/swipe carousel (default 6)
   @param {boolean} [eager] - Load the first image eagerly
+  @param {boolean} [defer_media] - Hold the first image until the section nears the viewport (assets/balad-product-card.js). For sections far down the page
   @param {boolean} [badge_first] - Show the "Selling fast" badge on this card
   @param {boolean} [show_rating] - Show the rating next to the subtitle (default true)
   @param {boolean} [show_buy_now] - Show the "Buy now" button on the image (default true). Pass false to hide it
@@ -127,7 +128,10 @@
         {%- capture card_srcset -%}{{ image | image_url: width: 300 }} 300w, {{ image | image_url: width: 450 }} 450w, {{ image | image_url: width: 600 }} 600w{%- endcapture -%}
         <img
           class="bpc__image{% if forloop.first %} is-active{% endif %}"
-          {% if forloop.first -%}
+          {% if forloop.first and defer_media and eager != true -%}
+            data-defer-src="{{ image | image_url: width: 600 }}"
+            data-defer-srcset="{{ card_srcset }}"
+          {%- elsif forloop.first -%}
             src="{{ image | image_url: width: 600 }}"
             srcset="{{ card_srcset }}"
           {%- else -%}

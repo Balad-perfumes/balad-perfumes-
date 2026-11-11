@@ -1,5 +1,67 @@
 /* Balad product card behaviour: image-loaded state (removes the skeleton) + global Quick View modal.
    Loaded once from layout/theme.liquid (was inlined in every card, ~10 KB x every card on the page). */
+/* Deferred images for sections further down the page (product cards, parallax backgrounds, promo cards).
+   They ship their URLs as data-defer-src / data-defer-srcset. Native loading="lazy" still fetched them
+   during page load (Chrome loads lazy images up to ~1250px below the screen), so ~600 KB of photos
+   competed with the hero image on mobile. Here a whole section loads together once any of its deferred
+   images comes within 300px of the viewport, so cards in horizontal rows don't pop in one by one. */
+if (!window.__baladDeferInit) {
+  window.__baladDeferInit = true;
+  (function () {
+    var SELECTOR = 'img[data-defer-src], img[data-defer-srcset]';
+
+    function loadImg(img) {
+      var picture = img.parentElement && img.parentElement.tagName === 'PICTURE' ? img.parentElement : null;
+      if (picture) {
+        picture.querySelectorAll('source[data-defer-srcset]').forEach(function (source) {
+          source.srcset = source.getAttribute('data-defer-srcset');
+          source.removeAttribute('data-defer-srcset');
+        });
+      }
+      var srcset = img.getAttribute('data-defer-srcset');
+      var src = img.getAttribute('data-defer-src');
+      img.removeAttribute('data-defer-srcset');
+      img.removeAttribute('data-defer-src');
+      if (srcset) img.srcset = srcset;
+      if (src) img.src = src;
+    }
+
+    function loadGroup(img) {
+      var group = img.closest('.shopify-section') || img.parentElement;
+      group.querySelectorAll(SELECTOR).forEach(function (el) {
+        if (io) io.unobserve(el);
+        loadImg(el);
+      });
+    }
+
+    var io = 'IntersectionObserver' in window
+      ? new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting && entry.target.isConnected) loadGroup(entry.target);
+          });
+        }, { rootMargin: '300px 0px' })
+      : null;
+
+    function scan(scope) {
+      (scope || document).querySelectorAll(SELECTOR).forEach(function (img) {
+        if (io) io.observe(img);
+        else loadImg(img);
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () { scan(); });
+    } else {
+      scan();
+    }
+    document.addEventListener('shopify:section:load', function (e) { scan(e.target); });
+    // Printing shows the whole page; make sure every photo is there.
+    window.addEventListener('beforeprint', function () {
+      document.querySelectorAll(SELECTOR).forEach(loadImg);
+    });
+  })();
+}
+
 if (!window.__bpcInit) {
   window.__bpcInit = true;
   (function () {

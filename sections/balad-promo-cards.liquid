@@ -67,15 +67,23 @@
           >
             <div class="balad-promo-card__media">
               {% if block.settings.image != blank %}
-                {{
-                  block.settings.image
-                  | image_url: width: 1600
-                  | image_tag:
-                    class: 'balad-promo-card__image',
-                    widths: '480, 720, 960, 1200, 1600, 2000',
-                    loading: 'lazy',
-                    alt: block.settings.heading | default: 'Promo card image'
-                }}
+                {%- capture promo_img -%}
+                  {{
+                    block.settings.image
+                    | image_url: width: 1600
+                    | image_tag:
+                      class: 'balad-promo-card__image',
+                      widths: '480, 720, 960, 1200, 1600, 2000',
+                      loading: 'lazy',
+                      alt: block.settings.heading | default: 'Promo card image'
+                  }}
+                {%- endcapture -%}
+                {%- comment -%} Below the first two sections, hold the photo until it's scrolled near (assets/balad-product-card.js) {%- endcomment -%}
+                {%- if section.index > 2 -%}
+                  {{ promo_img | replace: ' srcset=', ' data-defer-srcset=' | replace: ' src=', ' data-defer-src=' }}
+                {%- else -%}
+                  {{ promo_img }}
+                {%- endif -%}
               {% else %}
                 {{ 'lifestyle-1' | placeholder_svg_tag: 'balad-promo-card__placeholder' }}
               {% endif %}

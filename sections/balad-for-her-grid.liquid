@@ -1,3 +1,6 @@
+{%- comment -%} Sections below the first two load their card photos only when scrolled near (see balad-product-card.js) {%- endcomment -%}
+{%- assign defer_card_media = false -%}
+{%- if section.index > 2 -%}{%- assign defer_card_media = true -%}{%- endif -%}
 {{ 'balad-product-card.css' | asset_url | stylesheet_tag }}
 {% liquid
   assign coll_handle = section.settings.collection
@@ -53,16 +56,16 @@
         {%- if bg_image_mobile != blank -%}
           <source
             media="(max-width: 749px)"
-            srcset="{{ bg_image_mobile | image_url: width: 600 }} 600w, {{ bg_image_mobile | image_url: width: 900 }} 900w, {{ bg_image_mobile | image_url: width: 1200 }} 1200w"
+            {% if defer_card_media %}data-defer-{% endif %}srcset="{{ bg_image_mobile | image_url: width: 600 }} 600w, {{ bg_image_mobile | image_url: width: 900 }} 900w, {{ bg_image_mobile | image_url: width: 1200 }} 1200w"
             sizes="100vw"
           >
         {%- endif -%}
         <img
           class="balad-forher__bg-img"
-          src="{{ bg_image | image_url: width: 2400 }}"
+          {% if defer_card_media %}data-defer-{% endif %}src="{{ bg_image | image_url: width: 2400 }}"
           width="{{ bg_image.width }}"
           height="{{ bg_image.height }}"
-          srcset="{{ bg_image | image_url: width: 1200 }} 1200w, {{ bg_image | image_url: width: 1600 }} 1600w, {{ bg_image | image_url: width: 2000 }} 2000w, {{ bg_image | image_url: width: 2400 }} 2400w"
+          {% if defer_card_media %}data-defer-{% endif %}srcset="{{ bg_image | image_url: width: 1200 }} 1200w, {{ bg_image | image_url: width: 1600 }} 1600w, {{ bg_image | image_url: width: 2000 }} 2000w, {{ bg_image | image_url: width: 2400 }} 2400w"
           sizes="100vw"
           alt=""
           loading="lazy"
@@ -95,7 +98,7 @@
     <div class="balad-forher__track" data-forher-track>
       {% for product in active_collection.products limit: product_limit %}
         <div class="balad-forher__card" data-product-card>
-          {% render 'balad-product-card', product: product, limit: 4, badge_first: forloop.first, show_rating: section.settings.show_rating, show_buy_now: section.settings.show_buy_now %}
+          {% render 'balad-product-card', product: product, defer_media: defer_card_media, limit: 4, badge_first: forloop.first, show_rating: section.settings.show_rating, show_buy_now: section.settings.show_buy_now %}
         </div>
       {% endfor %}
 
