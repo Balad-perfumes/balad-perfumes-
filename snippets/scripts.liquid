@@ -62,34 +62,59 @@
     document.head.appendChild(s);
   }
 </script>
+{%- if template.name == 'index' -%}
+  {%- comment -%} Homepage: loaded after page load or on first tap (deferred-modules in layout/theme.liquid) {%- endcomment -%}
+  <script type="module-deferred" data-src="{{ 'overflow-list.js' | asset_url }}"></script>
+{%- else -%}
 <script
   src="{{ 'overflow-list.js' | asset_url }}"
   type="module"
   fetchpriority="low"
 ></script>
+{%- endif -%}
+{%- if template.name == 'index' -%}
+  {%- comment -%} Homepage: loaded after page load or on first tap (deferred-modules in layout/theme.liquid) {%- endcomment -%}
+  <script type="module-deferred" data-src="{{ 'quick-add.js' | asset_url }}"></script>
+{%- else -%}
 <script
   src="{{ 'quick-add.js' | asset_url }}"
   type="module"
   fetchpriority="low"
 ></script>
+{%- endif -%}
 {% if settings.show_add_discount_code %}
-  <script
+  {%- if template.name == 'index' -%}
+  {%- comment -%} Homepage: loaded after page load or on first tap (deferred-modules in layout/theme.liquid) {%- endcomment -%}
+  <script type="module-deferred" data-src="{{ 'cart-discount.js' | asset_url }}"></script>
+{%- else -%}
+<script
     src="{{ 'cart-discount.js' | asset_url }}"
     type="module"
     fetchpriority="low"
   ></script>
+{%- endif -%}
 {% endif %}
 
+{%- if template.name == 'index' -%}
+  {%- comment -%} Homepage: loaded after page load or on first tap (deferred-modules in layout/theme.liquid) {%- endcomment -%}
+  <script type="module-deferred" data-src="{{ 'dialog.js' | asset_url }}"></script>
+{%- else -%}
 <script
   src="{{ 'dialog.js' | asset_url }}"
   type="module"
   fetchpriority="low"
 ></script>
+{%- endif -%}
+{%- if template.name == 'index' -%}
+  {%- comment -%} Homepage: loaded after page load or on first tap (deferred-modules in layout/theme.liquid) {%- endcomment -%}
+  <script type="module-deferred" data-src="{{ 'product-card.js' | asset_url }}"></script>
+{%- else -%}
 <script
   src="{{ 'product-card.js' | asset_url }}"
   type="module"
   fetchpriority="low"
 ></script>
+{%- endif -%}
 
 {% if template contains 'product' or template.name == 'product' or request.page_type == 'product' %}
   <script
