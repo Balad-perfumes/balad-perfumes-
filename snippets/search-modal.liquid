@@ -5,16 +5,26 @@
   @param {string} [class] - Additional CSS classes to apply to the predictive search component.
 {% enddoc %}
 
+{%- if template.name == 'index' -%}
+  {%- comment -%} Homepage: loaded after page load or on first tap (deferred-modules in layout/theme.liquid) {%- endcomment -%}
+  <script type="module-deferred" data-src="{{ 'dialog.js' | asset_url }}"></script>
+{%- else -%}
 <script
   src="{{ 'dialog.js' | asset_url }}"
   type="module"
 ></script>
+{%- endif -%}
 
+{%- if template.name == 'index' -%}
+  {%- comment -%} Homepage: loaded after page load or on first tap (deferred-modules in layout/theme.liquid) {%- endcomment -%}
+  <script type="module-deferred" data-src="{{ 'predictive-search.js' | asset_url }}"></script>
+{%- else -%}
 <script
   src="{{ 'predictive-search.js' | asset_url }}"
   type="module"
   fetchpriority="low"
 ></script>
+{%- endif -%}
 
 <dialog-component
   id="search-modal"
