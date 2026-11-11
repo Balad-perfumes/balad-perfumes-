@@ -218,7 +218,8 @@
         "gradient_direction": "to top",
         "padding-block-start": 0,
         "padding-block-end": 0,
-        "remove_horizontal_padding": true
+        "remove_horizontal_padding": true,
+        "lazy_render": true
       }
     },
     "promo_cards_two_up": {

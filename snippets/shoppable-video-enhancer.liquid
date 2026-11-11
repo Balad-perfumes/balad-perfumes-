@@ -398,6 +398,11 @@
       [1000, 2500].forEach((t) => setTimeout(alignInstagramCards, t));
     });
 
+    // The gallery can be lazy-rendered (sections/_blocks.liquid "Load content when scrolled near"): align once it exists
+    document.addEventListener('lazy-blocks:rendered', () => {
+      [300, 1200, 2500].forEach((t) => setTimeout(alignInstagramCards, t));
+    });
+
     document.addEventListener('DOMContentLoaded', enhanceShoppableVideoAppSection);
     window.addEventListener('load', enhanceShoppableVideoAppSection);
 

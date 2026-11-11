@@ -4,6 +4,98 @@
   {% content_for 'blocks' %}
 {% endcapture %}
 
+{%- comment -%}
+  Lazy render: the blocks' HTML ships inside an inert <template>, so none of it is parsed into the page,
+  styled, laid out or downloaded (images, video posters) during page load. A skeleton holds the space.
+  When the section comes within 600px of the viewport, the HTML is moved into the page. App scripts
+  that watch the DOM (e.g. Reelfy's MutationObserver) then build their widget as usual.
+  Never in the theme editor, where merchants need the real blocks.
+{%- endcomment -%}
+{%- if section.settings.lazy_render and request.design_mode == false -%}
+  {%- capture children -%}
+    <div class="lazy-blocks" data-lazy-blocks>
+      <div class="lazy-blocks__skeleton" aria-hidden="true">
+        <div class="lazy-blocks__row">
+          {%- for i in (1..6) -%}<div class="lazy-blocks__card"></div>{%- endfor -%}
+        </div>
+      </div>
+      <template data-lazy-blocks-template>{{ children }}</template>
+    </div>
+  {%- endcapture -%}
+  {%- comment -%} Emitted once per lazy section (sections render in separate scopes); the script guards itself {%- endcomment -%}
+    <style>
+      .lazy-blocks {
+        width: 100%;
+        min-width: 0;
+      }
+      .lazy-blocks__skeleton {
+        /* Same height as the rendered Reelfy gallery (one row of 9:16 cards + product strip; the heading is added outside by shoppable-video-enhancer), so nothing shifts on swap */
+        min-height: 363px;
+        overflow: hidden;
+      }
+      .lazy-blocks__row {
+        display: flex;
+        gap: 8px;
+      }
+      .lazy-blocks__card {
+        flex: 0 0 auto;
+        width: 190px;
+        aspect-ratio: 9 / 16;
+        border-radius: 16px;
+        background: linear-gradient(100deg, rgb(0 0 0 / 0.06) 40%, rgb(0 0 0 / 0.1) 50%, rgb(0 0 0 / 0.06) 60%) 0 0 / 200% 100%;
+        animation: lazy-blocks-shimmer 1.4s linear infinite;
+      }
+      @media screen and (min-width: 750px) {
+        .lazy-blocks__skeleton { min-height: 487px; }
+        .lazy-blocks__row { gap: 16px; }
+        .lazy-blocks__card { width: 261px; }
+      }
+      @keyframes lazy-blocks-shimmer {
+        to { background-position: -200% 0; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .lazy-blocks__card { animation: none; }
+      }
+    </style>
+    <script>
+      (function () {
+        if (window.__lazyBlocksInit) return;
+        window.__lazyBlocksInit = true;
+        function reveal(wrap) {
+          if (wrap.dataset.lazyBlocksDone) return;
+          wrap.dataset.lazyBlocksDone = '1';
+          var tpl = wrap.querySelector('template[data-lazy-blocks-template]');
+          if (!tpl) return;
+          var frag = document.importNode(tpl.content, true);
+          // Re-create script tags so inline/app scripts inside the blocks run once inserted
+          frag.querySelectorAll('script').forEach(function (old) {
+            var s = document.createElement('script');
+            for (var i = 0; i < old.attributes.length; i++) s.setAttribute(old.attributes[i].name, old.attributes[i].value);
+            s.text = old.text;
+            old.replaceWith(s);
+          });
+          wrap.replaceWith(frag);
+          document.dispatchEvent(new CustomEvent('lazy-blocks:rendered'));
+        }
+        function init() {
+          var wraps = document.querySelectorAll('[data-lazy-blocks]');
+          if (!wraps.length) return;
+          if (!('IntersectionObserver' in window)) { wraps.forEach(reveal); return; }
+          var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (!entry.isIntersecting) return;
+              io.unobserve(entry.target);
+              reveal(entry.target);
+            });
+          }, { rootMargin: '600px 0px' });
+          wraps.forEach(function (w) { io.observe(w); });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+        else init();
+      })();
+    </script>
+{%- endif -%}
+
 <style>
   #shopify-section-{{ section.id }} .section {
     {% if section.settings.remove_horizontal_padding %}
@@ -473,6 +565,13 @@
       "type": "checkbox",
       "id": "remove_horizontal_padding",
       "label": "Remove horizontal padding",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "lazy_render",
+      "label": "Load content when scrolled near",
+      "info": "Shows a skeleton until the visitor scrolls close, then builds the blocks. Speeds up page load for heavy app blocks such as video galleries. Off in the theme editor.",
       "default": false
     }
   ],
