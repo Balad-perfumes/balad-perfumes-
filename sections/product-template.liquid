@@ -1355,7 +1355,33 @@
     0%, 55% { left: -60%; }
     100% { left: 130%; }
   }
+  /* Add to cart (main + sticky): same shine. Grey on the white button, white once it's dark (main button hover, phone bar).
+     Delayed so it doesn't sweep in step with Buy now. */
+  .pdp-btn--add,
+  .pf-sticky-btn--add { position: relative; overflow: hidden; }
+  .pdp-btn--add:not(:disabled)::after,
+  .pf-sticky-btn--add:not(:disabled)::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -60%;
+    width: 40%;
+    background: linear-gradient(100deg, transparent, rgba(0, 0, 0, 0.09), transparent);
+    transform: skewX(-20deg);
+    animation: pdpShine 4.5s ease-in-out 1.5s infinite;
+    pointer-events: none;
+  }
+  .pdp-btn--add:hover:not(:disabled)::after {
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  }
+  @media screen and (max-width: 749px) {
+    .pf-product-template .pf-sticky-btn--add:not(:disabled)::after {
+      background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+    }
+  }
   @media (prefers-reduced-motion: reduce) {
+    .pdp-btn--add::after, .pf-sticky-btn--add::after { animation: none !important; display: none; }
     .pdp-freeship__icon::after, .pdp-btn--buy::after { animation: none !important; display: none; }
   }
 
