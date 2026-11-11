@@ -197,75 +197,55 @@
         </div>
 
         <!-- Main card: stock/rating, name, price, size and buy buttons (all above the fold) -->
-        <section class="pdp-sc pdp-sc--intro pdp-sc--main">
-        <!-- Top bar: stock + rating + share -->
-        <div class="pdp-topbar pdp-topbar--card">
-          <div class="pdp-head__meta">
-            <p class="pdp-stock{% if current_variant.available %} is-in{% else %} is-out{% endif %}" data-pf-stock>
-              <span class="pdp-stock__dot" aria-hidden="true"></span>
-              <span data-pf-stock-text>{% if current_variant.available %}In Stock{% else %}Sold Out{% endif %}</span>
-            </p>
-            {%- if has_reviews -%}
-              <a class="pdp-rating" href="#judgeme_product_reviews" data-pf-reviews-scroll aria-label="Rated {{ review_rating }} out of 5 from {{ review_count }} reviews">
-                <span class="pdp-stars" aria-hidden="true">★★★★★<span class="pdp-stars__fill" style="width: {{ rating_pct }}%">★★★★★</span></span>
-                <span class="pdp-rating__text"><strong>{{ review_rating }}</strong> &middot; {{ review_count }} review{% if review_count != 1 %}s{% endif %}</span>
-              </a>
+        <section class="pdp-sc pdp-sc--intro pdp-sc--main pdp-mc">
+        {%- liquid
+          assign save_amt = 0
+          if has_discount
+            assign save_amt = current_variant.compare_at_price | minus: current_variant.price
+          endif
+        -%}
+
+        <!-- Zone 1: identity + price (tinted header) -->
+        <header class="pdp-head pdp-mc__head">
+          <div class="pdp-mc__top">
+            {%- if selected_product.vendor != blank or selected_product.type != blank -%}
+              <p class="pdp-eyebrow pdp-mc__eyebrow">{{ selected_product.type | default: selected_product.vendor | escape }}</p>
             {%- endif -%}
-          </div>
-          <button type="button" class="pdp-share" data-share-btn aria-label="Share product">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="15" height="15" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          </button>
-        </div>
-
-        <!-- 2. Name, stock, rating -->
-        <header class="pdp-head">
-          {%- if selected_product.vendor != blank or selected_product.type != blank -%}
-            <div class="pdp-head__top">
-              <p class="pdp-eyebrow">{{ selected_product.type | default: selected_product.vendor | escape }}</p>
-            </div>
-          {%- endif -%}
-          {%- liquid
-            assign save_amt = 0
-            if has_discount
-              assign save_amt = current_variant.compare_at_price | minus: current_variant.price
-            endif
-          -%}
-          <!-- Title with savings under it, price on the right -->
-          <div class="pdp-intro__row">
-            <div class="pdp-intro__name">
-              <h1 class="pdp-title">{{ selected_product.title }}</h1>
-              <div class="pdp-intro__save">
-                <span class="pdp-price__off" data-pf-off-badge{% unless has_discount %} hidden{% endunless %}>{{ pct_off }}% OFF</span>
-                <p class="pdp-save" data-pf-save{% unless has_discount %} hidden{% endunless %}>You save <strong data-pf-save-amount>{% if has_discount %}{% render 'format-price', price: save_amt %}{% endif %}</strong></p>
-              </div>
-            </div>
-            <div class="pdp-intro__price">
-              <div class="pdp-price__row">
-                <span class="pdp-price__compare" data-pf-compare-price{% unless has_discount %} hidden{% endunless %}>{% if has_discount %}{% render 'format-price', price: current_variant.compare_at_price %}{% endif %}</span>
-                <span class="pdp-price__main" data-pf-price-main>{% render 'format-price', price: current_variant.price %}</span>
-              </div>
-              <span class="pdp-price__tax">Incl. of all taxes</span>
-            </div>
+            <button type="button" class="pdp-share pdp-mc__share" data-share-btn aria-label="Share product">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="14" height="14" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </button>
           </div>
 
-          <!-- Key facts strip -->
-          <ul class="pdp-glance pdp-facts">
+          <h1 class="pdp-title pdp-hd__title">{{ selected_product.title }}</h1>
+
+          <div class="pdp-hd__price">
+            <span class="pdp-hd__now" data-pf-price-main>{% render 'format-price', price: current_variant.price %}</span>
+            <span class="pdp-hd__was" data-pf-compare-price{% unless has_discount %} hidden{% endunless %}>{% if has_discount %}{% render 'format-price', price: current_variant.compare_at_price %}{% endif %}</span>
+            <span class="pdp-hd__off" data-pf-off-badge{% unless has_discount %} hidden{% endunless %}>{{ pct_off }}% OFF</span>
+          </div>
+          <div class="pdp-hd__sub">
+            <p class="pdp-hd__save" data-pf-save{% unless has_discount %} hidden{% endunless %}>You save <strong data-pf-save-amount>{% if has_discount %}{% render 'format-price', price: save_amt %}{% endif %}</strong></p>
+            <span class="pdp-hd__tax">Inclusive of all taxes</span>
+          </div>
+        </header>
+
+        <!-- Zone 2: key facts -->
+        <ul class="pdp-hd__facts">
             <li>
-              <span class="pdp-glance__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v3M14 3v3"/><rect x="5" y="6" width="14" height="15" rx="3"/><path d="M9 12h6"/></svg></span>
-              <span class="pdp-glance__text"><small>Type</small><strong>Eau de Parfum</strong></span>
+              <small><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v3M14 3v3"/><rect x="5" y="6" width="14" height="15" rx="3"/><path d="M9 12h6"/></svg>Type</small>
+              <strong>Eau de Parfum</strong>
             </li>
             <li>
-              <span class="pdp-glance__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
-              <span class="pdp-glance__text"><small>Lasts</small><strong>6&ndash;8 hours</strong></span>
+              <small><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Lasts</small>
+              <strong>6&ndash;8 hours</strong>
             </li>
             {%- unless selected_product.has_only_default_variant -%}
               <li>
-                <span class="pdp-glance__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/></svg></span>
-                <span class="pdp-glance__text"><small>Size</small><strong data-pf-glance-size>{{ selected_size_label }}</strong></span>
+                <small><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/></svg>Size</small>
+                <strong data-pf-glance-size>{{ selected_size_label }}</strong>
               </li>
             {%- endunless -%}
           </ul>
-        </header>
 
         <!-- Savings, real low-stock and offer line -->
         {%- liquid
@@ -345,14 +325,23 @@
         {%- endif -%}
 
         {%- liquid
-          assign eta_dispatch = section.settings.dispatch_days | default: 2
+          assign eta_dispatch = section.settings.dispatch_days | default: 0
           assign eta_min = section.settings.delivery_min_days | default: 3
-          assign eta_max = section.settings.delivery_max_days | default: 6
+          assign eta_max = section.settings.delivery_max_days | default: 7
           assign eta_min_secs = eta_dispatch | plus: eta_min | times: 86400
           assign eta_max_secs = eta_dispatch | plus: eta_max | times: 86400
           assign now_secs = 'now' | date: '%s' | plus: 0
           assign eta_min_date = now_secs | plus: eta_min_secs | date: '%a, %-d %b'
           assign eta_max_date = now_secs | plus: eta_max_secs | date: '%a, %-d %b'
+          assign eta_min_month = now_secs | plus: eta_min_secs | date: '%b'
+          assign eta_max_month = now_secs | plus: eta_max_secs | date: '%b'
+          assign eta_min_day = now_secs | plus: eta_min_secs | date: '%-d'
+          assign eta_max_short = now_secs | plus: eta_max_secs | date: '%-d %b'
+          if eta_min_month == eta_max_month
+            assign eta_short_range = eta_min_day | append: '–' | append: eta_max_short
+          else
+            assign eta_short_range = now_secs | plus: eta_min_secs | date: '%-d %b' | append: ' – ' | append: eta_max_short
+          endif
         -%}
 
         <!-- Hurry up: driven by real Shopify inventory, only shows when stock is genuinely low -->
@@ -387,7 +376,7 @@
         <ul class="pdp-promise">
           <li>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            <span><strong>{% if section.settings.show_freeship %}Free delivery{% else %}Fast delivery{% endif %}</strong><small>Get it by {{ eta_max_date }}</small></span>
+            <span><strong>{% if section.settings.show_freeship %}Free delivery{% else %}Fast delivery{% endif %}</strong><small data-pf-promise-range data-dispatch="{{ eta_dispatch }}" data-min="{{ eta_min }}" data-max="{{ eta_max }}">Arrives {{ eta_short_range }}</small></span>
           </li>
           {%- if section.settings.show_cod -%}
             <li>
@@ -452,9 +441,9 @@
                 <span>{{ section.settings.freeship_sub | escape }}</span>
               {%- endif -%}
               <span class="pdp-freeship__eta" data-pf-delivery
-                data-dispatch="{{ section.settings.dispatch_days | default: 2 }}"
+                data-dispatch="{{ section.settings.dispatch_days | default: 0 }}"
                 data-min="{{ section.settings.delivery_min_days | default: 3 }}"
-                data-max="{{ section.settings.delivery_max_days | default: 6 }}"
+                data-max="{{ section.settings.delivery_max_days | default: 7 }}"
                 {% unless current_variant.available %}hidden{% endunless %}>
                 Estimated delivery: <b data-pf-delivery-range>{{ eta_min_date }} to {{ eta_max_date }}</b>
               </span>
@@ -465,9 +454,9 @@
         {%- unless section.settings.show_freeship -%}
           <div class="pdp-meta-row">
             <p class="pdp-delivery" data-pf-delivery
-               data-dispatch="{{ section.settings.dispatch_days | default: 2 }}"
+               data-dispatch="{{ section.settings.dispatch_days | default: 0 }}"
                data-min="{{ section.settings.delivery_min_days | default: 3 }}"
-               data-max="{{ section.settings.delivery_max_days | default: 6 }}"
+               data-max="{{ section.settings.delivery_max_days | default: 7 }}"
                {% unless current_variant.available %}hidden{% endunless %}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
               <span class="pdp-meta__text"><small>Estimated delivery</small><strong data-pf-delivery-range>{{ eta_min_date }} to {{ eta_max_date }}</strong></span>
@@ -628,7 +617,11 @@
       </div>
       <div class="pf-product-template__sticky-actions">
         <button type="button" class="pf-sticky-btn pf-sticky-btn--add" data-pf-sticky-add {% unless current_variant.available %}disabled{% endunless %}>
-          <span data-pf-sticky-add-text>{% if current_variant.available %}Add to bag{% else %}Sold out{% endif %}</span>
+          <span class="pf-sticky-btn__main">
+            <svg class="pf-sticky-btn__icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.75 9.25A2.25 2.25 0 0 1 7 7h10a2.25 2.25 0 0 1 2.25 2.25V17.5A3.5 3.5 0 0 1 15.75 21h-7.5a3.5 3.5 0 0 1-3.5-3.5z"/><path d="M8.75 7V6.25a3.25 3.25 0 0 1 6.5 0V7"/><path d="M9.25 11.25a2.75 2.75 0 0 0 5.5 0"/></svg>
+            <span class="pf-sticky-btn__label" data-pf-sticky-add-text>{% if current_variant.available %}Add to cart{% else %}Sold out{% endif %}</span>
+          </span>
+          <span class="pf-sticky-btn__price" data-pf-sticky-btn-price>{% render 'format-price', price: current_variant.price %}</span>
         </button>
         <button type="button" class="pf-sticky-btn pf-sticky-btn--buy" data-pf-sticky-buy {% unless current_variant.available %}disabled{% endunless %}>
           <span data-pf-buy-label>Buy now</span>
@@ -672,7 +665,7 @@
   .pf-product-template__shell {
     width: min(100%, 1520px);
     margin: 0 auto;
-    padding: 8px 12px 24px;
+    padding: 8px 12px 8px;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 16px;
@@ -1617,6 +1610,9 @@
   .pf-sticky-btn:focus-visible { outline: 2px solid var(--pf-gold); outline-offset: 3px; }
   .pf-sticky-btn--add { flex: 0.85 1 0; background: #fff; color: var(--pf-ink); border-color: #d9d4ca; }
   .pf-sticky-btn--add:hover:not(:disabled) { border-color: var(--pf-ink); background: var(--pf-soft); }
+  /* Icon + price inside the button are phone-only (see mobile rules) */
+  .pf-sticky-btn__icon,
+  .pf-sticky-btn__price { display: none; }
   .pf-sticky-btn--buy {
     flex: 1.3 1 0;
     background: linear-gradient(180deg, #2a2a2a, var(--pf-ink));
@@ -1653,17 +1649,72 @@
     .pf-product-template__sticky-bar::before { height: 2px; }
     .pf-product-template__sticky-shell { flex-direction: row; align-items: center; gap: 10px; }
     .pf-product-template__sticky-info { flex: 1 1 auto; gap: 10px; padding-right: 0; }
-    .pf-product-template__sticky-img { flex-basis: 44px; width: 44px; height: 44px; border-radius: 10px; }
-    .pf-product-template__sticky-text { gap: 3px; }
-    .pf-product-template__sticky-title { font-size: 11.5px; -webkit-line-clamp: 1; }
-    .pf-product-template__sticky-variant { display: none; }
-    .pf-product-template__sticky-price { font-size: 16px; }
-    .pf-product-template__sticky-compare-price { font-size: 11.5px; }
-    .pf-product-template__sticky-off { padding: 1px 6px; font-size: 9.5px; }
-    .pf-product-template__sticky-actions { flex: 0 0 auto; }
-    .pf-sticky-btn { flex: 0 0 auto; height: 46px; padding: 0 16px; font-size: 11.5px; letter-spacing: 0.06em; border-radius: 12px; }
-    .pf-sticky-btn--buy { flex: 0 0 auto; gap: 8px; }
-    .pf-sticky-btn--add { display: none; } /* Add to bag is in the main buttons; remove this line to show both */
+    /* Phones: [ name / size + % off ]  [ bag icon  ADD TO CART | price ] */
+    .pf-product-template .pf-product-template__sticky-img,
+    .pf-product-template .pf-product-template__sticky-price,
+    .pf-product-template .pf-product-template__sticky-compare-price { display: none !important; }
+    .pf-product-template .pf-product-template__sticky-info { flex: 0 1 38%; min-width: 0; max-width: 38%; padding: 0; }
+    /* Title on its own line; size chip and % OFF chip side by side underneath */
+    .pf-product-template .pf-product-template__sticky-text { display: flex; flex-flow: row wrap; align-items: center; gap: 5px 6px; min-width: 0; width: 100%; }
+    .pf-product-template .pf-product-template__sticky-title {
+      display: block;
+      width: 100%;
+      font-size: 12px;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .pf-product-template .pf-product-template__sticky-variant { padding: 2px 8px; font-size: 10px; line-height: 1.3; }
+    .pf-product-template .pf-product-template__sticky-price-wrap { display: contents; }
+    .pf-product-template .pf-product-template__sticky-off { padding: 2px 7px; font-size: 9.5px; line-height: 1.3; }
+    .pf-product-template .pf-product-template__sticky-variant[hidden],
+    .pf-product-template .pf-product-template__sticky-off[hidden] { display: none; }
+
+    .pf-product-template .pf-product-template__sticky-actions { flex: 1 1 0; min-width: 0; display: flex; }
+    /* Phones: one Add to cart button only (no Buy now) */
+    .pf-product-template .pf-sticky-btn--buy { display: none !important; }
+    .pf-product-template .pf-sticky-btn--add {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
+      min-width: 0;
+      height: 50px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #2a2a2a, var(--pf-ink));
+      color: #fff;
+      box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.45);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .pf-product-template .pf-sticky-btn--add:hover:not(:disabled) { background: #000; }
+    .pf-product-template .pf-sticky-btn--add:disabled { justify-content: center; }
+    .pf-product-template .pf-sticky-btn__main { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+    .pf-product-template .pf-sticky-btn__icon { display: block; position: static; flex: 0 0 18px; width: 18px; height: 18px; margin: 0; }
+    .pf-product-template .pf-sticky-btn__label { display: inline-block; }
+    .pf-product-template .pf-sticky-btn__price {
+      display: inline-flex;
+      align-items: center;
+      height: 22px;
+      padding-left: 12px;
+      border-left: 1px solid rgba(255, 255, 255, 0.28);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    .pf-product-template .pf-sticky-btn--add:disabled .pf-sticky-btn__price { display: none; }
+    @media (max-width: 359px) {
+      .pf-product-template .pf-sticky-btn__icon { display: none; }
+      .pf-product-template .pf-sticky-btn--add { padding: 0 12px; font-size: 11px; letter-spacing: 0.05em; }
+    }
     .pf-product-template__sticky-close,
     .pf-product-template__sticky-note { display: none; }
   }
@@ -1674,7 +1725,7 @@
       grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
       gap: 20px;
       align-items: start;
-      padding: 20px 28px 48px;
+      padding: 20px 28px 20px;
     }
 
     /* Stretch to the full row height (same as the details column) so the photos have room to stay pinned while long details scroll */
@@ -2602,6 +2653,197 @@
     .pdp-promise strong { font-size: 11.5px; }
     .pdp-promise small { font-size: 10.5px; }
   }
+
+  /* ---- Main card heading: title, price line, savings, facts ---- */
+  .pdp-info--v2 .pdp-sc--main .pdp-hd__title {
+    margin: 0;
+    font-family: var(--pf-head-font);
+    font-size: clamp(22px, 1.8vw, 26px);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    color: var(--pf-ink);
+    overflow-wrap: anywhere;
+  }
+  .pdp-hd__price {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin-top: 10px;
+  }
+  .pdp-hd__now {
+    font-family: var(--pf-head-font);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--pf-ink);
+    white-space: nowrap;
+  }
+  .pdp-hd__was { font-size: 13.5px; color: #a39a8d; text-decoration: line-through; white-space: nowrap; }
+  .pdp-hd__off {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    padding: 0 7px;
+    border-radius: 6px;
+    background: #e8f3ec;
+    color: #1f7a3d;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .pdp-hd__price [hidden], .pdp-hd__sub [hidden] { display: none !important; }
+  .pdp-hd__sub {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--pf-muted);
+  }
+  .pdp-hd__save { margin: 0; color: #1f7a3d; font-weight: 500; }
+  .pdp-hd__save strong { font-weight: 700; }
+  .pdp-hd__save:not([hidden]) + .pdp-hd__tax::before { content: "·"; margin-right: 8px; color: #c9c1b4; }
+
+  .pdp-hd__facts {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: auto;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid #efe7da;
+    border-radius: 12px;
+    background: #fcfaf6;
+  }
+  .pdp-hd__facts li {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    padding: 10px 12px;
+  }
+  .pdp-hd__facts li + li { border-left: 1px solid #efe7da; }
+  @media screen and (min-width: 750px) { .pdp-hd__facts { grid-auto-columns: minmax(0, 1fr); } }
+  .pdp-hd__facts small {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8a8279;
+  }
+  .pdp-hd__facts small svg { flex: none; width: 13px; height: 13px; color: var(--pf-gold); }
+  .pdp-hd__facts strong { font-size: 13px; font-weight: 600; line-height: 1.25; color: var(--pf-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  @media screen and (max-width: 749px) {
+    .pdp-info--v2 .pdp-sc--main .pdp-hd__title { font-size: 21px; }
+    .pdp-hd__now { font-size: 18px; }
+    .pdp-hd__was { font-size: 12.5px; }
+    .pdp-hd__facts li { padding: 9px 10px; }
+    .pdp-hd__facts strong { font-size: 12.5px; }
+  }
+
+  /* ---- Mobile gallery: keep slides clipped inside the rounded frame while swiping (iOS Safari) ---- */
+  @media screen and (max-width: 989px) {
+    /* No mask/transform here: on iOS Safari those can make the photo vanish while the page scrolls */
+    .pdp-gallery__frame {
+      overflow: hidden;
+      border-radius: var(--pf-radius);
+      isolation: isolate;
+    }
+    /* Only the sideways axis is contained (stops the edge bounce); up/down swipes on the photo scroll the page */
+    .pdp-gallery__stage {
+      overflow-y: hidden;
+      overscroll-behavior-x: none;
+      overscroll-behavior-y: auto;
+      touch-action: auto;
+      border-radius: 0;
+    }
+    .pdp-slide { border-radius: 0; }
+  }
+
+  /* =================================================================
+     MAIN CARD (pdp-mc) — zones: tinted header · facts · size & buy · promise · payment footer
+     Card has no padding of its own; each zone sets --mc-x so edges line up.
+     ================================================================= */
+  .pdp-info--v2 .pdp-sc.pdp-mc {
+    --mc-x: 20px;
+    --mc-line: #efe7da;
+    padding: 0;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #ece4d6;
+  }
+
+  /* Zone 1: header */
+  .pdp-info--v2 .pdp-mc .pdp-mc__head {
+    margin: 0;
+    padding: 16px var(--mc-x) 18px;
+    background: none;
+    border-bottom: 1px solid var(--mc-line);
+  }
+  .pdp-mc__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 30px;
+    margin-bottom: 6px;
+  }
+  .pdp-info--v2 .pdp-mc .pdp-mc__eyebrow { gap: 8px; margin: 0; font-size: 9.5px; letter-spacing: 0.16em; }
+  .pdp-info--v2 .pdp-mc .pdp-mc__eyebrow::before { width: 12px; }
+  .pdp-info--v2 .pdp-mc .pdp-mc__share {
+    width: 30px;
+    height: 30px;
+    margin-left: auto;
+    background: #ffffff;
+    border-color: #e6ddcf;
+  }
+  .pdp-info--v2 .pdp-mc .pdp-mc__share svg { width: 13px; height: 13px; }
+
+  .pdp-info--v2 .pdp-mc .pdp-hd__price { margin-top: 12px; }
+
+  /* Zone 2: facts */
+  .pdp-info--v2 .pdp-mc .pdp-hd__facts { margin: 16px var(--mc-x) 0; }
+
+  /* Zone 3: size, hurry, buttons, promise */
+  .pdp-info--v2 .pdp-mc .pdp-buy {
+    gap: 14px;
+    margin: 16px var(--mc-x) 0;
+    padding: 16px 0 18px;
+    border-top: 1px solid var(--mc-line);
+  }
+  .pdp-info--v2 .pdp-mc .pdp-buy .pdp-option__label { margin-bottom: 8px; }
+  .pdp-info--v2 .pdp-mc .pdp-buy .pdp-form { margin: 0; }
+  .pdp-info--v2 .pdp-mc .pdp-promise {
+    padding: 14px 0 0;
+    border-top: 1px dashed var(--mc-line);
+  }
+
+  /* Zone 4: payment footer, full bleed */
+  .pdp-info--v2 .pdp-mc .pdp-buy .pdp-payment-methods {
+    margin: 0 calc(var(--mc-x) * -1) -18px;
+    padding: 12px var(--mc-x);
+    border-top: 1px solid var(--mc-line);
+    background: #fbf8f3;
+  }
+
+  @media screen and (max-width: 749px) {
+    .pdp-info--v2 .pdp-sc.pdp-mc { --mc-x: 16px; }
+    .pdp-info--v2 .pdp-mc .pdp-mc__head { padding-top: 12px; padding-bottom: 16px; }
+    .pdp-info--v2 .pdp-mc .pdp-hd__price { margin-top: 10px; }
+    .pdp-info--v2 .pdp-mc .pdp-hd__facts { margin-top: 14px; }
+    .pdp-info--v2 .pdp-mc .pdp-buy { gap: 12px; margin-top: 14px; padding: 14px 0 16px; }
+    .pdp-info--v2 .pdp-mc .pdp-promise { padding-top: 12px; }
+    .pdp-info--v2 .pdp-mc .pdp-buy .pdp-payment-methods { margin-bottom: -16px; padding: 10px var(--mc-x); }
+  }
 </style>
 
 {% javascript %}
@@ -2748,7 +2990,7 @@
     if (deliveryEl) {
       const dispatch = parseInt(deliveryEl.dataset.dispatch, 10) || 0;
       const minDays = dispatch + (parseInt(deliveryEl.dataset.min, 10) || 3);
-      const maxDays = dispatch + (parseInt(deliveryEl.dataset.max, 10) || 6);
+      const maxDays = dispatch + (parseInt(deliveryEl.dataset.max, 10) || 7);
       const rangeEl = deliveryEl.querySelector('[data-pf-delivery-range]');
       const fmt = (days) => {
         const d = new Date();
@@ -2756,6 +2998,19 @@
         return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
       };
       if (rangeEl) rangeEl.textContent = fmt(minDays) + ' to ' + fmt(maxDays);
+    }
+
+    // Short "Arrives 14–18 Nov" range in the delivery promise row
+    const promiseRangeEl = root.querySelector('[data-pf-promise-range]');
+    if (promiseRangeEl) {
+      const dispatch = parseInt(promiseRangeEl.dataset.dispatch, 10) || 0;
+      const at = (n) => { const d = new Date(); d.setDate(d.getDate() + dispatch + n); return d; };
+      const a = at(parseInt(promiseRangeEl.dataset.min, 10) || 3);
+      const b = at(parseInt(promiseRangeEl.dataset.max, 10) || 7);
+      const mon = (d) => d.toLocaleDateString('en-IN', { month: 'short' });
+      promiseRangeEl.textContent = 'Arrives ' + (a.getMonth() === b.getMonth()
+        ? a.getDate() + '–' + b.getDate() + ' ' + mon(b)
+        : a.getDate() + ' ' + mon(a) + ' – ' + b.getDate() + ' ' + mon(b));
     }
 
     // ── Variant sync ──
@@ -2767,14 +3022,14 @@
       const available = v.available;
       [addToBagBtn, buyNowBtn, stickyAddBtn, stickyBuyBtn].forEach((b) => { if (b) b.disabled = !available; });
       if (addTextEl) addTextEl.textContent = available ? 'Add to bag' : 'Sold out';
-      if (stickyAddText) stickyAddText.textContent = available ? 'Add to bag' : 'Sold out';
+      if (stickyAddText) stickyAddText.textContent = available ? 'Add to cart' : 'Sold out';
 
       if (deliveryEl) deliveryEl.hidden = !available;
       if (stockEl) {
         stockEl.classList.toggle('is-in', !!available);
         stockEl.classList.toggle('is-out', !available);
       }
-      if (stockTextEl) stockTextEl.textContent = available ? 'In Stock, Ready To Ship' : 'Sold Out';
+      if (stockTextEl) stockTextEl.textContent = available ? 'In Stock' : 'Sold Out';
 
       if (v.price != null) {
         const priceText = formatMoney(v.price);
@@ -2793,6 +3048,8 @@
           offEl.hidden = !hasDiscount;
         }
         if (stickyPriceEl) stickyPriceEl.textContent = priceText;
+        const stickyBtnPriceEl = root.querySelector('[data-pf-sticky-btn-price]');
+        if (stickyBtnPriceEl) stickyBtnPriceEl.textContent = priceText;
         if (stickyCompareEl) {
           stickyCompareEl.textContent = hasDiscount ? formatMoney(v.compare_at_price) : '';
           stickyCompareEl.style.display = hasDiscount ? 'inline' : 'none';
@@ -3008,15 +3265,12 @@
       pinned.forEach((el) => ro.observe(el));
     }
 
-    // ── Sticky card: bottom-right card on desktop, slim bar on phones (only after the main buttons scroll out of view) ──
+    // ── Sticky card: bottom-right card on desktop, slim bar on phones (always shown until closed) ──
     if (stickyBar) {
-      let ticking = false;
       let dismissed = false;
       let cardOn = false;
-      let pastActions = false;
 
       const mobileQuery = window.matchMedia('(max-width: 749px)');
-      const actionsEl = root.querySelector('.pdp-actions');
 
       // Find the floating WhatsApp button (the fixed-position element that holds a WhatsApp link)
       const findWhatsApp = () => {
@@ -3048,21 +3302,16 @@
       };
 
       const update = () => {
-        // Desktop: always on (unless closed). Phones: only once the main Add to bag / Buy now row has scrolled above the screen.
-        cardOn = !dismissed && (!mobileQuery.matches || pastActions);
+        // Always shown (phones and desktop), including while the product details are on screen, until closed.
+        cardOn = !dismissed;
         if (cardOn) stickyBar.setAttribute('data-visible', 'true');
         else stickyBar.removeAttribute('data-visible');
         stickyBar.setAttribute('aria-hidden', cardOn ? 'false' : 'true');
+        // Phones: the full-width bar would cover the footer's last line, so reserve its height at the very end of the page
+        document.body.style.paddingBottom = cardOn && mobileQuery.matches ? stickyBar.offsetHeight + 'px' : '';
         liftWhatsApp();
-        ticking = false;
       };
 
-      if (actionsEl && 'IntersectionObserver' in window) {
-        new IntersectionObserver(([entry]) => {
-          pastActions = !entry.isIntersecting && entry.boundingClientRect.bottom < 0;
-          update();
-        }).observe(actionsEl);
-      }
 
       if (stickyClose) {
         stickyClose.addEventListener('click', () => {
@@ -3173,8 +3422,8 @@
       "min": 0,
       "max": 7,
       "step": 1,
-      "default": 2,
-      "info": "Days to pack and hand over to the courier."
+      "default": 0,
+      "info": "Days to pack and hand over to the courier. Added on top of the transit days below."
     },
     {
       "type": "range",
@@ -3192,7 +3441,7 @@
       "min": 1,
       "max": 20,
       "step": 1,
-      "default": 6
+      "default": 7
     },
     {
       "type": "header",

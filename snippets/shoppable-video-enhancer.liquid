@@ -331,6 +331,18 @@
   [id*="1790060856d032d058"] [class*="reelfy"] img:not([class*="icon"]) {
     border-radius: inherit !important;
   }
+
+  /* ── Reelfy video cards on every page (product page included): rounded corners ── */
+  .rf-video-item .reelfy_card,
+  .rf-video-item .reelfy_card_video_wrapper {
+    border-radius: {{ settings.card_corner_radius | default: 16 }}px !important;
+    overflow: hidden !important;
+    isolation: isolate;
+  }
+  .rf-video-item .reelfy_card_video,
+  .rf-video-item .reelfy_card_video video {
+    border-radius: inherit !important;
+  }
 </style>
 
 <script>

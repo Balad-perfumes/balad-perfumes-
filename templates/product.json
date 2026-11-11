@@ -472,10 +472,10 @@
   },
   "order": [
     "main",
+    "customer_stories",
     "1790242250043b352a",
     "balad_similar_products_wqLRpx",
     "product_reviews",
-    "customer_stories",
     "179015426732e1050b"
   ]
 }
