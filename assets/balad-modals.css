@@ -458,6 +458,391 @@ html body .balad-wishlist-modal :focus-visible {
   }
 }
 
+/* ── Quick View: compact layout ────────────────
+     [img]  NAME                         (x)
+            ₹1,299  ₹1,500
+     [ SIZE   (✓ 70 ml) (100 ml)               ]   soft row
+     [ ADD TO BAG ]  [ BUY NOW              ]
+   Overrides the shared card rules above for the Quick View only
+   (the wishlist popup keeps its own layout). */
+html body .balad-qa-modal__card {
+  max-width: 400px;
+  padding: 18px;
+}
+
+html body .balad-qa-modal__card::before { display: none; }
+
+html body .balad-qa-modal__close {
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+}
+
+html body .balad-qa-modal__close svg { width: 14px; height: 14px; }
+
+html body .balad-qa-modal__header {
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 14px;
+  padding: 0 36px 0 0;
+  border: 0;
+}
+
+html body .balad-qa-modal__product-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+}
+
+html body .balad-qa-modal__product-info { gap: 4px; }
+
+html body .balad-qa-modal__eyebrow { display: none; }
+
+/* Same font as the price (body font), so the name reads as bold as the price */
+html body .balad-qa-modal__title {
+  font-family: var(--font-body--family, inherit);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.25;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+html body .balad-qa-modal__price { font-size: 17px; }
+
+/* Size: label and options on one soft row */
+html body .balad-qa-modal__sizes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 14px;
+  padding: 8px 8px 8px 14px;
+  border-radius: 12px;
+  background: var(--bm-soft);
+}
+
+html body .balad-qa-modal__sizes-top {
+  flex: none;
+  gap: 8px;
+  margin: 0;
+}
+
+html body .balad-qa-modal__label { font-size: 10.5px; }
+
+html body .balad-qa-modal__size-grid {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+html body .balad-qa-modal__size {
+  height: 34px;
+  padding: 0 14px;
+  border-width: 1px;
+  border-radius: 999px;
+  font-size: 12.5px;
+}
+
+html body .balad-qa-modal__size.is-selected::before {
+  width: 4px;
+  height: 8px;
+}
+
+html body .balad-qa-modal__actions { gap: 8px; }
+
+html body .balad-qa-modal__btn,
+html body .balad-qa-modal__sold-out {
+  height: 46px;
+  font-size: 12px;
+}
+
+/* Buy Now: label + round payment icons (same as the product page) */
+html body .balad-qa-modal__btn--buy { gap: 10px; }
+html body .balad-qa-modal__btn--buy .balad-pay-stack { position: relative; z-index: 1; }
+
+/* Shine sweeping across the buttons, like the product page.
+   White on the dark buttons, soft grey on the white Add To Bag. */
+html body .balad-qa-modal__btn,
+html body .balad-wishlist-modal__add-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+html body .balad-qa-modal__btn:not(:disabled)::after,
+html body .balad-wishlist-modal__add-btn:not(:disabled)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.28), transparent);
+  transform: skewX(-20deg);
+  animation: bm-shine 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+html body .balad-qa-modal__btn--bag:not(:disabled)::after {
+  background: linear-gradient(100deg, transparent, rgb(0 0 0 / 0.09), transparent);
+  animation-delay: 1.5s;
+}
+
+@keyframes bm-shine {
+  0%, 55% { left: -60%; }
+  100% { left: 130%; }
+}
+
+/* Loading: progress circle in place of the label (window.baladBtnLoading in balad-product-card.js).
+   The circle uses ::before; on the wishlist button that replaces the bookmark icon while it spins. */
+html body .balad-btn-loading {
+  color: transparent !important;
+  cursor: progress;
+  opacity: 1 !important;
+  transition: none !important;
+}
+
+html body .balad-btn-loading > * { visibility: hidden; }
+
+html body .balad-btn-loading::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #fff;
+  border-right-color: transparent;
+  border-radius: 50%;
+  background: none;
+  -webkit-mask: none;
+  mask: none;
+  animation: bm-spin 0.7s linear infinite;
+}
+
+html body .balad-qa-modal__btn--bag.balad-btn-loading::before {
+  border-color: var(--bm-ink);
+  border-right-color: transparent;
+}
+
+@keyframes bm-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  html body .balad-qa-modal__btn::after,
+  html body .balad-wishlist-modal__add-btn::after { display: none; }
+}
+
+@media screen and (max-width: 560px) {
+  html body .balad-qa-modal__card {
+    padding: 22px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Keep the grab handle on phones */
+  html body .balad-qa-modal__card::before { display: block; }
+
+  html body .balad-qa-modal__close {
+    top: 20px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+  }
+
+  html body .balad-qa-modal__header {
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 0;
+  }
+
+  html body .balad-qa-modal__product-img {
+    width: 64px;
+    height: 64px;
+  }
+
+  html body .balad-qa-modal__title { font-size: 14px; }
+
+  html body .balad-qa-modal__price { font-size: 16px; }
+
+  html body .balad-qa-modal__size-grid {
+    grid-template-columns: none;
+  }
+}
+
+/* ── Wishlist popup: same compact layout as the Quick View ──────
+     [img]  NAME                         (x)
+            ₹1,299  ₹1,500
+     [ SIZE   (✓ 70 ml) (100 ml)               ]   soft row
+     [ ■ ADD TO LIST  (full width, gold bookmark) ]   */
+html body .balad-wishlist-modal__card {
+  max-width: 400px;
+  padding: 18px;
+}
+
+html body .balad-wishlist-modal__card::before { display: none; }
+
+html body .balad-wishlist-modal__close {
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+}
+
+html body .balad-wishlist-modal__close svg { width: 14px; height: 14px; }
+
+html body .balad-wishlist-modal__header {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 14px;
+  margin: 0 0 14px;
+  padding: 0 36px 0 0;
+  border: 0;
+}
+
+/* Title row above the product: gold bookmark badge + "Save to wishlist".
+   Done in CSS so every section's copy of this popup gets it without markup changes. */
+html body .balad-wishlist-modal__header::before {
+  content: 'Save to wishlist';
+  order: -1;
+  flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  padding-left: 38px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='14' fill='%23f4ecdb'/%3E%3Cpath d='M18.5 20l-4.5-3.2L9.5 20V9.6A1.6 1.6 0 0 1 11.1 8h5.8a1.6 1.6 0 0 1 1.6 1.6z' fill='none' stroke='%23a37b35' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") left center / 28px 28px no-repeat;
+  color: var(--bm-ink);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+html body .balad-wishlist-modal__product-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+}
+
+html body .balad-wishlist-modal__product-info { gap: 4px; }
+
+html body .balad-wishlist-modal .balad-qa-modal__eyebrow { display: none; }
+
+html body .balad-wishlist-modal__title {
+  font-family: var(--font-body--family, inherit);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.25;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+html body .balad-wishlist-modal__price { font-size: 17px; }
+
+html body .balad-wishlist-modal__sizes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 14px;
+  padding: 8px 8px 8px 14px;
+  border-radius: 12px;
+  background: var(--bm-soft);
+}
+
+html body .balad-wishlist-modal__sizes-top {
+  flex: none;
+  gap: 8px;
+  margin: 0;
+}
+
+html body .balad-wishlist-modal__label { font-size: 10.5px; }
+
+html body .balad-wishlist-modal__size-grid {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+html body .balad-wishlist-modal__size {
+  height: 34px;
+  padding: 0 14px;
+  border-width: 1px;
+  border-radius: 999px;
+  font-size: 12.5px;
+}
+
+html body .balad-wishlist-modal__size.is-selected::before {
+  width: 4px;
+  height: 8px;
+}
+
+/* Button: full-width dark, gold bookmark, wider letter-spacing (shine + spinner come from the shared rules above) */
+html body .balad-wishlist-modal__add-btn {
+  gap: 10px;
+  height: 48px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #2a2a2a, var(--bm-ink));
+  font-size: 12.5px;
+  letter-spacing: 0.12em;
+  box-shadow: 0 10px 22px -10px rgb(0 0 0 / 0.55);
+}
+
+html body .balad-wishlist-modal__add-btn:hover {
+  background: #000;
+  box-shadow: 0 12px 26px -10px rgb(0 0 0 / 0.6);
+}
+
+html body .balad-wishlist-modal__add-btn::before {
+  width: 15px;
+  height: 15px;
+  background: #d8b46a;
+}
+
+/* While saving, the bookmark becomes the progress circle (overrides the icon rule just above) */
+html body .balad-wishlist-modal__add-btn.balad-btn-loading::before {
+  width: 20px;
+  height: 20px;
+  background: none;
+  -webkit-mask: none;
+  mask: none;
+}
+
+@media screen and (max-width: 560px) {
+  html body .balad-wishlist-modal__card {
+    padding: 22px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  html body .balad-wishlist-modal__card::before { display: block; }
+
+  html body .balad-wishlist-modal__close {
+    top: 20px;
+    right: 14px;
+  }
+
+  html body .balad-wishlist-modal__header {
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 0;
+  }
+
+  html body .balad-wishlist-modal__product-img {
+    width: 64px;
+    height: 64px;
+  }
+
+  html body .balad-wishlist-modal__title { font-size: 14px; }
+
+  html body .balad-wishlist-modal__price { font-size: 16px; }
+
+  html body .balad-wishlist-modal__size-grid { grid-template-columns: none; }
+}
+
 @keyframes bm-fade {
   from { opacity: 0; }
   to { opacity: 1; }

@@ -455,7 +455,7 @@
 
     <div class="balad-qa-modal__actions" data-qa-actions>
       <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--bag" data-qa-add-bag>Add To Bag</button>
-      <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--buy" data-qa-buy-now>Buy Now</button>
+      <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--buy" data-qa-buy-now><span class="balad-qa-modal__btn-label">Buy Now</span>{% render 'balad-pay-icons-stack', size: 16 %}</button>
     </div>
     <div class="balad-qa-modal__sold-out" data-qa-sold-out style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -599,10 +599,10 @@
 
       currentProductId = productId;
       titleEl.textContent = title;
-      priceEl.textContent = 'INR ' + price;
+      priceEl.textContent = (window.baladMoney ? window.baladMoney(price) : 'INR ' + price);
 
       if (comparePrice && comparePrice !== price && comparePrice !== '0' && comparePrice !== '') {
-        comparePriceEl.textContent = 'INR ' + comparePrice;
+        comparePriceEl.textContent = (window.baladMoney ? window.baladMoney(comparePrice) : 'INR ' + comparePrice);
         comparePriceEl.style.display = 'inline';
       } else {
         comparePriceEl.textContent = '';
@@ -980,7 +980,7 @@
             const modal = getQAModal();
             const variantId = resolveVariantId(modal);
             if (!variantId) return;
-            addBagBtn.textContent = 'Adding...';
+            window.baladBtnLoading && window.baladBtnLoading(addBagBtn, true);
             addBagBtn.disabled = true;
             fetch(cartAddUrl, {
               method: 'POST',
@@ -989,12 +989,12 @@
             })
             .then(res => { if (!res.ok) return res.json().then(data => { throw new Error(data.description || 'Add to cart failed'); }); return res.json(); })
             .then((cart) => {
-              addBagBtn.textContent = 'Added!';
+              window.baladBtnLoading && window.baladBtnLoading(addBagBtn, false);
           if (typeof closeQAModal === 'function') closeQAModal();
           if (window.pfOpenCart) { window.pfOpenCart('quick-add'); } else { document.dispatchEvent(new CustomEvent('cart:update', { bubbles: true, detail: { data: cart, resource: cart } })); }
-              setTimeout(() => { addBagBtn.textContent = 'Add To Bag'; addBagBtn.disabled = false; closeQAModal(); }, 1200);
+              setTimeout(() => { window.baladBtnLoading && window.baladBtnLoading(addBagBtn, false); addBagBtn.disabled = false; closeQAModal(); }, 1200);
             })
-            .catch((err) => { console.error('Add to bag failed:', err); addBagBtn.textContent = 'Add To Bag'; addBagBtn.disabled = false; });
+            .catch((err) => { console.error('Add to bag failed:', err); window.baladBtnLoading && window.baladBtnLoading(addBagBtn, false); addBagBtn.disabled = false; });
             return;
           }
 
@@ -1005,7 +1005,7 @@
             const modal = getQAModal();
             const variantId = resolveVariantId(modal);
             if (!variantId) return;
-            buyBtn.textContent = 'Redirecting...';
+            window.baladBtnLoading && window.baladBtnLoading(buyBtn, true);
             buyBtn.disabled = true;
             const rootUrl = window.Shopify?.routes?.root || '/';
             const cleanRoot = rootUrl.endsWith('/') ? rootUrl : rootUrl + '/';

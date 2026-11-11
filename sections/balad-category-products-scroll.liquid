@@ -195,7 +195,7 @@
 
       <div class="balad-qa-modal__actions" data-qa-actions>
         <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--bag" data-qa-add-bag>Add To Bag</button>
-        <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--buy" data-qa-buy-now>Buy Now</button>
+        <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--buy" data-qa-buy-now><span class="balad-qa-modal__btn-label">Buy Now</span>{% render 'balad-pay-icons-stack', size: 16 %}</button>
       </div>
       <div class="balad-qa-modal__sold-out" data-qa-sold-out style="display:none;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1523,7 +1523,7 @@
         const variantId = resolveVariantId();
         if (!variantId) return;
 
-        addBagBtn.textContent = 'Adding...';
+        window.baladBtnLoading && window.baladBtnLoading(addBagBtn, true);
         addBagBtn.disabled = true;
 
         fetch(cartAddUrl, {
@@ -1540,18 +1540,18 @@
           return res.json();
         })
         .then((cart) => {
-          addBagBtn.textContent = 'Added!';
+          window.baladBtnLoading && window.baladBtnLoading(addBagBtn, false);
           if (typeof closeQAModal === 'function') closeQAModal();
           if (window.pfOpenCart) { window.pfOpenCart('quick-add'); } else { document.dispatchEvent(new CustomEvent('cart:update', { bubbles: true, detail: { data: cart, resource: cart } })); }
           setTimeout(() => {
-            addBagBtn.textContent = 'Add To Bag';
+            window.baladBtnLoading && window.baladBtnLoading(addBagBtn, false);
             addBagBtn.disabled = false;
             closeQAModal();
           }, 1200);
         })
         .catch(err => {
           console.error(err);
-          addBagBtn.textContent = 'Add To Bag';
+          window.baladBtnLoading && window.baladBtnLoading(addBagBtn, false);
           addBagBtn.disabled = false;
         });
       });
@@ -1563,7 +1563,7 @@
         e.preventDefault();
         const variantId = resolveVariantId();
         if (!variantId) return;
-        buyBtn.textContent = 'Redirecting...';
+        window.baladBtnLoading && window.baladBtnLoading(buyBtn, true);
         buyBtn.disabled = true;
         const rootUrl = window.Shopify?.routes?.root || '/';
         const cleanRoot = rootUrl.endsWith('/') ? rootUrl : rootUrl + '/';

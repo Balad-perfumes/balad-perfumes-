@@ -123,6 +123,13 @@ if (!window.__bpcInit) {
     var qaSelectedSize = null;
     var qaProductUrl = '';
 
+    // Payment icons for the Buy Now button: copied from one the page already rendered
+    // (snippets/balad-pay-icons-stack.liquid), since this fallback popup is built in JS.
+    function payIconsHtml() {
+      var stack = document.querySelector('.balad-pay-stack');
+      return stack ? stack.outerHTML : '';
+    }
+
     function getOrCreateQAModal() {
       var modal = document.querySelector('[data-qa-modal]');
       if (!modal) {
@@ -159,7 +166,7 @@ if (!window.__bpcInit) {
           + '  </div>'
           + '  <div class="balad-qa-modal__actions" data-qa-actions>'
           + '    <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--bag" data-qa-add-bag>Add To Bag</button>'
-          + '    <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--buy" data-qa-buy-now>Buy Now</button>'
+          + '    <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--buy" data-qa-buy-now><span class="balad-qa-modal__btn-label">Buy Now</span>' + payIconsHtml() + '</button>'
           + '  </div>'
           + '  <div class="balad-qa-modal__sold-out" data-qa-sold-out style="display:none;">'
           + '    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
@@ -245,7 +252,8 @@ if (!window.__bpcInit) {
       if (bagBtn) {
         bagBtn.addEventListener('click', function () {
           var vId = resolveVariantId(modal);
-          addToCartAndRedirect(vId, false);
+          if (window.baladBtnLoading) window.baladBtnLoading(bagBtn, true);
+          Promise.resolve(addToCartAndRedirect(vId, false)).finally(function () { if (window.baladBtnLoading) window.baladBtnLoading(bagBtn, false); });
         });
       }
 
@@ -253,6 +261,7 @@ if (!window.__bpcInit) {
       if (buyBtn) {
         buyBtn.addEventListener('click', function () {
           var vId = resolveVariantId(modal);
+          if (window.baladBtnLoading) window.baladBtnLoading(buyBtn, true);
           addToCartAndRedirect(vId, true);
         });
       }
@@ -359,4 +368,59 @@ if (!window.__bpcInit) {
       openQAModal(btn);
     });
   })();
+}
+
+/* Spinner for Quick View / card buttons: window.baladBtnLoading(btn, true|false).
+   Shows a progress circle in place of the label (CSS: .balad-btn-loading in balad-modals.css).
+   Used by every section's Quick View handlers instead of writing "Adding..." into the button,
+   which also wiped out the payment icons inside Buy Now. */
+if (!window.baladBtnLoading) {
+  window.baladBtnLoading = function (btn, on) {
+    if (!btn) return;
+    clearTimeout(btn.__baladLoadingTimer);
+    btn.classList.toggle('balad-btn-loading', !!on);
+    btn.disabled = !!on;
+    if (on) {
+      btn.setAttribute('aria-busy', 'true');
+      // Never leave a button spinning if a request hangs or a handler bails out early
+      btn.__baladLoadingTimer = setTimeout(function () { window.baladBtnLoading(btn, false); }, 15000);
+    } else {
+      btn.removeAttribute('aria-busy');
+    }
+  };
+  // Back from checkout restores the page from the back/forward cache with Buy Now still spinning
+  window.addEventListener('pageshow', function (e) {
+    if (!e.persisted) return;
+    document.querySelectorAll('.balad-btn-loading').forEach(function (b) { window.baladBtnLoading(b, false); });
+  });
+}
+
+/* "1299.00" → "₹1,299" for the popups (same format as the product cards). Falls back to the raw value. */
+if (!window.baladMoney) {
+  window.baladMoney = function (value) {
+    var n = Number(String(value == null ? '' : value).replace(/[^0-9.]/g, ''));
+    if (!isFinite(n) || String(value).trim() === '') return String(value == null ? '' : value);
+    return '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  };
+}
+
+/* Wishlist popup "Add To List": show the progress circle for a moment before saving.
+   Every section ships its own wishlist handler and saving is instant (localStorage), so this listener
+   (window, capture phase: runs before any of them) holds the tap, spins, then replays the click
+   with a pass flag so the section's own handler saves and closes as before. */
+if (!window.__baladWishlistSpin) {
+  window.__baladWishlistSpin = true;
+  window.addEventListener('click', function (e) {
+    var btn = e.target && e.target.closest && e.target.closest('.balad-wishlist-modal__add-btn');
+    if (!btn || btn.__baladPass || !window.baladBtnLoading) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (btn.classList.contains('balad-btn-loading')) return;
+    window.baladBtnLoading(btn, true);
+    setTimeout(function () {
+      window.baladBtnLoading(btn, false);
+      btn.__baladPass = true;
+      try { btn.click(); } finally { btn.__baladPass = false; }
+    }, 450);
+  }, true);
 }

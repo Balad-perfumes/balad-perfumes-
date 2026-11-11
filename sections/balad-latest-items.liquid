@@ -206,7 +206,7 @@
 
       <div class="balad-qa-modal__actions" data-qa-actions>
         <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--bag" data-qa-add-bag>Add To Bag</button>
-        <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--buy" data-qa-buy-now>Buy Now</button>
+        <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--buy" data-qa-buy-now><span class="balad-qa-modal__btn-label">Buy Now</span>{% render 'balad-pay-icons-stack', size: 16 %}</button>
       </div>
       <div class="balad-qa-modal__sold-out" data-qa-sold-out style="display:none;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -278,11 +278,11 @@
       currentProductId = productId;
 
       if (titleEl) titleEl.textContent = title;
-      if (priceEl) priceEl.textContent = 'INR ' + price;
+      if (priceEl) priceEl.textContent = (window.baladMoney ? window.baladMoney(price) : 'INR ' + price);
 
       if (comparePriceEl) {
         if (comparePrice && comparePrice !== price && comparePrice !== '0') {
-          comparePriceEl.textContent = 'INR ' + comparePrice;
+          comparePriceEl.textContent = (window.baladMoney ? window.baladMoney(comparePrice) : 'INR ' + comparePrice);
           comparePriceEl.style.display = 'inline';
         } else {
           comparePriceEl.textContent = '';
@@ -709,7 +709,8 @@
         if (bagBtn) {
           bagBtn.addEventListener('click', () => {
             const vId = resolveVariantId(modal);
-            addToCartAndRedirect(vId, false);
+            if (window.baladBtnLoading) window.baladBtnLoading(bagBtn, true);
+          Promise.resolve(addToCartAndRedirect(vId, false)).finally(function () { if (window.baladBtnLoading) window.baladBtnLoading(bagBtn, false); });
           });
         }
 
@@ -717,7 +718,8 @@
         if (buyBtn) {
           buyBtn.addEventListener('click', () => {
             const vId = resolveVariantId(modal);
-            addToCartAndRedirect(vId, true);
+            if (window.baladBtnLoading) window.baladBtnLoading(buyBtn, true);
+          addToCartAndRedirect(vId, true);
           });
         }
       }

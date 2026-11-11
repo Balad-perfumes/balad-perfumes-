@@ -240,7 +240,7 @@
       </div>
       <div class="balad-qa-modal__actions" data-qa-actions>
         <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--bag" data-qa-add-bag>Add To Bag</button>
-        <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--buy" data-qa-buy-now>Buy Now</button>
+        <button type="button" class="balad-qa-modal__btn balad-qa-modal__btn--buy" data-qa-buy-now><span class="balad-qa-modal__btn-label">Buy Now</span>{% render 'balad-pay-icons-stack', size: 16 %}</button>
       </div>
       <div class="balad-qa-modal__sold-out" data-qa-sold-out style="display:none;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
@@ -926,7 +926,7 @@
             const variantId = resolveVariantId(modal);
             if (!variantId) return;
 
-            addBagBtn.textContent = 'Adding...';
+            window.baladBtnLoading && window.baladBtnLoading(addBagBtn, true);
             addBagBtn.disabled = true;
 
             fetch(cartAddUrl, {
@@ -936,11 +936,11 @@
             })
             .then(res => res.json())
             .then(cart => {
-              addBagBtn.textContent = 'Added!';
+              window.baladBtnLoading && window.baladBtnLoading(addBagBtn, false);
               if (typeof closeQAModal === 'function') closeQAModal();
               if (window.pfOpenCart) { window.pfOpenCart('quick-add'); } else { document.dispatchEvent(new CustomEvent('cart:update', { bubbles: true, detail: { data: cart, resource: cart } })); }
               setTimeout(() => {
-                addBagBtn.textContent = 'Add To Bag';
+                window.baladBtnLoading && window.baladBtnLoading(addBagBtn, false);
                 addBagBtn.disabled = false;
                 closeQAModal();
               }, 1000);
@@ -948,7 +948,7 @@
             .catch(err => {
               console.error(err);
               addBagBtn.textContent = 'Error';
-              setTimeout(() => { addBagBtn.textContent = 'Add To Bag'; addBagBtn.disabled = false; }, 1500);
+              setTimeout(() => { window.baladBtnLoading && window.baladBtnLoading(addBagBtn, false); addBagBtn.disabled = false; }, 1500);
             });
           });
         }
@@ -961,7 +961,7 @@
             const variantId = resolveVariantId(modal);
             if (!variantId) return;
 
-            buyNowBtn.textContent = 'Processing...';
+            window.baladBtnLoading && window.baladBtnLoading(buyNowBtn, true);
             buyNowBtn.disabled = true;
 
             fetch(cartAddUrl, {
@@ -975,7 +975,7 @@
             })
             .catch(err => {
               console.error(err);
-              buyNowBtn.textContent = 'Buy Now';
+              window.baladBtnLoading && window.baladBtnLoading(buyNowBtn, false);
               buyNowBtn.disabled = false;
             });
           });
