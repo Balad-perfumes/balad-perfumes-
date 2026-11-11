@@ -4865,3 +4865,50 @@ body.template-page--about #MainContent {
   content-visibility: auto;
   contain-intrinsic-block-size: auto 640px;
 }
+
+/* On-demand sections (snippets/lazy-section.liquid): skeleton that holds the real section's height until
+   assets/lazy-sections.js swaps in the HTML from the Section Rendering API. */
+.lazy-section {
+  height: var(--ls-h);
+  overflow: hidden;
+  padding: 28px 16px;
+  box-sizing: border-box;
+}
+@media screen and (min-width: 750px) {
+  .lazy-section { height: var(--ls-ht); padding: 40px 36px; }
+}
+@media screen and (min-width: 1200px) {
+  .lazy-section { height: var(--ls-hd); }
+}
+.lazy-section__title,
+.lazy-section__card,
+.lazy-section__block {
+  border-radius: 12px;
+  background: linear-gradient(100deg, rgb(0 0 0 / 0.05) 40%, rgb(0 0 0 / 0.09) 50%, rgb(0 0 0 / 0.05) 60%) 0 0 / 200% 100%;
+  animation: lazy-section-shimmer 1.4s linear infinite;
+}
+.lazy-section__title {
+  width: min(260px, 60%);
+  height: 24px;
+  margin-bottom: 20px;
+}
+.lazy-section__row {
+  display: flex;
+  gap: 12px;
+}
+.lazy-section__card {
+  flex: 0 0 calc((100% - 12px) / 2);
+  aspect-ratio: 4 / 5;
+}
+@media screen and (min-width: 750px) {
+  .lazy-section__card { flex-basis: calc((100% - 36px) / 4); }
+}
+.lazy-section__block {
+  height: calc(100% - 44px);
+}
+@keyframes lazy-section-shimmer {
+  to { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lazy-section__title, .lazy-section__card, .lazy-section__block { animation: none; }
+}

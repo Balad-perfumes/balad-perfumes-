@@ -1,3 +1,11 @@
+{%- comment -%}
+  Below the fold (section 3+ of a page), ship a skeleton and load the real section on demand
+  (snippets/lazy-section.liquid). section.index is blank when Shopify renders it via ?section_id=,
+  so that request gets the full markup below. Heights are the measured real section heights.
+{%- endcomment -%}
+{%- if section.index > 2 and request.design_mode == false -%}
+  {%- render 'lazy-section', section_id: section.id, kind: 'block', h: 455, ht: 500, hd: 624 -%}
+{%- else -%}
 {% liquid
   assign padding_top = section.settings.padding_top
   assign padding_bottom = section.settings.padding_bottom
@@ -999,6 +1007,7 @@
     document.addEventListener('shopify:section:load', function (e) { initPromoSliders(e.target); });
   })();
 </script>
+{%- endif -%}
 
 {% schema %}
 {

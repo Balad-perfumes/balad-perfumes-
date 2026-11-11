@@ -1,7 +1,25 @@
+{%- comment -%}
+  Below the fold (section 3+ of a page), ship a skeleton and load the real section on demand
+  (snippets/lazy-section.liquid). section.index is blank when Shopify renders it via ?section_id=,
+  so that request gets the full markup below. Heights are the measured real section heights.
+{%- endcomment -%}
+{%- if section.index > 2 and request.design_mode == false -%}
+  {%- render 'lazy-section', section_id: section.id, kind: 'cards', h: 2200, ht: 1250, hd: 1000 -%}
+{%- else -%}
 {%- comment -%} Sections below the first two load their card photos only when scrolled near (see balad-product-card.js) {%- endcomment -%}
 {%- assign defer_card_media = false -%}
 {%- if section.index > 2 -%}{%- assign defer_card_media = true -%}{%- endif -%}
-{{ 'balad-product-card.css' | asset_url | stylesheet_tag }}
+{%- comment -%}
+  Below the fold (section 3+), the card styles must not block the first paint: the sections render with
+  content-visibility: auto, so nothing here is drawn before this small file has arrived. Above the fold
+  (e.g. as the first section of a page) it stays a normal, render-blocking stylesheet.
+{%- endcomment -%}
+{%- if defer_card_media -%}
+  <link rel="stylesheet" href="{{ 'balad-product-card.css' | asset_url }}" media="print" onload="this.media='all'">
+  <noscript>{{ 'balad-product-card.css' | asset_url | stylesheet_tag }}</noscript>
+{%- else -%}
+  {{ 'balad-product-card.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
 {% liquid
   assign coll_handle = section.settings.collection
   if coll_handle != blank
@@ -749,12 +767,15 @@
       });
     };
 
-    document.addEventListener('DOMContentLoaded', () => {
+    // Also runs when the section is inserted after page load (snippets/lazy-section.liquid), when DOMContentLoaded has already fired
+    const initAll = () => {
       initCarousels();
       initSection();
       initModal();
       initQAModal();
-    });
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAll);
+    else initAll();
     document.addEventListener('shopify:section:load', (event) => {
       initCarousels(event.target);
       initSection(event.target);
@@ -1606,6 +1627,7 @@
     }
   }
 </style>
+{%- endif -%}
 
 {% schema %}
 {

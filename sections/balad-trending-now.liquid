@@ -1,7 +1,17 @@
 {%- comment -%} Sections below the first two load their card photos only when scrolled near (see balad-product-card.js) {%- endcomment -%}
 {%- assign defer_card_media = false -%}
 {%- if section.index > 2 -%}{%- assign defer_card_media = true -%}{%- endif -%}
-{{ 'balad-product-card.css' | asset_url | stylesheet_tag }}
+{%- comment -%}
+  Below the fold (section 3+), the card styles must not block the first paint: the sections render with
+  content-visibility: auto, so nothing here is drawn before this small file has arrived. Above the fold
+  (e.g. as the first section of a page) it stays a normal, render-blocking stylesheet.
+{%- endcomment -%}
+{%- if defer_card_media -%}
+  <link rel="stylesheet" href="{{ 'balad-product-card.css' | asset_url }}" media="print" onload="this.media='all'">
+  <noscript>{{ 'balad-product-card.css' | asset_url | stylesheet_tag }}</noscript>
+{%- else -%}
+  {{ 'balad-product-card.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
 {% liquid
   assign coll_handle = section.settings.collection
   if coll_handle != blank

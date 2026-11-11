@@ -1,0 +1,44 @@
+{%- comment -%}
+  Placeholder for a section that loads on demand (homepage sections below the fold).
+
+  Why: the homepage HTML was ~185 KB compressed. On PageSpeed's slow-4G mobile test the whole document must
+  download before first paint, and ~42% of it was sections nobody sees until they scroll. Those sections now
+  render this skeleton instead. Their real HTML comes from Shopify's Section Rendering API
+  (`?section_id=`) and replaces the skeleton:
+    - right away if the placeholder is on screen (very tall screens, Googlebot's tall rendering viewport),
+    - otherwise when the visitor first scrolls/touches/clicks and the section is within 1200px.
+  The HTML is prefetched once the page has finished loading, so it's usually ready before anyone gets there.
+
+  How a section opts in (sections/balad-*.liquid):
+    {%- if section.index > 2 and request.design_mode == false -%} render this {%- else -%} real markup {%- endif -%}
+  `section.index` is blank when Shopify renders the section through the Section Rendering API, so the fetch
+  always gets the real markup.
+
+  Accepts:
+  - section_id {string} - section.id
+  - kind {string} - 'cards' (product row skeleton) or 'block' (plain block). Default 'block'
+  - h {number} - height in px on phones (<750px), measured from the real section
+  - ht {number} - height on tablets (750-1199px)
+  - hd {number} - height on desktop (>=1200px)
+
+  Styles: end of assets/base.css. Loader: assets/lazy-sections.js (added by layout/theme.liquid when the page has placeholders).
+{%- endcomment -%}
+<div
+  class="lazy-section lazy-section--{{ kind | default: 'block' }}"
+  data-lazy-section="{{ section_id }}"
+  style="--ls-h: {{ h | default: 500 }}px; --ls-ht: {{ ht | default: h | default: 500 }}px; --ls-hd: {{ hd | default: ht | default: h | default: 500 }}px;"
+  aria-busy="true"
+>
+  <div class="lazy-section__inner" aria-hidden="true">
+    <div class="lazy-section__title"></div>
+    {%- if kind == 'cards' -%}
+      <div class="lazy-section__row">
+        {%- for i in (1..4) -%}<div class="lazy-section__card"></div>{%- endfor -%}
+      </div>
+    {%- else -%}
+      <div class="lazy-section__block"></div>
+    {%- endif -%}
+  </div>
+</div>
+
+
