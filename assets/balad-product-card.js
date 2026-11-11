@@ -42,30 +42,10 @@ if (!window.__baladDeferInit) {
         }, { rootMargin: '300px 0px' })
       : null;
 
-    // Images marked data-defer-late sit just below the first screen (e.g. "Shop Our Collections"). Within 300px
-    // they'd still be fetched while the hero image is loading, so they also wait until the page has painted:
-    // 1.5s after `load`, or the visitor's first scroll / tap / key press, whichever comes first.
-    var lateReady = new Promise(function (resolve) {
-      var EVENTS = ['scroll', 'wheel', 'touchstart', 'pointerdown', 'keydown'];
-      function go() {
-        EVENTS.forEach(function (t) { window.removeEventListener(t, go, true); });
-        resolve();
-      }
-      EVENTS.forEach(function (t) { window.addEventListener(t, go, { capture: true, passive: true }); });
-      function afterLoad() { setTimeout(go, 1500); }
-      if (document.readyState === 'complete') afterLoad();
-      else window.addEventListener('load', afterLoad, { once: true });
-    });
-
-    function watch(img) {
-      if (io) io.observe(img);
-      else loadImg(img);
-    }
-
     function scan(scope) {
       (scope || document).querySelectorAll(SELECTOR).forEach(function (img) {
-        if (img.hasAttribute('data-defer-late')) lateReady.then(function () { watch(img); });
-        else watch(img);
+        if (io) io.observe(img);
+        else loadImg(img);
       });
     }
 

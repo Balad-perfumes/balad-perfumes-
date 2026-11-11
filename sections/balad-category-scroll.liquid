@@ -93,30 +93,18 @@
         <a href="{{ coll.url }}" class="balad-cc" draggable="false">
           <span class="balad-cc__media">
             {%- if img != blank -%}
-              {%- capture cc_img -%}
-                {{
-                  img
-                  | image_url: width: 900
-                  | image_tag:
-                    loading: 'lazy',
-                    fetchpriority: 'low',
-                    widths: '360, 540, 720, 900',
-                    sizes: '(min-width: 1200px) 25vw, (min-width: 750px) 33vw, 46vw',
-                    alt: coll.title,
-                    class: 'balad-cc__image',
-                    draggable: 'false'
-                }}
-              {%- endcapture -%}
-              {%- comment -%}
-                Not the first section: these photos sit just below the first screen. They were downloaded alongside
-                the hero image (the mobile LCP), so they wait until the page has painted (data-defer-late, see
-                assets/balad-product-card.js).
-              {%- endcomment -%}
-              {%- if section.index > 1 -%}
-                {{ cc_img | replace: ' srcset=', ' data-defer-srcset=' | replace: '<img src=', '<img data-defer-late data-defer-src=' }}
-              {%- else -%}
-                {{ cc_img }}
-              {%- endif -%}
+              {{
+                img
+                | image_url: width: 900
+                | image_tag:
+                  loading: 'lazy',
+                  fetchpriority: 'low',
+                  widths: '360, 540, 720, 900',
+                  sizes: '(min-width: 1200px) 25vw, (min-width: 750px) 33vw, 46vw',
+                  alt: coll.title,
+                  class: 'balad-cc__image',
+                  draggable: 'false'
+              }}
             {%- else -%}
               {{ 'collection-1' | placeholder_svg_tag: 'balad-cc__image balad-cc__placeholder' }}
             {%- endif -%}
@@ -192,9 +180,7 @@
     flex-shrink: 0;
     color: var(--cats-text, #111111);
     font-size: 13px;
-    /* Heading font (Manrope bold, already loaded for headings) instead of bold Inter: keeps the Inter 700 file (~40 KB) out of the first screen on mobile */
-    font-family: var(--font-heading--family);
-    font-weight: 700;
+    font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 3px;
     transition: opacity 0.2s ease;
@@ -301,12 +287,6 @@
     inset: 0;
     z-index: 1;
     overflow: hidden;
-    background: rgb(0 0 0 / 0.06);
-  }
-
-  /* Deferred photo (data-defer-src) before its URL is set: no broken-image icon / alt text */
-  .balad-cc__image:not([src]) {
-    visibility: hidden;
   }
 
   .balad-cc .balad-cc__image {
