@@ -6,6 +6,26 @@ import { RecentlyViewed } from '@theme/recently-viewed-products';
 import { DialogCloseEvent, DialogOpenEvent, DialogComponent } from '@theme/dialog';
 
 /**
+ * Product cards (snippets/balad-product-card.liquid) show a skeleton until their photo has loaded. Their inline
+ * onload handler can miss photos that were already cached when the markup was swapped in, so check here too.
+ * @param {Element} root
+ */
+function markCardImages(root) {
+  root.querySelectorAll('.bpc__media:not(.is-loaded) .bpc__image.is-active').forEach((img) => {
+    if (!(img instanceof HTMLImageElement)) return;
+    const done = () => {
+      img.classList.add('is-loaded');
+      img.closest('.bpc__media')?.classList.add('is-loaded');
+    };
+    if (img.complete) done();
+    else {
+      img.addEventListener('load', done, { once: true });
+      img.addEventListener('error', done, { once: true });
+    }
+  });
+}
+
+/**
  * A custom element that allows the user to search for resources available on the store.
  *
  * @typedef {object} Refs
@@ -51,16 +71,14 @@ class PredictiveSearchComponent extends Component {
     if (dialog) {
       document.addEventListener('keydown', this.#handleKeyboardShortcut, { signal });
       dialog.addEventListener(DialogCloseEvent.eventName, this.#handleDialogClose, { signal });
-      dialog.addEventListener(DialogOpenEvent.eventName, this.#handleDialogOpen, { signal, once: true });
+      dialog.addEventListener(DialogOpenEvent.eventName, this.#handleDialogOpen, { signal });
 
       this.addEventListener('click', this.#handleModalClick, { signal });
     }
 
-    if (RecentlyViewed.getProducts().length > 0) {
-      requestIdleCallback(() => {
-        this.#loadEmptyState();
-      });
-    }
+    // The page ships skeleton cards; the real Popular Products load the first time search opens. On the homepage this
+    // module can arrive after the sheet is already open (deferred modules), so check for that too.
+    if (this.closest('dialog')?.open) this.#loadEmptyState();
   }
 
   /**
@@ -105,9 +123,7 @@ class PredictiveSearchComponent extends Component {
   };
 
   #handleDialogOpen = () => {
-    if (!this.#emptyStateLoaded && RecentlyViewed.getProducts().length > 0) {
-      this.#loadEmptyState();
-    }
+    this.#loadEmptyState();
   };
 
   #loadEmptyState() {
@@ -230,8 +246,15 @@ class PredictiveSearchComponent extends Component {
           event.preventDefault();
           this.#currentItem?.querySelector('a')?.click();
         } else {
+          event.preventDefault();
+          const term = this.refs.searchInput.value.trim();
+          if (!term) {
+            window.location.href = Theme.routes.all_products_collection_url || '/collections/all';
+            return;
+          }
           const searchUrl = new URL(Theme.routes.search_url, location.origin);
-          searchUrl.searchParams.set('q', this.refs.searchInput.value);
+          searchUrl.searchParams.set('q', term);
+          searchUrl.searchParams.set('options[prefix]', 'last');
           window.location.href = searchUrl.toString();
         }
         break;
@@ -315,7 +338,9 @@ class PredictiveSearchComponent extends Component {
 
     const url = new URL(Theme.routes.predictive_search_url, location.origin);
     url.searchParams.set('q', searchTerm);
-    url.searchParams.set('resources[limit_scope]', 'each');
+    // Products only: collections, pages and articles aren't shown in the search sheet
+    url.searchParams.set('resources[type]', 'product');
+    url.searchParams.set('resources[limit]', '10');
 
     const { predictiveSearchResults } = this.refs;
 
@@ -329,6 +354,7 @@ class PredictiveSearchComponent extends Component {
         if (abortController.signal.aborted) return;
 
         morph(predictiveSearchResults, resultsMarkup);
+        markCardImages(predictiveSearchResults);
 
         this.#resetScrollPositions();
       })
@@ -388,41 +414,55 @@ class PredictiveSearchComponent extends Component {
     const url = new URL(window.location.href);
     url.searchParams.delete('page');
 
-    const emptySectionMarkup = await sectionRenderer.getSectionHTML(emptySectionId, false, url);
+    let emptySectionMarkup;
+    try {
+      emptySectionMarkup = await sectionRenderer.getSectionHTML(emptySectionId, false, url);
+    } catch (error) {
+      // Couldn't load Popular Products: allow another try on the next open, keep what's on screen
+      this.#emptyStateLoaded = false;
+      return;
+    }
+    if (abortController.signal.aborted) return;
+
     const parsedEmptySectionMarkup = new DOMParser()
       .parseFromString(emptySectionMarkup, 'text/html')
       .querySelector('.predictive-search-empty-section');
 
-    if (!parsedEmptySectionMarkup) throw new Error('No empty section markup found');
+    if (!parsedEmptySectionMarkup) {
+      this.#emptyStateLoaded = false;
+      return;
+    }
 
-    /** This needs to be awaited and not .then so the DOM is already morphed
-     * when #closeResults is called and therefore the height is animated */
-    const viewedProducts = RecentlyViewed.getProducts();
+    // "Recently viewed" goes above Popular Products. If it can't be loaded, still show Popular Products:
+    // returning early here used to leave the previous search's results on screen with an empty search box.
+    if (RecentlyViewed.getProducts().length > 0) {
+      try {
+        const recentlyViewedMarkup = await this.#getRecentlyViewedProductsMarkup();
+        if (abortController.signal.aborted) return;
 
-    if (viewedProducts.length > 0) {
-      const recentlyViewedMarkup = await this.#getRecentlyViewedProductsMarkup();
-      if (!recentlyViewedMarkup) return;
+        const recentlyViewedProductsHtml = recentlyViewedMarkup
+          ? new DOMParser().parseFromString(recentlyViewedMarkup, 'text/html').getElementById('predictive-search-products')
+          : null;
+        const collectionElement = parsedEmptySectionMarkup.querySelector('#predictive-search-products');
 
-      const parsedRecentlyViewedMarkup = new DOMParser().parseFromString(recentlyViewedMarkup, 'text/html');
-      const recentlyViewedProductsHtml = parsedRecentlyViewedMarkup.getElementById('predictive-search-products');
-      if (!recentlyViewedProductsHtml) return;
-
-      for (const child of recentlyViewedProductsHtml.children) {
-        if (child instanceof HTMLElement) {
-          child.setAttribute('ref', 'recentlyViewedWrapper');
+        if (recentlyViewedProductsHtml && collectionElement) {
+          for (const child of recentlyViewedProductsHtml.children) {
+            if (child instanceof HTMLElement) child.setAttribute('ref', 'recentlyViewedWrapper');
+          }
+          collectionElement.prepend(...recentlyViewedProductsHtml.children);
         }
+      } catch (error) {
+        // ignore: Popular Products alone is fine
       }
-
-      const collectionElement = parsedEmptySectionMarkup.querySelector('#predictive-search-products');
-      if (!collectionElement) return;
-      collectionElement.prepend(...recentlyViewedProductsHtml.children);
     }
 
     if (abortController.signal.aborted) return;
 
     morph(predictiveSearchResults, parsedEmptySectionMarkup);
+    markCardImages(predictiveSearchResults);
     this.#resetScrollPositions();
   };
+
 }
 
 if (!customElements.get('predictive-search-component')) {

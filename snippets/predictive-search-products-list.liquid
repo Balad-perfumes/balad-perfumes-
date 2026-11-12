@@ -7,6 +7,10 @@
   @param {number} [limit] - limit of products to display
   @param {string} [products_test_id] - a playwright test id, used to differentiate empty state from 'real' search results
 {%- enddoc -%}
+{%- comment -%}
+  Cards use the site's product card (snippets/balad-product-card.liquid) so search looks like the rest of the store.
+  Its CSS is loaded by snippets/search-modal.liquid.
+{%- endcomment -%}
 {%- liquid
   assign recently_viewed_title_text = 'content.recently_viewed_products' | t
 -%}
@@ -18,17 +22,18 @@
   {% endif %}
 >
   {% if title == recently_viewed_title_text %}
+    {%- comment -%} Same classes as Popular Products (snippets/predictive-search-empty-state.liquid) so both look alike {%- endcomment -%}
     <div
-      class="recently-viewed-wrapper"
+      class="recently-viewed-wrapper search-modal__products-section"
       ref="recentlyViewedWrapper"
     >
       <h4
-        class="predictive-search-results__title"
+        class="search-modal__section-heading search-modal__section-heading--with-action"
         ref="recentlyViewedTitle[]"
       >
         {{ title }}
         <button
-          class="predictive-search-results__clear button button-unstyled"
+          class="predictive-search-results__clear button-unstyled"
           type="button"
           on:click="/clearRecentlyViewedProducts"
         >
@@ -36,7 +41,7 @@
         </button>
       </h4>
       <ul
-        class="predictive-search-results__list predictive-search-results__wrapper-products list-unstyled"
+        class="search-modal__products-grid predictive-search-results__list predictive-search-results__wrapper-products list-unstyled"
       >
         {% liquid
           assign limit = limit | default: 8
@@ -53,13 +58,7 @@
               class="predictive-search-results__card predictive-search-results__card--product"
               ref="recentlyViewedItems[]"
             >
-              {% render 'resource-card',
-                resource_type: 'product',
-                resource: product,
-                image_width: 500,
-                image_hover: true,
-                image_aspect_ratio: '2 / 3'
-              %}
+              {% render 'balad-product-card', product: product, limit: 4, show_buy_now: false, show_rating: false %}
             </li>
           {% endfor %}
         {% else %}
@@ -68,13 +67,7 @@
               class="predictive-search-results__card predictive-search-results__card--product"
               ref="recentlyViewedItems[]"
             >
-              {% render 'resource-card',
-                resource_type: 'product',
-                resource: product,
-                image_width: 500,
-                image_hover: true,
-                image_aspect_ratio: '2 / 3'
-              %}
+              {% render 'balad-product-card', product: product, limit: 4, show_buy_now: false, show_rating: false %}
             </li>
           {% endfor %}
         {% endif %}
@@ -95,13 +88,7 @@
           class="predictive-search-results__card predictive-search-results__card--product"
           ref="resultsItems[]"
         >
-          {% render 'resource-card',
-            resource_type: 'product',
-            resource: product,
-            image_width: 500,
-            image_hover: true,
-            image_aspect_ratio: '2 / 3'
-          %}
+          {% render 'balad-product-card', product: product, limit: 4, show_buy_now: false, show_rating: false %}
         </li>
       {% endfor %}
     </ul>

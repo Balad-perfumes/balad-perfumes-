@@ -86,7 +86,6 @@
               placeholder="Search here....."
               ref="searchInput"
               on:input="/search"
-              on:keydown="/onSearchKeyDown"
             >
             <input
               name="options[prefix]"
@@ -138,7 +137,7 @@
             data-lenis-prevent
           >
             {% render 'predictive-search-empty-state',
-              load_empty_state: true,
+              load_empty_state: false,
               shadow_opacity: 0.1,
               products_test_id: 'products-list-default--modal'
             %}
@@ -179,123 +178,74 @@
   }
 </style>
 <link rel="stylesheet" href="{{ 'search-modal.css' | asset_url }}" media="print" onload="this.media='all'">
-<noscript>{{ 'search-modal.css' | asset_url | stylesheet_tag }}</noscript>
+{%- comment -%} Search results use the site's product card (snippets/balad-product-card.liquid) {%- endcomment -%}
+<link rel="stylesheet" href="{{ 'balad-product-card.css' | asset_url }}" media="print" onload="this.media='all'">
+<noscript>
+  {{ 'search-modal.css' | asset_url | stylesheet_tag }}
+  {{ 'balad-product-card.css' | asset_url | stylesheet_tag }}
+</noscript>
 
+{%- comment -%}
+  Opening and closing belong to <dialog-component> (assets/dialog.js): the header buttons call
+  #search-modal/showDialog, and ✕, the backdrop and Escape call closeDialog. This script only adds what the
+  component doesn't do. (It used to also open/close the dialog itself, which ran every open/close twice and
+  force-closed the sheet mid-animation, so the "closed" event that clears old results never fired.)
+{%- endcomment -%}
 <script>
-  (function() {
-    function getSearchDialog() {
-      const modal = document.querySelector('dialog-component#search-modal');
-      const dialog = modal ? modal.querySelector('dialog') : document.querySelector('dialog.search-modal__content');
-      return { modal, dialog };
+  (function () {
+    var modal = document.getElementById('search-modal');
+    if (!modal) return;
+    var dialog = modal.querySelector('dialog');
+
+    function searchInput() {
+      return modal.querySelector('input.search-input');
     }
 
-    function closeSearchModal() {
-      const { modal, dialog } = getSearchDialog();
-      if (!dialog) return;
+    // Put the cursor in the box as soon as the sheet opens
+    modal.addEventListener('dialog:open', function () {
+      setTimeout(function () {
+        var input = searchInput();
+        if (input && dialog.open) input.focus({ preventScroll: true });
+      }, 60);
+    });
 
-      // Call component close method if available
-      if (modal && typeof modal.closeDialog === 'function') {
-        try {
-          modal.closeDialog();
-        } catch (_) {}
-      }
-
-      // Hard safety fallback to guarantee closing and unlock body
-      setTimeout(function() {
-        if (dialog && dialog.hasAttribute('open')) {
-          try {
-            dialog.close();
-          } catch (_) {}
-          dialog.removeAttribute('open');
-          dialog.classList.remove('dialog-closing');
-        }
-        document.body.style.position = '';
-        document.body.style.width = '';
-        document.body.style.top = '';
-      }, 50);
-    }
-
-    function openSearchModal() {
-      const { modal, dialog } = getSearchDialog();
-      if (!modal && !dialog) return;
-
-      if (modal && typeof modal.showDialog === 'function') {
+    // Triggers without their own on:click (e.g. links added in the theme editor): wait for the component if needed
+    document.addEventListener('click', function (e) {
+      var trigger = e.target.closest('[data-open-search-modal]:not([on\\:click])');
+      if (!trigger) return;
+      e.preventDefault();
+      customElements.whenDefined('dialog-component').then(function () {
         modal.showDialog();
-      } else if (dialog && typeof dialog.showModal === 'function') {
-        dialog.showModal();
-      }
-      setTimeout(function() {
-        const input = document.querySelector('.search-modal__content input.search-input');
-        if (input) input.focus();
-      }, 100);
-    }
+      });
+    });
 
-    // Ensure dialog is strictly closed on initial page load
-    function ensureInitialClosed() {
-      const { dialog } = getSearchDialog();
-      if (dialog && !window.location.hash.includes('search-modal-open')) {
-        try {
-          if (dialog.open) dialog.close();
-        } catch (_) {}
-        dialog.removeAttribute('open');
-        dialog.classList.remove('dialog-closing');
-      }
-    }
+    // Quick view (+) and wishlist on a result card open their own modal. The search sheet sits in the browser's
+    // top layer, so that modal would open underneath it: close the sheet first.
+    dialog.addEventListener(
+      'click',
+      function (e) {
+        if (!e.target.closest('[data-quick-add], [data-wishlist-heart]')) return;
+        if (typeof modal.closeDialog === 'function') modal.closeDialog();
+      },
+      true
+    );
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', ensureInitialClosed);
-    } else {
-      ensureInitialClosed();
-    }
-
-    // Event delegation for all search triggers and close actions
-    document.addEventListener('click', function(e) {
-      // 1. Close button click
-      const closeBtn = e.target.closest('.predictive-search__close-modal-button, [data-close-search-modal]');
-      if (closeBtn) {
+    // "View all" with an empty box: show every product instead of an empty search page
+    dialog.addEventListener('submit', function (e) {
+      var input = searchInput();
+      if (input && !input.value.trim()) {
         e.preventDefault();
-        closeSearchModal();
-        return;
-      }
-
-      // 2. Click outside the modal content (on the native dialog backdrop)
-      const { dialog } = getSearchDialog();
-      if (dialog && dialog.hasAttribute('open') && e.target === dialog) {
-        const rect = dialog.getBoundingClientRect();
-        const isInDialog = (
-          rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
-          rect.left <= e.clientX && e.clientX <= rect.left + rect.width
-        );
-        if (!isInDialog) {
-          closeSearchModal();
-          return;
-        }
-      }
-
-      // 3. Open trigger click
-      const openBtn = e.target.closest('.pf-header__search-btn, .menu-drawer__top-action--search, [data-open-search-modal]');
-      if (openBtn) {
-        e.preventDefault();
-        openSearchModal();
+        window.location.href = '{{ routes.all_products_collection_url }}';
       }
     });
 
-    // Escape key closes modal
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' || e.key === 'Esc') {
-        const { dialog } = getSearchDialog();
-        if (dialog && dialog.hasAttribute('open')) {
-          closeSearchModal();
-        }
-      }
-    });
-
-    // Ensure wheel events inside the search modal wrapper scroll properly
-    document.addEventListener('wheel', function(e) {
-      const scrollWrapper = e.target.closest('.predictive-search-form__content-wrapper');
-      if (scrollWrapper) {
-        e.stopPropagation();
-      }
-    }, { passive: true });
+    // Let the wheel scroll the results list (the page's smooth-scroll library would otherwise take it)
+    document.addEventListener(
+      'wheel',
+      function (e) {
+        if (e.target.closest && e.target.closest('.predictive-search-form__content-wrapper')) e.stopPropagation();
+      },
+      { passive: true }
+    );
   })();
 </script>

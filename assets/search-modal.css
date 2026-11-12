@@ -254,119 +254,6 @@ dialog.search-modal__content.dialog-closing {
   text-transform: none !important;
 }
 
-/* Products Section - Full Width Adaptive Grid */
-.search-modal__products-section {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.search-modal__products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 18px;
-  width: 100%;
-}
-
-@media screen and (min-width: 1200px) {
-  .search-modal__products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-    gap: 20px;
-  }
-}
-
-@media screen and (max-width: 600px) {
-  .search-modal__products-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-}
-
-.search-modal__product-card {
-  display: flex;
-  flex-direction: column;
-  text-decoration: none;
-  color: #111111;
-  background: #ffffff;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: transform 0.2s ease;
-}
-
-.search-modal__product-card:hover {
-  transform: translateY(-3px);
-}
-
-.search-modal__product-media {
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  border-radius: 6px;
-  overflow: hidden;
-  background: #f6f6f7;
-  margin-bottom: 8px;
-}
-
-.search-modal__product-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.35s ease;
-}
-
-.search-modal__product-card:hover .search-modal__product-img {
-  transform: scale(1.04);
-}
-
-.search-modal__product-img-placeholder {
-  width: 100%;
-  height: 100%;
-  background: #eeeeee;
-}
-
-.search-modal__product-info {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.search-modal__product-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: #111111;
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  position: relative;
-  display: inline-block;
-  width: fit-content;
-  max-width: 100%;
-}
-
-.search-modal__product-title::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 1.5px;
-  background-color: currentColor;
-  transform: scaleX(0);
-  transform-origin: left bottom;
-  transition: transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.search-modal__product-card:hover .search-modal__product-title::after {
-  transform: scaleX(1);
-}
-
-.search-modal__product-price {
-  font-size: 12px;
-  font-weight: 600;
-  color: #111111;
-}
-
 /* Live Predictive Search Results Grid */
 .search-modal__content .predictive-search-results__title {
   font-size: 14px !important;
@@ -403,82 +290,108 @@ dialog.search-modal__content.dialog-closing {
   color: #ffffff;
 }
 
-.search-modal__content .predictive-search-results__products {
-  padding: 0;
-  margin: 0;
+/* Product grids: Popular Products, Recently viewed and live results all use the site's product card
+   (snippets/balad-product-card.liquid, styled by assets/balad-product-card.css) */
+.search-modal__products-section {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
+/* Recently viewed sits above Popular Products and uses the same heading + grid */
+.search-modal__content .recently-viewed-wrapper {
+  margin: 0 0 28px 0;
+  padding: 0;
+}
+
+.search-modal__section-heading--with-action {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.search-modal__content .predictive-search-results__clear {
+  display: inline-flex;
+  align-items: center;
+  min-height: 0;
+  height: auto;
+  width: auto;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: 0;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #696969;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.search-modal__content .predictive-search-results__clear:hover {
+  color: #111111;
+}
+
+.search-modal__products-grid,
 .search-modal__content .predictive-search-results__wrapper-products {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
-  gap: 18px !important;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+  gap: 16px !important;
+  width: 100%;
   list-style: none !important;
   padding: 0 !important;
   margin: 0 !important;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (min-width: 1200px) {
+  .search-modal__products-grid,
   .search-modal__content .predictive-search-results__wrapper-products {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    gap: 18px !important;
   }
 }
 
-.search-modal__content .predictive-search-results__card--product {
+@media screen and (max-width: 749px) {
+  .search-modal__products-grid,
+  .search-modal__content .predictive-search-results__wrapper-products {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+}
+
+.search-modal__content .predictive-search-results__card--product,
+.search-modal__content .predictive-search-results__card--skeleton {
   display: flex;
-  flex-direction: column;
-  background: #ffffff;
-  border-radius: 6px;
-  overflow: hidden;
-  padding: 0;
+  min-width: 0;
   margin: 0;
-  transition: transform 0.2s ease;
+  padding: 0;
+  list-style: none;
 }
 
-.search-modal__content .predictive-search-results__card--product:hover {
-  transform: translateY(-2px);
+/* Keyboard (arrow key) selection */
+.search-modal__content .predictive-search-results__card--product.keyboard-focus .bpc,
+.search-modal__content .predictive-search-results__card--product[aria-selected='true'] .bpc {
+  box-shadow: 0 0 0 2px #111;
 }
 
-.search-modal__content .resource-card {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.search-modal__content .resource-card__media {
-  border-radius: 6px;
-  overflow: hidden;
-  background: #f6f6f7;
-  margin-bottom: 8px;
-}
-
-.search-modal__content .resource-card__image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.3s ease;
-}
-
-.search-modal__content .resource-card:hover .resource-card__image {
-  transform: scale(1.03);
-}
-
+/* Collections / pages / articles carousels keep the theme's resource cards */
 .search-modal__content .resource-card__title {
   font-size: 13px !important;
   font-weight: 500 !important;
   line-height: 1.3 !important;
   color: #111111 !important;
-  margin: 0 !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.search-modal__content .price {
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  color: #111111 !important;
+.search-modal__content .predictive-search-results__no-results {
+  margin: 24px 0;
+  font-size: 14px;
+  color: #696969;
+  text-align: center;
 }
 
 /* Fixed Bottom Footer CTA Button */
@@ -572,8 +485,9 @@ dialog.search-modal__content.dialog-closing {
     padding: 0 14px !important;
   }
 
+  /* 16px: iPhones zoom the whole page in when a focused input's text is smaller */
   .search-modal__content input.search-input {
-    font-size: 13.5px !important;
+    font-size: 16px !important;
   }
 
   .search-modal__content .predictive-search-form__content-wrapper {
@@ -583,4 +497,23 @@ dialog.search-modal__content.dialog-closing {
   .search-modal__content .predictive-search-form__footer {
     padding: 8px 16px 10px 16px !important;
   }
+}
+
+/* Top spacing: the scroll area's padding is the only gap under the search bar. The theme's default
+   .predictive-search-results__inner padding (16px) and the first heading's top margin stacked on top of it. */
+.search-modal__content .predictive-search-results__inner {
+  padding: 0 !important;
+}
+
+.search-modal__content .predictive-search-results__inner > :first-child,
+.search-modal__content .predictive-search-results__inner > .visually-hidden + *,
+.search-modal__content .search-modal__layout > :first-child .predictive-search-results__title,
+.search-modal__content .predictive-search-results__inner > .visually-hidden + * > .predictive-search-results__title,
+.search-modal__content .predictive-search-results__products > .predictive-search-results__title:first-child {
+  margin-top: 0 !important;
+}
+
+/* Suggestion pills are no longer rendered (sections/predictive-search.liquid); hide any cached markup too */
+.search-modal__content .predictive-search-results__wrapper-queries {
+  display: none !important;
 }
