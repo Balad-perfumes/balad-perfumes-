@@ -1,3 +1,15 @@
+{%- comment -%}
+  defer_web_fonts: on the homepage the @font-face rules are emitted switched off (media="not all") and
+  switched on once the hero image has painted. In PageSpeed's simulated mobile test every byte requested
+  before the LCP paint delays it, and the three Inter/Manrope files (~98 KB) were requested just before it.
+  Text shows in the fallback font (font-display: swap behaves the same way) and changes when the fonts arrive.
+{%- endcomment -%}
+{%- liquid
+  assign defer_web_fonts = false
+  if template.name == 'index' and request.design_mode == false
+    assign defer_web_fonts = true
+  endif
+-%}
 {% style %}
   {%- liquid
     assign rendered_fonts = ''
@@ -42,85 +54,91 @@
     assign accent_font_italic_face_id = '[accent_font_italic_family]-[accent_font_italic_weight]-[accent_font_italic_style]|' | replace: '[accent_font_italic_family]', accent_font_italic.family | replace: '[accent_font_italic_weight]', accent_font_italic.weight | replace: '[accent_font_italic_style]', accent_font_italic.style
     assign accent_font_bold_italic_face_id = '[accent_font_bold_italic_family]-[accent_font_bold_italic_weight]-[accent_font_bold_italic_style]|' | replace: '[accent_font_bold_italic_family]', accent_font_bold_italic.family | replace: '[accent_font_bold_italic_weight]', accent_font_bold_italic.weight | replace: '[accent_font_bold_italic_style]', accent_font_bold_italic.style
 
-    unless rendered_fonts contains primary_font_face_id
-      echo primary_font | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: primary_font_face_id
-    endunless
+    capture font_faces
+      unless rendered_fonts contains primary_font_face_id
+        echo primary_font | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: primary_font_face_id
+      endunless
 
-    unless rendered_fonts contains primary_font_bold_face_id
-      echo primary_font_bold | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: primary_font_bold_face_id
-    endunless
+      unless rendered_fonts contains primary_font_bold_face_id
+        echo primary_font_bold | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: primary_font_bold_face_id
+      endunless
 
-    unless rendered_fonts contains primary_font_italic_face_id
-      echo primary_font_italic | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: primary_font_italic_face_id
-    endunless
+      unless rendered_fonts contains primary_font_italic_face_id
+        echo primary_font_italic | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: primary_font_italic_face_id
+      endunless
 
-    unless rendered_fonts contains primary_font_bold_italic_face_id
-      echo primary_font_bold_italic | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: primary_font_bold_italic_face_id
-    endunless
+      unless rendered_fonts contains primary_font_bold_italic_face_id
+        echo primary_font_bold_italic | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: primary_font_bold_italic_face_id
+      endunless
 
-    unless rendered_fonts contains secondary_font_face_id
-      echo secondary_font | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: secondary_font_face_id
-    endunless
+      unless rendered_fonts contains secondary_font_face_id
+        echo secondary_font | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: secondary_font_face_id
+      endunless
 
-    unless rendered_fonts contains secondary_font_bold_face_id
-      echo secondary_font_bold | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: secondary_font_bold_face_id
-    endunless
+      unless rendered_fonts contains secondary_font_bold_face_id
+        echo secondary_font_bold | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: secondary_font_bold_face_id
+      endunless
 
-    unless rendered_fonts contains secondary_font_italic_face_id
-      echo secondary_font_italic | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: secondary_font_italic_face_id
-    endunless
+      unless rendered_fonts contains secondary_font_italic_face_id
+        echo secondary_font_italic | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: secondary_font_italic_face_id
+      endunless
 
-    unless rendered_fonts contains secondary_font_bold_italic_face_id
-      echo secondary_font_bold_italic | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: secondary_font_bold_italic_face_id
-    endunless
+      unless rendered_fonts contains secondary_font_bold_italic_face_id
+        echo secondary_font_bold_italic | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: secondary_font_bold_italic_face_id
+      endunless
 
-    unless rendered_fonts contains tertiary_font_face_id
-      echo tertiary_font | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: tertiary_font_face_id
-    endunless
+      unless rendered_fonts contains tertiary_font_face_id
+        echo tertiary_font | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: tertiary_font_face_id
+      endunless
 
-    unless rendered_fonts contains tertiary_font_bold_face_id
-      echo tertiary_font_bold | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: tertiary_font_bold_face_id
-    endunless
+      unless rendered_fonts contains tertiary_font_bold_face_id
+        echo tertiary_font_bold | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: tertiary_font_bold_face_id
+      endunless
 
-    unless rendered_fonts contains tertiary_font_italic_face_id
-      echo tertiary_font_italic | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: tertiary_font_italic_face_id
-    endunless
+      unless rendered_fonts contains tertiary_font_italic_face_id
+        echo tertiary_font_italic | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: tertiary_font_italic_face_id
+      endunless
 
-    unless rendered_fonts contains tertiary_font_bold_italic_face_id
-      echo tertiary_font_bold_italic | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: tertiary_font_bold_italic_face_id
-    endunless
+      unless rendered_fonts contains tertiary_font_bold_italic_face_id
+        echo tertiary_font_bold_italic | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: tertiary_font_bold_italic_face_id
+      endunless
 
-    unless rendered_fonts contains accent_font_face_id
-      echo accent_font | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: accent_font_face_id
-    endunless
+      unless rendered_fonts contains accent_font_face_id
+        echo accent_font | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: accent_font_face_id
+      endunless
 
-    unless rendered_fonts contains accent_font_bold_face_id
-      echo accent_font_bold | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: accent_font_bold_face_id
-    endunless
+      unless rendered_fonts contains accent_font_bold_face_id
+        echo accent_font_bold | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: accent_font_bold_face_id
+      endunless
 
-    unless rendered_fonts contains accent_font_italic_face_id
-      echo accent_font_italic | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: accent_font_italic_face_id
-    endunless
+      unless rendered_fonts contains accent_font_italic_face_id
+        echo accent_font_italic | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: accent_font_italic_face_id
+      endunless
 
-    unless rendered_fonts contains accent_font_bold_italic_face_id
-      echo accent_font_bold_italic | font_face: font_display: 'swap'
-      assign rendered_fonts = rendered_fonts | append: accent_font_bold_italic_face_id
-    endunless
+      unless rendered_fonts contains accent_font_bold_italic_face_id
+        echo accent_font_bold_italic | font_face: font_display: 'swap'
+        assign rendered_fonts = rendered_fonts | append: accent_font_bold_italic_face_id
+      endunless
+    endcapture
+
+    if defer_web_fonts != true
+      echo font_faces
+    endif
   %}
 
   :root {
@@ -686,3 +704,23 @@
     --cart-secondary-font-weight: var(--font-{{ settings.cart_price_font }}--weight);
   }
 {% endstyle %}
+{%- if defer_web_fonts -%}
+  <style id="balad-deferred-fonts" media="not all">{{ font_faces }}</style>
+  <noscript><style>{{ font_faces }}</style></noscript>
+  <script>
+    (function () {
+      var sheet = document.getElementById('balad-deferred-fonts');
+      var done = false;
+      function on() { if (done) return; done = true; requestAnimationFrame(function () { setTimeout(function () { sheet.media = 'all'; }, 0); }); }
+      function wait() {
+        var hero = document.querySelector('.balad-min-hero__img');
+        if (!hero || hero.complete || document.readyState === 'complete') return on();
+        hero.addEventListener('load', on, { once: true });
+        hero.addEventListener('error', on, { once: true });
+        window.addEventListener('load', on, { once: true });
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wait, { once: true });
+      else wait();
+    })();
+  </script>
+{%- endif -%}

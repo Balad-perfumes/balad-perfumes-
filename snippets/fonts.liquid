@@ -5,7 +5,8 @@
   bandwidth on slow connections. The subheading / heading / accent fonts load from their
   @font-face rules as soon as text needs them.
 {%- endcomment -%}
-{%- unless settings.type_body_font.system? -%}
+{%- comment -%} Not on the homepage: its @font-face rules load after the hero paints (snippets/theme-styles-variables.liquid). {%- endcomment -%}
+{%- unless settings.type_body_font.system? or template.name == 'index' and request.design_mode == false -%}
   <link
     rel="preload"
     as="font"
