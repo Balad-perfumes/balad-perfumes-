@@ -127,11 +127,12 @@
                       {%- endcomment -%}
                       {%- comment -%}
                         Mobile sizes = calc(100vw - 24px): the hero has a 12px gutter each side below 750px (see the
-                        max-width: 749px padding rule). With 100vw a 412px phone at 1.75x fetched the 750w file; now 680w.
+                        max-width: 749px padding rule). The "* 0.8" asks for ~80% of full device density: a 412px phone at 1.75x
+                        (PageSpeed mobile) gets the 550w file (93 KB) instead of 680w (119 KB); 3x phones still get 1000w.
                       {%- endcomment -%}
                       <!--BALAD_LCP_PRELOAD
                       {%- if block.settings.mobile_image != blank %}
-                      <link rel="preload" as="image" fetchpriority="high" media="(max-width: 749px)" imagesizes="calc(100vw - 24px)" imagesrcset="{{ block.settings.mobile_image | image_url: width: 450, format: 'webp' }} 450w, {{ block.settings.mobile_image | image_url: width: 550, format: 'webp' }} 550w, {{ block.settings.mobile_image | image_url: width: 680, format: 'webp' }} 680w, {{ block.settings.mobile_image | image_url: width: 750, format: 'webp' }} 750w, {{ block.settings.mobile_image | image_url: width: 1000, format: 'webp' }} 1000w, {{ block.settings.mobile_image | image_url: width: 1200, format: 'webp' }} 1200w, {{ block.settings.mobile_image | image_url: width: 1500, format: 'webp' }} 1500w">
+                      <link rel="preload" as="image" fetchpriority="high" media="(max-width: 749px)" imagesizes="calc((100vw - 24px) * 0.8)" imagesrcset="{{ block.settings.mobile_image | image_url: width: 450, format: 'webp' }} 450w, {{ block.settings.mobile_image | image_url: width: 550, format: 'webp' }} 550w, {{ block.settings.mobile_image | image_url: width: 680, format: 'webp' }} 680w, {{ block.settings.mobile_image | image_url: width: 750, format: 'webp' }} 750w, {{ block.settings.mobile_image | image_url: width: 1000, format: 'webp' }} 1000w, {{ block.settings.mobile_image | image_url: width: 1200, format: 'webp' }} 1200w, {{ block.settings.mobile_image | image_url: width: 1500, format: 'webp' }} 1500w">
                       {%- comment -%}
                         No desktop preload here: Chrome's early fetch ignored media="(min-width: 750px)" in mobile
                         tests and downloaded the 1600px desktop image on phones too.
@@ -152,7 +153,7 @@
                     {% endif %}
                     {% if block.settings.mobile_image != blank %}
                       <picture class="balad-min-hero__picture">
-                        <source media="(max-width: 749px)" srcset="{{ block.settings.mobile_image | image_url: width: 450, format: 'webp' }} 450w, {{ block.settings.mobile_image | image_url: width: 550, format: 'webp' }} 550w, {{ block.settings.mobile_image | image_url: width: 680, format: 'webp' }} 680w, {{ block.settings.mobile_image | image_url: width: 750, format: 'webp' }} 750w, {{ block.settings.mobile_image | image_url: width: 1000, format: 'webp' }} 1000w, {{ block.settings.mobile_image | image_url: width: 1200, format: 'webp' }} 1200w, {{ block.settings.mobile_image | image_url: width: 1500, format: 'webp' }} 1500w" sizes="calc(100vw - 24px)">
+                        <source media="(max-width: 749px)" srcset="{{ block.settings.mobile_image | image_url: width: 450, format: 'webp' }} 450w, {{ block.settings.mobile_image | image_url: width: 550, format: 'webp' }} 550w, {{ block.settings.mobile_image | image_url: width: 680, format: 'webp' }} 680w, {{ block.settings.mobile_image | image_url: width: 750, format: 'webp' }} 750w, {{ block.settings.mobile_image | image_url: width: 1000, format: 'webp' }} 1000w, {{ block.settings.mobile_image | image_url: width: 1200, format: 'webp' }} 1200w, {{ block.settings.mobile_image | image_url: width: 1500, format: 'webp' }} 1500w" sizes="calc((100vw - 24px) * 0.8)">
                         {{ block.settings.image | image_url: width: 3000, format: 'webp' | image_tag: class: 'balad-min-hero__img', widths: '750, 1200, 1600, 2000, 2400, 3000', sizes: '100vw', loading: loading_attr, fetchpriority: priority_attr, alt: hero_alt }}
                       </picture>
                     {% else %}

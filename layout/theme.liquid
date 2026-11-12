@@ -16,11 +16,9 @@
       {{ lcp_preload[1] }}
     {%- endif -%}
     {%- comment -%}
-      Shop Pay, Reelfy and Judge.me all load from cdn.shopify.com. Opening that connection now (in parallel)
-      instead of when the first of them is found saves the DNS + TCP + TLS round trips on mobile.
+      No cdn.shopify.com preconnect here: Shopify already sends both (with and without crossorigin) as HTTP
+      Link headers. Repeating them in HTML made PageSpeed warn "More than 4 preconnect connections".
     {%- endcomment -%}
-    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
-    <link rel="preconnect" href="https://cdn.shopify.com">
     {%- if settings.favicon != blank -%}
       <link
         rel="icon"
